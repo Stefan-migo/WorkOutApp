@@ -31,3 +31,32 @@ export interface Exercise {
   muscleGroup: string
   imageUrl?: string
 }
+
+export interface Sequence {
+  id: string
+  title: string
+  description?: string
+  workoutIds: string[]
+  repeatCount: number
+  createdAt: number
+  updatedAt: number
+}
+
+export interface CompletedInterval {
+  intervalId: string
+  title: string
+  type: IntervalType
+  plannedDuration: number
+  actualDuration: number
+  completed: boolean
+}
+
+export interface Session {
+  id: string
+  type: 'workout' | 'sequence'
+  sequenceId?: string
+  workoutId?: string
+  startedAt: number
+  completedAt?: number
+  intervals: CompletedInterval[]
+}
