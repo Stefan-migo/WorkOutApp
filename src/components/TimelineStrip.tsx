@@ -4,54 +4,61 @@ import type { FlattenedInterval } from '@/lib/interval-engine'
 
 interface TimelineStripProps {
   intervals: FlattenedInterval[]
-  currentIndex?: number
   onIntervalClick?: (index: number) => void
 }
 
-// ponytail: static color map, uses existing Tailwind tokens from brand-spec
-const TYPE_BG: Record<string, string> = {
-  prepare: 'bg-interval-prepare',
-  work: 'bg-interval-work',
-  rest: 'bg-interval-rest',
-  cooldown: 'bg-interval-cooldown',
+// ponytail: exhaustive maps so Tailwind v4 resolves all class strings
+const SEGMENT_BG: Record<string, string> = {
+  prepare: 'bg-segment-prepare/80',
+  work: 'bg-segment-work/80',
+  rest: 'bg-segment-rest/80',
+  cooldown: 'bg-segment-cooldown/80',
 }
 
-export function TimelineStrip({ intervals, currentIndex, onIntervalClick }: TimelineStripProps) {
+const LEGEND_COLORS: Record<string, string> = {
+  prepare: 'bg-segment-prepare',
+  work: 'bg-segment-work',
+  rest: 'bg-segment-rest',
+  cooldown: 'bg-segment-cooldown',
+}
+
+export function TimelineStrip({ intervals, onIntervalClick }: TimelineStripProps) {
   if (intervals.length === 0) return null
 
   const totalDuration = intervals.reduce((s, i) => s + i.duration, 0)
   if (totalDuration <= 0) return null
 
-  return (
-    <div
-      className="flex w-full overflow-x-auto gap-px rounded-lg min-h-[32px]"
-      role="listbox"
-      aria-label="Workout timeline"
-    >
-      {intervals.map((interval, idx) => {
-        const widthPct = (interval.duration / totalDuration) * 100
-        const isCurrent = idx === currentIndex
+  const LEGEND_ITEMS = ['prepare', 'work', 'rest', 'cooldown'] as const
 
-        return (
-          <button
-            key={`${interval.id}-${idx}`}
-            onClick={() => onIntervalClick?.(idx)}
-            role="option"
-            aria-selected={isCurrent}
-            aria-label={`${interval.title} ${interval.duration}s`}
-            style={{ width: `${Math.max(widthPct, 0.5)}%` }}
-            className={[
-              'h-8 rounded-sm transition-all cursor-pointer shrink-0 relative',
-              'hover:opacity-85 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-1',
-              TYPE_BG[interval.type] ?? 'bg-muted',
-              isCurrent ? 'ring-2 ring-accent ring-offset-1 ring-offset-bg z-10 opacity-100' : 'opacity-60',
-              interval.depth > 0 && 'border-l-2 border-white/30',
-            ].join(' ')}
-          >
-            {/* ponytail: depth indicator as left border stripe, no extra DOM nodes for depth */}
-          </button>
-        )
-      })}
+  return (
+    <div className="space-y-sm">
+      <div className="h-4 w-full bg-surface-dim rounded-full overflow-hidden flex shadow-inner">
+        {intervals.map((interval, idx) => {
+          const widthPct = (interval.duration / totalDuration) * 100
+
+          return (
+            <button
+              key={`${interval.id}-${idx}`}
+              onClick={() => onIntervalClick?.(idx)}
+              style={{ width: `${Math.max(widthPct, 0.5)}%` }}
+              className={`h-full ${SEGMENT_BG[interval.type] ?? 'bg-segment-work/80'} transition-opacity cursor-pointer hover:opacity-90 focus-visible:outline-2 focus-visible:outline-secondary focus-visible:outline-offset-1`}
+              aria-label={`${interval.title} ${interval.duration}s`}
+            />
+          )
+        })}
+      </div>
+
+      {/* Timeline Legend */}
+      <div className="flex flex-wrap gap-md px-xs pt-xs">
+        {LEGEND_ITEMS.map((type) => (
+          <div key={type} className="flex items-center gap-xs">
+            <div className={`w-3 h-3 rounded-sm ${LEGEND_COLORS[type]}`} />
+            <span className="text-[10px] font-label-caps uppercase text-on-surface-variant">
+              {type.charAt(0).toUpperCase() + type.slice(1)}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

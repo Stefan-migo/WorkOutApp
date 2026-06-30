@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { IntervalRow } from '@/components/IntervalRow'
-import { IntervalForm } from '@/components/IntervalForm'
 import { TimelineStrip } from '@/components/TimelineStrip'
 import { IntervalDetailSheet } from '@/components/IntervalDetailSheet'
 import { flattenWorkout } from '@/lib/interval-engine'
@@ -25,6 +24,39 @@ const DEFAULT_INTERVALS: Interval[] = [
   { id: intervalId(), type: 'prepare', title: 'Prepare', duration: 10 },
   { id: intervalId(), type: 'cooldown', title: 'Cooldown', duration: 10 },
 ]
+
+type AddBlockType = 'prepare' | 'work' | 'rest' | 'cooldown'
+
+const DEFAULT_DURATIONS: Record<AddBlockType, number> = {
+  prepare: 180,
+  work: 30,
+  rest: 30,
+  cooldown: 120,
+}
+
+export function createInterval(type: AddBlockType): Interval {
+  return {
+    id: intervalId(),
+    type,
+    title: type.charAt(0).toUpperCase() + type.slice(1),
+    duration: DEFAULT_DURATIONS[type],
+  }
+}
+
+// ponytail: exhaustive map so Tailwind v4 resolves all class strings
+const SEGMENT_CLASSES: Record<AddBlockType, { bg: string; text: string; border: string; bg10: string }> = {
+  prepare: { bg: 'bg-segment-prepare', text: 'text-segment-prepare', border: 'border-t-segment-prepare', bg10: 'bg-segment-prepare/10' },
+  work: { bg: 'bg-segment-work', text: 'text-segment-work', border: 'border-t-segment-work', bg10: 'bg-segment-work/10' },
+  rest: { bg: 'bg-segment-rest', text: 'text-segment-rest', border: 'border-t-segment-rest', bg10: 'bg-segment-rest/10' },
+  cooldown: { bg: 'bg-segment-cooldown', text: 'text-segment-cooldown', border: 'border-t-segment-cooldown', bg10: 'bg-segment-cooldown/10' },
+}
+
+const TYPE_ICONS: Record<AddBlockType, string> = {
+  prepare: 'self_improvement',
+  work: 'directions_run',
+  rest: 'pause_circle',
+  cooldown: 'ac_unit',
+}
 
 interface WorkoutEditorProps {
   existingWorkout?: Workout
@@ -146,10 +178,10 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
           type="text"
           value={title}
           placeholder="Workout title"
-          className="flex-1 text-2xl font-bold bg-transparent border-b border-transparent hover:border-border focus:border-accent outline-none text-fg placeholder:text-muted"
+          className="flex-1 text-2xl font-bold bg-transparent border-b border-transparent hover:border-outline-variant focus:border-secondary outline-none text-on-surface placeholder:text-on-surface-variant"
           onChange={(e) => { dirtyRef.current = true; setTitle(e.target.value) }}
         />
-        <span className="font-mono text-muted text-sm tabular-nums shrink-0">
+        <span className="font-mono text-on-surface-variant text-sm tabular-nums shrink-0">
           {totalMin}:{String(totalSec).padStart(2, '0')}
         </span>
       </div>
@@ -159,7 +191,7 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
       )}
 
       {intervals.length === 0 ? (
-        <p className="text-muted text-center py-12">Add intervals to build your workout</p>
+        <p className="text-on-surface-variant text-center py-12">Add intervals to build your workout</p>
       ) : (
         <div className="flex flex-col gap-2">
           {intervals.map((interval, i) => (
@@ -187,12 +219,29 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
         />
       )}
 
-      <IntervalForm onAdd={handleAdd} />
+      {/* Add Block bento grid */}
+      <div className="pt-lg border-t border-outline-variant/30 mt-xl">
+        <h3 className="font-label text-label-caps uppercase text-on-surface-variant mb-md text-center tracking-widest">Add Block</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-md">
+          {(['prepare', 'work', 'rest', 'cooldown'] as const).map((type) => (
+            <button
+              key={type}
+              onClick={() => handleAdd(createInterval(type))}
+              className={`glass-card p-md rounded-xl flex flex-col items-center justify-center gap-sm hover:-translate-y-1 hover:shadow-md transition-all duration-200 ${SEGMENT_CLASSES[type].border} group`}
+            >
+              <div className={`w-10 h-10 rounded-full ${SEGMENT_CLASSES[type].bg10} ${SEGMENT_CLASSES[type].text} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                <span className="material-symbols-outlined">{TYPE_ICONS[type]}</span>
+              </div>
+              <span className="font-label text-label-caps uppercase text-on-surface font-semibold">{type}</span>
+            </button>
+          ))}
+        </div>
+      </div>
 
       <button
         onClick={handleSave}
         disabled={!canSave}
-        className="w-full py-3 bg-accent hover:bg-accent disabled:bg-surface-alt disabled:text-muted text-accent-on disabled:text-muted rounded-lg font-medium transition-colors"
+        className="w-full py-3 bg-primary-container hover:bg-primary disabled:bg-surface-container-low disabled:text-on-surface-variant text-on-primary rounded-lg font-medium transition-colors"
       >
         {existingWorkout ? 'Update Workout' : 'Save Workout'}
       </button>

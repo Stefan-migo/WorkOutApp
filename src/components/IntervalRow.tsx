@@ -14,12 +14,33 @@ interface IntervalRowProps {
   isLast?: boolean
 }
 
-// ponytail: static color map, make configurable if custom interval types are added
-const TYPE_COLORS: Record<string, string> = {
-  prepare: 'bg-interval-prepare',
-  work: 'bg-interval-work',
-  rest: 'bg-interval-rest',
-  cooldown: 'bg-interval-cooldown',
+// ponytail: exhaustive maps so Tailwind v4 resolves all class strings
+const SEGMENT_BORDER: Record<string, string> = {
+  prepare: 'border-l-segment-prepare',
+  work: 'border-l-segment-work',
+  rest: 'border-l-segment-rest',
+  cooldown: 'border-l-segment-cooldown',
+}
+
+const SEGMENT_BG10: Record<string, string> = {
+  prepare: 'bg-segment-prepare/10',
+  work: 'bg-segment-work/10',
+  rest: 'bg-segment-rest/10',
+  cooldown: 'bg-segment-cooldown/10',
+}
+
+const SEGMENT_TEXT: Record<string, string> = {
+  prepare: 'text-segment-prepare',
+  work: 'text-segment-work',
+  rest: 'text-segment-rest',
+  cooldown: 'text-segment-cooldown',
+}
+
+const TYPE_ICON: Record<string, string> = {
+  prepare: 'self_improvement',
+  work: 'directions_run',
+  rest: 'pause_circle',
+  cooldown: 'ac_unit',
 }
 
 export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onMoveDown, isFirst, isLast }: IntervalRowProps) {
@@ -34,47 +55,77 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
       : undefined
 
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg bg-surface border border-border-soft">
-      <span className={`w-3 h-3 rounded-full shrink-0 ${TYPE_COLORS[interval.type] ?? 'bg-muted'}`} />
-      <span className="text-sm text-muted w-16 shrink-0 capitalize">{interval.type}</span>
-      <input
-        type="text"
-        value={interval.title}
-        onChange={(e) => onChange(index, { ...interval, title: e.target.value })}
-        className="flex-1 bg-transparent text-fg border-b border-transparent hover:border-border focus:border-accent outline-none"
-        aria-label={`Interval ${index + 1} title`}
-      />
-      <span className="font-mono text-fg-2 tabular-nums">{durationStr}</span>
-      {exerciseName && (
-        <span className="text-xs text-muted w-24 truncate shrink-0" title={exerciseName}>
-          {exerciseName}
-        </span>
-      )}
-      <div className="flex flex-col gap-0.5">
-        <button
-          onClick={() => onMoveUp?.(index)}
-          disabled={isFirst}
-          className="min-w-[28px] min-h-[18px] flex items-center justify-center text-muted hover:text-fg disabled:opacity-20 disabled:pointer-events-none text-xs leading-none"
-          aria-label={`Move interval ${index + 1} up`}
-        >
-          ▲
-        </button>
-        <button
-          onClick={() => onMoveDown?.(index)}
-          disabled={isLast}
-          className="min-w-[28px] min-h-[18px] flex items-center justify-center text-muted hover:text-fg disabled:opacity-20 disabled:pointer-events-none text-xs leading-none"
-          aria-label={`Move interval ${index + 1} down`}
-        >
-          ▼
-        </button>
+    <div className={`glass-card rounded-lg flex items-center group transition-all duration-200 border-l-4 ${SEGMENT_BORDER[interval.type] ?? 'border-l-segment-work'} pl-0 hover:shadow-md relative overflow-hidden`}>
+      {/* Drag Handle */}
+      <div className="px-sm py-md text-outline-variant cursor-grab flex items-center justify-center">
+        <span className="material-symbols-outlined text-[20px]">drag_indicator</span>
       </div>
-      <button
-        onClick={() => onRemove(index)}
-        className="min-w-[44px] min-h-[44px] flex items-center justify-center text-muted hover:text-danger text-lg"
-        aria-label={`Remove interval ${index + 1}`}
-      >
-        ✕
-      </button>
+
+      {/* Type Icon */}
+      <div className={`p-sm ${SEGMENT_BG10[interval.type] ?? 'bg-segment-work/10'} ${SEGMENT_TEXT[interval.type] ?? 'text-segment-work'} rounded-md mr-md flex items-center justify-center`}>
+        <span className="material-symbols-outlined text-[20px]">{TYPE_ICON[interval.type] ?? 'fitness_center'}</span>
+      </div>
+
+      {/* Title + Description */}
+      <div className="flex-1 py-md">
+        <input
+          type="text"
+          value={interval.title}
+          onChange={(e) => onChange(index, { ...interval, title: e.target.value })}
+          className="bg-transparent border-none p-0 font-body-md font-semibold text-on-surface w-full focus:ring-0 focus:outline-none placeholder-on-surface-variant/50"
+          aria-label={`Interval ${index + 1} title`}
+        />
+        {exerciseName && (
+          <p className="text-[11px] text-on-surface-variant font-body-md mt-xs">{exerciseName}</p>
+        )}
+      </div>
+
+      {/* Duration + Actions */}
+      <div className="px-md flex items-center gap-sm border-l border-outline-variant/30 py-md">
+        <input
+          type="text"
+          value={durationStr}
+          onChange={(e) => {
+            // ponytail: parse MM:SS input, default to current duration on parse failure
+            const parts = e.target.value.split(':')
+            if (parts.length === 2) {
+              const m = parseInt(parts[0], 10) || 0
+              const s = parseInt(parts[1], 10) || 0
+              onChange(index, { ...interval, duration: m * 60 + s })
+            }
+          }}
+          className="bg-transparent border-none p-0 font-data-lg text-data-lg text-primary focus:ring-0 focus:outline-none w-20 text-center font-bold tracking-tight"
+          aria-label={`Interval ${index + 1} duration`}
+        />
+        <div className="hidden group-hover:flex gap-xs items-center pl-sm">
+          {/* Move Up */}
+          <button
+            onClick={() => onMoveUp?.(index)}
+            disabled={isFirst}
+            className="text-outline-variant hover:text-secondary transition-colors disabled:opacity-20 disabled:pointer-events-none"
+            aria-label={`Move interval ${index + 1} up`}
+          >
+            <span className="material-symbols-outlined text-[18px]">keyboard_arrow_up</span>
+          </button>
+          {/* Move Down */}
+          <button
+            onClick={() => onMoveDown?.(index)}
+            disabled={isLast}
+            className="text-outline-variant hover:text-secondary transition-colors disabled:opacity-20 disabled:pointer-events-none"
+            aria-label={`Move interval ${index + 1} down`}
+          >
+            <span className="material-symbols-outlined text-[18px]">keyboard_arrow_down</span>
+          </button>
+          {/* Remove */}
+          <button
+            onClick={() => onRemove(index)}
+            className="text-outline-variant hover:text-error transition-colors"
+            aria-label={`Remove interval ${index + 1}`}
+          >
+            <span className="material-symbols-outlined text-[18px]">delete</span>
+          </button>
+        </div>
+      </div>
     </div>
   )
 }

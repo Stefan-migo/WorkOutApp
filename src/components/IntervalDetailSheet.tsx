@@ -83,41 +83,41 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises }: In
         <div className="p-6 flex flex-col gap-5">
           {/* ponytail: no drag handle — add only if users need to grab-and-drag */}
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted font-medium uppercase tracking-wider">{interval.type}</span>
+            <span className="text-xs text-on-surface-variant font-medium uppercase tracking-wider">{interval.type}</span>
           </div>
 
           {/* Title */}
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs text-muted">Title</span>
+            <span className="text-xs text-on-surface-variant">Title</span>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="bg-surface-alt text-fg rounded-lg px-3 py-2.5 text-sm border border-border focus:outline-none focus:ring-1 focus:ring-accent"
+              className="bg-surface-container-low text-on-surface rounded-lg px-3 py-2.5 text-sm border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
             />
           </label>
 
           {/* Duration */}
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs text-muted">Duration (seconds)</span>
+            <span className="text-xs text-on-surface-variant">Duration (seconds)</span>
             <input
               type="number"
               value={duration}
               onChange={(e) => setDuration(Math.max(1, Math.min(3600, Number(e.target.value))))}
               min={1}
               max={3600}
-              className="bg-surface-alt text-fg rounded-lg px-3 py-2.5 text-sm w-28 border border-border focus:outline-none focus:ring-1 focus:ring-accent"
+              className="bg-surface-container-low text-on-surface rounded-lg px-3 py-2.5 text-sm w-28 border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
             />
           </label>
 
           {/* Exercise select — only for work type */}
           {interval.type === 'work' && exercises && exercises.length > 0 && (
             <label className="flex flex-col gap-1.5">
-              <span className="text-xs text-muted">Exercise</span>
+              <span className="text-xs text-on-surface-variant">Exercise</span>
               <select
                 value={exerciseId}
                 onChange={(e) => setExerciseId(e.target.value)}
-                className="bg-surface-alt text-fg rounded-lg px-3 py-2.5 text-sm border border-border focus:outline-none focus:ring-1 focus:ring-accent"
+                className="bg-surface-container-low text-on-surface rounded-lg px-3 py-2.5 text-sm border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
               >
                 <option value="">No exercise</option>
                 {exercises.map((ex) => (
@@ -129,62 +129,62 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises }: In
 
           {/* Description */}
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs text-muted">Description</span>
+            <span className="text-xs text-on-surface-variant">Description</span>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="bg-surface-alt text-fg rounded-lg px-3 py-2.5 text-sm border border-border resize-none focus:outline-none focus:ring-1 focus:ring-accent"
+              className="bg-surface-container-low text-on-surface rounded-lg px-3 py-2.5 text-sm border border-outline-variant resize-none focus:outline-none focus:ring-1 focus:ring-secondary"
             />
           </label>
 
           {/* Nesting section — shown when interval has children or non-default nesting values */}
           {(interval.children && interval.children.length > 0) &&
-            <div className="border-t border-border pt-4 flex flex-col gap-4">
-              <span className="text-xs text-muted font-medium uppercase tracking-wider">Nesting</span>
+            <div className="border-t border-outline-variant pt-4 flex flex-col gap-4">
+              <span className="text-xs text-on-surface-variant font-medium uppercase tracking-wider">Nesting</span>
               <div className="flex gap-6">
                 <div className="flex flex-col gap-1.5">
-                  <span className="text-xs text-muted">Cycles</span>
+                  <span className="text-xs text-on-surface-variant">Cycles</span>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setCycleCount(Math.max(1, cycleCount - 1))}
-                      className="w-8 h-8 flex items-center justify-center bg-surface-alt rounded-lg text-fg hover:bg-border text-sm font-medium"
+                      className="w-8 h-8 flex items-center justify-center bg-surface-container-low rounded-lg text-on-surface hover:bg-surface-container text-sm font-medium"
                       aria-label="Decrease cycle count"
                     >−</button>
-                    <span className="w-8 text-center text-sm font-mono tabular-nums text-fg">{cycleCount}</span>
+                    <span className="w-8 text-center text-sm font-mono tabular-nums text-on-surface">{cycleCount}</span>
                     <button
                       onClick={() => setCycleCount(Math.min(99, cycleCount + 1))}
-                      className="w-8 h-8 flex items-center justify-center bg-surface-alt rounded-lg text-fg hover:bg-border text-sm font-medium"
+                      className="w-8 h-8 flex items-center justify-center bg-surface-container-low rounded-lg text-on-surface hover:bg-surface-container text-sm font-medium"
                       aria-label="Increase cycle count"
                     >+</button>
                   </div>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <span className="text-xs text-muted">Sets</span>
+                  <span className="text-xs text-on-surface-variant">Sets</span>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setSetCount(Math.max(1, setCount - 1))}
-                      className="w-8 h-8 flex items-center justify-center bg-surface-alt rounded-lg text-fg hover:bg-border text-sm font-medium"
+                      className="w-8 h-8 flex items-center justify-center bg-surface-container-low rounded-lg text-on-surface hover:bg-surface-container text-sm font-medium"
                       aria-label="Decrease set count"
                     >−</button>
-                    <span className="w-8 text-center text-sm font-mono tabular-nums text-fg">{setCount}</span>
+                    <span className="w-8 text-center text-sm font-mono tabular-nums text-on-surface">{setCount}</span>
                     <button
                       onClick={() => setSetCount(Math.min(99, setCount + 1))}
-                      className="w-8 h-8 flex items-center justify-center bg-surface-alt rounded-lg text-fg hover:bg-border text-sm font-medium"
+                      className="w-8 h-8 flex items-center justify-center bg-surface-container-low rounded-lg text-on-surface hover:bg-surface-container text-sm font-medium"
                       aria-label="Increase set count"
                     >+</button>
                   </div>
                 </div>
               </div>
               <label className="flex flex-col gap-1.5">
-                <span className="text-xs text-muted">Rest between cycles (seconds)</span>
+                <span className="text-xs text-on-surface-variant">Rest between cycles (seconds)</span>
                 <input
                   type="number"
                   value={restBetweenCycles}
                   onChange={(e) => setRestBetweenCycles(Math.max(0, Math.min(600, Number(e.target.value))))}
                   min={0}
                   max={600}
-                  className="bg-surface-alt text-fg rounded-lg px-3 py-2.5 text-sm w-28 border border-border focus:outline-none focus:ring-1 focus:ring-accent"
+                  className="bg-surface-container-low text-on-surface rounded-lg px-3 py-2.5 text-sm w-28 border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
                 />
               </label>
             </div>
@@ -194,13 +194,13 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises }: In
           <div className="flex gap-3 pt-2">
             <button
               onClick={handleCancel}
-              className="flex-1 py-3 bg-surface-alt text-fg rounded-lg font-medium hover:bg-border transition-colors text-sm"
+              className="flex-1 py-3 bg-surface-container-low text-on-surface rounded-lg font-medium hover:bg-surface-container transition-colors text-sm"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
-              className="flex-1 py-3 bg-accent text-accent-on rounded-lg font-medium hover:opacity-90 transition-colors text-sm"
+              className="flex-1 py-3 bg-primary-container text-on-primary rounded-lg font-medium hover:opacity-90 transition-colors text-sm"
             >
               Save
             </button>
