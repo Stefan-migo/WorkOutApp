@@ -7,6 +7,10 @@ interface IntervalRowProps {
   index: number
   onChange: (index: number, interval: Interval) => void
   onRemove: (index: number) => void
+  onMoveUp?: (index: number) => void
+  onMoveDown?: (index: number) => void
+  isFirst?: boolean
+  isLast?: boolean
 }
 
 // ponytail: static color map, make configurable if custom interval types are added
@@ -17,7 +21,7 @@ const TYPE_COLORS: Record<string, string> = {
   cooldown: 'bg-purple-500',
 }
 
-export function IntervalRow({ interval, index, onChange, onRemove }: IntervalRowProps) {
+export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onMoveDown, isFirst, isLast }: IntervalRowProps) {
   const minutes = Math.floor(interval.duration / 60)
   const seconds = interval.duration % 60
   const durationStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
@@ -34,6 +38,24 @@ export function IntervalRow({ interval, index, onChange, onRemove }: IntervalRow
         aria-label={`Interval ${index + 1} title`}
       />
       <span className="font-mono text-zinc-300 tabular-nums">{durationStr}</span>
+      <div className="flex flex-col gap-0.5">
+        <button
+          onClick={() => onMoveUp?.(index)}
+          disabled={isFirst}
+          className="min-w-[28px] min-h-[18px] flex items-center justify-center text-zinc-500 hover:text-white disabled:opacity-20 disabled:pointer-events-none text-xs leading-none"
+          aria-label={`Move interval ${index + 1} up`}
+        >
+          ▲
+        </button>
+        <button
+          onClick={() => onMoveDown?.(index)}
+          disabled={isLast}
+          className="min-w-[28px] min-h-[18px] flex items-center justify-center text-zinc-500 hover:text-white disabled:opacity-20 disabled:pointer-events-none text-xs leading-none"
+          aria-label={`Move interval ${index + 1} down`}
+        >
+          ▼
+        </button>
+      </div>
       <button
         onClick={() => onRemove(index)}
         className="min-w-[44px] min-h-[44px] flex items-center justify-center text-zinc-500 hover:text-red-400 text-lg"

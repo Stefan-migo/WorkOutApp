@@ -50,6 +50,25 @@ export default function EditWorkoutPage() {
     setIntervals((prev) => prev.filter((_, i) => i !== index))
   }
 
+  // ponytail: direct array swap, no drag & drop, no library
+  function handleMoveUp(index: number) {
+    if (index <= 0) return
+    setIntervals((prev) => {
+      const next = [...prev]
+      ;[next[index - 1], next[index]] = [next[index], next[index - 1]]
+      return next
+    })
+  }
+
+  function handleMoveDown(index: number) {
+    setIntervals((prev) => {
+      if (index >= prev.length - 1) return prev
+      const next = [...prev]
+      ;[next[index], next[index + 1]] = [next[index + 1], next[index]]
+      return next
+    })
+  }
+
   function handleUpdate() {
     if (!title.trim() || intervals.length === 0 || !existing) return
     saveWorkout({
@@ -91,6 +110,10 @@ export default function EditWorkoutPage() {
               index={i}
               onChange={handleChange}
               onRemove={handleRemove}
+              onMoveUp={handleMoveUp}
+              onMoveDown={handleMoveDown}
+              isFirst={i === 0}
+              isLast={i === intervals.length - 1}
             />
           ))}
         </div>
