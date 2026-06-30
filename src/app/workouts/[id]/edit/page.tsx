@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useWorkoutContext } from '@/context/WorkoutContext'
@@ -19,6 +19,19 @@ export default function EditWorkoutPage() {
   const [title, setTitle] = useState(existing?.title ?? '')
   const [intervals, setIntervals] = useState<Interval[]>(existing?.intervals ?? [])
 
+  // ponytail: dirty flag on user interaction, no deep compare
+  const dirtyRef = useRef(false)
+
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (dirtyRef.current) {
+        e.preventDefault()
+      }
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [])
+
   if (!existing) {
     return (
       <div className="flex flex-col items-center justify-center flex-1 gap-4 p-8 text-center">
@@ -35,10 +48,12 @@ export default function EditWorkoutPage() {
   const totalSec = totalDuration % 60
 
   function handleAdd(interval: Interval) {
+    dirtyRef.current = true
     setIntervals((prev) => [...prev, interval])
   }
 
   function handleChange(index: number, interval: Interval) {
+    dirtyRef.current = true
     // ponytail: force prepare on first, cooldown on last — no UI to opt out
     const forcedType =
       index === 0 ? 'prepare' as const
@@ -52,12 +67,14 @@ export default function EditWorkoutPage() {
   }
 
   function handleRemove(index: number) {
+    dirtyRef.current = true
     setIntervals((prev) => prev.filter((_, i) => i !== index))
   }
 
   // ponytail: direct array swap, no drag & drop, no library
   function handleMoveUp(index: number) {
     if (index <= 0) return
+    dirtyRef.current = true
     setIntervals((prev) => {
       const next = [...prev]
       ;[next[index - 1], next[index]] = [next[index], next[index - 1]]
@@ -66,6 +83,7 @@ export default function EditWorkoutPage() {
   }
 
   function handleMoveDown(index: number) {
+    dirtyRef.current = true
     setIntervals((prev) => {
       if (index >= prev.length - 1) return prev
       const next = [...prev]
@@ -98,6 +116,7 @@ export default function EditWorkoutPage() {
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Workout title"
           className="flex-1 text-2xl font-bold bg-transparent border-b border-transparent hover:border-zinc-600 focus:border-blue-500 outline-none placeholder:text-zinc-600"
+          onChange={(e) => { dirtyRef.current = true; setTitle(e.target.value) }}
         />
         <span className="font-mono text-zinc-400 text-sm tabular-nums shrink-0">
           {totalMin}:{String(totalSec).padStart(2, '0')}
