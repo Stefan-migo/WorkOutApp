@@ -8,6 +8,7 @@ import { useSequences } from '@/hooks/useSequences'
 import { useSessions } from '@/hooks/useSessions'
 import { useTimer } from '@/hooks/useTimer'
 import { useBeep } from '@/hooks/useBeep'
+import { useIntervalNotification } from '@/hooks/useIntervalNotification'
 import { TimerDisplay } from '@/components/TimerDisplay'
 import { ProgressBar } from '@/components/ProgressBar'
 import { TimerControls } from '@/components/TimerControls'
@@ -31,6 +32,7 @@ export default function PlaySequencePage() {
   const { getSequence } = useSequences()
   const { addSession } = useSessions()
   const { beep } = useBeep()
+  const { notify } = useIntervalNotification()
 
   const sequence = getSequence(params.id)
   const totalRounds = sequence ? getTotalRounds(sequence) : 0
@@ -52,6 +54,7 @@ export default function PlaySequencePage() {
 
   const timer = useTimer(currentInterval?.duration ?? 0, () => {
     beep()
+    notify(workout?.title ?? sequence.title, intervalIdx + 1, flat.length)
     if (skipRef.current) {
       // skip handler already captured interval data, just advance
       skipRef.current = false

@@ -7,6 +7,7 @@ import { useWorkoutContext } from '@/context/WorkoutContext'
 import { useSessions } from '@/hooks/useSessions'
 import { useTimer } from '@/hooks/useTimer'
 import { useBeep } from '@/hooks/useBeep'
+import { useIntervalNotification } from '@/hooks/useIntervalNotification'
 import { TimerDisplay } from '@/components/TimerDisplay'
 import { ProgressBar } from '@/components/ProgressBar'
 import { TimerControls } from '@/components/TimerControls'
@@ -43,12 +44,14 @@ export default function PlayWorkoutPage() {
   const sessionSavedRef = useRef(false)
 
   const { beep } = useBeep()
+  const { notify } = useIntervalNotification()
   const interval: FlattenedInterval | undefined = flat[currentIdx]
   const total = flat.length
 
   const { getExercise } = useExercises()
   const timer = useTimer(interval?.duration ?? 0, () => {
     beep()
+    notify(workout.title, currentIdx + 1, total)
     if (skipRef.current) {
       skipRef.current = false
       if (currentIdx < total - 1) {
