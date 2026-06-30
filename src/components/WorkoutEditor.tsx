@@ -256,17 +256,23 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
 
   return (
     <div className="max-w-2xl mx-auto w-full p-6 flex flex-col gap-6">
-      <div className="flex items-center justify-between gap-4">
-        <input
-          type="text"
-          value={title}
-          placeholder="Workout title"
-          className="flex-1 text-2xl font-bold bg-transparent border-b border-transparent hover:border-outline-variant focus:border-secondary outline-none text-on-surface placeholder:text-on-surface-variant"
-          onChange={(e) => { dirtyRef.current = true; setTitle(e.target.value) }}
-        />
-        <span className="font-mono text-on-surface-variant text-sm tabular-nums shrink-0">
-          {totalMin}:{String(totalSec).padStart(2, '0')}
-        </span>
+      <div className="glass-card rounded-xl p-md flex flex-col md:flex-row justify-between items-start md:items-end gap-lg">
+        <div className="w-full md:w-2/3">
+          <label className="block font-label text-label-caps text-on-surface-variant mb-xs uppercase tracking-wider">Workout Title</label>
+          <input
+            type="text"
+            value={title}
+            placeholder="Name your workout..."
+            className="w-full bg-transparent border-0 border-b-2 border-outline-variant pb-xs font-headline text-headline-lg text-on-surface focus:border-secondary focus:ring-0 transition-colors px-0 outline-none placeholder:text-outline/50"
+            onChange={(e) => { dirtyRef.current = true; setTitle(e.target.value) }}
+          />
+        </div>
+        <div className="text-right w-full md:w-auto">
+          <span className="block font-label text-label-caps text-on-surface-variant mb-xs uppercase tracking-wider">Est. Duration</span>
+          <div className="font-mono text-display-timer-mobile text-primary tracking-tighter">
+            {totalMin}:{String(totalSec).padStart(2, '0')}
+          </div>
+        </div>
       </div>
 
       {intervals.length > 0 && (
@@ -381,13 +387,23 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
         </div>
       </div>
 
-      <button
-        onClick={handleSave}
-        disabled={!canSave}
-        className="w-full py-3 bg-primary-container hover:bg-primary disabled:bg-surface-container-low disabled:text-on-surface-variant text-on-primary rounded-lg font-medium transition-colors"
-      >
-        {existingWorkout ? 'Update Workout' : 'Save Workout'}
-      </button>
+      <div className="flex gap-3">
+        {onCancel && (
+          <button
+            onClick={onCancel}
+            className="flex-1 py-3 bg-surface border border-outline-variant text-on-surface rounded-lg font-medium transition-colors hover:bg-surface-dim font-label text-label-caps uppercase tracking-wider"
+          >
+            Discard
+          </button>
+        )}
+        <button
+          onClick={handleSave}
+          disabled={!canSave}
+          className="flex-1 py-3 bg-primary-container hover:bg-primary disabled:bg-surface-container-low disabled:text-on-surface-variant text-on-primary rounded-lg font-medium transition-colors font-label text-label-caps uppercase tracking-wider"
+        >
+          {existingWorkout ? 'Update Workout' : 'Save Workout'}
+        </button>
+      </div>
     </div>
   )
 }
