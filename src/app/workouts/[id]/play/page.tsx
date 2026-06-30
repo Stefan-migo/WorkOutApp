@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useWorkoutContext } from '@/context/WorkoutContext'
 import { useTimer } from '@/hooks/useTimer'
+import { useBeep } from '@/hooks/useBeep'
 import { TimerDisplay } from '@/components/TimerDisplay'
 import { ProgressBar } from '@/components/ProgressBar'
 import { TimerControls } from '@/components/TimerControls'
@@ -30,10 +31,12 @@ export default function PlayWorkoutPage() {
   const [currentIdx, setCurrentIdx] = useState(0)
   const startedRef = useRef(false)
 
+  const { beep } = useBeep()
   const interval = workout?.intervals[currentIdx]
   const total = workout?.intervals.length ?? 0
 
   const timer = useTimer(interval?.duration ?? 0, () => {
+    beep()
     if (currentIdx < total - 1) {
       setCurrentIdx((prev) => prev + 1)
     } else {
