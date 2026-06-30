@@ -11,7 +11,20 @@ export function useWorkouts() {
 
   const getWorkout = useCallback(
     (id: string): Workout | undefined => {
-      return workouts.find((w) => w.id === id)
+      const w = workouts.find((w) => w.id === id)
+      if (!w) return undefined
+      // ponytail: silent migration — spread defaults over legacy intervals so absent fields never crash
+      return {
+        ...w,
+        intervals: w.intervals.map((i) => ({
+          children: undefined,
+          cycleCount: 1,
+          setCount: 1,
+          restBetweenCycles: 0,
+          isGenerated: undefined,
+          ...i,
+        })),
+      }
     },
     [workouts],
   )
