@@ -142,6 +142,89 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
     })
   }
 
+  // ponytail: cycle bracket — CSS-only visual, no JS drag-to-group
+  function handleCycleCountChange(parentIndex: number, count: number) {
+    dirtyRef.current = true
+    setIntervals((prev) => {
+      const next = [...prev]
+      const parent = next[parentIndex]
+      next[parentIndex] = { ...parent, cycleCount: count }
+      return next
+    })
+  }
+
+  function handleChildChange(parentIndex: number, childIndex: number, child: Interval) {
+    dirtyRef.current = true
+    setIntervals((prev) => {
+      const next = [...prev]
+      const parent = next[parentIndex]
+      if (!parent.children) return prev
+      const children = [...parent.children]
+      children[childIndex] = child
+      next[parentIndex] = { ...parent, children }
+      return next
+    })
+  }
+
+  function handleRemoveChild(parentIndex: number, childIndex: number) {
+    dirtyRef.current = true
+    setIntervals((prev) => {
+      const next = [...prev]
+      const parent = next[parentIndex]
+      if (!parent.children) return prev
+      const children = parent.children.filter((_, i) => i !== childIndex)
+      next[parentIndex] = children.length === 0
+        ? { ...parent, children: undefined }
+        : { ...parent, children }
+      return next
+    })
+  }
+
+  function handleChildMoveUp(parentIndex: number, childIndex: number) {
+    if (childIndex <= 0) return
+    dirtyRef.current = true
+    setIntervals((prev) => {
+      const next = [...prev]
+      const parent = next[parentIndex]
+      if (!parent.children) return prev
+      const children = [...parent.children]
+      ;[children[childIndex - 1], children[childIndex]] = [children[childIndex], children[childIndex - 1]]
+      next[parentIndex] = { ...parent, children }
+      return next
+    })
+  }
+
+  function handleChildMoveDown(parentIndex: number, childIndex: number) {
+    dirtyRef.current = true
+    setIntervals((prev) => {
+      const next = [...prev]
+      const parent = next[parentIndex]
+      if (!parent.children || childIndex >= parent.children.length - 1) return prev
+      const children = [...parent.children]
+      ;[children[childIndex], children[childIndex + 1]] = [children[childIndex + 1], children[childIndex]]
+      next[parentIndex] = { ...parent, children }
+      return next
+    })
+  }
+
+  // ponytail: wraps last 2 top-level intervals; no selection UI
+  function handleWrapInCycle() {
+    dirtyRef.current = true
+    setIntervals((prev) => {
+      if (prev.length < 2) return prev
+      const lastTwo = prev.slice(-2)
+      const cycle: Interval = {
+        id: intervalId(),
+        type: 'work',
+        title: 'Block',
+        duration: 0,
+        children: lastTwo,
+        cycleCount: 4,
+      }
+      return [...prev.slice(0, -2), cycle]
+    })
+  }
+
   // ponytail: click timeline block → open sheet for that original interval
   function handleTimelineClick(idx: number) {
     const fi = flat[idx]
@@ -194,19 +277,69 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
         <p className="text-on-surface-variant text-center py-12">Add intervals to build your workout</p>
       ) : (
         <div className="flex flex-col gap-2">
-          {intervals.map((interval, i) => (
-            <IntervalRow
-              key={interval.id}
-              interval={interval}
-              index={i}
-              onChange={handleChange}
-              onRemove={handleRemove}
-              onMoveUp={handleMoveUp}
-              onMoveDown={handleMoveDown}
-              isFirst={i === 0}
-              isLast={i === intervals.length - 1}
-            />
-          ))}
+          {intervals.map((interval, i) => {
+            if (interval.children?.length) {
+              const childTotal = interval.children.reduce((s, ch) => s + ch.duration, 0)
+              const childMin = Math.floor(childTotal / 60)
+              const childSec = childTotal % 60
+              return (
+                <div key={interval.id} className="mt-lg relative">
+                  {/* Cycle Bracket — CSS-only visual */}
+                  <div className="absolute left-0 top-0 bottom-0 w-8 border-l-2 border-y-2 border-outline-variant/40 rounded-l-lg z-0 pointer-events-none" />
+                  {/* Cycle Header */}
+                  <div className="flex justify-between items-center pl-sm pr-md py-xs mb-sm relative z-10">
+                    <div className="flex items-center gap-sm">
+                      <span className="font-label-caps text-label-caps uppercase text-on-surface-variant font-bold">{interval.title} Cycle</span>
+                      <span className="bg-surface-dim px-sm py-[2px] rounded text-[11px] font-data-sm text-on-surface font-bold">
+                        Total: {childMin}:{String(childSec).padStart(2, '0')}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-xs">
+                      <span className="font-label-caps text-[10px] uppercase text-on-surface-variant">Repeats:</span>
+                      <select
+                        value={interval.cycleCount ?? 4}
+                        onChange={(e) => handleCycleCountChange(i, Number(e.target.value))}
+                        className="bg-surface border border-outline-variant/50 rounded px-2 py-1 text-data-sm font-data-sm text-primary font-bold focus:ring-secondary focus:border-secondary"
+                      >
+                        {[2, 3, 4, 5, 6].map((n) => (
+                          <option key={n} value={n}>x{n}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  {/* Children rendered indented inside the bracket */}
+                  <div className="space-y-sm ml-sm relative z-10">
+                    {interval.children.map((child, ci) => (
+                      <IntervalRow
+                        key={child.id}
+                        interval={child}
+                        index={ci}
+                        onChange={(_idx, updated) => handleChildChange(i, ci, updated)}
+                        onRemove={() => handleRemoveChild(i, ci)}
+                        onMoveUp={() => handleChildMoveUp(i, ci)}
+                        onMoveDown={() => handleChildMoveDown(i, ci)}
+                        isFirst={ci === 0}
+                        isLast={ci === interval.children!.length - 1}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )
+            }
+            return (
+              <IntervalRow
+                key={interval.id}
+                interval={interval}
+                index={i}
+                onChange={handleChange}
+                onRemove={handleRemove}
+                onMoveUp={handleMoveUp}
+                onMoveDown={handleMoveDown}
+                isFirst={i === 0}
+                isLast={i === intervals.length - 1}
+              />
+            )
+          })}
         </div>
       )}
 
@@ -235,6 +368,16 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
               <span className="font-label text-label-caps uppercase text-on-surface font-semibold">{type}</span>
             </button>
           ))}
+        </div>
+        <div className="mt-md flex justify-center">
+          <button
+            onClick={handleWrapInCycle}
+            disabled={intervals.length < 2}
+            className="flex items-center gap-sm px-lg py-sm rounded-lg bg-surface border border-outline-variant hover:border-primary hover:bg-surface-dim transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <span className="material-symbols-outlined text-[18px] text-primary">data_object</span>
+            <span className="font-label-caps text-label-caps uppercase font-bold text-primary">Wrap in Cycle</span>
+          </button>
         </div>
       </div>
 
