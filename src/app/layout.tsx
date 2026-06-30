@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { WorkoutProvider } from '@/context/WorkoutContext'
+import Nav from '@/components/Nav'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -27,7 +28,10 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col">
-        <WorkoutProvider>{children}</WorkoutProvider>
+        <WorkoutProvider>
+          <main className="flex-1 flex flex-col">{children}</main>
+          <Nav />
+        </WorkoutProvider>
       </body>
     </html>
   )
