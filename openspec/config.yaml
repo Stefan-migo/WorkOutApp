@@ -7,13 +7,12 @@ context: >
   prototypes. CC0 free-exercise-db for initial exercises, later custom GIFs/images.
   Next.js 14+ App Router + TypeScript + Tailwind CSS v4.
 
-strict_tdd: false
-# ponytail: no test runner detected at init time; enable when vitest/jest is added
+strict_tdd: true
 
 testing:
-  runner: null
+  runner: vitest
   layers:
-    unit: false
+    unit: true
     integration: false
     e2e: false
   coverage: false
