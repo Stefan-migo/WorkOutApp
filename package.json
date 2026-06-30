@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "vitest"
+    "test": "vitest",
+    "audit:tokens": "grep -r \"text-fg\\|bg-accent\\|border-border\\|text-muted\\|bg-surface-alt\\|bg-interval-\" src/ --include=\"*.tsx\" --include=\"*.ts\" || echo \"✅ No old tokens found\""
   },
   "dependencies": {
     "next": "16.2.9",
