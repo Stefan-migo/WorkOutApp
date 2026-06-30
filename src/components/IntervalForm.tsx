@@ -2,12 +2,14 @@
 
 import { useState } from 'react'
 import type { IntervalType, Interval } from '@/types/workout'
+import { getExercises } from '@/data/exercises'
 
 interface IntervalFormProps {
   onAdd: (interval: Interval) => void
 }
 
 const INTERVAL_TYPES: IntervalType[] = ['prepare', 'work', 'rest', 'cooldown']
+const exercises = getExercises()
 
 // ponytail: simple counter ID, upgrade to crypto.randomUUID if collisions become an issue
 let nextId = 1
@@ -19,6 +21,7 @@ export function IntervalForm({ onAdd }: IntervalFormProps) {
   const [type, setType] = useState<IntervalType>('work')
   const [title, setTitle] = useState('')
   const [duration, setDuration] = useState(30)
+  const [exerciseId, setExerciseId] = useState('')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -29,11 +32,13 @@ export function IntervalForm({ onAdd }: IntervalFormProps) {
       type,
       title: title || type,
       duration,
+      ...(type === 'work' && exerciseId ? { exerciseId } : {}),
     })
 
     setTitle('')
     setDuration(30)
     setType('work')
+    setExerciseId('')
   }
 
   return (
@@ -62,6 +67,23 @@ export function IntervalForm({ onAdd }: IntervalFormProps) {
           className="bg-zinc-700 text-white rounded px-3 py-2 text-sm w-32 placeholder:text-zinc-500"
         />
       </label>
+      {type === 'work' && (
+        <label className="flex flex-col gap-1">
+          <span className="text-xs text-zinc-400">Exercise</span>
+          <select
+            value={exerciseId}
+            onChange={(e) => setExerciseId(e.target.value)}
+            className="bg-zinc-700 text-white rounded px-3 py-2 text-sm"
+          >
+            <option value="">Select exercise</option>
+            {exercises.map((ex) => (
+              <option key={ex.id} value={ex.id}>
+                {ex.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
       <label className="flex flex-col gap-1">
         <span className="text-xs text-zinc-400">Duration (sec)</span>
         <input

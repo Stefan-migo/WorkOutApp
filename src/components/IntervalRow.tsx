@@ -1,6 +1,7 @@
 'use client'
 
 import type { Interval } from '@/types/workout'
+import { getExercise } from '@/data/exercises'
 
 interface IntervalRowProps {
   interval: Interval
@@ -25,6 +26,11 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
   const minutes = Math.floor(interval.duration / 60)
   const seconds = interval.duration % 60
   const durationStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+  // ponytail: inline exercise lookup, memoize if list grows
+  const exerciseName =
+    interval.type === 'work' && interval.exerciseId
+      ? getExercise(interval.exerciseId)?.name
+      : undefined
 
   return (
     <div className="flex items-center gap-3 p-3 rounded-lg bg-zinc-800">
@@ -38,6 +44,11 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
         aria-label={`Interval ${index + 1} title`}
       />
       <span className="font-mono text-zinc-300 tabular-nums">{durationStr}</span>
+      {exerciseName && (
+        <span className="text-xs text-zinc-500 w-24 truncate shrink-0" title={exerciseName}>
+          {exerciseName}
+        </span>
+      )}
       <div className="flex flex-col gap-0.5">
         <button
           onClick={() => onMoveUp?.(index)}
