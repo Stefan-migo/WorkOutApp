@@ -1,29 +1,152 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #f7f3f1;
-  --color-surface: #ffffff;
-  --color-surface-alt: #f0eae8;
-  --color-fg: #1e1416;
-  --color-fg-2: #4a3a3c;
-  --color-muted: #8a7678;
-  --color-accent: #7a1a28;
-  --color-accent-on: #ffffff;
-  --color-border: #dccccc;
-  --color-border-soft: #eae0de;
-  --color-success: #3a7050;
-  --color-warning: #8a7040;
-  --color-danger: #7a3840;
-  --color-info: #5a4860;
-  --color-interval-prepare: #9a6a6e;
-  --color-interval-work: #7a1a28;
-  --color-interval-rest: #b89a9a;
-  --color-interval-cooldown: #4a252a;
-  --font-timer: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+  /* Deep Nordic Athletic — colors */
+  --color-primary: #091426;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #1e293b;
+  --color-on-primary-container: #8590a6;
+  --color-primary-fixed: #d8e3fb;
+  --color-primary-fixed-dim: #bcc7de;
+  --color-on-primary-fixed: #111c2d;
+  --color-on-primary-fixed-variant: #3c475a;
+
+  --color-secondary: #ac3400;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #fd6b36;
+  --color-on-secondary-container: #5d1900;
+  --color-secondary-fixed: #ffdbd0;
+  --color-secondary-fixed-dim: #ffb59d;
+  --color-on-secondary-fixed: #390c00;
+  --color-on-secondary-fixed-variant: #832600;
+
+  --color-tertiary: #111516;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #26292b;
+  --color-on-tertiary-container: #8d9092;
+  --color-tertiary-fixed: #e0e3e5;
+  --color-tertiary-fixed-dim: #c4c7c9;
+  --color-on-tertiary-fixed: #191c1e;
+  --color-on-tertiary-fixed-variant: #444749;
+
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+
+  --color-background: #f8f9ff;
+  --color-on-background: #0b1c30;
+
+  --color-surface: #f8f9ff;
+  --color-on-surface: #0b1c30;
+  --color-surface-dim: #cbdbf5;
+  --color-surface-bright: #f8f9ff;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #eff4ff;
+  --color-surface-container: #e5eeff;
+  --color-surface-container-high: #dce9ff;
+  --color-surface-container-highest: #d3e4fe;
+  --color-surface-variant: #d3e4fe;
+  --color-on-surface-variant: #45474c;
+
+  --color-inverse-surface: #213145;
+  --color-inverse-on-surface: #eaf1ff;
+  --color-inverse-primary: #bcc7de;
+
+  --color-outline: #75777d;
+  --color-outline-variant: #c5c6cd;
+  --color-surface-tint: #545f73;
+
+  /* Interval segment colors */
+  --color-segment-prepare: #3b82f6;
+  --color-segment-work: #10b981;
+  --color-segment-rest: #ef4444;
+  --color-segment-cooldown: #8b5cf6;
+
+  /* Font families */
+  --font-headline: 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-label: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-timer: 'JetBrains Mono', monospace;
+  --font-data: 'JetBrains Mono', monospace;
+
+  /* Font-size utilities with line-height, tracking, weight */
+  --text-headline-lg: 32px;
+  --text-headline-lg--line-height: 40px;
+  --text-headline-lg--letter-spacing: -0.02em;
+  --text-headline-lg--font-weight: 700;
+
+  --text-headline-md: 24px;
+  --text-headline-md--line-height: 32px;
+  --text-headline-md--font-weight: 600;
+
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 28px;
+  --text-body-lg--font-weight: 400;
+
+  --text-body-md: 16px;
+  --text-body-md--line-height: 24px;
+  --text-body-md--font-weight: 400;
+
+  --text-data-lg: 20px;
+  --text-data-lg--line-height: 24px;
+  --text-data-lg--font-weight: 500;
+
+  --text-data-sm: 14px;
+  --text-data-sm--line-height: 16px;
+  --text-data-sm--font-weight: 500;
+
+  --text-label-caps: 12px;
+  --text-label-caps--line-height: 16px;
+  --text-label-caps--letter-spacing: 0.05em;
+  --text-label-caps--font-weight: 700;
+
+  --text-display-timer: 84px;
+  --text-display-timer--line-height: 100px;
+  --text-display-timer--letter-spacing: -0.04em;
+  --text-display-timer--font-weight: 700;
+
+  --text-display-timer-mobile: 64px;
+  --text-display-timer-mobile--line-height: 72px;
+  --text-display-timer-mobile--letter-spacing: -0.04em;
+  --text-display-timer-mobile--font-weight: 700;
+
+  /* Custom spacing (4px grid) */
+  --spacing-margin-mobile: 20px;
+  --spacing-margin-desktop: 40px;
+  --spacing-gutter: 16px;
+}
+
+/* Glassmorphism card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid #e2e8f0;
+}
+
+/* Ambient shadow for elevated elements */
+.ambient-shadow {
+  box-shadow: 0 4px 20px rgba(30, 41, 59, 0.1);
+}
+
+/* Timer dark background */
+.timer-dark-bg {
+  background-color: #091426;
+}
+
+/* Hide scrollbar for clean lists */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 body {
-  background-color: var(--color-bg);
-  color: var(--color-fg);
-  font-family: system-ui, -apple-system, Segoe UI, Helvetica Neue, Arial, sans-serif;
+  background-color: #f8f9ff;
+  color: #0b1c30;
+  font-family: 'Inter', system-ui, sans-serif;
 }

@@ -203,15 +203,10 @@ Cada intervalo: `title, duration, description, image/gif (opcional)`
 
 ```yaml
 Palette:
-  primary:    "#4F46E5" # Indigo — acción, Work intervals
-  success:    "#22C55E" # Green — Work/active
-  warning:    "#F59E0B" # Amber — Prepare
-  danger:     "#EF4444" # Red — Rest
-  info:       "#8B5CF6" # Purple — CoolDown
-  bg:         "#0F0F0F" # Dark base (timer view)
-  surface:    "#1A1A2E" # Cards
-  text:       "#FFFFFF"
-  textDim:    "#94A3B8"
+
+```
+Select a color pallete by your own. Select an appropiate one. do not be obvious about the color it must be different than normal generic workout app 
+```
 
 Typography:
   timer:      "JetBrains Mono, monospace" # Números enormes

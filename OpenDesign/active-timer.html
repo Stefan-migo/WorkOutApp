@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WorkOutApp - Active Timer</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-dim": "#cbdbf5",
+                        "on-surface": "#0b1c30",
+                        "primary": "#091426",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "secondary-container": "#fd6b36",
+                        "primary-fixed": "#d8e3fb",
+                        "on-tertiary-container": "#8d9092",
+                        "surface": "#f8f9ff",
+                        "surface-variant": "#d3e4fe",
+                        "background": "#f8f9ff",
+                        "surface-container-high": "#dce9ff",
+                        "on-primary-fixed": "#111c2d",
+                        "on-primary-fixed-variant": "#3c475a",
+                        "tertiary-container": "#26292b",
+                        "on-surface-variant": "#45474c",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed": "#390c00",
+                        "error": "#ba1a1a",
+                        "inverse-on-surface": "#eaf1ff",
+                        "outline-variant": "#c5c6cd",
+                        "tertiary": "#111516",
+                        "surface-bright": "#f8f9ff",
+                        "surface-container-highest": "#d3e4fe",
+                        "secondary": "#ac3400",
+                        "surface-container": "#e5eeff",
+                        "inverse-surface": "#213145",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "outline": "#75777d",
+                        "on-error": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#8590a6",
+                        "primary-fixed-dim": "#bcc7de",
+                        "secondary-fixed-dim": "#ffb59d",
+                        "on-tertiary-fixed": "#191c1e",
+                        "on-error-container": "#93000a",
+                        "inverse-primary": "#bcc7de",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#832600",
+                        "surface-tint": "#545f73",
+                        "secondary-fixed": "#ffdbd0",
+                        "primary-container": "#1e293b",
+                        "surface-container-lowest": "#ffffff",
+                        "on-background": "#0b1c30",
+                        "on-secondary-container": "#5d1900",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#eff4ff",
+                        "tertiary-fixed": "#e0e3e5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "md": "16px",
+                        "margin-desktop": "40px",
+                        "xs": "4px",
+                        "sm": "8px",
+                        "margin-mobile": "20px",
+                        "gutter": "16px",
+                        "base": "4px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "display-timer-mobile": ["JetBrains Mono"],
+                        "body-md": ["Inter"],
+                        "data-sm": ["JetBrains Mono"],
+                        "label-caps": ["Inter"],
+                        "data-lg": ["JetBrains Mono"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "display-timer": ["JetBrains Mono"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-timer-mobile": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.04em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "data-sm": ["14px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "data-lg": ["20px", { "lineHeight": "24px", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "display-timer": ["84px", { "lineHeight": "100px", "letterSpacing": "-0.04em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #000; color: #fff; } /* Force dark mode look */
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-[#091426] text-white min-h-screen flex flex-col antialiased">
+<!-- Top Bar (Suppressed Shell for focused journey, but keeping minimal header) -->
+<header class="flex justify-between items-center h-20 px-margin-mobile md:px-margin-desktop w-full border-b border-white/10 glass-panel sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-white">close</span>
+</button>
+<div>
+<h1 class="font-headline-md text-headline-md text-white font-bold tracking-tight">Active Session</h1>
+<p class="font-body-md text-body-md text-gray-400">Full Body Conditioning</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-white">volume_up</span>
+<span class="material-symbols-outlined text-white">more_vert</span>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col items-center justify-center px-margin-mobile py-lg relative w-full max-w-4xl mx-auto">
+<!-- Timer Ring -->
+<div class="relative w-72 h-72 md:w-96 md:h-96 flex items-center justify-center mb-xl">
+<svg class="absolute inset-0 w-full h-full drop-shadow-2xl" viewbox="0 0 100 100">
+<!-- Track -->
+<circle cx="50" cy="50" fill="transparent" r="45" stroke="#1E293B" stroke-width="4"></circle>
+<!-- Progress (Sage Greenish for WORK) -->
+<circle class="progress-ring__circle" cx="50" cy="50" fill="transparent" r="45" stroke="#84cc16" stroke-dasharray="283" stroke-dashoffset="70" stroke-linecap="round" stroke-width="4"></circle>
+</svg>
+<div class="z-10 flex flex-col items-center text-center">
+<span class="font-label-caps text-label-caps text-[#84cc16] tracking-widest uppercase mb-sm">WORK</span>
+<span class="font-display-timer-mobile text-display-timer-mobile md:font-display-timer md:text-display-timer text-white tabular-nums">00:45</span>
+<span class="font-data-sm text-data-sm text-gray-400 mt-xs">Next: Rest (00:15)</span>
+</div>
+</div>
+<!-- Current Exercise Details -->
+<div class="glass-panel rounded-xl p-md w-full max-w-lg mb-xl flex flex-col items-center text-center">
+<div class="w-full h-40 bg-primary-container rounded-lg mb-md overflow-hidden relative border border-white/5">
+<img class="w-full h-full object-cover opacity-80" data-alt="A detailed digital rendering of an athlete performing a goblet squat. The scene is illuminated with dramatic, moody lighting in a premium, dark-mode fitness studio. The background is minimalist and dark, focusing entirely on the correct form of the exercise. High quality, cinematic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDF7rLGTSm5XYHHjLIIrVRDkyT-t9UQKejB0wvWdoFwjWfLK-H28AlCiuql7R7P0hiD47yipDaosGDdonmBlHfUWPay0BE6I4wCSrehBT2TpjvyYrH0RRAkqdTvm_nDA9cFneTtZ-fkIcNkJ2R-QHqyYqxSuvzTK4S4JERcx6g00t1MV15v-LBA-cJLHgR8HrX9q-JmhSexBPB6UN4X0Q-H_GSTKAN0Aljw5oxByKf453RDpmU9T2TmQaVgJ3PM_dKq8zH1LaqKMg8"/>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-white mb-xs">Goblet Squats</h2>
+<p class="font-body-md text-body-md text-gray-300">Keep your chest up and drive through your heels. Maintain a tight core throughout the movement.</p>
+<div class="flex gap-2 mt-md">
+<span class="px-3 py-1 rounded-full bg-surface-tint/20 text-white font-label-caps text-label-caps border border-white/10">Kettlebell</span>
+<span class="px-3 py-1 rounded-full bg-surface-tint/20 text-white font-label-caps text-label-caps border border-white/10">Quads</span>
+</div>
+</div>
+<!-- Controls -->
+<div class="flex items-center justify-center gap-lg mb-xl">
+<button class="w-14 h-14 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-white text-3xl" style="font-variation-settings: 'FILL' 1;">replay_10</span>
+</button>
+<button class="w-20 h-20 rounded-full bg-white text-primary flex items-center justify-center hover:bg-gray-200 transition-colors shadow-[0_4px_20px_rgba(255,255,255,0.15)]">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">pause</span>
+</button>
+<button class="w-14 h-14 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-white text-3xl" style="font-variation-settings: 'FILL' 1;">skip_next</span>
+</button>
+</div>
+<!-- Mini Timeline & Stats -->
+<div class="w-full max-w-2xl px-md">
+<div class="flex justify-between items-center mb-sm">
+<span class="font-data-sm text-data-sm text-gray-400">Total Progress</span>
+<span class="font-data-sm text-data-sm text-white">45%</span>
+</div>
+<div class="w-full h-2 bg-primary-container rounded-full overflow-hidden mb-md border border-white/10">
+<div class="h-full bg-white rounded-full" style="width: 45%;"></div>
+</div>
+<div class="flex justify-between w-full font-label-caps text-label-caps text-gray-400">
+<span>Set 2 of 4</span>
+<span>Cycle 3 of 8</span>
+</div>
+</div>
+</main>
+</body></html>

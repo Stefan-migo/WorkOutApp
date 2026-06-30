@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Nordic Athlete - Stats</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#e0e3e5",
+                        "background": "#f8f9ff",
+                        "tertiary": "#111516",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-container": "#8590a6",
+                        "on-background": "#0b1c30",
+                        "on-secondary-fixed-variant": "#832600",
+                        "secondary-fixed-dim": "#ffb59d",
+                        "on-primary-fixed-variant": "#3c475a",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f8f9ff",
+                        "outline": "#75777d",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "on-secondary-container": "#5d1900",
+                        "on-surface-variant": "#45474c",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "surface-container-low": "#eff4ff",
+                        "on-surface": "#0b1c30",
+                        "on-error": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "secondary-container": "#fd6b36",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "primary": "#091426",
+                        "on-tertiary-fixed": "#191c1e",
+                        "on-secondary-fixed": "#390c00",
+                        "outline-variant": "#c5c6cd",
+                        "surface-container": "#e5eeff",
+                        "primary-container": "#1e293b",
+                        "surface-dim": "#cbdbf5",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-variant": "#d3e4fe",
+                        "primary-fixed": "#d8e3fb",
+                        "primary-fixed-dim": "#bcc7de",
+                        "inverse-surface": "#213145",
+                        "tertiary-container": "#26292b",
+                        "surface": "#f8f9ff",
+                        "on-tertiary-container": "#8d9092",
+                        "surface-container-high": "#dce9ff",
+                        "on-primary-fixed": "#111c2d",
+                        "surface-tint": "#545f73",
+                        "inverse-primary": "#bcc7de",
+                        "surface-container-highest": "#d3e4fe",
+                        "secondary-fixed": "#ffdbd0",
+                        "secondary": "#ac3400",
+                        "on-error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "20px",
+                        "sm": "8px",
+                        "margin-desktop": "40px",
+                        "base": "4px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "xs": "4px",
+                        "xl": "32px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "data-sm": ["JetBrains Mono"],
+                        "data-lg": ["JetBrains Mono"],
+                        "display-timer": ["JetBrains Mono"],
+                        "headline-md": ["Inter"],
+                        "display-timer-mobile": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "data-sm": ["14px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "data-lg": ["20px", { "lineHeight": "24px", "fontWeight": "500" }],
+                        "display-timer": ["84px", { "lineHeight": "100px", "letterSpacing": "-0.04em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-timer-mobile": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.04em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid #E2E8F0;
+        }
+        .ambient-shadow {
+            box-shadow: 0 4px 20px rgba(30, 41, 59, 0.1);
+        }
+        /* Hide scrollbar for clean aesthetic */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md antialiased h-full overflow-hidden flex">
+<!-- SideNavBar (Hidden on Mobile, Visible on Desktop) -->
+<nav class="hidden md:flex flex-col h-full py-lg px-md h-full w-64 fixed left-0 top-0 bg-primary shadow-sm z-50">
+<div class="mb-xl px-sm">
+<h1 class="font-headline-md text-headline-md font-bold text-surface">Nordic Athlete</h1>
+<p class="font-body-md text-body-md text-on-primary-fixed-variant mt-1">Elite Performance</p>
+</div>
+<div class="flex flex-col gap-sm flex-grow overflow-y-auto">
+<a class="flex items-center gap-md px-sm py-2 rounded text-on-primary-fixed-variant hover:bg-primary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-caps text-label-caps">Dashboard</span>
+</a>
+<a class="flex items-center gap-md px-sm py-2 rounded text-on-primary-fixed-variant hover:bg-primary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">fitness_center</span>
+<span class="font-label-caps text-label-caps">Workouts</span>
+</a>
+<a class="flex items-center gap-md px-sm py-2 rounded text-on-primary-fixed-variant hover:bg-primary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">reorder</span>
+<span class="font-label-caps text-label-caps">Sequences</span>
+</a>
+<a class="flex items-center gap-md px-sm py-2 rounded text-on-primary-fixed-variant hover:bg-primary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">settings_accessibility</span>
+<span class="font-label-caps text-label-caps">Exercises</span>
+</a>
+<a class="flex items-center gap-md px-sm py-2 rounded text-on-primary-fixed-variant hover:bg-primary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-label-caps text-label-caps">Calendar</span>
+</a>
+<a class="flex items-center gap-md px-sm py-2 rounded text-on-primary-fixed-variant hover:bg-primary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-label-caps text-label-caps">History</span>
+</a>
+<a class="flex items-center gap-md px-sm py-2 rounded text-secondary-container font-bold opacity-90 transition-opacity" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="font-label-caps text-label-caps">Stats</span>
+</a>
+<a class="flex items-center gap-md px-sm py-2 rounded text-on-primary-fixed-variant hover:bg-primary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-caps text-label-caps">Settings</span>
+</a>
+</div>
+<div class="mt-auto pt-lg border-t border-primary-container">
+<a class="flex items-center gap-md px-sm py-2 rounded text-on-primary-fixed-variant hover:bg-primary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-caps text-label-caps">Logout</span>
+</a>
+<div class="mt-md px-sm flex items-center gap-sm">
+<img class="w-8 h-8 rounded-full object-cover" data-alt="A small, circular avatar portrait of a focused athlete with a minimalist, high-contrast light mode background. The portrait should reflect the refined, elite Nordic Athletic aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWcEpi6rqfDL8aNzGKlhYCnaiOpDQX5XYBfC-qZZdzd2ROCJQjpGQxuSQ2dW-hGmjnH96v64RnWRhRwK-2NmIJW1o5Ce4EeutnGVm5sHcc0EixCQl9WiAjk5e19mmNrN65CEf1jMwp3sX9PY27cyG9sJZHDuUyRxItIWz8fAom3_20Xg_R_ZmmufJ4XQI5CH366HUnqUpb2uyfzslZKLZPWE2Ug9UHUx04PZ6bEo8soGEXxaOEpV25QmMAPJpcRZVwHe5oARt29f8"/>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 h-full overflow-y-auto md:ml-64 w-full">
+<!-- TopAppBar (Hidden on Mobile, Visible on Desktop) -->
+<header class="hidden md:flex justify-between items-center h-20 px-margin-desktop w-full sticky top-0 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 z-40">
+<div class="flex items-center gap-lg">
+<span class="font-headline-md text-headline-md font-bold text-primary">WorkOutApp</span>
+<nav class="flex gap-md ml-lg">
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-secondary transition-colors" href="#">Workouts</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-secondary transition-colors" href="#">Active Session</a>
+</nav>
+</div>
+<div class="flex items-center gap-md">
+<button class="font-label-caps text-label-caps bg-primary text-on-primary px-4 py-2 rounded flex items-center gap-2 hover:bg-primary/90 transition-colors">
+                    Create New
+                </button>
+<button class="text-on-surface-variant hover:text-secondary transition-colors w-10 h-10 flex items-center justify-center">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-secondary transition-colors w-10 h-10 flex items-center justify-center">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<img class="w-10 h-10 rounded-full object-cover cursor-pointer" data-alt="A small, circular avatar portrait of a focused athlete with a minimalist, high-contrast light mode background. The portrait should reflect the refined, elite Nordic Athletic aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCA9Q_X4o9eufuqmep8mK4Xobm5uhKWBqNsMs_1nJNc6ru11XTLv88QITFV797gUgK2WmmZ1st3689LWSGXiWIxOe3lKNefGLdExkjA4xzU0g_czlC2jYt2aVQpKKxP6qvoOjLTCDBe9NqaHBIpKJE-Wh1QEyioRLotHcSRZ7BWlkADvccL_bUbntLqSHe4F7_ymzqfeO-KJZlZuAt2FCGQscIT_RYAnamk4VA5S4zn92ervyGs0NDiMv211zOkVLQ6n5qUymXhA-o"/>
+</div>
+</header>
+<!-- Canvas -->
+<div class="p-margin-mobile md:p-margin-desktop max-w-7xl mx-auto space-y-lg">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-sm mb-lg">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-1">Performance Stats</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Last 30 Days Overview</p>
+</div>
+<div class="flex gap-sm">
+<button class="px-4 py-2 border border-outline rounded font-label-caps text-label-caps text-on-surface hover:bg-surface-variant transition-colors">Export CSV</button>
+<button class="px-4 py-2 bg-primary text-on-primary rounded font-label-caps text-label-caps hover:bg-primary/90 transition-colors">Detailed View</button>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-lg">
+<!-- Volume Chart (Spans 8 columns) -->
+<div class="md:col-span-8 glass-card rounded-xl p-md flex flex-col h-96 ambient-shadow">
+<div class="flex justify-between items-center mb-md">
+<h3 class="font-headline-md text-headline-md text-on-surface">Volume per Week</h3>
+<span class="font-data-sm text-data-sm text-secondary-container">kg lifted</span>
+</div>
+<div class="flex-1 w-full bg-surface-container-lowest rounded-lg border border-outline-variant/30 flex items-end p-sm gap-2 relative overflow-hidden">
+<!-- Simulated Bar Chart -->
+<div class="w-full h-[60%] bg-primary-fixed-dim rounded-t hover:bg-primary-fixed transition-colors relative group">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-tertiary text-on-tertiary font-data-sm text-data-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">12.4k</div>
+</div>
+<div class="w-full h-[75%] bg-primary-fixed-dim rounded-t hover:bg-primary-fixed transition-colors relative group">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-tertiary text-on-tertiary font-data-sm text-data-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">15.2k</div>
+</div>
+<div class="w-full h-[40%] bg-primary-fixed-dim rounded-t hover:bg-primary-fixed transition-colors relative group">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-tertiary text-on-tertiary font-data-sm text-data-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">8.1k</div>
+</div>
+<div class="w-full h-[90%] bg-primary rounded-t relative group">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-tertiary text-on-tertiary font-data-sm text-data-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">18.5k</div>
+</div>
+</div>
+<div class="flex justify-between mt-2 font-data-sm text-data-sm text-on-surface-variant px-sm">
+<span>Wk 1</span><span>Wk 2</span><span>Wk 3</span><span>Wk 4</span>
+</div>
+</div>
+<!-- Average Strain (Spans 4 columns) -->
+<div class="md:col-span-4 glass-card rounded-xl p-md flex flex-col h-96 ambient-shadow justify-between">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Average Strain</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">RPE Focus</p>
+</div>
+<div class="flex-1 flex items-center justify-center">
+<!-- Simulated Donut/Gauge -->
+<div class="relative w-48 h-48 rounded-full border-[16px] border-surface-variant flex items-center justify-center">
+<!-- SVG overlay for the 'active' part of gauge could go here, simulating with CSS clip for now -->
+<div class="absolute inset-0 rounded-full border-[16px] border-secondary-container rounded-full" style="clip-path: polygon(0 0, 100% 0, 100% 70%, 0 70%); transform: rotate(45deg);"></div>
+<div class="text-center z-10">
+<span class="block font-display-timer-mobile text-display-timer-mobile text-primary">8.2</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Avg RPE</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Muscle Map (Spans 5 columns) -->
+<div class="md:col-span-5 glass-card rounded-xl p-md h-[400px] ambient-shadow flex flex-col">
+<div class="flex justify-between items-center mb-md">
+<h3 class="font-headline-md text-headline-md text-on-surface">Muscle Map</h3>
+<span class="material-symbols-outlined text-on-surface-variant">body_system</span>
+</div>
+<div class="flex-1 bg-surface-container-lowest rounded-lg border border-outline-variant/30 flex items-center justify-center overflow-hidden relative">
+<img class="object-contain h-full p-4 opacity-80 mix-blend-multiply" data-alt="A clean, minimalist 2D wireframe illustration of a human muscular system front and back, styled in slate and cream tones. Specific muscle groups like the quadriceps and chest are highlighted softly in terracotta orange to indicate workout focus areas. The style is highly technical, precise, and belongs to a premium athletic dashboard." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAokddlkdOPOOuCqEtzbZaYp5a6t7QSXs6hkr4uWp874hqEoU-gi051-c16l5FLm5hU4KcvKwPKxE8glT4XOK3_qV9AViEv2kOb79Lh72oW7kBExJtZTcYgSJip45d01ZaX7XpAEwKpDSyP2ZW4GwuOp9TW4YbHrUZkOR0UY0DtvMd3JMmhSnpto2cJU-3_XNPdr3hmU3DI3GoIba5-_AqIaGNmxWZUfRcnCY1_zKfm4j08ZflA8ouJczm6bn-IXSajb_wz7YKFhUk"/>
+</div>
+</div>
+<!-- Workout Consistency & PRs (Spans 7 columns) -->
+<div class="md:col-span-7 flex flex-col gap-lg">
+<!-- Consistency Heatmap -->
+<div class="glass-card rounded-xl p-md h-48 ambient-shadow flex flex-col">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-sm">Consistency</h3>
+<div class="flex-1 grid grid-cols-7 gap-1 auto-rows-fr">
+<!-- Simulate heatmap squares -->
+<script>
+                                 for(let i=0; i<28; i++) {
+                                     let intensity = Math.random();
+                                     let bgClass = 'bg-surface-variant';
+                                     if(intensity > 0.8) bgClass = 'bg-primary';
+                                     else if(intensity > 0.4) bgClass = 'bg-primary/50';
+                                     
+                                     document.write(`<div class="${bgClass} rounded-sm w-full h-full opacity-80 hover:opacity-100 transition-opacity"></div>`);
+                                 }
+                             </script>
+</div>
+<div class="flex justify-between mt-2 font-data-sm text-data-sm text-on-surface-variant">
+<span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+</div>
+</div>
+<!-- Personal Records List -->
+<div class="glass-card rounded-xl p-md flex-1 ambient-shadow flex flex-col">
+<div class="flex justify-between items-center mb-md border-b border-outline-variant/30 pb-sm">
+<h3 class="font-headline-md text-headline-md text-on-surface">Personal Records</h3>
+<button class="font-label-caps text-label-caps text-secondary-container hover:text-secondary transition-colors">View All</button>
+</div>
+<div class="flex-1 flex flex-col gap-sm overflow-y-auto">
+<div class="flex justify-between items-center p-sm bg-surface-container-lowest rounded border border-outline-variant/30 hover:border-primary-fixed transition-colors">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded bg-surface-variant flex items-center justify-center text-primary font-bold font-data-sm text-data-sm">DL</div>
+<div>
+<p class="font-body-md text-body-md font-bold text-on-surface">Deadlift</p>
+<p class="font-data-sm text-data-sm text-on-surface-variant">1RM</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-data-lg text-data-lg text-primary">185 kg</p>
+<p class="font-data-sm text-data-sm text-secondary-container flex items-center gap-1 justify-end"><span class="material-symbols-outlined text-[14px]">arrow_upward</span> 5kg</p>
+</div>
+</div>
+<div class="flex justify-between items-center p-sm bg-surface-container-lowest rounded border border-outline-variant/30 hover:border-primary-fixed transition-colors">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded bg-surface-variant flex items-center justify-center text-primary font-bold font-data-sm text-data-sm">SQ</div>
+<div>
+<p class="font-body-md text-body-md font-bold text-on-surface">Back Squat</p>
+<p class="font-data-sm text-data-sm text-on-surface-variant">3RM</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-data-lg text-data-lg text-primary">150 kg</p>
+<p class="font-data-sm text-data-sm text-on-surface-variant flex items-center gap-1 justify-end">-</p>
+</div>
+</div>
+<div class="flex justify-between items-center p-sm bg-surface-container-lowest rounded border border-outline-variant/30 hover:border-primary-fixed transition-colors">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded bg-surface-variant flex items-center justify-center text-primary font-bold font-data-sm text-data-sm">BP</div>
+<div>
+<p class="font-body-md text-body-md font-bold text-on-surface">Bench Press</p>
+<p class="font-data-sm text-data-sm text-on-surface-variant">5RM</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-data-lg text-data-lg text-primary">100 kg</p>
+<p class="font-data-sm text-data-sm text-secondary-container flex items-center gap-1 justify-end"><span class="material-symbols-outlined text-[14px]">arrow_upward</span> 2.5kg</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

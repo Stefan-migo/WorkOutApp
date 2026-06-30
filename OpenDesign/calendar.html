@@ -1,0 +1,453 @@
+ <!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WorkOutApp - Calendar</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary": "#ffffff",
+                      "secondary-fixed-dim": "#ffb59d",
+                      "tertiary-fixed-dim": "#c4c7c9",
+                      "on-primary-fixed": "#111c2d",
+                      "tertiary-fixed": "#e0e3e5",
+                      "surface-container-highest": "#d3e4fe",
+                      "surface-container": "#e5eeff",
+                      "error": "#ba1a1a",
+                      "on-error-container": "#93000a",
+                      "on-tertiary-fixed": "#191c1e",
+                      "tertiary": "#111516",
+                      "background": "#f8f9ff",
+                      "on-primary": "#ffffff",
+                      "surface-tint": "#545f73",
+                      "error-container": "#ffdad6",
+                      "primary-fixed": "#d8e3fb",
+                      "outline-variant": "#c5c6cd",
+                      "inverse-on-surface": "#eaf1ff",
+                      "secondary": "#ac3400",
+                      "on-surface": "#0b1c30",
+                      "on-background": "#0b1c30",
+                      "on-tertiary": "#ffffff",
+                      "surface-bright": "#f8f9ff",
+                      "surface": "#f8f9ff",
+                      "on-surface-variant": "#45474c",
+                      "inverse-surface": "#213145",
+                      "primary": "#091426",
+                      "surface-container-low": "#eff4ff",
+                      "on-secondary-fixed": "#390c00",
+                      "on-primary-container": "#8590a6",
+                      "inverse-primary": "#bcc7de",
+                      "primary-container": "#1e293b",
+                      "on-secondary-fixed-variant": "#832600",
+                      "outline": "#75777d",
+                      "on-error": "#ffffff",
+                      "surface-container-high": "#dce9ff",
+                      "on-tertiary-fixed-variant": "#444749",
+                      "tertiary-container": "#26292b",
+                      "surface-container-lowest": "#ffffff",
+                      "on-tertiary-container": "#8d9092",
+                      "on-primary-fixed-variant": "#3c475a",
+                      "surface-variant": "#d3e4fe",
+                      "secondary-container": "#fd6b36",
+                      "on-secondary-container": "#5d1900",
+                      "secondary-fixed": "#ffdbd0",
+                      "primary-fixed-dim": "#bcc7de",
+                      "surface-dim": "#cbdbf5"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-mobile": "20px",
+                      "xl": "32px",
+                      "margin-desktop": "40px",
+                      "xs": "4px",
+                      "md": "16px",
+                      "gutter": "16px",
+                      "lg": "24px",
+                      "base": "4px",
+                      "sm": "8px"
+              },
+              "fontFamily": {
+                      "display-timer": [
+                              "JetBrains Mono"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "data-lg": [
+                              "JetBrains Mono"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "display-timer-mobile": [
+                              "JetBrains Mono"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "data-sm": [
+                              "JetBrains Mono"
+                      ],
+                      "label-caps": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "display-timer": [
+                              "84px",
+                              {
+                                      "lineHeight": "100px",
+                                      "letterSpacing": "-0.04em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "data-lg": [
+                              "20px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display-timer-mobile": [
+                              "64px",
+                              {
+                                      "lineHeight": "72px",
+                                      "letterSpacing": "-0.04em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "data-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid #E2E8F0;
+        }
+        .chip-hiit { background-color: #f1f5f9; color: #0b1c30; border-left: 4px solid #fd6b36; }
+        .chip-strength { background-color: #f1f5f9; color: #0b1c30; border-left: 4px solid #091426; }
+        .chip-recovery { background-color: #f1f5f9; color: #0b1c30; border-left: 4px solid #bcc7de; }
+        
+        .draggable-workout { cursor: grab; }
+        .draggable-workout:active { cursor: grabbing; opacity: 0.8; }
+      </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col md:flex-row overflow-x-hidden">
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col h-full fixed left-0 top-0 w-64 bg-primary text-on-primary py-lg px-md shadow-sm z-50">
+<div class="mb-xl px-sm">
+<h1 class="font-headline-md text-headline-md font-bold text-surface">Nordic Athlete</h1>
+<p class="font-body-md text-body-md text-on-primary-fixed-variant mt-xs">Elite Performance</p>
+</div>
+<div class="flex-1 flex flex-col gap-sm">
+<a class="flex items-center gap-md p-sm rounded-DEFAULT text-on-primary-fixed-variant hover:bg-primary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+<span class="font-label-caps text-label-caps">Dashboard</span>
+</a>
+<a class="flex items-center gap-md p-sm rounded-DEFAULT text-on-primary-fixed-variant hover:bg-primary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">fitness_center</span>
+<span class="font-label-caps text-label-caps">Workouts</span>
+</a>
+<a class="flex items-center gap-md p-sm rounded-DEFAULT text-on-primary-fixed-variant hover:bg-primary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">reorder</span>
+<span class="font-label-caps text-label-caps">Sequences</span>
+</a>
+<a class="flex items-center gap-md p-sm rounded-DEFAULT text-on-primary-fixed-variant hover:bg-primary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings_accessibility</span>
+<span class="font-label-caps text-label-caps">Exercises</span>
+</a>
+<a class="flex items-center gap-md p-sm rounded-DEFAULT text-secondary-container font-bold hover:bg-primary-container transition-colors duration-200 opacity-90 transition-opacity" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+<span class="font-label-caps text-label-caps">Calendar</span>
+</a>
+<a class="flex items-center gap-md p-sm rounded-DEFAULT text-on-primary-fixed-variant hover:bg-primary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">history</span>
+<span class="font-label-caps text-label-caps">History</span>
+</a>
+<a class="flex items-center gap-md p-sm rounded-DEFAULT text-on-primary-fixed-variant hover:bg-primary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">monitoring</span>
+<span class="font-label-caps text-label-caps">Stats</span>
+</a>
+<a class="flex items-center gap-md p-sm rounded-DEFAULT text-on-primary-fixed-variant hover:bg-primary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+<span class="font-label-caps text-label-caps">Settings</span>
+</a>
+</div>
+<div class="mt-auto">
+<a class="flex items-center gap-md p-sm rounded-DEFAULT text-on-primary-fixed-variant hover:bg-primary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">logout</span>
+<span class="font-label-caps text-label-caps">Logout</span>
+</a>
+<div class="mt-md flex items-center gap-sm px-sm">
+<img class="w-10 h-10 rounded-full object-cover border-2 border-primary-container" data-alt="A small circular avatar of a professional athlete with intense focus, set against a dark gray background in a high-contrast style. A high-end minimal aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtT9NHmyHBgEXpt8iWzAoxDU44iEcgC6q915D4MHhh74c91KdGc9FnL5mr0L2k7k478qUE-tykc3F6xvKA37LfBRhRtbkhMI7SZggHGooS8CoFcD_RwmQHakR-7v0LRJrekU9-_mofG9Ewkt4z1xL3jnfRBWOZSuJyKtkKFrItw5U2nbpE2AoERhKjsp2xlzBhLc8COWIcC3IqPNiSHMvVMCnvjhbcC4vg2P-EAl8GAyI3iaBD7ednB7Va9-IQRhODi_jK2jtwRaY"/>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col md:ml-64 w-full md:w-[calc(100%-16rem)] min-h-screen">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center h-20 px-margin-mobile md:px-margin-desktop sticky top-0 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 z-40">
+<div class="flex items-center gap-md">
+<h2 class="font-headline-md text-headline-md font-bold text-primary hidden md:block">WorkOutApp</h2>
+<!-- View Toggle -->
+<div class="flex bg-surface-container-low rounded-lg p-xs ml-md">
+<button class="px-md py-xs rounded-DEFAULT bg-surface text-primary font-label-caps text-label-caps shadow-sm">Weekly</button>
+<button class="px-md py-xs rounded-DEFAULT text-on-surface-variant font-label-caps text-label-caps hover:text-primary transition-colors">Monthly</button>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="hidden md:flex items-center gap-xs px-md py-sm bg-primary-container text-on-primary rounded-DEFAULT font-label-caps text-label-caps hover:bg-primary transition-colors shadow-[0_4px_20px_rgba(30,41,59,0.1)]">
+                    Create New
+                </button>
+<div class="flex items-center gap-sm text-on-surface-variant">
+<button class="p-xs hover:text-secondary transition-colors"><span class="material-symbols-outlined">notifications</span></button>
+<button class="p-xs hover:text-secondary transition-colors"><span class="material-symbols-outlined">help_outline</span></button>
+</div>
+<img class="w-8 h-8 rounded-full object-cover md:hidden" data-alt="User avatar placeholder in top nav. Professional headshot with clean lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtJxcIhslsYqKC8JbbJDqNGSNV6bA0cqbJwa0HJyQ5tQ4S0MGZkGyYaLOgThj-g2TY1Zc0vNOrn1gknQCEWjrrJ673ZIyDZIYVYy-xrhZdYCiibPlnKj2_6-NPBiwh2M9Y4EYegzrEptWg2r5FhmuN2CkAxEfXEdKsn1OEaCExCnNXuUHqUsO_1-J7taof7z0vxcfXUQfV9J8aNlztEZ3UDJbzy1_lT7i53UqDteAGTnSEoA6xpSzBsq0IreJe4t7Y_aTWwhyC-4Q"/>
+</div>
+</header>
+<!-- Content Area -->
+<div class="flex-1 p-margin-mobile md:p-margin-desktop flex flex-col md:flex-row gap-lg">
+<!-- Calendar Grid (Weekly) -->
+<div class="flex-1">
+<div class="flex items-center justify-between mb-lg">
+<div class="flex items-center gap-md">
+<button class="p-xs rounded-full hover:bg-surface-container transition-colors"><span class="material-symbols-outlined">chevron_left</span></button>
+<h3 class="font-headline-md text-headline-md font-bold">Oct 23 - Oct 29</h3>
+<button class="p-xs rounded-full hover:bg-surface-container transition-colors"><span class="material-symbols-outlined">chevron_right</span></button>
+</div>
+</div>
+<div class="flex flex-col lg:flex-row gap-lg h-full">
+<!-- Left Side: Week Timeline -->
+<div class="flex-1 flex flex-col gap-md overflow-y-auto pr-sm">
+<!-- Monday Row -->
+<div class="flex items-center gap-md p-md bg-surface-container-lowest border border-outline-variant/20 rounded-lg hover:border-primary transition-colors cursor-pointer group">
+<div class="flex flex-col items-center justify-center w-16 h-16 bg-surface-container-low rounded-lg">
+<span class="font-label-caps text-label-caps text-on-surface-variant">MON</span>
+<span class="font-headline-md text-headline-md font-bold">23</span>
+</div>
+<div class="flex-1">
+<h4 class="font-body-md text-body-md font-bold">Heavy Pull Session</h4>
+<div class="flex gap-xs mt-xs">
+<span class="px-sm py-xs bg-primary text-on-primary text-[10px] font-bold rounded-full uppercase tracking-wider">Strength</span>
+<span class="text-data-sm text-data-sm text-on-surface-variant">60 min</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary">chevron_right</span>
+</div>
+<!-- Tuesday Row (Empty) -->
+<div class="flex items-center gap-md p-md bg-surface-container-lowest/50 border border-dashed border-outline-variant/30 rounded-lg hover:border-primary transition-colors cursor-pointer group">
+<div class="flex flex-col items-center justify-center w-16 h-16 bg-surface-container-low/50 rounded-lg">
+<span class="font-label-caps text-label-caps text-on-surface-variant">TUE</span>
+<span class="font-headline-md text-headline-md font-bold">24</span>
+</div>
+<div class="flex-1">
+<span class="text-on-surface-variant italic">Rest Day / Active Recovery</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary">add_circle</span>
+</div>
+<!-- Wednesday Row (Active) -->
+<div class="flex items-center gap-md p-md bg-primary-container border-2 border-primary rounded-lg shadow-lg">
+<div class="flex flex-col items-center justify-center w-16 h-16 bg-primary text-on-primary rounded-lg">
+<span class="font-label-caps text-label-caps opacity-80">WED</span>
+<span class="font-headline-md text-headline-md font-bold">25</span>
+</div>
+<div class="flex-1">
+<h4 class="font-body-md text-body-md font-bold text-on-primary">MetCon V.2</h4>
+<div class="flex gap-xs mt-xs">
+<span class="px-sm py-xs bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded-full uppercase tracking-wider">HIIT</span>
+<span class="text-data-sm text-data-sm text-on-primary-container">45 min</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-primary">check_circle</span>
+</div>
+<!-- Thursday Row -->
+<div class="flex items-center gap-md p-md bg-surface-container-lowest border border-outline-variant/20 rounded-lg hover:border-primary transition-colors cursor-pointer group">
+<div class="flex flex-col items-center justify-center w-16 h-16 bg-surface-container-low rounded-lg">
+<span class="font-label-caps text-label-caps text-on-surface-variant">THU</span>
+<span class="font-headline-md text-headline-md font-bold">26</span>
+</div>
+<div class="flex-1">
+<h4 class="font-body-md text-body-md font-bold">Active Rec.</h4>
+<div class="flex gap-xs mt-xs">
+<span class="px-sm py-xs bg-primary-fixed-dim text-on-primary-fixed-variant text-[10px] font-bold rounded-full uppercase tracking-wider">Recovery</span>
+<span class="text-data-sm text-data-sm text-on-surface-variant">30 min</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary">chevron_right</span>
+</div>
+</div>
+<!-- Right Side: Day Focus Panel -->
+<div class="w-full lg:w-96 bg-surface-container-low rounded-lg p-lg flex flex-col gap-lg border border-outline-variant/20">
+<div class="flex justify-between items-start">
+<div>
+<span class="font-label-caps text-label-caps text-primary font-bold">Today's Focus</span>
+<h3 class="font-headline-md text-headline-md font-bold mt-xs">MetCon V.2</h3>
+</div>
+<span class="px-md py-xs bg-secondary-container text-on-secondary-container font-label-caps text-label-caps rounded-full">HIIT</span>
+</div>
+<div class="flex flex-col gap-md">
+<div class="flex items-center gap-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">timer</span>
+<span class="font-data-sm text-data-sm">45 Minutes Total</span>
+</div>
+<div class="flex flex-col gap-sm">
+<h5 class="font-label-caps text-label-caps text-on-surface-variant border-b border-outline-variant/30 pb-xs">Exercise List</h5>
+<ul class="flex flex-col gap-xs">
+<li class="flex justify-between text-body-md text-sm">
+<span>Kettlebell Swings</span>
+<span class="font-data-sm">4 x 15</span>
+</li>
+<li class="flex justify-between text-body-md text-sm">
+<span>Burpees</span>
+<span class="font-data-sm">4 x 12</span>
+</li>
+<li class="flex justify-between text-body-md text-sm">
+<span>Box Jumps</span>
+<span class="font-data-sm">4 x 10</span>
+</li>
+<li class="flex justify-between text-body-md text-sm">
+<span>Plank Hold</span>
+<span class="font-data-sm">4 x 60s</span>
+</li>
+</ul>
+</div>
+</div>
+<button class="mt-auto w-full py-md bg-primary text-on-primary rounded-lg font-label-caps text-label-caps font-bold hover:bg-primary/90 transition-colors shadow-lg flex items-center justify-center gap-sm">
+<span class="material-symbols-outlined">play_arrow</span>
+      Start Workout
+    </button>
+</div>
+</div>
+</div>
+<!-- Sidebar Upcoming -->
+<aside class="w-full md:w-80 flex flex-col gap-md">
+<div class="bg-surface-container-lowest border border-outline-variant/20 rounded-lg p-md">
+<h4 class="font-headline-md text-headline-md font-bold mb-md text-sm border-b border-outline-variant/20 pb-sm">Upcoming</h4>
+<div class="flex flex-col gap-md">
+<!-- Upcoming item 1 -->
+<div class="flex gap-sm items-start">
+<div class="w-12 h-12 bg-surface-container-low rounded flex items-center justify-center flex-shrink-0 text-secondary-container">
+<span class="font-data-lg text-data-lg font-bold">25</span>
+</div>
+<div>
+<span class="block font-body-md text-body-md font-bold text-sm">MetCon V.2</span>
+<span class="block font-data-sm text-data-sm text-on-surface-variant mt-xs">HIIT • 45 min</span>
+</div>
+</div>
+<!-- Upcoming item 2 -->
+<div class="flex gap-sm items-start">
+<div class="w-12 h-12 bg-surface-container-lowest border border-outline-variant/20 rounded flex items-center justify-center flex-shrink-0 text-on-surface">
+<span class="font-data-lg text-data-lg font-bold">26</span>
+</div>
+<div>
+<span class="block font-body-md text-body-md font-bold text-sm">Active Rec.</span>
+<span class="block font-data-sm text-data-sm text-on-surface-variant mt-xs">Mobility • 30 min</span>
+</div>
+</div>
+<!-- Upcoming item 3 -->
+<div class="flex gap-sm items-start">
+<div class="w-12 h-12 bg-surface-container-lowest border border-outline-variant/20 rounded flex items-center justify-center flex-shrink-0 text-on-surface">
+<span class="font-data-lg text-data-lg font-bold">27</span>
+</div>
+<div>
+<span class="block font-body-md text-body-md font-bold text-sm">Heavy Push</span>
+<span class="block font-data-sm text-data-sm text-on-surface-variant mt-xs">Strength • 60 min</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Mini motivational card -->
+<div class="glass-card rounded-lg p-md relative overflow-hidden">
+<div class="relative z-10">
+<span class="material-symbols-outlined text-primary mb-sm block">insights</span>
+<p class="font-body-md text-body-md font-medium text-sm text-primary">On track for a 4-week streak. Maintain focus.</p>
+</div>
+<!-- Decorative subtle background -->
+<div class="absolute -bottom-10 -right-10 opacity-5">
+<span class="material-symbols-outlined" style="font-size: 120px;">fitness_center</span>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only - Conceptual, omitted full implementation for space, focusing on desktop canvas as requested by layout rules) -->
+<nav class="md:hidden fixed bottom-0 w-full bg-surface/90 backdrop-blur-md border-t border-outline-variant/30 flex justify-around p-sm z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+<a class="flex flex-col items-center gap-xs text-on-surface-variant p-sm" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+</a>
+<a class="flex flex-col items-center gap-xs text-on-surface-variant p-sm" href="#">
+<span class="material-symbols-outlined">fitness_center</span>
+</a>
+<a class="flex flex-col items-center gap-xs text-primary font-bold p-sm border-t-2 border-secondary -mt-[1px]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+</a>
+<a class="flex flex-col items-center gap-xs text-on-surface-variant p-sm" href="#">
+<span class="material-symbols-outlined">settings</span>
+</a>
+</nav>
+</body></html>

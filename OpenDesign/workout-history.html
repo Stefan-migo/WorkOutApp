@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Workout History - Nordic Athlete</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#e0e3e5",
+                        "background": "#f8f9ff",
+                        "tertiary": "#111516",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-container": "#8590a6",
+                        "on-background": "#0b1c30",
+                        "on-secondary-fixed-variant": "#832600",
+                        "secondary-fixed-dim": "#ffb59d",
+                        "on-primary-fixed-variant": "#3c475a",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f8f9ff",
+                        "outline": "#75777d",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "on-secondary-container": "#5d1900",
+                        "on-surface-variant": "#45474c",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "surface-container-low": "#eff4ff",
+                        "on-surface": "#0b1c30",
+                        "on-error": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "secondary-container": "#fd6b36",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "primary": "#091426",
+                        "on-tertiary-fixed": "#191c1e",
+                        "on-secondary-fixed": "#390c00",
+                        "outline-variant": "#c5c6cd",
+                        "surface-container": "#e5eeff",
+                        "primary-container": "#1e293b",
+                        "surface-dim": "#cbdbf5",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-variant": "#d3e4fe",
+                        "primary-fixed": "#d8e3fb",
+                        "primary-fixed-dim": "#bcc7de",
+                        "inverse-surface": "#213145",
+                        "tertiary-container": "#26292b",
+                        "surface": "#f8f9ff",
+                        "on-tertiary-container": "#8d9092",
+                        "surface-container-high": "#dce9ff",
+                        "on-primary-fixed": "#111c2d",
+                        "surface-tint": "#545f73",
+                        "inverse-primary": "#bcc7de",
+                        "surface-container-highest": "#d3e4fe",
+                        "secondary-fixed": "#ffdbd0",
+                        "secondary": "#ac3400",
+                        "on-error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "20px",
+                        "sm": "8px",
+                        "margin-desktop": "40px",
+                        "base": "4px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "xs": "4px",
+                        "xl": "32px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "data-sm": ["JetBrains Mono"],
+                        "data-lg": ["JetBrains Mono"],
+                        "display-timer": ["JetBrains Mono"],
+                        "headline-md": ["Inter"],
+                        "display-timer-mobile": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "data-sm": ["14px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "data-lg": ["20px", { "lineHeight": "24px", "fontWeight": "500" }],
+                        "display-timer": ["84px", { "lineHeight": "100px", "letterSpacing": "-0.04em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-timer-mobile": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.04em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #f8f9ff; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid #E2E8F0;
+        }
+        .interval-timeline-bar {
+            background: linear-gradient(90deg, #1e293b 0%, #1e293b 30%, #e0e3e5 30%, #e0e3e5 40%, #1e293b 40%, #1e293b 80%, #ac3400 80%, #ac3400 100%);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md antialiased overflow-x-hidden min-h-screen flex">
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col h-full fixed left-0 top-0 w-64 bg-primary dark:bg-primary py-lg px-md shadow-sm z-50">
+<div class="flex items-center gap-4 mb-xl px-sm">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="A clean, minimalist abstract logo representing a stylized mountain peak or athlete in motion, using stark white lines against a deep slate background. The image should be simple, iconic, and convey high performance and elite athleticism, fitting for a sophisticated fitness app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7oJmVcDG6DX6CgCIUamCYab6HhTFs9KFiE7LMZDcBbg6OiNO4ylRIt1mK9NOKoAC01njWIieXMBqgmg4vsrzhAiBb8aQPMGcb8otdlqc-xcoY0zycHUSKq5hZcIyyBot_z4xbL7JOIw7EoCuNQ4H3s9EXtnhOfgh18xQUqLsxctqwpoeXRdFK6PWvQte67rbcwUYPO3GkcZlkwqpA9Gn4HyhhskmeE_2segcBSWEfluumTKRgciDBfeqEZMY8jaZDuZzOpE50dwI"/>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-surface dark:text-surface">Nordic Athlete</h1>
+<p class="font-label-caps text-label-caps text-on-primary-container">Elite Performance</p>
+</div>
+</div>
+<ul class="flex-1 space-y-2">
+<li>
+<a class="flex items-center gap-3 px-sm py-2 rounded-lg text-on-primary-fixed-variant dark:text-on-primary-container hover:bg-primary-container dark:hover:bg-tertiary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-caps text-label-caps">Dashboard</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-sm py-2 rounded-lg text-on-primary-fixed-variant dark:text-on-primary-container hover:bg-primary-container dark:hover:bg-tertiary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">fitness_center</span>
+<span class="font-label-caps text-label-caps">Workouts</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-sm py-2 rounded-lg text-on-primary-fixed-variant dark:text-on-primary-container hover:bg-primary-container dark:hover:bg-tertiary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">reorder</span>
+<span class="font-label-caps text-label-caps">Sequences</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-sm py-2 rounded-lg text-on-primary-fixed-variant dark:text-on-primary-container hover:bg-primary-container dark:hover:bg-tertiary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">settings_accessibility</span>
+<span class="font-label-caps text-label-caps">Exercises</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-sm py-2 rounded-lg text-on-primary-fixed-variant dark:text-on-primary-container hover:bg-primary-container dark:hover:bg-tertiary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-label-caps text-label-caps">Calendar</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-sm py-2 rounded-lg text-secondary-container dark:text-secondary-fixed-dim font-bold opacity-90 transition-opacity bg-primary-container dark:bg-tertiary-container" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-label-caps text-label-caps">History</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-sm py-2 rounded-lg text-on-primary-fixed-variant dark:text-on-primary-container hover:bg-primary-container dark:hover:bg-tertiary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="font-label-caps text-label-caps">Stats</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-sm py-2 rounded-lg text-on-primary-fixed-variant dark:text-on-primary-container hover:bg-primary-container dark:hover:bg-tertiary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-caps text-label-caps">Settings</span>
+</a>
+</li>
+</ul>
+<div class="mt-auto">
+<a class="flex items-center gap-3 px-sm py-2 rounded-lg text-on-primary-fixed-variant dark:text-on-primary-container hover:bg-primary-container dark:hover:bg-tertiary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-caps text-label-caps">Logout</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 md:ml-64 flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="hidden md:flex justify-between items-center h-20 px-margin-desktop w-full docked top-0 sticky bg-surface/80 dark:bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 z-40">
+<div class="flex items-center gap-6">
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">WorkOutApp</span>
+<nav class="flex gap-4 ml-8">
+<a class="font-label-caps text-label-caps text-on-surface-variant dark:text-on-surface-variant hover:text-secondary dark:hover:text-secondary-fixed-dim transition-colors py-4" href="#">Workouts</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant dark:text-on-surface-variant hover:text-secondary dark:hover:text-secondary-fixed-dim transition-colors py-4" href="#">Active Session</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="font-label-caps text-label-caps px-4 py-2 rounded-full bg-primary-container text-on-primary hover:bg-primary transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">add</span>
+                    Create New
+                </button>
+<button class="text-on-surface hover:text-secondary transition-colors p-2 rounded-full hover:bg-surface-variant">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface hover:text-secondary transition-colors p-2 rounded-full hover:bg-surface-variant">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<img class="w-10 h-10 rounded-full border border-outline-variant/30 object-cover ml-2" data-alt="A small, circular avatar portrait of an athletic individual looking focused, in sharp black and white with high contrast, against a clean light grey background. Reflects a serious, disciplined tone." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWptT_6dU4LvXN6F5CLUvAvYbBlQkOXmc8KlWOBNC-Zi1_gq-rxQelVjZ1qrqBZMS1KlIKB9SArfwh9cdaXXqInhobsU_kM4WL0-Il4mr_b4N8qsrVMNhBGT54CITTU6wmkF3U9o7NR1SjWQeFLxp2AKfjuXTlQIiMMW8N6RWprgbyym1cA2lNRlETpKEF8uP-oBA2hrGa9lkwQxjnH3qX3pYfvqiCb-azMmGaCgc0l763z2146lupM592WJEsv2zpT7lDKRvZvG4"/>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 p-margin-mobile md:p-margin-desktop bg-background">
+<div class="max-w-5xl mx-auto space-y-lg">
+<!-- Header & Filters -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-xl">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-background mb-2">History</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Review your past performance and metrics.</p>
+</div>
+<div class="flex flex-wrap gap-3 items-center w-full md:w-auto">
+<div class="relative flex-1 md:flex-none">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
+<input class="w-full md:w-64 pl-10 pr-4 py-2 rounded-lg bg-surface-container-lowest border-outline-variant/30 font-body-md text-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all shadow-sm" placeholder="Search sessions..." type="text"/>
+</div>
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-lowest border border-outline-variant/30 hover:bg-surface-variant transition-colors shadow-sm">
+<span class="material-symbols-outlined text-sm text-on-surface-variant">filter_list</span>
+<span class="font-label-caps text-label-caps text-on-surface">Filters</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-lowest border border-outline-variant/30 hover:bg-surface-variant transition-colors shadow-sm">
+<span class="material-symbols-outlined text-sm text-on-surface-variant">calendar_month</span>
+<span class="font-label-caps text-label-caps text-on-surface">This Month</span>
+<span class="material-symbols-outlined text-xs text-on-surface-variant ml-1">expand_more</span>
+</button>
+</div>
+</div>
+<!-- History List -->
+<div class="space-y-4">
+<!-- Item 1 -->
+<div class="glass-card rounded-xl p-md md:p-lg flex flex-col md:flex-row gap-6 hover:shadow-md transition-shadow duration-300 group cursor-pointer relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="flex-1 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+<!-- Date & Title -->
+<div class="col-span-1 md:col-span-4 flex gap-4 items-center">
+<div class="bg-surface-container w-12 h-12 rounded-lg flex flex-col items-center justify-center border border-outline-variant/20 flex-shrink-0">
+<span class="font-label-caps text-label-caps text-on-surface-variant leading-none">OCT</span>
+<span class="font-data-lg text-data-lg text-on-surface leading-none mt-1">24</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-background text-lg leading-tight group-hover:text-primary transition-colors">Nordic V02 Max Protocol</h3>
+<div class="flex gap-2 mt-2">
+<span class="px-2 py-1 bg-slate-100 rounded-full font-label-caps text-[10px] text-slate-700">HIIT</span>
+<span class="px-2 py-1 bg-slate-100 rounded-full font-label-caps text-[10px] text-slate-700">TREADMILL</span>
+</div>
+</div>
+</div>
+<!-- Metrics -->
+<div class="col-span-1 md:col-span-4 flex justify-between md:justify-around px-0 md:px-4 border-y md:border-y-0 md:border-x border-outline-variant/20 py-4 md:py-0">
+<div class="text-center">
+<p class="font-label-caps text-[10px] text-on-surface-variant mb-1">DURATION</p>
+<p class="font-data-lg text-data-lg text-on-surface">45:00</p>
+</div>
+<div class="text-center">
+<p class="font-label-caps text-[10px] text-on-surface-variant mb-1">AVG HR</p>
+<p class="font-data-lg text-data-lg text-on-surface">164 <span class="text-xs text-on-surface-variant">bpm</span></p>
+</div>
+<div class="text-center">
+<p class="font-label-caps text-[10px] text-on-surface-variant mb-1">LOAD</p>
+<p class="font-data-lg text-data-lg text-on-surface">342</p>
+</div>
+</div>
+<!-- Timeline Preview -->
+<div class="col-span-1 md:col-span-4 flex flex-col justify-center">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-[10px] text-on-surface-variant">ZONE DISTRIBUTION</span>
+<span class="material-symbols-outlined text-outline text-sm opacity-0 group-hover:opacity-100 transition-opacity">arrow_forward</span>
+</div>
+<div class="h-2 w-full rounded-full bg-surface-container-high overflow-hidden flex">
+<div class="h-full bg-slate-400 w-[10%]" title="Zone 1"></div>
+<div class="h-full bg-slate-600 w-[20%]" title="Zone 2"></div>
+<div class="h-full bg-primary-container w-[40%]" title="Zone 3"></div>
+<div class="h-full bg-secondary-container w-[20%]" title="Zone 4"></div>
+<div class="h-full bg-error w-[10%]" title="Zone 5"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="glass-card rounded-xl p-md md:p-lg flex flex-col md:flex-row gap-6 hover:shadow-md transition-shadow duration-300 group cursor-pointer relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-surface-tint"></div>
+<div class="flex-1 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+<!-- Date & Title -->
+<div class="col-span-1 md:col-span-4 flex gap-4 items-center">
+<div class="bg-surface-container w-12 h-12 rounded-lg flex flex-col items-center justify-center border border-outline-variant/20 flex-shrink-0">
+<span class="font-label-caps text-label-caps text-on-surface-variant leading-none">OCT</span>
+<span class="font-data-lg text-data-lg text-on-surface leading-none mt-1">22</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-background text-lg leading-tight group-hover:text-primary transition-colors">Active Recovery</h3>
+<div class="flex gap-2 mt-2">
+<span class="px-2 py-1 bg-slate-100 rounded-full font-label-caps text-[10px] text-slate-700">MOBILITY</span>
+<span class="px-2 py-1 bg-slate-100 rounded-full font-label-caps text-[10px] text-slate-700">BODYWEIGHT</span>
+</div>
+</div>
+</div>
+<!-- Metrics -->
+<div class="col-span-1 md:col-span-4 flex justify-between md:justify-around px-0 md:px-4 border-y md:border-y-0 md:border-x border-outline-variant/20 py-4 md:py-0">
+<div class="text-center">
+<p class="font-label-caps text-[10px] text-on-surface-variant mb-1">DURATION</p>
+<p class="font-data-lg text-data-lg text-on-surface">30:00</p>
+</div>
+<div class="text-center">
+<p class="font-label-caps text-[10px] text-on-surface-variant mb-1">AVG HR</p>
+<p class="font-data-lg text-data-lg text-on-surface">112 <span class="text-xs text-on-surface-variant">bpm</span></p>
+</div>
+<div class="text-center">
+<p class="font-label-caps text-[10px] text-on-surface-variant mb-1">LOAD</p>
+<p class="font-data-lg text-data-lg text-on-surface">45</p>
+</div>
+</div>
+<!-- Timeline Preview -->
+<div class="col-span-1 md:col-span-4 flex flex-col justify-center">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-[10px] text-on-surface-variant">ZONE DISTRIBUTION</span>
+<span class="material-symbols-outlined text-outline text-sm opacity-0 group-hover:opacity-100 transition-opacity">arrow_forward</span>
+</div>
+<div class="h-2 w-full rounded-full bg-surface-container-high overflow-hidden flex">
+<div class="h-full bg-slate-400 w-[60%]" title="Zone 1"></div>
+<div class="h-full bg-slate-600 w-[35%]" title="Zone 2"></div>
+<div class="h-full bg-primary-container w-[5%]" title="Zone 3"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

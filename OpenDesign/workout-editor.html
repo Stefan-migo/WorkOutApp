@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Workout Editor - Nordic Athlete</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-dim": "#cbdbf5",
+                        "on-surface": "#0b1c30",
+                        "primary": "#091426",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "secondary-container": "#fd6b36",
+                        "primary-fixed": "#d8e3fb",
+                        "on-tertiary-container": "#8d9092",
+                        "surface": "#f8f9ff",
+                        "surface-variant": "#d3e4fe",
+                        "background": "#f8f9ff",
+                        "surface-container-high": "#dce9ff",
+                        "on-primary-fixed": "#111c2d",
+                        "on-primary-fixed-variant": "#3c475a",
+                        "tertiary-container": "#26292b",
+                        "on-surface-variant": "#45474c",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed": "#390c00",
+                        "error": "#ba1a1a",
+                        "inverse-on-surface": "#eaf1ff",
+                        "outline-variant": "#c5c6cd",
+                        "tertiary": "#111516",
+                        "surface-bright": "#f8f9ff",
+                        "surface-container-highest": "#d3e4fe",
+                        "secondary": "#ac3400",
+                        "surface-container": "#e5eeff",
+                        "inverse-surface": "#213145",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "outline": "#75777d",
+                        "on-error": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#8590a6",
+                        "primary-fixed-dim": "#bcc7de",
+                        "secondary-fixed-dim": "#ffb59d",
+                        "on-tertiary-fixed": "#191c1e",
+                        "on-error-container": "#93000a",
+                        "inverse-primary": "#bcc7de",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#832600",
+                        "surface-tint": "#545f73",
+                        "secondary-fixed": "#ffdbd0",
+                        "primary-container": "#1e293b",
+                        "surface-container-lowest": "#ffffff",
+                        "on-background": "#0b1c30",
+                        "on-secondary-container": "#5d1900",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#eff4ff",
+                        "tertiary-fixed": "#e0e3e5",
+                        // Custom segment colors requested in prompt
+                        "segment-prepare": "#3b82f6", // Blue
+                        "segment-work": "#10b981",    // Green
+                        "segment-rest": "#ef4444",    // Red
+                        "segment-cooldown": "#8b5cf6" // Purple
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "md": "16px",
+                        "margin-desktop": "40px",
+                        "xs": "4px",
+                        "sm": "8px",
+                        "margin-mobile": "20px",
+                        "gutter": "16px",
+                        "base": "4px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "display-timer-mobile": ["JetBrains Mono"],
+                        "body-md": ["Inter"],
+                        "data-sm": ["JetBrains Mono"],
+                        "label-caps": ["Inter"],
+                        "data-lg": ["JetBrains Mono"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "display-timer": ["JetBrains Mono"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-timer-mobile": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.04em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "data-sm": ["14px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "data-lg": ["20px", { "lineHeight": "24px", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "display-timer": ["84px", { "lineHeight": "100px", "letterSpacing": "-0.04em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .drag-handle {
+            cursor: grab;
+        }
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+        
+        /* Glassmorphism utilities */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid #E2E8F0;
+        }
+        
+        /* Subtle glow for inputs on focus */
+        .input-glow:focus {
+            border-bottom-color: #fd6b36; /* secondary-container / Terracotta */
+            box-shadow: 0 1px 0 0 #fd6b36;
+            outline: none;
+        }
+
+        /* Ambient shadow for elevated elements */
+        .ambient-shadow {
+            box-shadow: 0 4px 20px rgba(30, 41, 59, 0.1);
+        }
+        
+        /* Hide scrollbar for clean lists */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen font-body-md antialiased overflow-x-hidden">
+<!-- App Shell Container -->
+<div class="flex h-screen overflow-hidden">
+<!-- SideNavBar (Desktop Only) -->
+<nav class="hidden md:flex flex-col h-full py-lg px-md w-64 fixed left-0 top-0 bg-primary dark:bg-primary shadow-sm z-50">
+<div class="mb-xl flex items-center gap-sm">
+<img class="w-8 h-8 rounded-full object-cover" data-alt="A minimal, high-contrast black and white abstract geometric logo representing a stylized mountain peak or letter N. The design should be sharp, precise, and exude a sense of elite athletic performance and modern minimalist graphic design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJkldICbe8ahfZnPAHmeDgx-riABKwLDzoAS_jbYGJC134WTHif03lqfZdZDgG_YseqE0PYzu4WBO9ksuJfWASJz-BTVZxT-9bxFxARtyPArwr8NJ9flBUZL4aH76K-uD1VBlbg146Qe-OSkJ6MuyugYFrSILHCWVo42J9e4LDuftB0h4GPm2Am4VpeQtTAba6r76GoYTyDFZHKQpJPvLHg1Bv5D0WhUqGE6Rs5oAyG9iTlxei44UTxucYy607luLaAy1BzK36UFY"/>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-surface dark:text-surface">Nordic Athlete</h1>
+<p class="font-label-caps text-label-caps text-on-primary-fixed-variant uppercase tracking-wider text-[10px]">Elite Performance</p>
+</div>
+</div>
+<ul class="flex-1 space-y-sm">
+<!-- Dashboard -->
+<li>
+<a class="flex items-center gap-md px-sm py-xs rounded text-on-primary-fixed-variant dark:text-on-primary-container hover:bg-primary-container dark:hover:bg-tertiary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-caps text-label-caps uppercase">Dashboard</span>
+</a>
+</li>
+<!-- Workouts (Active State based on Intent: Workout Editor) -->
+<li>
+<a class="flex items-center gap-md px-sm py-xs rounded bg-primary-container/50 text-secondary-container dark:text-secondary-fixed-dim font-bold opacity-90 transition-opacity" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">fitness_center</span>
+<span class="font-label-caps text-label-caps uppercase">Workouts</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-md px-sm py-xs rounded text-on-primary-fixed-variant dark:text-on-primary-container hover:bg-primary-container dark:hover:bg-tertiary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">reorder</span>
+<span class="font-label-caps text-label-caps uppercase">Sequences</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-md px-sm py-xs rounded text-on-primary-fixed-variant dark:text-on-primary-container hover:bg-primary-container dark:hover:bg-tertiary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">settings_accessibility</span>
+<span class="font-label-caps text-label-caps uppercase">Exercises</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-md px-sm py-xs rounded text-on-primary-fixed-variant dark:text-on-primary-container hover:bg-primary-container dark:hover:bg-tertiary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-label-caps text-label-caps uppercase">Calendar</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-md px-sm py-xs rounded text-on-primary-fixed-variant dark:text-on-primary-container hover:bg-primary-container dark:hover:bg-tertiary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-label-caps text-label-caps uppercase">History</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-md px-sm py-xs rounded text-on-primary-fixed-variant dark:text-on-primary-container hover:bg-primary-container dark:hover:bg-tertiary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="font-label-caps text-label-caps uppercase">Stats</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-md px-sm py-xs rounded text-on-primary-fixed-variant dark:text-on-primary-container hover:bg-primary-container dark:hover:bg-tertiary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-caps text-label-caps uppercase">Settings</span>
+</a>
+</li>
+</ul>
+<div class="mt-auto pt-md border-t border-primary-container/30">
+<a class="flex items-center gap-md px-sm py-xs rounded text-on-primary-fixed-variant dark:text-on-primary-container hover:bg-primary-container dark:hover:bg-tertiary-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-caps text-label-caps uppercase">Logout</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col md:ml-64 h-full relative">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center h-20 px-margin-desktop docked full-width top-0 sticky bg-surface/80 dark:bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 flat no shadows z-40">
+<div class="flex items-center gap-lg">
+<!-- Mobile Menu Button (visible only on small screens) -->
+<button class="md:hidden text-on-surface hover:text-secondary transition-colors p-sm -ml-sm">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h2 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed tracking-tight">Interval Builder</h2>
+</div>
+<div class="flex items-center gap-md">
+<!-- Action Buttons -->
+<button class="hidden md:flex items-center gap-xs px-md py-sm rounded border border-outline-variant text-on-surface hover:border-on-surface hover:bg-surface-dim transition-colors font-label-caps text-label-caps uppercase">
+                        Discard
+                    </button>
+<button class="ambient-shadow bg-primary-container text-on-primary font-label-caps text-label-caps uppercase px-lg py-sm rounded flex items-center gap-xs hover:bg-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">save</span>
+                        Save Workout
+                    </button>
+<div class="h-8 w-px bg-outline-variant/30 mx-xs hidden md:block"></div>
+<!-- Trailing Icons -->
+<div class="hidden md:flex items-center gap-sm text-on-surface-variant">
+<button class="p-xs hover:text-secondary dark:hover:text-secondary-fixed-dim transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-xs hover:text-secondary dark:hover:text-secondary-fixed-dim transition-colors">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<img alt="User avatar" class="w-8 h-8 rounded-full object-cover ml-sm border border-outline-variant/30" data-alt="A clean, professional headshot of a focused athlete with a minimalist background, representing a user profile photo in a high-end fitness app. Soft, even lighting, desaturated tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCP_OMkkYtD9GG544wji3TBGBBAc3UsmLGCkE33igJmwonw90lIsD01CBm2xzmfhcXg0VO4Uzd9QxA6Oez2onfO2C41WxbDFg8EwdL4sJLl5-SSTI3tErKXHMIYXvLvErqWk3TzAvQTOZdjgMg69EIb2E-LS3XIL2jY_i80Q_Z4c0gxKmJ_SoR8HOoGTCB11KhQ6nNYRWYBTYpQR6IUj2McQmieKKGONxH2eUAq0_lHkskX-t08arHXfY1IyI1WyFLreyTroeeblpY"/>
+</div>
+</div>
+</header>
+<!-- Editor Canvas -->
+<div class="flex-1 overflow-y-auto no-scrollbar pb-32">
+<div class="max-w-5xl mx-auto px-margin-mobile md:px-margin-desktop py-lg space-y-lg">
+<!-- Header Section: Title and Total Duration -->
+<section class="glass-card rounded-xl p-md flex flex-col md:flex-row justify-between items-start md:items-end gap-lg">
+<div class="w-full md:w-2/3">
+<label class="block font-label-caps text-label-caps text-on-surface-variant mb-xs uppercase tracking-wider">Workout Title</label>
+<input class="w-full bg-transparent border-0 border-b-2 border-outline-variant pb-xs font-headline-lg text-headline-lg text-on-surface input-glow px-0 transition-colors" placeholder="Name your workout..." type="text" value="Morning HIIT Protocol v2"/>
+<div class="flex gap-sm mt-sm">
+<span class="inline-flex items-center gap-xs px-sm py-1 rounded-full bg-surface-dim text-on-surface text-[10px] font-label-caps uppercase tracking-wider">
+<span class="material-symbols-outlined text-[14px]">local_fire_department</span> High Intensity
+                                </span>
+<span class="inline-flex items-center gap-xs px-sm py-1 rounded-full bg-surface-dim text-on-surface text-[10px] font-label-caps uppercase tracking-wider">
+<span class="material-symbols-outlined text-[14px]">timer</span> 45 Min Target
+                                </span>
+</div>
+</div>
+<div class="text-right w-full md:w-auto">
+<span class="block font-label-caps text-label-caps text-on-surface-variant mb-xs uppercase tracking-wider">Est. Duration</span>
+<div class="font-display-timer-mobile text-display-timer-mobile text-primary tracking-tighter">
+                                32:45
+                            </div>
+</div>
+</section>
+<!-- Visual Timeline -->
+<section class="space-y-sm">
+<div class="flex justify-between items-center px-xs">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Timeline Overview</span>
+<span class="font-data-sm text-data-sm text-on-surface-variant">12 Intervals</span>
+</div>
+<div class="h-4 w-full bg-surface-dim rounded-full overflow-hidden flex shadow-inner">
+<!-- Proportional segments -->
+<div class="h-full bg-segment-prepare" style="width: 10%;" title="Prepare: 3:00"></div>
+<!-- Cycle 1 (Work/Rest x4) -->
+<div class="h-full bg-segment-work" style="width: 12%;" title="Work: 4:00"></div>
+<div class="h-full bg-segment-rest" style="width: 4%;" title="Rest: 1:00"></div>
+<div class="h-full bg-segment-work" style="width: 12%;" title="Work: 4:00"></div>
+<div class="h-full bg-segment-rest" style="width: 4%;" title="Rest: 1:00"></div>
+<div class="h-full bg-segment-work" style="width: 12%;" title="Work: 4:00"></div>
+<div class="h-full bg-segment-rest" style="width: 4%;" title="Rest: 1:00"></div>
+<div class="h-full bg-segment-work" style="width: 12%;" title="Work: 4:00"></div>
+<div class="h-full bg-segment-rest" style="width: 4%;" title="Rest: 1:00"></div>
+<div class="h-full bg-segment-cooldown" style="width: 26%;" title="Cooldown: 8:45"></div>
+</div>
+<!-- Timeline Legend -->
+<div class="flex flex-wrap gap-md px-xs pt-xs">
+<div class="flex items-center gap-xs"><div class="w-3 h-3 rounded-sm bg-segment-prepare"></div><span class="text-[10px] font-label-caps uppercase text-on-surface-variant">Prepare</span></div>
+<div class="flex items-center gap-xs"><div class="w-3 h-3 rounded-sm bg-segment-work"></div><span class="text-[10px] font-label-caps uppercase text-on-surface-variant">Work</span></div>
+<div class="flex items-center gap-xs"><div class="w-3 h-3 rounded-sm bg-segment-rest"></div><span class="text-[10px] font-label-caps uppercase text-on-surface-variant">Rest</span></div>
+<div class="flex items-center gap-xs"><div class="w-3 h-3 rounded-sm bg-segment-cooldown"></div><span class="text-[10px] font-label-caps uppercase text-on-surface-variant">Cooldown</span></div>
+</div>
+</section>
+<!-- Interval Builder Area -->
+<section class="space-y-lg relative">
+<!-- Interval Rows Container -->
+<div class="space-y-sm">
+<!-- Prepare Interval -->
+<div class="glass-card rounded-lg flex items-center group transition-all duration-200 border-l-4 border-l-segment-prepare pl-0 hover:shadow-md relative overflow-hidden">
+<!-- Drag Handle -->
+<div class="px-sm py-md text-outline-variant drag-handle cursor-grab flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">drag_indicator</span>
+</div>
+<div class="p-sm bg-segment-prepare/10 text-segment-prepare rounded-md mr-md flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">self_improvement</span>
+</div>
+<div class="flex-1 py-md">
+<input class="bg-transparent border-none p-0 font-body-md font-semibold text-on-surface w-full focus:ring-0 focus:outline-none placeholder-on-surface-variant/50" type="text" value="Dynamic Warmup"/>
+<p class="text-[11px] text-on-surface-variant font-body-md mt-xs">Jumping jacks, arm circles, light jogging</p>
+</div>
+<div class="px-md flex items-center gap-sm border-l border-outline-variant/30 py-md">
+<input class="bg-transparent border-none p-0 font-data-lg text-data-lg text-primary focus:ring-0 focus:outline-none w-20 text-center font-bold tracking-tight" type="text" value="03:00"/>
+<div class="hidden group-hover:flex gap-xs items-center pl-sm">
+<button class="text-outline-variant hover:text-secondary transition-colors"><span class="material-symbols-outlined text-[18px]">content_copy</span></button>
+<button class="text-outline-variant hover:text-error transition-colors"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+</div>
+</div>
+</div>
+<!-- CYCLE CONTAINER (Wrapped Intervals) -->
+<div class="mt-lg relative">
+<!-- Cycle Bracket Visual -->
+<div class="absolute left-0 top-0 bottom-0 w-8 border-l-2 border-y-2 border-outline-variant/40 rounded-l-lg z-0 pointer-events-none -ml-4"></div>
+<!-- Cycle Header -->
+<div class="flex justify-between items-center pl-sm pr-md py-xs mb-sm relative z-10">
+<div class="flex items-center gap-sm">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant font-bold">Main Block Cycle</span>
+<div class="bg-surface-dim px-sm py-[2px] rounded text-[11px] font-data-sm text-on-surface font-bold">Total: 20:00</div>
+</div>
+<div class="flex items-center gap-xs">
+<span class="font-label-caps text-[10px] uppercase text-on-surface-variant">Repeats:</span>
+<select class="bg-surface border border-outline-variant/50 rounded px-2 py-1 text-data-sm font-data-sm text-primary font-bold focus:ring-secondary focus:border-secondary">
+<option>x2</option>
+<option>x3</option>
+<option selected="">x4</option>
+<option>x5</option>
+<option>x6</option>
+</select>
+</div>
+</div>
+<!-- Inside Cycle Intervals -->
+<div class="space-y-sm ml-sm relative z-10">
+<!-- Work Interval -->
+<div class="glass-card rounded-lg flex items-center group transition-all duration-200 border-l-4 border-l-segment-work pl-0 hover:shadow-md bg-white/90">
+<div class="px-sm py-md text-outline-variant drag-handle flex items-center justify-center"><span class="material-symbols-outlined text-[20px]">drag_indicator</span></div>
+<div class="p-sm bg-segment-work/10 text-segment-work rounded-md mr-md flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">directions_run</span>
+</div>
+<div class="flex-1 py-md">
+<input class="bg-transparent border-none p-0 font-body-md font-semibold text-on-surface w-full focus:ring-0 focus:outline-none" type="text" value="High Intensity Sprints"/>
+<p class="text-[11px] text-on-surface-variant font-body-md mt-xs">85-90% Max HR Target</p>
+</div>
+<div class="px-md flex items-center gap-sm border-l border-outline-variant/30 py-md">
+<input class="bg-transparent border-none p-0 font-data-lg text-data-lg text-primary focus:ring-0 focus:outline-none w-20 text-center font-bold tracking-tight" type="text" value="04:00"/>
+<div class="hidden group-hover:flex gap-xs items-center pl-sm">
+<button class="text-outline-variant hover:text-secondary transition-colors"><span class="material-symbols-outlined text-[18px]">content_copy</span></button>
+<button class="text-outline-variant hover:text-error transition-colors"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+</div>
+</div>
+</div>
+<!-- Rest Interval -->
+<div class="glass-card rounded-lg flex items-center group transition-all duration-200 border-l-4 border-l-segment-rest pl-0 hover:shadow-md bg-white/90">
+<div class="px-sm py-md text-outline-variant drag-handle flex items-center justify-center"><span class="material-symbols-outlined text-[20px]">drag_indicator</span></div>
+<div class="p-sm bg-segment-rest/10 text-segment-rest rounded-md mr-md flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">pause_circle</span>
+</div>
+<div class="flex-1 py-md">
+<input class="bg-transparent border-none p-0 font-body-md font-semibold text-on-surface w-full focus:ring-0 focus:outline-none text-on-surface-variant" type="text" value="Active Recovery"/>
+</div>
+<div class="px-md flex items-center gap-sm border-l border-outline-variant/30 py-md">
+<input class="bg-transparent border-none p-0 font-data-lg text-data-lg text-primary focus:ring-0 focus:outline-none w-20 text-center font-bold tracking-tight text-on-surface-variant" type="text" value="01:00"/>
+<div class="hidden group-hover:flex gap-xs items-center pl-sm">
+<button class="text-outline-variant hover:text-secondary transition-colors"><span class="material-symbols-outlined text-[18px]">content_copy</span></button>
+<button class="text-outline-variant hover:text-error transition-colors"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+</div>
+</div>
+</div>
+<!-- Add Interval Inside Cycle Button -->
+<div class="flex justify-center py-sm">
+<button class="flex items-center gap-xs px-md py-xs rounded-full border border-dashed border-outline-variant text-on-surface-variant hover:border-secondary hover:text-secondary transition-colors text-[11px] font-label-caps uppercase tracking-wider bg-surface/50">
+<span class="material-symbols-outlined text-[14px]">add</span> Add to Cycle
+                                        </button>
+</div>
+</div>
+</div>
+<!-- Cooldown Interval -->
+<div class="glass-card rounded-lg flex items-center group transition-all duration-200 border-l-4 border-l-segment-cooldown pl-0 hover:shadow-md mt-lg">
+<div class="px-sm py-md text-outline-variant drag-handle flex items-center justify-center"><span class="material-symbols-outlined text-[20px]">drag_indicator</span></div>
+<div class="p-sm bg-segment-cooldown/10 text-segment-cooldown rounded-md mr-md flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">ac_unit</span>
+</div>
+<div class="flex-1 py-md">
+<input class="bg-transparent border-none p-0 font-body-md font-semibold text-on-surface w-full focus:ring-0 focus:outline-none" type="text" value="Stretching &amp; Breathe"/>
+</div>
+<div class="px-md flex items-center gap-sm border-l border-outline-variant/30 py-md">
+<input class="bg-transparent border-none p-0 font-data-lg text-data-lg text-primary focus:ring-0 focus:outline-none w-20 text-center font-bold tracking-tight" type="text" value="08:45"/>
+<div class="hidden group-hover:flex gap-xs items-center pl-sm">
+<button class="text-outline-variant hover:text-secondary transition-colors"><span class="material-symbols-outlined text-[18px]">content_copy</span></button>
+<button class="text-outline-variant hover:text-error transition-colors"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Add Interval Controls (Bento Style Grid) -->
+<div class="pt-lg border-t border-outline-variant/30 mt-xl">
+<h3 class="font-label-caps text-label-caps uppercase text-on-surface-variant mb-md text-center tracking-widest">Add Block</h3>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-md">
+<button class="glass-card p-md rounded-xl flex flex-col items-center justify-center gap-sm hover:-translate-y-1 hover:shadow-md transition-all duration-200 border-t-2 border-t-segment-prepare group">
+<div class="w-10 h-10 rounded-full bg-segment-prepare/10 text-segment-prepare flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">self_improvement</span>
+</div>
+<span class="font-label-caps text-label-caps uppercase text-on-surface font-semibold">Prepare</span>
+</button>
+<button class="glass-card p-md rounded-xl flex flex-col items-center justify-center gap-sm hover:-translate-y-1 hover:shadow-md transition-all duration-200 border-t-2 border-t-segment-work group">
+<div class="w-10 h-10 rounded-full bg-segment-work/10 text-segment-work flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">directions_run</span>
+</div>
+<span class="font-label-caps text-label-caps uppercase text-on-surface font-semibold">Work</span>
+</button>
+<button class="glass-card p-md rounded-xl flex flex-col items-center justify-center gap-sm hover:-translate-y-1 hover:shadow-md transition-all duration-200 border-t-2 border-t-segment-rest group">
+<div class="w-10 h-10 rounded-full bg-segment-rest/10 text-segment-rest flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">pause_circle</span>
+</div>
+<span class="font-label-caps text-label-caps uppercase text-on-surface font-semibold">Rest</span>
+</button>
+<button class="glass-card p-md rounded-xl flex flex-col items-center justify-center gap-sm hover:-translate-y-1 hover:shadow-md transition-all duration-200 border-t-2 border-t-segment-cooldown group">
+<div class="w-10 h-10 rounded-full bg-segment-cooldown/10 text-segment-cooldown flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">ac_unit</span>
+</div>
+<span class="font-label-caps text-label-caps uppercase text-on-surface font-semibold">Cooldown</span>
+</button>
+</div>
+<div class="mt-md flex justify-center">
+<button class="flex items-center gap-sm px-lg py-sm rounded-lg bg-surface border border-outline-variant hover:border-primary hover:bg-surface-dim transition-colors ambient-shadow">
+<span class="material-symbols-outlined text-[18px]">data_object</span>
+<span class="font-label-caps text-label-caps uppercase font-bold text-primary">Wrap in Cycle</span>
+</button>
+</div>
+</div>
+</section>
+</div>
+</div>
+<!-- Mobile Bottom Action Bar (Fixed) -->
+<div class="md:hidden fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-md border-t border-outline-variant/30 p-md flex justify-between items-center z-40">
+<button class="font-label-caps text-label-caps uppercase text-on-surface-variant px-md py-sm">Cancel</button>
+<button class="bg-primary-container text-on-primary font-label-caps text-label-caps uppercase px-lg py-sm rounded flex items-center gap-xs shadow-lg">
+<span class="material-symbols-outlined text-[18px]">save</span> Save
+                </button>
+</div>
+</main>
+</div>
+</body></html>

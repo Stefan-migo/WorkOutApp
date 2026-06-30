@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Session Detail - Nordic Athlete</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#e0e3e5",
+                        "background": "#f8f9ff",
+                        "tertiary": "#111516",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-container": "#8590a6",
+                        "on-background": "#0b1c30",
+                        "on-secondary-fixed-variant": "#832600",
+                        "secondary-fixed-dim": "#ffb59d",
+                        "on-primary-fixed-variant": "#3c475a",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f8f9ff",
+                        "outline": "#75777d",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "on-secondary-container": "#5d1900",
+                        "on-surface-variant": "#45474c",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "surface-container-low": "#eff4ff",
+                        "on-surface": "#0b1c30",
+                        "on-error": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "secondary-container": "#fd6b36",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "primary": "#091426",
+                        "on-tertiary-fixed": "#191c1e",
+                        "on-secondary-fixed": "#390c00",
+                        "outline-variant": "#c5c6cd",
+                        "surface-container": "#e5eeff",
+                        "primary-container": "#1e293b",
+                        "surface-dim": "#cbdbf5",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-variant": "#d3e4fe",
+                        "primary-fixed": "#d8e3fb",
+                        "primary-fixed-dim": "#bcc7de",
+                        "inverse-surface": "#213145",
+                        "tertiary-container": "#26292b",
+                        "surface": "#f8f9ff",
+                        "on-tertiary-container": "#8d9092",
+                        "surface-container-high": "#dce9ff",
+                        "on-primary-fixed": "#111c2d",
+                        "surface-tint": "#545f73",
+                        "inverse-primary": "#bcc7de",
+                        "surface-container-highest": "#d3e4fe",
+                        "secondary-fixed": "#ffdbd0",
+                        "secondary": "#ac3400",
+                        "on-error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "20px",
+                        "sm": "8px",
+                        "margin-desktop": "40px",
+                        "base": "4px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "xs": "4px",
+                        "xl": "32px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "data-sm": ["JetBrains Mono"],
+                        "data-lg": ["JetBrains Mono"],
+                        "display-timer": ["JetBrains Mono"],
+                        "headline-md": ["Inter"],
+                        "display-timer-mobile": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "data-sm": ["14px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "data-lg": ["20px", { "lineHeight": "24px", "fontWeight": "500" }],
+                        "display-timer": ["84px", { "lineHeight": "100px", "letterSpacing": "-0.04em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-timer-mobile": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.04em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .chart-path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: drawLine 2s ease-out forwards;
+        }
+        @keyframes drawLine {
+            to { stroke-dashoffset: 0; }
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md antialiased flex overflow-x-hidden min-h-screen">
+<!-- SideNavBar (Shared Component) -->
+<nav class="h-full w-64 fixed left-0 top-0 bg-primary flex flex-col py-lg px-md shadow-sm z-50">
+<!-- Header -->
+<div class="mb-xl px-sm">
+<h1 class="font-headline-md text-headline-md font-bold text-surface">Nordic Athlete</h1>
+<p class="font-label-caps text-label-caps text-on-primary-fixed-variant mt-xs">Elite Performance</p>
+</div>
+<!-- Navigation Tabs -->
+<div class="flex flex-col gap-xs flex-1">
+<a class="font-label-caps text-label-caps text-on-primary-fixed-variant hover:bg-primary-container transition-colors duration-200 p-sm rounded flex items-center gap-md" href="#">
+<span class="material-symbols-outlined">dashboard</span>Dashboard
+            </a>
+<a class="font-label-caps text-label-caps text-on-primary-fixed-variant hover:bg-primary-container transition-colors duration-200 p-sm rounded flex items-center gap-md" href="#">
+<span class="material-symbols-outlined">fitness_center</span>Workouts
+            </a>
+<a class="font-label-caps text-label-caps text-on-primary-fixed-variant hover:bg-primary-container transition-colors duration-200 p-sm rounded flex items-center gap-md" href="#">
+<span class="material-symbols-outlined">reorder</span>Sequences
+            </a>
+<a class="font-label-caps text-label-caps text-on-primary-fixed-variant hover:bg-primary-container transition-colors duration-200 p-sm rounded flex items-center gap-md" href="#">
+<span class="material-symbols-outlined">settings_accessibility</span>Exercises
+            </a>
+<a class="font-label-caps text-label-caps text-on-primary-fixed-variant hover:bg-primary-container transition-colors duration-200 p-sm rounded flex items-center gap-md" href="#">
+<span class="material-symbols-outlined">calendar_today</span>Calendar
+            </a>
+<!-- Active State -->
+<a class="font-label-caps text-label-caps text-secondary-container font-bold bg-primary-container opacity-90 transition-opacity p-sm rounded flex items-center gap-md" href="#">
+<span class="material-symbols-outlined">history</span>History
+            </a>
+<a class="font-label-caps text-label-caps text-on-primary-fixed-variant hover:bg-primary-container transition-colors duration-200 p-sm rounded flex items-center gap-md" href="#">
+<span class="material-symbols-outlined">monitoring</span>Stats
+            </a>
+<a class="font-label-caps text-label-caps text-on-primary-fixed-variant hover:bg-primary-container transition-colors duration-200 p-sm rounded flex items-center gap-md mt-auto mb-lg" href="#">
+<span class="material-symbols-outlined">settings</span>Settings
+            </a>
+</div>
+<!-- Footer -->
+<div class="pt-sm border-t border-outline-variant/10">
+<a class="font-label-caps text-label-caps text-on-primary-fixed-variant hover:bg-primary-container transition-colors duration-200 p-sm rounded flex items-center gap-md" href="#">
+<span class="material-symbols-outlined">logout</span>Logout
+            </a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 ml-64 flex flex-col min-h-screen">
+<!-- TopAppBar (Shared Component) -->
+<header class="bg-surface/80 backdrop-blur-md flex justify-between items-center h-20 px-margin-desktop border-b border-outline-variant/30 sticky top-0 z-40">
+<div class="flex gap-lg">
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-secondary transition-colors" href="#">Workouts</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-secondary transition-colors" href="#">Active Session</a>
+</div>
+<div class="flex items-center gap-lg">
+<button class="font-label-caps text-label-caps text-on-surface hover:text-secondary transition-colors uppercase tracking-wider">Create New</button>
+<div class="flex gap-sm">
+<button class="w-10 h-10 rounded-full hover:bg-surface-variant flex items-center justify-center transition-colors text-on-surface-variant hover:text-secondary">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="w-10 h-10 rounded-full hover:bg-surface-variant flex items-center justify-center transition-colors text-on-surface-variant hover:text-secondary">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+</div>
+<img alt="User avatar" class="w-10 h-10 rounded-full object-cover border border-outline-variant/30" data-alt="A striking, high-end professional portrait of an elite Nordic athlete, cinematic side lighting, minimalist dark background, crisp focus on facial features, conveying intense discipline and focus." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBa3JoBNAzGD2rN19qXKjBXLb0IaY1s_mD45hvsMCgW1q4SmC-Mxuk9QL-DXz9sgMLxgvIo1af07JrHHiAG7Tx0g9E8stTC86DL8fPJzlbS3cLf8B2vgn8k4085740O5wgOhHvN_PpY0LLtc35X08RoocgigGK1p2WAiXqpYbo66oObUPTgf9W-46FicBYoi0IRDHsq56WBdNIy6L14bkSi-rM7c-C8OQ_-ueOeH6OZXSqlTo-9cjgZyc_xy0p87CuRyjMwj052dvw"/>
+</div>
+</header>
+<!-- Page Canvas -->
+<div class="px-margin-desktop py-lg w-full max-w-6xl mx-auto flex flex-col gap-lg">
+<!-- Header Section -->
+<section class="flex flex-col gap-xs mb-md">
+<div class="flex items-center gap-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+<span class="font-data-sm text-data-sm uppercase tracking-widest text-xs">October 24, 2023 • 06:30 AM</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">VO2 Max Pyramids</h2>
+<div class="flex gap-sm mt-sm">
+<span class="bg-surface-variant text-on-surface-variant font-label-caps text-label-caps px-3 py-1 rounded-full">High Intensity</span>
+<span class="bg-surface-variant text-on-surface-variant font-label-caps text-label-caps px-3 py-1 rounded-full">Running</span>
+</div>
+</section>
+<!-- Metrics Bento Grid -->
+<section class="grid grid-cols-2 md:grid-cols-4 gap-md">
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-md flex flex-col justify-between h-32 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="absolute -right-4 -top-4 w-20 h-20 bg-surface-variant rounded-full opacity-30 group-hover:scale-110 transition-transform"></div>
+<span class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-sm"><span class="material-symbols-outlined text-sm">timer</span>Total Duration</span>
+<span class="font-data-lg text-data-lg text-on-surface text-3xl">45:00</span>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-md flex flex-col justify-between h-32 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="absolute -right-4 -top-4 w-20 h-20 bg-error-container rounded-full opacity-30 group-hover:scale-110 transition-transform"></div>
+<span class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-sm"><span class="material-symbols-outlined text-sm">local_fire_department</span>Calories Active</span>
+<span class="font-data-lg text-data-lg text-on-surface text-3xl">642 <span class="text-sm text-on-surface-variant font-body-md">kcal</span></span>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-md flex flex-col justify-between h-32 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="absolute -right-4 -top-4 w-20 h-20 bg-surface-variant rounded-full opacity-30 group-hover:scale-110 transition-transform"></div>
+<span class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-sm"><span class="material-symbols-outlined text-sm">favorite</span>Avg Heart Rate</span>
+<span class="font-data-lg text-data-lg text-on-surface text-3xl">154 <span class="text-sm text-on-surface-variant font-body-md">bpm</span></span>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-md flex flex-col justify-between h-32 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="absolute -right-4 -top-4 w-20 h-20 bg-secondary-fixed-dim rounded-full opacity-30 group-hover:scale-110 transition-transform"></div>
+<span class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-sm"><span class="material-symbols-outlined text-sm">monitor_heart</span>Peak Heart Rate</span>
+<span class="font-data-lg text-data-lg text-on-surface text-3xl">188 <span class="text-sm text-on-surface-variant font-body-md">bpm</span></span>
+</div>
+</section>
+<!-- Heart Rate Chart Section -->
+<section class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-lg shadow-sm flex flex-col gap-md">
+<div class="flex justify-between items-center">
+<h3 class="font-headline-md text-headline-md text-on-surface">Heart Rate Profile</h3>
+<div class="flex items-center gap-md">
+<div class="flex items-center gap-xs font-label-caps text-label-caps text-on-surface-variant"><span class="w-3 h-3 rounded-full bg-secondary block"></span> Heart Rate</div>
+<div class="flex items-center gap-xs font-label-caps text-label-caps text-on-surface-variant"><span class="w-3 h-3 rounded-full bg-outline-variant block"></span> Target Zone</div>
+</div>
+</div>
+<div class="w-full h-64 relative border-b border-l border-outline-variant/30 mt-sm">
+<!-- Y Axis Labels -->
+<div class="absolute -left-8 h-full flex flex-col justify-between text-xs text-on-surface-variant font-data-sm text-data-sm pb-6">
+<span>190</span>
+<span>150</span>
+<span>110</span>
+<span>70</span>
+</div>
+<!-- X Axis Labels -->
+<div class="absolute -bottom-6 w-full flex justify-between text-xs text-on-surface-variant font-data-sm text-data-sm pl-2">
+<span>0:00</span>
+<span>15:00</span>
+<span>30:00</span>
+<span>45:00</span>
+</div>
+<!-- Target Zone Background -->
+<div class="absolute bottom-[40%] h-[30%] w-full bg-surface-variant/40 rounded-r"></div>
+<!-- SVG Chart Path -->
+<svg class="absolute inset-0 w-full h-full" preserveaspectratio="none" viewbox="0 0 100 100">
+<path class="text-secondary" d="M0,80 Q10,75 20,50 T40,20 T50,60 T70,15 T85,55 T100,75" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" vector-effect="non-scaling-stroke"></path>
+<path class="text-secondary opacity-10" d="M0,80 L0,100 L100,100 L100,75 Z" fill="currentColor"></path>
+</svg>
+</div>
+</section>
+<!-- Interval Breakdown -->
+<section class="flex flex-col gap-md mb-xl">
+<h3 class="font-headline-md text-headline-md text-on-surface">Interval Breakdown</h3>
+<div class="flex flex-col gap-sm">
+<!-- Interval Row 1 -->
+<div class="bg-surface-container-lowest border-l-4 border-l-surface-tint border-y border-r border-outline-variant/30 rounded-r-lg p-md flex justify-between items-center hover:bg-surface-container-low transition-colors group cursor-default">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 bg-surface flex items-center justify-center rounded font-data-sm text-data-sm text-on-surface-variant border border-outline-variant/20">1</div>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md font-bold text-on-surface">Warm Up</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant mt-1">Zone 2 • Steady</span>
+</div>
+</div>
+<div class="flex gap-xl items-center">
+<div class="flex flex-col items-end">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Target</span>
+<span class="font-data-sm text-data-sm text-on-surface">10:00</span>
+</div>
+<div class="flex flex-col items-end w-16">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Actual</span>
+<span class="font-data-sm text-data-sm text-on-surface font-bold">10:05</span>
+</div>
+</div>
+</div>
+<!-- Interval Row 2 -->
+<div class="bg-surface-container-lowest border-l-4 border-l-secondary border-y border-r border-outline-variant/30 rounded-r-lg p-md flex justify-between items-center hover:bg-surface-container-low transition-colors group cursor-default shadow-sm backdrop-blur-md bg-white/80">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 bg-surface flex items-center justify-center rounded font-data-sm text-data-sm text-on-surface-variant border border-outline-variant/20">2</div>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md font-bold text-on-surface">VO2 Max Push</span>
+<span class="font-label-caps text-label-caps text-secondary mt-1">Zone 5 • Max Effort</span>
+</div>
+</div>
+<div class="flex gap-xl items-center">
+<div class="flex flex-col items-end">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Target</span>
+<span class="font-data-sm text-data-sm text-on-surface">04:00</span>
+</div>
+<div class="flex flex-col items-end w-16">
+<span class="font-label-caps text-label-caps text-secondary">Actual</span>
+<span class="font-data-sm text-data-sm text-secondary font-bold">04:02</span>
+</div>
+</div>
+</div>
+<!-- Interval Row 3 -->
+<div class="bg-surface-container-lowest border-l-4 border-l-surface-tint border-y border-r border-outline-variant/30 rounded-r-lg p-md flex justify-between items-center hover:bg-surface-container-low transition-colors group cursor-default">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 bg-surface flex items-center justify-center rounded font-data-sm text-data-sm text-on-surface-variant border border-outline-variant/20">3</div>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md font-bold text-on-surface">Active Recovery</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant mt-1">Zone 1 • Easy</span>
+</div>
+</div>
+<div class="flex gap-xl items-center">
+<div class="flex flex-col items-end">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Target</span>
+<span class="font-data-sm text-data-sm text-on-surface">03:00</span>
+</div>
+<div class="flex flex-col items-end w-16">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Actual</span>
+<span class="font-data-sm text-data-sm text-on-surface font-bold">03:00</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+</body></html>
