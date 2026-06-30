@@ -8,8 +8,8 @@ import { IntervalForm } from '@/components/IntervalForm'
 import { TimelineStrip } from '@/components/TimelineStrip'
 import { IntervalDetailSheet } from '@/components/IntervalDetailSheet'
 import { flattenWorkout } from '@/lib/interval-engine'
-import { getExercises } from '@/data/exercises'
-import type { Interval, Exercise } from '@/types/workout'
+import { useExercises } from '@/hooks/useExercises'
+import type { Interval } from '@/types/workout'
 
 // ponytail: counter ID, upgrade to crypto.randomUUID if collisions become an issue
 let nextId = 1
@@ -34,7 +34,7 @@ export default function NewWorkoutPage() {
   const [title, setTitle] = useState('')
   const [intervals, setIntervals] = useState<Interval[]>(DEFAULT_INTERVALS)
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
-  const exercises = useMemo(() => getExercises(), [])
+  const { exercises } = useExercises()
 
   // ponytail: synthetic workout object for flatten; temp id/createdAt/updatedAt not persisted
   const flat = useMemo(

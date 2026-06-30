@@ -9,8 +9,8 @@ import { IntervalForm } from '@/components/IntervalForm'
 import { TimelineStrip } from '@/components/TimelineStrip'
 import { IntervalDetailSheet } from '@/components/IntervalDetailSheet'
 import { flattenWorkout } from '@/lib/interval-engine'
-import { getExercises } from '@/data/exercises'
-import type { Interval, Exercise } from '@/types/workout'
+import { useExercises } from '@/hooks/useExercises'
+import type { Interval } from '@/types/workout'
 
 export default function EditWorkoutPage() {
   const { getWorkout, saveWorkout } = useWorkoutContext()
@@ -23,7 +23,7 @@ export default function EditWorkoutPage() {
   const [title, setTitle] = useState(existing?.title ?? '')
   const [intervals, setIntervals] = useState<Interval[]>(existing?.intervals ?? [])
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
-  const exercises = useMemo(() => getExercises(), [])
+  const { exercises } = useExercises()
 
   // ponytail: synthetic workout object for flatten; temp id/createdAt/updatedAt not persisted
   const flat = useMemo(
