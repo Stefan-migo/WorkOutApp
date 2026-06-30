@@ -16,10 +16,19 @@ function flattenInterval(
   depth: number,
   cycleIndex?: number,
   setIndex?: number,
+  parentCycleCount?: number,
+  parentSetCount?: number,
 ): FlattenedInterval[] {
   // Leaf: emit as-is
   if (!interval.children?.length) {
-    return [{ ...interval, depth, cycleIndex, setIndex }]
+    return [{
+      ...interval,
+      depth,
+      cycleIndex,
+      setIndex,
+      cycleCount: parentCycleCount ?? interval.cycleCount,
+      setCount: parentSetCount ?? interval.setCount,
+    }]
   }
 
   const cycleCount = interval.cycleCount ?? 1
@@ -30,7 +39,7 @@ function flattenInterval(
   for (let s = 1; s <= setCount; s++) {
     for (let c = 1; c <= cycleCount; c++) {
       for (const child of interval.children) {
-        result.push(...flattenInterval(child, depth + 1, c, s))
+        result.push(...flattenInterval(child, depth + 1, c, s, cycleCount, setCount))
       }
       // Rest between cycles (not after last)
       if (c < cycleCount && restBetween > 0) {
@@ -43,6 +52,8 @@ function flattenInterval(
           depth: depth + 1,
           cycleIndex: c,
           setIndex: s,
+          cycleCount,
+          setCount,
         })
       }
     }

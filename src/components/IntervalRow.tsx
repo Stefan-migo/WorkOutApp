@@ -16,10 +16,10 @@ interface IntervalRowProps {
 
 // ponytail: static color map, make configurable if custom interval types are added
 const TYPE_COLORS: Record<string, string> = {
-  prepare: 'bg-amber-500',
-  work: 'bg-green-500',
-  rest: 'bg-red-500',
-  cooldown: 'bg-purple-500',
+  prepare: 'bg-interval-prepare',
+  work: 'bg-interval-work',
+  rest: 'bg-interval-rest',
+  cooldown: 'bg-interval-cooldown',
 }
 
 export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onMoveDown, isFirst, isLast }: IntervalRowProps) {
@@ -33,19 +33,19 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
       : undefined
 
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg bg-zinc-800">
-      <span className={`w-3 h-3 rounded-full shrink-0 ${TYPE_COLORS[interval.type] ?? 'bg-zinc-500'}`} />
-      <span className="text-sm text-zinc-400 w-16 shrink-0 capitalize">{interval.type}</span>
+    <div className="flex items-center gap-3 p-3 rounded-lg bg-surface border border-border-soft">
+      <span className={`w-3 h-3 rounded-full shrink-0 ${TYPE_COLORS[interval.type] ?? 'bg-muted'}`} />
+      <span className="text-sm text-muted w-16 shrink-0 capitalize">{interval.type}</span>
       <input
         type="text"
         value={interval.title}
         onChange={(e) => onChange(index, { ...interval, title: e.target.value })}
-        className="flex-1 bg-transparent text-white border-b border-transparent hover:border-zinc-600 focus:border-blue-500 outline-none"
+        className="flex-1 bg-transparent text-fg border-b border-transparent hover:border-border focus:border-accent outline-none"
         aria-label={`Interval ${index + 1} title`}
       />
-      <span className="font-mono text-zinc-300 tabular-nums">{durationStr}</span>
+      <span className="font-mono text-fg-2 tabular-nums">{durationStr}</span>
       {exerciseName && (
-        <span className="text-xs text-zinc-500 w-24 truncate shrink-0" title={exerciseName}>
+        <span className="text-xs text-muted w-24 truncate shrink-0" title={exerciseName}>
           {exerciseName}
         </span>
       )}
@@ -53,7 +53,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
         <button
           onClick={() => onMoveUp?.(index)}
           disabled={isFirst}
-          className="min-w-[28px] min-h-[18px] flex items-center justify-center text-zinc-500 hover:text-white disabled:opacity-20 disabled:pointer-events-none text-xs leading-none"
+          className="min-w-[28px] min-h-[18px] flex items-center justify-center text-muted hover:text-fg disabled:opacity-20 disabled:pointer-events-none text-xs leading-none"
           aria-label={`Move interval ${index + 1} up`}
         >
           ▲
@@ -61,7 +61,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
         <button
           onClick={() => onMoveDown?.(index)}
           disabled={isLast}
-          className="min-w-[28px] min-h-[18px] flex items-center justify-center text-zinc-500 hover:text-white disabled:opacity-20 disabled:pointer-events-none text-xs leading-none"
+          className="min-w-[28px] min-h-[18px] flex items-center justify-center text-muted hover:text-fg disabled:opacity-20 disabled:pointer-events-none text-xs leading-none"
           aria-label={`Move interval ${index + 1} down`}
         >
           ▼
@@ -69,7 +69,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
       </div>
       <button
         onClick={() => onRemove(index)}
-        className="min-w-[44px] min-h-[44px] flex items-center justify-center text-zinc-500 hover:text-red-400 text-lg"
+        className="min-w-[44px] min-h-[44px] flex items-center justify-center text-muted hover:text-danger text-lg"
         aria-label={`Remove interval ${index + 1}`}
       >
         ✕

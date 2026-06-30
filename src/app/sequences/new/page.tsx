@@ -88,7 +88,7 @@ export default function NewSequencePage() {
       updatedAt: Date.now(),
     }
     saveSequence(seq)
-    router.push('/sequences')
+    router.push(`/sequences/${seq.id}/play`)
   }
 
   const canSave = title.trim().length > 0 && selectedIds.length > 0

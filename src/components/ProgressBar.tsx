@@ -11,9 +11,9 @@ export function ProgressBar({ progress, label }: ProgressBarProps) {
 
   return (
     <div className="w-full">
-      {label && <span className="text-sm text-zinc-400 mb-1 block">{label}</span>}
+      {label && <span className="text-sm text-muted mb-1 block">{label}</span>}
       <div
-        className="w-full bg-zinc-700 rounded-full overflow-hidden min-h-[44px] flex items-center"
+        className="w-full bg-border rounded-full overflow-hidden min-h-[44px] flex items-center"
         role="progressbar"
         aria-valuenow={pct}
         aria-valuemin={0}
@@ -21,7 +21,7 @@ export function ProgressBar({ progress, label }: ProgressBarProps) {
         aria-label={label ?? 'Progress'}
       >
         <div
-          className="h-3 bg-blue-500 rounded-full transition-all duration-500 ease-out"
+          className="h-3 bg-accent rounded-full transition-all duration-500 ease-out"
           style={{ width: `${pct}%` }}
         />
       </div>

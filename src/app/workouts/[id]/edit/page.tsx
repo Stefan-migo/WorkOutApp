@@ -1,12 +1,16 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useWorkoutContext } from '@/context/WorkoutContext'
 import { IntervalRow } from '@/components/IntervalRow'
 import { IntervalForm } from '@/components/IntervalForm'
-import type { Interval } from '@/types/workout'
+import { TimelineStrip } from '@/components/TimelineStrip'
+import { IntervalDetailSheet } from '@/components/IntervalDetailSheet'
+import { flattenWorkout } from '@/lib/interval-engine'
+import { getExercises } from '@/data/exercises'
+import type { Interval, Exercise } from '@/types/workout'
 
 export default function EditWorkoutPage() {
   const { getWorkout, saveWorkout } = useWorkoutContext()
@@ -18,6 +22,14 @@ export default function EditWorkoutPage() {
   // existing is resolved synchronously from localStorage via context
   const [title, setTitle] = useState(existing?.title ?? '')
   const [intervals, setIntervals] = useState<Interval[]>(existing?.intervals ?? [])
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const exercises = useMemo(() => getExercises(), [])
+
+  // ponytail: synthetic workout object for flatten; temp id/createdAt/updatedAt not persisted
+  const flat = useMemo(
+    () => flattenWorkout({ id: '', title: '', intervals, createdAt: 0, updatedAt: 0 }),
+    [intervals],
+  )
 
   // ponytail: dirty flag on user interaction, no deep compare
   const dirtyRef = useRef(false)
@@ -35,17 +47,18 @@ export default function EditWorkoutPage() {
   if (!existing) {
     return (
       <div className="flex flex-col items-center justify-center flex-1 gap-4 p-8 text-center">
-        <h1 className="text-2xl font-bold">Workout not found</h1>
-        <Link href="/workouts" className="text-blue-400 hover:underline">
+        <h1 className="text-2xl font-bold text-fg">Workout not found</h1>
+        <Link href="/workouts" className="text-accent hover:underline">
           &larr; Back to workouts
         </Link>
       </div>
     )
   }
 
-  const totalDuration = intervals.reduce((s, i) => s + i.duration, 0)
-  const totalMin = Math.floor(totalDuration / 60)
-  const totalSec = totalDuration % 60
+  // ponytail: reuse flat for total to avoid double-flatten; equals totalDuration() result
+  const totalDurationSec = flat.reduce((s, i) => s + i.duration, 0)
+  const totalMin = Math.floor(totalDurationSec / 60)
+  const totalSec = totalDurationSec % 60
 
   function handleAdd(interval: Interval) {
     dirtyRef.current = true
@@ -92,6 +105,25 @@ export default function EditWorkoutPage() {
     })
   }
 
+  // ponytail: click timeline block → open sheet for that original interval
+  function handleTimelineClick(idx: number) {
+    const fi = flat[idx]
+    if (fi.isGenerated) return
+    const origIdx = intervals.findIndex((i) => i.id === fi.id)
+    if (origIdx >= 0) setEditingIndex(origIdx)
+  }
+
+  function handleSheetSave(updated: Interval) {
+    if (editingIndex === null) return
+    dirtyRef.current = true
+    setIntervals((prev) => {
+      const next = [...prev]
+      next[editingIndex] = updated
+      return next
+    })
+    setEditingIndex(null)
+  }
+
   function handleUpdate() {
     if (!title.trim() || intervals.length === 0 || !existing) return
     saveWorkout({
@@ -113,18 +145,21 @@ export default function EditWorkoutPage() {
         <input
           type="text"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
           placeholder="Workout title"
-          className="flex-1 text-2xl font-bold bg-transparent border-b border-transparent hover:border-zinc-600 focus:border-blue-500 outline-none placeholder:text-zinc-600"
+          className="flex-1 text-2xl font-bold bg-transparent border-b border-transparent hover:border-border focus:border-accent outline-none text-fg placeholder:text-muted"
           onChange={(e) => { dirtyRef.current = true; setTitle(e.target.value) }}
         />
-        <span className="font-mono text-zinc-400 text-sm tabular-nums shrink-0">
+        <span className="font-mono text-muted text-sm tabular-nums shrink-0">
           {totalMin}:{String(totalSec).padStart(2, '0')}
         </span>
       </div>
 
+      {intervals.length > 0 && (
+        <TimelineStrip intervals={flat} onIntervalClick={handleTimelineClick} />
+      )}
+
       {intervals.length === 0 ? (
-        <p className="text-zinc-500 text-center py-12">Add intervals to build your workout</p>
+        <p className="text-muted text-center py-12">Add intervals to build your workout</p>
       ) : (
         <div className="flex flex-col gap-2">
           {intervals.map((interval, i) => (
@@ -143,12 +178,21 @@ export default function EditWorkoutPage() {
         </div>
       )}
 
+      {editingIndex !== null && (
+        <IntervalDetailSheet
+          interval={intervals[editingIndex]}
+          onSave={handleSheetSave}
+          onClose={() => setEditingIndex(null)}
+          exercises={exercises}
+        />
+      )}
+
       <IntervalForm onAdd={handleAdd} />
 
       <button
         onClick={handleUpdate}
         disabled={!canSave}
-        className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-700 disabled:text-zinc-500 rounded-lg font-medium transition-colors"
+        className="w-full py-3 bg-accent hover:bg-accent disabled:bg-surface-alt text-accent-on disabled:text-muted rounded-lg font-medium transition-colors"
       >
         Update Workout
       </button>

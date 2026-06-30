@@ -17,7 +17,7 @@ export function TimerControls({ status, onPause, onResume, onSkip, onRestart }: 
       {status === 'running' && (
         <button
           onClick={onPause}
-          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-zinc-700 hover:bg-zinc-600 text-white text-xl"
+          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-surface hover:bg-surface-alt border border-border text-fg text-xl"
           aria-label="Pause"
         >
           ⏸
@@ -26,7 +26,7 @@ export function TimerControls({ status, onPause, onResume, onSkip, onRestart }: 
       {status === 'paused' && (
         <button
           onClick={onResume}
-          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-zinc-700 hover:bg-zinc-600 text-white text-xl"
+          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-accent hover:bg-accent text-accent-on text-xl"
           aria-label="Resume"
         >
           ▶
@@ -35,7 +35,7 @@ export function TimerControls({ status, onPause, onResume, onSkip, onRestart }: 
       {(status === 'running' || status === 'paused') && (
         <button
           onClick={onSkip}
-          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-zinc-700 hover:bg-zinc-600 text-white text-xl"
+          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-surface hover:bg-surface-alt border border-border text-fg text-xl"
           aria-label="Skip to next interval"
         >
           ⏭
@@ -44,7 +44,7 @@ export function TimerControls({ status, onPause, onResume, onSkip, onRestart }: 
       {(status === 'paused' || status === 'complete') && (
         <button
           onClick={onRestart}
-          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-zinc-700 hover:bg-zinc-600 text-white text-xl"
+          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-surface hover:bg-surface-alt border border-border text-fg text-xl"
           aria-label="Restart timer"
         >
           🔄

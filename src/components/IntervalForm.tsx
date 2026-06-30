@@ -42,13 +42,13 @@ export function IntervalForm({ onAdd }: IntervalFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-end gap-3 p-4 rounded-lg bg-zinc-800">
+    <form onSubmit={handleSubmit} className="flex items-end gap-3 p-4 rounded-lg bg-surface border border-border">
       <label className="flex flex-col gap-1">
-        <span className="text-xs text-zinc-400">Type</span>
+        <span className="text-xs text-muted">Type</span>
         <select
           value={type}
           onChange={(e) => setType(e.target.value as IntervalType)}
-          className="bg-zinc-700 text-white rounded px-3 py-2 text-sm"
+          className="bg-surface-alt text-fg rounded px-3 py-2 text-sm border border-border"
         >
           {INTERVAL_TYPES.map((t) => (
             <option key={t} value={t} className="capitalize">
@@ -58,22 +58,22 @@ export function IntervalForm({ onAdd }: IntervalFormProps) {
         </select>
       </label>
       <label className="flex flex-col gap-1">
-        <span className="text-xs text-zinc-400">Title</span>
+        <span className="text-xs text-muted">Title</span>
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder={type}
-          className="bg-zinc-700 text-white rounded px-3 py-2 text-sm w-32 placeholder:text-zinc-500"
+          className="bg-surface-alt text-fg rounded px-3 py-2 text-sm w-32 border border-border placeholder:text-muted"
         />
       </label>
       {type === 'work' && (
         <label className="flex flex-col gap-1">
-          <span className="text-xs text-zinc-400">Exercise</span>
+          <span className="text-xs text-muted">Exercise</span>
           <select
             value={exerciseId}
             onChange={(e) => setExerciseId(e.target.value)}
-            className="bg-zinc-700 text-white rounded px-3 py-2 text-sm"
+            className="bg-surface-alt text-fg rounded px-3 py-2 text-sm border border-border"
           >
             <option value="">Select exercise</option>
             {exercises.map((ex) => (
@@ -85,19 +85,19 @@ export function IntervalForm({ onAdd }: IntervalFormProps) {
         </label>
       )}
       <label className="flex flex-col gap-1">
-        <span className="text-xs text-zinc-400">Duration (sec)</span>
+        <span className="text-xs text-muted">Duration (sec)</span>
         <input
           type="number"
           value={duration}
           onChange={(e) => setDuration(Math.max(5, Math.min(600, Number(e.target.value))))}
           min={5}
           max={600}
-          className="bg-zinc-700 text-white rounded px-3 py-2 text-sm w-20"
+          className="bg-surface-alt text-fg rounded px-3 py-2 text-sm w-20 border border-border"
         />
       </label>
       <button
         type="submit"
-        className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-blue-600 hover:bg-blue-500 text-white rounded px-4 text-sm font-medium"
+        className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-accent hover:bg-accent text-accent-on rounded px-4 text-sm font-medium"
       >
         Add
       </button>
