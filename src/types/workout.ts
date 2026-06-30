@@ -24,12 +24,26 @@ export interface Workout {
   updatedAt: number
 }
 
+export type ExerciseCategory = 'strength' | 'cardio' | 'stretching' | 'mobility' | 'other'
+
 export interface Exercise {
   id: string
   name: string
-  description: string
-  muscleGroup: string
-  imageUrl?: string
+  description?: string
+  muscleGroups?: string[]
+  category: ExerciseCategory
+  createdAt: number
+  updatedAt: number
+}
+
+export interface Sequence {
+  id: string
+  title: string
+  description?: string
+  workoutIds: string[]
+  repeatCount: number
+  createdAt: number
+  updatedAt: number
 }
 
 export interface Sequence {

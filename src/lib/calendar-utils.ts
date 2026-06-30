@@ -69,9 +69,9 @@ export function runCalendarTests(): string[] {
   assert(nextWeek('2026-06-29') === '2026-07-06', 'nextWeek → +7 days', '')
 
   // getDayOfWeek
-  assert(getDayOfWeek(new Date('2026-06-29')) === 0, 'getDayOfWeek Mon → 0', '')
-  assert(getDayOfWeek(new Date('2026-06-30')) === 1, 'getDayOfWeek Tue → 1', '')
-  assert(getDayOfWeek(new Date('2026-07-05')) === 6, 'getDayOfWeek Sun → 6', '')
+  assert(getDayOfWeek(new Date('2026-06-29T12:00:00')) === 0, 'getDayOfWeek Mon → 0', '')
+  assert(getDayOfWeek(new Date('2026-06-30T12:00:00')) === 1, 'getDayOfWeek Tue → 1', '')
+  assert(getDayOfWeek(new Date('2026-07-05T12:00:00')) === 6, 'getDayOfWeek Sun → 6', '')
 
   return results
 }

@@ -10,7 +10,7 @@ import { useBeep } from '@/hooks/useBeep'
 import { TimerDisplay } from '@/components/TimerDisplay'
 import { ProgressBar } from '@/components/ProgressBar'
 import { TimerControls } from '@/components/TimerControls'
-import { getExercise } from '@/data/exercises'
+import { useExercises } from '@/hooks/useExercises'
 import { flattenWorkout } from '@/lib/interval-engine'
 import type { IntervalType, CompletedInterval } from '@/types/workout'
 import type { FlattenedInterval } from '@/lib/interval-engine'
@@ -46,6 +46,7 @@ export default function PlayWorkoutPage() {
   const interval: FlattenedInterval | undefined = flat[currentIdx]
   const total = flat.length
 
+  const { getExercise } = useExercises()
   const timer = useTimer(interval?.duration ?? 0, () => {
     beep()
     if (skipRef.current) {

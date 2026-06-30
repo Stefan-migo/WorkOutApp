@@ -1,7 +1,7 @@
 'use client'
 
 import type { Interval } from '@/types/workout'
-import { getExercise } from '@/data/exercises'
+import { useExercises } from '@/hooks/useExercises'
 
 interface IntervalRowProps {
   interval: Interval
@@ -23,6 +23,7 @@ const TYPE_COLORS: Record<string, string> = {
 }
 
 export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onMoveDown, isFirst, isLast }: IntervalRowProps) {
+  const { getExercise } = useExercises()
   const minutes = Math.floor(interval.duration / 60)
   const seconds = interval.duration % 60
   const durationStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`

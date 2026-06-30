@@ -2,14 +2,14 @@
 
 import { useState } from 'react'
 import type { IntervalType, Interval } from '@/types/workout'
-import { getExercises } from '@/data/exercises'
+import { useExercises } from '@/hooks/useExercises'
+import { ExercisePicker } from './ExercisePicker'
 
 interface IntervalFormProps {
   onAdd: (interval: Interval) => void
 }
 
 const INTERVAL_TYPES: IntervalType[] = ['prepare', 'work', 'rest', 'cooldown']
-const exercises = getExercises()
 
 // ponytail: simple counter ID, upgrade to crypto.randomUUID if collisions become an issue
 let nextId = 1
@@ -18,6 +18,7 @@ function generateId(): string {
 }
 
 export function IntervalForm({ onAdd }: IntervalFormProps) {
+  const { exercises, saveExercise } = useExercises()
   const [type, setType] = useState<IntervalType>('work')
   const [title, setTitle] = useState('')
   const [duration, setDuration] = useState(30)
@@ -68,21 +69,15 @@ export function IntervalForm({ onAdd }: IntervalFormProps) {
         />
       </label>
       {type === 'work' && (
-        <label className="flex flex-col gap-1">
-          <span className="text-xs text-muted">Exercise</span>
-          <select
+        <div className="flex flex-col gap-1 min-w-40">
+          <span className="text-xs text-zinc-400">Exercise</span>
+          <ExercisePicker
+            exercises={exercises}
             value={exerciseId}
-            onChange={(e) => setExerciseId(e.target.value)}
-            className="bg-surface-alt text-fg rounded px-3 py-2 text-sm border border-border"
-          >
-            <option value="">Select exercise</option>
-            {exercises.map((ex) => (
-              <option key={ex.id} value={ex.id}>
-                {ex.name}
-              </option>
-            ))}
-          </select>
-        </label>
+            onChange={setExerciseId}
+            onQuickCreate={(ex) => saveExercise(ex)}
+          />
+        </div>
       )}
       <label className="flex flex-col gap-1">
         <span className="text-xs text-muted">Duration (sec)</span>
