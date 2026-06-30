@@ -108,6 +108,31 @@ describe('StatsDashboard', () => {
     })
   })
 
+  describe('export button', () => {
+    it('renders Export All Data button when sessions exist', () => {
+      const sessions = [
+        session({
+          startedAt: new Date('2026-06-30T10:00:00Z').getTime(),
+          intervals: [interval(600)],
+        }),
+      ]
+
+      render(<StatsDashboard sessions={sessions} />)
+
+      const btn = screen.getByRole('button', { name: /export all data/i })
+      expect(btn).toBeInTheDocument()
+      expect(btn).not.toBeDisabled()
+    })
+
+    it('renders Export All Data button in empty state', () => {
+      render(<StatsDashboard sessions={[]} />)
+
+      const btn = screen.getByRole('button', { name: /export all data/i })
+      expect(btn).toBeInTheDocument()
+      expect(btn).not.toBeDisabled()
+    })
+  })
+
   describe('recent sessions list', () => {
     it('renders last 10 sessions with date, name, duration, type', () => {
       const sessions = Array.from({ length: 12 }, (_, i) =>

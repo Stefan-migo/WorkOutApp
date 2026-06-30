@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useStats } from '@/hooks/useStats'
 import { useSessions } from '@/hooks/useSessions'
+import { exportAllData } from '@/lib/export-data'
 import type { Session } from '@/types/workout'
 
 function formatDate(ts: number) {
@@ -44,6 +45,12 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
         >
           Browse Workouts
         </Link>
+        <button
+          onClick={exportAllData}
+          className="px-6 py-3 bg-accent text-accent-on rounded-lg font-medium transition-colors"
+        >
+          Export All Data
+        </button>
       </div>
     )
   }
@@ -122,6 +129,16 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
             )
           })}
         </div>
+      </div>
+
+      {/* Export */}
+      <div className="flex justify-center">
+        <button
+          onClick={exportAllData}
+          className="px-6 py-3 bg-accent text-accent-on rounded-lg font-medium transition-colors"
+        >
+          Export All Data
+        </button>
       </div>
     </div>
   )

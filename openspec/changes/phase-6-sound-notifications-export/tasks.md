@@ -44,15 +44,15 @@ Chain strategy: stacked-to-main
 
 ### Phase 1: Lib — `exportAllData`
 
-- [ ] 1.1 RED: Write failing test — mock `localStorage` with empty/corrupt/normal `workoutapp.*` keys, verify blob creation and `<a>.click` trigger
-- [ ] 1.2 GREEN: Create `src/lib/export-data.ts` — `exportAllData()` reads `workoutapp.*` keys, builds JSON, triggers download via Blob + anchor click
-- [ ] 1.3 REFACTOR: Clean up — add `ponytail:` comment noting browser-native, no deps
+- [x] 1.1 RED: Write failing test — mock `localStorage` with empty/corrupt/normal `workoutapp.*` keys, verify blob creation and `<a>.click` trigger
+- [x] 1.2 GREEN: Create `src/lib/export-data.ts` — `exportAllData()` reads `workoutapp.*` keys, builds JSON, triggers download via Blob + anchor click
+- [x] 1.3 REFACTOR: Clean up — add `ponytail:` comment noting browser-native, no deps
 
 ### Phase 2: UI wiring
 
-- [ ] 2.1 Add "Export All Data" button to `src/components/StatsDashboard.tsx`, call `exportAllData` on click
-- [ ] 2.2 Visual test: button renders when sessions exist
+- [x] 2.1 Add "Export All Data" button to `src/components/StatsDashboard.tsx`, call `exportAllData` on click
+- [x] 2.2 Visual test: button renders when sessions exist
 
 ### Phase 3: Verify
 
-- [ ] 3.1 Verify tests pass, manual check that downloaded JSON contains all user data keys
+- [x] 3.1 Verify tests pass (32/32 — `vitest run`), manual check that downloaded JSON contains all user data keys
