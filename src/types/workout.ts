@@ -25,3 +25,30 @@ export interface Exercise {
   muscleGroup: string
   imageUrl?: string
 }
+
+// Phase 4: Calendar & Programming
+export interface DayAssignment {
+  workoutId?: string
+  sequenceId?: string
+  notes?: string
+}
+
+export interface WeekPlan {
+  id: string
+  title?: string
+  startDate: string // ISO YYYY-MM-DD of the Monday
+  days: [DayAssignment | null, DayAssignment | null, DayAssignment | null,
+         DayAssignment | null, DayAssignment | null, DayAssignment | null,
+         DayAssignment | null]
+  createdAt: number
+  updatedAt: number
+}
+
+export interface ProgramTemplate {
+  id: string
+  title: string
+  description?: string
+  days: (DayAssignment | null)[] // length 7
+  createdAt: number
+  updatedAt: number
+}
