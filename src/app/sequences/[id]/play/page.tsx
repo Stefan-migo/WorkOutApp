@@ -54,7 +54,7 @@ export default function PlaySequencePage() {
 
   const timer = useTimer(currentInterval?.duration ?? 0, () => {
     beep()
-    notify(workout?.title ?? sequence.title, intervalIdx + 1, flat.length)
+    notify(workout?.title ?? sequence?.title ?? 'Sequence', intervalIdx + 1, flat.length)
     if (skipRef.current) {
       // skip handler already captured interval data, just advance
       skipRef.current = false

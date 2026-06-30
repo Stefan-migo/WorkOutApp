@@ -51,7 +51,7 @@ export default function PlayWorkoutPage() {
   const { getExercise } = useExercises()
   const timer = useTimer(interval?.duration ?? 0, () => {
     beep()
-    notify(workout.title, currentIdx + 1, total)
+    notify(workout?.title ?? 'Workout', currentIdx + 1, total)
     if (skipRef.current) {
       skipRef.current = false
       if (currentIdx < total - 1) {

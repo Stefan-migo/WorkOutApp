@@ -4,14 +4,14 @@ import { exportAllData } from '../export-data'
 describe('exportAllData', () => {
   let capturedBlob: Blob | null
   let capturedAnchor: HTMLAnchorElement | null
-  let clickSpy: ReturnType<typeof vi.fn>
+  let clickCount: number
   let revokeSpy: ReturnType<typeof vi.fn>
 
   beforeEach(() => {
     localStorage.clear()
     capturedBlob = null
     capturedAnchor = null
-    clickSpy = vi.fn()
+    clickCount = 0
     revokeSpy = vi.fn()
 
     vi.stubGlobal('URL', {
@@ -27,7 +27,7 @@ describe('exportAllData', () => {
       const el = origCreateElement(tagName)
       if (tagName.toLowerCase() === 'a') {
         capturedAnchor = el as HTMLAnchorElement
-        vi.spyOn(el, 'click').mockImplementation(clickSpy)
+        vi.spyOn(el, 'click').mockImplementation(() => { clickCount++ })
       }
       return el
     })
@@ -44,7 +44,7 @@ describe('exportAllData', () => {
 
     exportAllData()
 
-    expect(clickSpy).toHaveBeenCalledOnce()
+    expect(clickCount).toBe(1)
     expect(capturedBlob).not.toBeNull()
     const text = await capturedBlob!.text()
     expect(JSON.parse(text)).toEqual({
@@ -57,7 +57,7 @@ describe('exportAllData', () => {
   it('handles empty localStorage gracefully', async () => {
     exportAllData()
 
-    expect(clickSpy).toHaveBeenCalledOnce()
+    expect(clickCount).toBe(1)
     expect(capturedBlob).not.toBeNull()
     const text = await capturedBlob!.text()
     expect(JSON.parse(text)).toEqual({})
