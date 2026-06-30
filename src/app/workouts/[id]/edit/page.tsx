@@ -39,9 +39,14 @@ export default function EditWorkoutPage() {
   }
 
   function handleChange(index: number, interval: Interval) {
+    // ponytail: force prepare on first, cooldown on last — no UI to opt out
+    const forcedType =
+      index === 0 ? 'prepare' as const
+      : index === intervals.length - 1 ? 'cooldown' as const
+      : interval.type
     setIntervals((prev) => {
       const next = [...prev]
-      next[index] = interval
+      next[index] = { ...interval, type: forcedType }
       return next
     })
   }

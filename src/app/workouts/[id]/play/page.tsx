@@ -80,6 +80,8 @@ export default function PlayWorkoutPage() {
 
   // ponytail: no drag, no reorder — flat list, upgrade with drag-and-drop in Phase 1
   const badgeClass = interval ? TYPE_BADGES[interval.type] ?? 'bg-zinc-600' : 'bg-zinc-600'
+  const invalidFirst = workout.intervals[0]?.type !== 'prepare'
+  const invalidLast = workout.intervals[workout.intervals.length - 1]?.type !== 'cooldown'
 
   return (
     <div className="max-w-lg mx-auto w-full p-6 flex flex-col items-center gap-8">
@@ -90,6 +92,12 @@ export default function PlayWorkoutPage() {
             {total} interval{total !== 1 && 's'} &middot;{' '}
             {Math.floor(workout.intervals.reduce((s, i) => s + i.duration, 0) / 60)} min
           </p>
+          {(invalidFirst || invalidLast) && (
+            <div className="w-full p-3 rounded-lg bg-amber-900/50 border border-amber-700 text-amber-300 text-sm text-center">
+              {invalidFirst && 'First interval should be "Prepare". '}
+              {invalidLast && 'Last interval should be "Cooldown".'}
+            </div>
+          )}
           <button
             onClick={handleStart}
             className="mt-4 px-12 py-4 bg-green-600 hover:bg-green-500 rounded-full text-xl font-bold transition-colors min-w-[44px] min-h-[44px]"

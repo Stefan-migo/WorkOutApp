@@ -13,11 +13,22 @@ function generateId(): string {
   return `workout-${Date.now()}-${nextId++}`
 }
 
+// ponytail: simple counter for interval IDs
+let intervalIdCounter = 1
+function intervalId(): string {
+  return `int-${intervalIdCounter++}`
+}
+
+const DEFAULT_INTERVALS: Interval[] = [
+  { id: intervalId(), type: 'prepare', title: 'Prepare', duration: 10 },
+  { id: intervalId(), type: 'cooldown', title: 'Cooldown', duration: 10 },
+]
+
 export default function NewWorkoutPage() {
   const { saveWorkout } = useWorkoutContext()
   const router = useRouter()
   const [title, setTitle] = useState('')
-  const [intervals, setIntervals] = useState<Interval[]>([])
+  const [intervals, setIntervals] = useState<Interval[]>(DEFAULT_INTERVALS)
 
   const totalDuration = intervals.reduce((s, i) => s + i.duration, 0)
   const totalMin = Math.floor(totalDuration / 60)
@@ -28,9 +39,14 @@ export default function NewWorkoutPage() {
   }
 
   function handleChange(index: number, interval: Interval) {
+    // ponytail: force prepare on first, cooldown on last — no UI to opt out
+    const forcedType =
+      index === 0 ? 'prepare' as const
+      : index === intervals.length - 1 ? 'cooldown' as const
+      : interval.type
     setIntervals((prev) => {
       const next = [...prev]
-      next[index] = interval
+      next[index] = { ...interval, type: forcedType }
       return next
     })
   }
