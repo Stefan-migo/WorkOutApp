@@ -60,32 +60,34 @@ export default function DayAssignmentModal({
     <dialog
       ref={ref}
       onClose={onClose}
-      className="rounded-xl bg-zinc-900 border border-zinc-700 text-white p-6 w-full max-w-md backdrop:bg-black/60"
+      className="rounded-xl bg-surface border border-outline-variant/50 text-on-surface p-lg w-full max-w-md backdrop:bg-black/40 open:animate-in fade-in-0 zoom-in-95"
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold">Assign Day {dayIndex + 1}</h2>
+        <h2 className="font-headline-md text-headline-md text-on-surface">
+          Assign Day {dayIndex + 1}
+        </h2>
 
         {/* Radio: Workout / Sequence */}
         <fieldset className="flex gap-4">
-          <label className="flex items-center gap-2 cursor-pointer">
+          <label className="flex items-center gap-2 cursor-pointer text-body-md text-sm">
             <input
               type="radio"
               name="mode"
               value="workout"
               checked={mode === 'workout'}
               onChange={() => { setMode('workout'); setSelectedId(''); setSearch('') }}
-              className="accent-blue-500"
+              className="accent-secondary"
             />
             Workout
           </label>
-          <label className="flex items-center gap-2 cursor-pointer">
+          <label className="flex items-center gap-2 cursor-pointer text-body-md text-sm">
             <input
               type="radio"
               name="mode"
               value="sequence"
               checked={mode === 'sequence'}
               onChange={() => { setMode('sequence'); setSelectedId(''); setSearch('') }}
-              className="accent-blue-500"
+              className="accent-secondary"
             />
             Sequence
           </label>
@@ -94,16 +96,16 @@ export default function DayAssignmentModal({
         {/* Search */}
         <input
           type="text"
-          placeholder={`Search ${mode}s…`}
+          placeholder={`Search ${mode}s\u2026`}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-600 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 rounded-lg bg-surface-container-low border border-outline-variant/50 text-body-md text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-secondary transition-all"
         />
 
         {/* Items list */}
         <div className="flex flex-col gap-1 max-h-48 overflow-y-auto">
           {filtered.length === 0 && (
-            <p className="text-sm text-zinc-500 py-2">
+            <p className="text-body-md text-sm text-on-surface-variant py-2">
               No {mode}s{search ? ' matching search' : ' available'}.
             </p>
           )}
@@ -112,8 +114,8 @@ export default function DayAssignmentModal({
               key={item.id}
               className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
                 selectedId === item.id
-                  ? 'bg-blue-600/20 border border-blue-500'
-                  : 'hover:bg-zinc-800 border border-transparent'
+                  ? 'bg-secondary-container/20 border border-secondary'
+                  : 'hover:bg-surface-container-low border border-transparent'
               }`}
             >
               <input
@@ -122,18 +124,21 @@ export default function DayAssignmentModal({
                 value={item.id}
                 checked={selectedId === item.id}
                 onChange={() => setSelectedId(item.id)}
-                className="accent-blue-500"
+                className="accent-secondary"
               />
               <div className="min-w-0">
-                <div className="text-sm font-medium truncate">{item.title}</div>
+                <div className="text-body-md text-sm font-medium text-on-surface truncate">
+                  {item.title}
+                </div>
                 {'intervals' in item && (
-                  <div className="text-xs text-zinc-400">
+                  <div className="text-data-sm text-xs text-on-surface-variant">
                     {formatDuration(item.intervals.reduce((s, i) => s + i.duration, 0))}
                   </div>
                 )}
                 {'workoutIds' in item && item.workoutIds && (
-                  <div className="text-xs text-zinc-400">
-                    {item.workoutIds.length} workout{item.workoutIds.length !== 1 && 's'} &middot; x{item.repeatCount}
+                  <div className="text-data-sm text-xs text-on-surface-variant">
+                    {item.workoutIds.length} workout
+                    {item.workoutIds.length !== 1 && 's'} &middot; x{item.repeatCount}
                   </div>
                 )}
               </div>
@@ -143,13 +148,15 @@ export default function DayAssignmentModal({
 
         {/* Notes */}
         <div className="flex flex-col gap-1">
-          <label htmlFor="notes" className="text-xs text-zinc-400 uppercase tracking-wider">Notes (optional)</label>
+          <label htmlFor="notes" className="font-label-caps text-label-caps text-on-surface-variant">
+            Notes (optional)
+          </label>
           <textarea
             id="notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
-            className="w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-600 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 rounded-lg bg-surface-container-low border border-outline-variant/50 text-body-md text-sm text-on-surface resize-none focus:outline-none focus:ring-2 focus:ring-secondary transition-all"
           />
         </div>
 
@@ -158,7 +165,7 @@ export default function DayAssignmentModal({
           <button
             type="button"
             onClick={handleClear}
-            className="px-4 py-2 rounded-lg text-sm bg-red-700 hover:bg-red-600 transition-colors"
+            className="px-4 py-2 rounded-lg text-sm bg-error-container text-on-error-container font-label-caps text-label-caps hover:bg-error hover:text-on-error transition-colors"
           >
             Clear
           </button>
@@ -166,14 +173,14 @@ export default function DayAssignmentModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg text-sm bg-zinc-700 hover:bg-zinc-600 transition-colors"
+              className="px-4 py-2 rounded-lg text-sm bg-surface-container-low text-on-surface font-label-caps text-label-caps hover:bg-surface-container transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!selectedId}
-              className="px-4 py-2 rounded-lg text-sm bg-blue-600 hover:bg-blue-500 disabled:opacity-40 transition-colors"
+              className="px-4 py-2 rounded-lg text-sm bg-primary text-on-primary font-label-caps text-label-caps hover:bg-primary/90 disabled:opacity-40 transition-colors ambient-shadow"
             >
               Assign
             </button>

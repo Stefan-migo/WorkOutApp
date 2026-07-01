@@ -1,28 +1,94 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { useWeekPlans } from '@/hooks/useWeekPlans'
 import { useProgramTemplates } from '@/hooks/useProgramTemplates'
 import { useWorkoutContext } from '@/context/WorkoutContext'
 import { useSequences } from '@/hooks/useSequences'
-import { getMonday, formatWeekRange, previousWeek, nextWeek } from '@/lib/calendar-utils'
+import { getMonday, formatWeekRange, previousWeek, nextWeek, getDayOfWeek } from '@/lib/calendar-utils'
 import DayAssignmentModal from '@/components/DayAssignmentModal'
-import type { DayAssignment, ProgramTemplate } from '@/types/workout'
+import type { DayAssignment, ProgramTemplate, Workout, Sequence } from '@/types/workout'
 
-const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const
+
+function formatDuration(totalSeconds: number): string {
+  const m = Math.floor(totalSeconds / 60)
+  const s = totalSeconds % 60
+  return `${m}:${String(s).padStart(2, '0')}`
+}
+
+// ponytail: heuristic type label from available data — no category field on Workout/Sequence yet
+function deriveTypeLabel(
+  assignment: DayAssignment,
+  workout?: Workout,
+  sequence?: Sequence,
+): string {
+  if (assignment.workoutId && workout) {
+    const hasNonWork = workout.intervals.some(
+      (i): boolean => i.type !== undefined && i.type !== 'work',
+    )
+    return hasNonWork ? 'HIIT' : 'Strength'
+  }
+  if (assignment.sequenceId && sequence) {
+    return sequence.workoutIds.length > 1 ? 'Circuit' : 'Strength'
+  }
+  return 'Training'
+}
 
 export default function CalendarPage() {
   const [currentMonday, setCurrentMonday] = useState(() => getMonday(new Date()))
   const [modalDay, setModalDay] = useState<number | null>(null)
   const [templateName, setTemplateName] = useState('')
   const [saveError, setSaveError] = useState('')
+  const router = useRouter()
 
   const { weekPlans, getWeekPlan, saveWeekPlan } = useWeekPlans()
   const { templates, saveTemplate, deleteTemplate } = useProgramTemplates()
   const { workouts, getWorkout } = useWorkoutContext()
   const { sequences, getSequence } = useSequences()
 
-  const weekPlan = useMemo(() => getWeekPlan(currentMonday), [currentMonday, weekPlans, getWeekPlan])
+  const weekPlan = useMemo(
+    () => getWeekPlan(currentMonday),
+    [currentMonday, weekPlans, getWeekPlan],
+  )
+
+  // -1 if viewing a different week
+  const today = useMemo(() => {
+    const now = new Date()
+    const todayMon = getMonday(now)
+    return todayMon === currentMonday ? getDayOfWeek(now) : -1
+  }, [currentMonday])
+
+  const todayAssignment = today >= 0 ? weekPlan.days[today] : null
+  const todayWorkout = todayAssignment?.workoutId
+    ? getWorkout(todayAssignment.workoutId)
+    : undefined
+  const todaySequence = todayAssignment?.sequenceId
+    ? getSequence(todayAssignment.sequenceId)
+    : undefined
+  const todayTypeLabel = todayAssignment
+    ? deriveTypeLabel(todayAssignment, todayWorkout, todaySequence)
+    : ''
+
+  const upcomingDays = useMemo(() => {
+    const result: { index: number; assignment: DayAssignment }[] = []
+    const isCurrentWeek = today >= 0
+    // Collect assigned days after "today" (or all if another week)
+    for (let i = isCurrentWeek ? today + 1 : 0; i < 7 && result.length < 3; i++) {
+      const a = weekPlan.days[i]
+      if (a) result.push({ index: i, assignment: a })
+    }
+    // Wrap from Monday if not enough
+    if (result.length < 3 && isCurrentWeek) {
+      for (let i = 0; i <= today && result.length < 3; i++) {
+        const a = weekPlan.days[i]
+        if (a && !result.some((r) => r.index === i))
+          result.push({ index: i, assignment: a })
+      }
+    }
+    return result
+  }, [weekPlan, today])
 
   function handleAssign(dayIndex: number, assignment: DayAssignment) {
     const days = [...weekPlan.days] as typeof weekPlan.days
@@ -60,116 +126,229 @@ export default function CalendarPage() {
 
   function handleApplyTemplate(template: ProgramTemplate) {
     // ponytail: native confirm — no custom modal for one-off question
-    if (!confirm(`Apply "${template.title}" to this week? This will overwrite all current day assignments.`)) return
+    if (
+      !confirm(
+        `Apply "${template.title}" to this week? This will overwrite all current day assignments.`,
+      )
+    )
+      return
     const days = [...template.days] as typeof weekPlan.days
     saveWeekPlan({ ...weekPlan, days })
   }
 
-  const currentDay = modalDay
-  const currentAssignment = currentDay !== null ? weekPlan.days[currentDay] : null
-
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen p-4 max-w-6xl mx-auto gap-4">
-      {/* Calendar */}
-      <div className="flex-1 flex flex-col gap-4">
+    <div className="flex flex-col md:flex-row min-h-screen p-margin-mobile md:p-margin-desktop max-w-6xl mx-auto gap-lg">
+      {/* Left: calendar grid */}
+      <div className="flex-1 flex flex-col gap-lg">
         {/* Week nav */}
         <div className="flex items-center justify-between">
-          <button
-            onClick={() => setCurrentMonday(previousWeek(currentMonday))}
-            className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-sm transition-colors"
-          >
-            ◀
-          </button>
-          <h1 className="text-lg font-semibold">{formatWeekRange(currentMonday)}</h1>
-          <button
-            onClick={() => setCurrentMonday(nextWeek(currentMonday))}
-            className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-sm transition-colors"
-          >
-            ▶
-          </button>
+          <div className="flex items-center gap-md">
+            <button
+              onClick={() => setCurrentMonday(previousWeek(currentMonday))}
+              className="p-xs rounded-full hover:bg-surface-container transition-colors"
+              aria-label="Previous week"
+            >
+              <span className="material-symbols-outlined text-on-surface-variant">chevron_left</span>
+            </button>
+            <h1 className="font-headline-md text-headline-md font-bold text-on-surface">
+              {formatWeekRange(currentMonday)}
+            </h1>
+            <button
+              onClick={() => setCurrentMonday(nextWeek(currentMonday))}
+              className="p-xs rounded-full hover:bg-surface-container transition-colors"
+              aria-label="Next week"
+            >
+              <span className="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+            </button>
+          </div>
         </div>
 
-        {/* 7-column grid */}
-        <div className="grid grid-cols-7 gap-2">
-          {DAY_NAMES.map((name, i) => {
-            const d = new Date(currentMonday + 'T00:00:00')
-            d.setDate(d.getDate() + i)
-            const dayNum = d.getDate()
-            const assignment = weekPlan.days[i]
+        {/* Day rows + Focus panel */}
+        <div className="flex flex-col lg:flex-row gap-lg">
+          {/* Day rows */}
+          <div className="flex-1 flex flex-col gap-md">
+            {DAY_NAMES.map((name, i) => {
+              const d = new Date(currentMonday + 'T00:00:00')
+              d.setDate(d.getDate() + i)
+              const dayNum = d.getDate()
+              const assignment = weekPlan.days[i]
+              const isToday = today === i
 
-            return (
-              <button
-                key={i}
-                onClick={() => setModalDay(i)}
-                className="flex flex-col items-center gap-1 p-3 rounded-xl bg-zinc-800/50 border border-zinc-700/50 hover:border-zinc-500 transition-colors min-h-24 text-left"
-              >
-                <span className="text-xs text-zinc-400 font-medium">{name}</span>
-                <span className="text-lg font-bold">{dayNum}</span>
-                {assignment ? (
-                  <DayCellContent
-                    assignment={assignment}
-                    getWorkout={getWorkout}
-                    getSequence={getSequence}
-                  />
-                ) : (
-                  <span className="text-xs text-zinc-500 mt-1">Rest</span>
-                )}
-              </button>
-            )
-          })}
+              const workout = assignment?.workoutId
+                ? getWorkout(assignment.workoutId)
+                : undefined
+              const sequence = assignment?.sequenceId
+                ? getSequence(assignment.sequenceId)
+                : undefined
+              const isDeleted = assignment !== null && !workout && !sequence
+              const title = isDeleted
+                ? '(deleted)'
+                : workout?.title ?? sequence?.title
+              const typeLabel =
+                assignment && !isDeleted
+                  ? deriveTypeLabel(assignment, workout, sequence)
+                  : ''
+              const totalSec = workout
+                ? workout.intervals.reduce((s, iv) => s + iv.duration, 0)
+                : 0
+
+              return (
+                <DayRow
+                  key={i}
+                  dayName={name}
+                  dayNum={dayNum}
+                  assignment={assignment}
+                  title={title}
+                  typeLabel={typeLabel}
+                  duration={totalSec}
+                  isToday={isToday}
+                  isEmpty={!assignment || isDeleted}
+                  onClick={() => setModalDay(i)}
+                />
+              )
+            })}
+          </div>
+
+          {/* Today's Focus panel */}
+          <TodaysFocus
+            assignment={todayAssignment}
+            workout={todayWorkout}
+            sequence={todaySequence}
+            typeLabel={todayTypeLabel}
+            isCurrentWeek={today >= 0}
+            onStartWorkout={() => {
+              if (todayAssignment?.workoutId)
+                router.push(`/workouts/${todayAssignment.workoutId}/play`)
+              else if (todayAssignment?.sequenceId)
+                router.push(`/sequences/${todayAssignment.sequenceId}/play`)
+            }}
+          />
         </div>
       </div>
 
-      {/* Template sidebar */}
-      <aside className="w-full lg:w-64 flex flex-col gap-4 border-t lg:border-t-0 lg:border-l border-zinc-800 pt-4 lg:pt-0 lg:pl-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">Templates</h2>
-
-        {/* Save current week */}
-        <div className="flex flex-col gap-2">
-          <input
-            type="text"
-            placeholder="Template name…"
-            value={templateName}
-            onChange={(e) => { setTemplateName(e.target.value); setSaveError('') }}
-            className="w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-600 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          {saveError && <p className="text-xs text-red-400">{saveError}</p>}
-          <button
-            onClick={handleSaveTemplate}
-            disabled={!templateName.trim()}
-            className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-sm font-medium transition-colors"
-          >
-            Save current week as template
-          </button>
+      {/* Right sidebar */}
+      <aside className="w-full md:w-80 flex flex-col gap-md">
+        {/* Templates — glass-card panel */}
+        <div className="glass-card rounded-lg p-md flex flex-col gap-md">
+          <h2 className="font-label-caps text-label-caps text-primary tracking-wider">
+            Templates
+          </h2>
+          <div className="flex flex-col gap-sm">
+            <input
+              type="text"
+              placeholder="Template name…"
+              value={templateName}
+              onChange={(e) => {
+                setTemplateName(e.target.value)
+                setSaveError('')
+              }}
+              className="w-full px-3 py-2 rounded-lg bg-surface border border-outline-variant/50 text-body-md text-sm focus:outline-none focus:ring-2 focus:ring-secondary transition-all"
+            />
+            {saveError && (
+              <p className="text-label-caps text-error">{saveError}</p>
+            )}
+            <button
+              onClick={handleSaveTemplate}
+              disabled={!templateName.trim()}
+              className="w-full px-3 py-2 rounded-lg bg-primary text-on-primary font-label-caps text-label-caps hover:bg-primary/90 disabled:opacity-40 transition-colors ambient-shadow"
+            >
+              Save current week
+            </button>
+          </div>
+          <div className="flex flex-col gap-sm max-h-48 overflow-y-auto no-scrollbar">
+            {templates.length === 0 && (
+              <p className="text-body-md text-sm text-on-surface-variant">
+                No templates saved yet.
+              </p>
+            )}
+            {templates.map((t) => (
+              <div
+                key={t.id}
+                className="flex items-center justify-between p-sm rounded-lg bg-surface-container-lowest border border-outline-variant/20"
+              >
+                <span className="text-body-md text-sm font-medium truncate text-on-surface">
+                  {t.title}
+                </span>
+                <div className="flex gap-1 shrink-0">
+                  <button
+                    onClick={() => handleApplyTemplate(t)}
+                    className="px-2 py-1 rounded bg-primary-container text-on-primary-container font-label-caps text-[10px] hover:bg-primary hover:text-on-primary transition-colors"
+                  >
+                    Apply
+                  </button>
+                  <button
+                    onClick={() => deleteTemplate(t.id)}
+                    className="px-2 py-1 rounded bg-error-container text-on-error-container font-label-caps text-[10px] hover:bg-error hover:text-on-error transition-colors"
+                  >
+                    Del
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Template list */}
-        <div className="flex flex-col gap-2">
-          {templates.length === 0 && (
-            <p className="text-sm text-zinc-500">No templates saved yet.</p>
+        {/* Upcoming mini-list */}
+        <div className="bg-surface-container-lowest border border-outline-variant/20 rounded-lg p-md flex flex-col gap-md">
+          <h4 className="font-label-caps text-label-caps text-on-surface-variant border-b border-outline-variant/20 pb-sm">
+            Upcoming
+          </h4>
+          {upcomingDays.length === 0 && (
+            <p className="text-body-md text-sm text-on-surface-variant">
+              No sessions scheduled.
+            </p>
           )}
-          {templates.map((t) => (
-            <div
-              key={t.id}
-              className="flex items-center justify-between p-2 rounded-lg bg-zinc-800/50 border border-zinc-700/50"
-            >
-              <span className="text-sm font-medium truncate">{t.title}</span>
-              <div className="flex gap-1 shrink-0">
-                <button
-                  onClick={() => handleApplyTemplate(t)}
-                  className="px-2 py-1 rounded bg-green-700 hover:bg-green-600 text-xs transition-colors"
-                >
-                  Apply
-                </button>
-                <button
-                  onClick={() => deleteTemplate(t.id)}
-                  className="px-2 py-1 rounded bg-red-800 hover:bg-red-700 text-xs transition-colors"
-                >
-                  Del
-                </button>
+          {upcomingDays.map(({ index, assignment }) => {
+            const d = new Date(currentMonday + 'T00:00:00')
+            d.setDate(d.getDate() + index)
+            const w = assignment.workoutId
+              ? getWorkout(assignment.workoutId)
+              : undefined
+            const s = assignment.sequenceId
+              ? getSequence(assignment.sequenceId)
+              : undefined
+            const title = w?.title ?? s?.title ?? '(deleted)'
+            const label = deriveTypeLabel(assignment, w, s)
+            const seconds = w
+              ? w.intervals.reduce((sum, iv) => sum + iv.duration, 0)
+              : 0
+            return (
+              <div key={index} className="flex gap-sm items-start">
+                <div className="w-12 h-12 bg-surface-container-low rounded-lg flex items-center justify-center flex-shrink-0 text-secondary-container font-data-lg text-data-lg font-bold">
+                  {d.getDate()}
+                </div>
+                <div className="min-w-0">
+                  <span className="block font-body-md text-body-md font-bold text-sm text-on-surface truncate">
+                    {title}
+                  </span>
+                  <span className="block font-data-sm text-data-sm text-on-surface-variant mt-xs">
+                    {label}
+                    {seconds > 0 && ` \u2022 ${formatDuration(seconds)}`}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
+        </div>
+
+        {/* Motivational card */}
+        <div className="glass-card rounded-lg p-md relative overflow-hidden">
+          <div className="relative z-10">
+            <span className="material-symbols-outlined text-primary mb-sm block">
+              insights
+            </span>
+            <p className="font-body-md text-body-md font-medium text-sm text-primary">
+              On track for a 4-week streak. Maintain focus.
+            </p>
+          </div>
+          <div className="absolute -bottom-10 -right-10 opacity-5">
+            <span
+              className="material-symbols-outlined"
+              style={{ fontSize: 120 }}
+            >
+              fitness_center
+            </span>
+          </div>
         </div>
       </aside>
 
@@ -177,7 +356,7 @@ export default function CalendarPage() {
       {modalDay !== null && (
         <DayAssignmentModal
           dayIndex={modalDay}
-          currentAssignment={currentAssignment}
+          currentAssignment={weekPlan.days[modalDay]}
           workouts={workouts}
           sequences={sequences}
           onAssign={handleAssign}
@@ -189,38 +368,209 @@ export default function CalendarPage() {
   )
 }
 
-/** Renders the assigned workout/sequence name + duration, or "(deleted)" if stale reference. */
-function DayCellContent({
+// --- Sub-components -------------------------------------------------------
+
+function DayRow({
+  dayName,
+  dayNum,
   assignment,
-  getWorkout,
-  getSequence,
+  title,
+  typeLabel,
+  duration,
+  isToday,
+  isEmpty,
+  onClick,
 }: {
-  assignment: DayAssignment
-  getWorkout: (id: string) => { title: string; intervals: { duration: number }[] } | undefined
-  getSequence: (id: string) => { title: string } | undefined
+  dayName: string
+  dayNum: number
+  assignment: DayAssignment | null
+  title?: string
+  typeLabel: string
+  duration: number
+  isToday: boolean
+  isEmpty: boolean
+  onClick: () => void
 }) {
-  if (assignment.workoutId) {
-    const w = getWorkout(assignment.workoutId)
-    if (!w) return <span className="text-xs text-zinc-500 mt-1 italic">(deleted)</span>
-    const totalSec = w.intervals.reduce((s, i) => s + i.duration, 0)
+  if (isToday && !isEmpty) {
+    // Active day row — primary container styling
     return (
-      <>
-        <span className="text-xs font-medium truncate w-full text-center">{w.title}</span>
-        <span className="text-[10px] text-zinc-400">{formatDuration(totalSec)}</span>
-      </>
+      <button
+        onClick={onClick}
+        className="flex items-center gap-md p-md bg-primary-container border-2 border-primary rounded-lg shadow-lg"
+      >
+        <div className="flex flex-col items-center justify-center w-16 h-16 bg-primary text-on-primary rounded-lg shrink-0">
+          <span className="font-label-caps text-label-caps opacity-80">{dayName}</span>
+          <span className="font-headline-md text-headline-md font-bold">{dayNum}</span>
+        </div>
+        <div className="flex-1 min-w-0 text-left">
+          <h4 className="font-body-md text-body-md font-bold text-on-primary truncate">
+            {title}
+          </h4>
+          <div className="flex gap-xs mt-xs items-center">
+            <span className="px-sm py-0.5 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded-full uppercase tracking-wider">
+              {typeLabel}
+            </span>
+            <span className="font-data-sm text-data-sm text-on-primary-container">
+              {duration > 0 ? `${Math.floor(duration / 60)} min` : ''}
+            </span>
+          </div>
+        </div>
+        <span className="material-symbols-outlined text-on-primary">check_circle</span>
+      </button>
     )
   }
-  if (assignment.sequenceId) {
-    const s = getSequence(assignment.sequenceId)
-    if (!s) return <span className="text-xs text-zinc-500 mt-1 italic">(deleted)</span>
-    // ponytail: sequence duration is computed at play time from its workouts — display title only
-    return <span className="text-xs font-medium truncate w-full text-center">{s.title}</span>
+
+  if (isEmpty) {
+    // Empty day — dashed border, italic "Rest Day"
+    return (
+      <button
+        onClick={onClick}
+        className="flex items-center gap-md p-md bg-surface-container-lowest/50 border border-dashed border-outline-variant/30 rounded-lg hover:border-primary transition-colors cursor-pointer group"
+      >
+        <div className="flex flex-col items-center justify-center w-16 h-16 bg-surface-container-low/50 rounded-lg shrink-0">
+          <span className="font-label-caps text-label-caps text-on-surface-variant">{dayName}</span>
+          <span className="font-headline-md text-headline-md font-bold text-on-surface-variant">
+            {dayNum}
+          </span>
+        </div>
+        <div className="flex-1 text-left">
+          {assignment ? (
+            <span className="text-on-surface-variant italic text-body-md">
+              (deleted)
+            </span>
+          ) : (
+            <span className="text-on-surface-variant italic text-body-md">
+              Rest Day / Active Recovery
+            </span>
+          )}
+        </div>
+        <span className="material-symbols-outlined text-outline-variant group-hover:text-primary">
+          add_circle
+        </span>
+      </button>
+    )
   }
-  return null
+
+  // Normal assigned day
+  return (
+    <button
+      onClick={onClick}
+      className="flex items-center gap-md p-md bg-surface-container-lowest border border-outline-variant/20 rounded-lg hover:border-primary transition-colors cursor-pointer group"
+    >
+      <div className="flex flex-col items-center justify-center w-16 h-16 bg-surface-container-low rounded-lg shrink-0">
+        <span className="font-label-caps text-label-caps text-on-surface-variant">{dayName}</span>
+        <span className="font-headline-md text-headline-md font-bold text-on-surface">{dayNum}</span>
+      </div>
+      <div className="flex-1 min-w-0 text-left">
+        <h4 className="font-body-md text-body-md font-bold text-on-surface truncate">
+          {title}
+        </h4>
+        <div className="flex gap-xs mt-xs items-center">
+          <span className="px-sm py-0.5 bg-primary-fixed-dim text-on-primary-fixed-variant text-[10px] font-bold rounded-full uppercase tracking-wider">
+            {typeLabel}
+          </span>
+          <span className="font-data-sm text-data-sm text-on-surface-variant">
+            {duration > 0 ? `${Math.floor(duration / 60)} min` : ''}
+          </span>
+        </div>
+      </div>
+      <span className="material-symbols-outlined text-outline-variant group-hover:text-primary">
+        chevron_right
+      </span>
+    </button>
+  )
 }
 
-function formatDuration(totalSeconds: number): string {
-  const m = Math.floor(totalSeconds / 60)
-  const s = totalSeconds % 60
-  return `${m}:${String(s).padStart(2, '0')}`
+function TodaysFocus({
+  assignment,
+  workout,
+  sequence,
+  typeLabel,
+  isCurrentWeek,
+  onStartWorkout,
+}: {
+  assignment: DayAssignment | null
+  workout?: Workout
+  sequence?: Sequence
+  typeLabel: string
+  isCurrentWeek: boolean
+  onStartWorkout: () => void
+}) {
+  const title = workout?.title ?? sequence?.title
+  const totalSec = workout
+    ? workout.intervals.reduce((s, i) => s + i.duration, 0)
+    : 0
+
+  if (!isCurrentWeek || !assignment || !title) {
+    return (
+      <div className="w-full lg:w-96 bg-surface-container-low rounded-lg p-lg flex flex-col gap-lg border border-outline-variant/20 self-start">
+        <span className="font-label-caps text-label-caps text-primary font-bold">
+          Today&apos;s Focus
+        </span>
+        <div className="flex flex-col items-center gap-sm py-lg text-center">
+          <span className="material-symbols-outlined text-[40px] text-on-surface-variant">
+            event_busy
+          </span>
+          <p className="font-body-md text-body-md text-on-surface-variant">
+            No session scheduled for today.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  const intervals = workout?.intervals ?? []
+
+  return (
+    <div className="w-full lg:w-96 bg-surface-container-low rounded-lg p-lg flex flex-col gap-lg border border-outline-variant/20 self-start">
+      <div className="flex justify-between items-start">
+        <div>
+          <span className="font-label-caps text-label-caps text-primary font-bold">
+            Today&apos;s Focus
+          </span>
+          <h3 className="font-headline-md text-headline-md font-bold text-on-surface mt-xs">
+            {title}
+          </h3>
+        </div>
+        <span className="px-md py-xs bg-secondary-container text-on-secondary-container font-label-caps text-label-caps rounded-full">
+          {typeLabel}
+        </span>
+      </div>
+      <div className="flex flex-col gap-md">
+        <div className="flex items-center gap-sm text-on-surface-variant">
+          <span className="material-symbols-outlined text-sm">timer</span>
+          <span className="font-data-sm text-data-sm">
+            {totalSec > 0 ? `${Math.floor(totalSec / 60)} Minutes Total` : ''}
+          </span>
+        </div>
+        {intervals.length > 0 && (
+          <div className="flex flex-col gap-sm">
+            <h5 className="font-label-caps text-label-caps text-on-surface-variant border-b border-outline-variant/30 pb-xs">
+              Exercise List
+            </h5>
+            <ul className="flex flex-col gap-xs">
+              {intervals.map((iv, idx) => (
+                <li
+                  key={idx}
+                  className="flex justify-between text-body-md text-sm"
+                >
+                  <span className="text-on-surface">{iv.title}</span>
+                  <span className="font-data-sm text-data-sm text-on-surface-variant">
+                    {formatDuration(iv.duration)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+      <button
+        onClick={onStartWorkout}
+        className="mt-auto w-full py-md bg-primary text-on-primary rounded-lg font-label-caps text-label-caps font-bold hover:bg-primary/90 transition-colors ambient-shadow flex items-center justify-center gap-sm"
+      >
+        <span className="material-symbols-outlined">play_arrow</span>
+        Start Workout
+      </button>
+    </div>
+  )
 }
