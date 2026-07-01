@@ -9,20 +9,22 @@ import { useSessions } from '@/hooks/useSessions'
 import { useTimer } from '@/hooks/useTimer'
 import { useBeep } from '@/hooks/useBeep'
 import { useIntervalNotification } from '@/hooks/useIntervalNotification'
-import { TimerDisplay } from '@/components/TimerDisplay'
 import { ProgressBar } from '@/components/ProgressBar'
 import { TimerControls } from '@/components/TimerControls'
+import { TimerRing } from '@/components/TimerRing'
+import { PlayHeader } from '@/components/PlayHeader'
+import { ExercisePanel } from '@/components/ExercisePanel'
+import { useExercises } from '@/hooks/useExercises'
 import { flattenWorkout } from '@/lib/interval-engine'
 import { getTotalRounds, getRoundAt, getProgress } from '@/lib/sequence-engine'
 import type { CompletedInterval } from '@/types/workout'
 
 type Phase = 'idle' | 'active' | 'workout-summary' | 'complete'
 
-const TYPE_BADGES: Record<string, string> = {
-  prepare: 'bg-interval-prepare',
-  work: 'bg-interval-work',
-  rest: 'bg-interval-rest',
-  cooldown: 'bg-interval-cooldown',
+function formatTime(seconds: number): string {
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 }
 
 export default function PlaySequencePage() {
@@ -33,6 +35,7 @@ export default function PlaySequencePage() {
   const { addSession } = useSessions()
   const { beep } = useBeep()
   const { notify } = useIntervalNotification()
+  const { getExercise } = useExercises()
 
   const sequence = getSequence(params.id)
   const totalRounds = sequence ? getTotalRounds(sequence) : 0
@@ -51,6 +54,9 @@ export default function PlaySequencePage() {
   const flat = useMemo(() => (workout ? flattenWorkout(workout) : []), [workout?.id])
   const currentInterval = flat[intervalIdx]
   const progress = sequence ? getProgress(sequence, roundIdx) : { current: 0, total: 0, percent: 0 }
+
+  const exercise = currentInterval?.exerciseId ? getExercise(currentInterval.exerciseId) : undefined
+  const nextInterval = flat[intervalIdx + 1]
 
   const timer = useTimer(currentInterval?.duration ?? 0, () => {
     beep()
@@ -208,9 +214,9 @@ export default function PlaySequencePage() {
 
   if (!sequence) {
     return (
-      <div className="flex flex-col items-center justify-center flex-1 gap-4 p-8 text-center text-fg">
-        <h1 className="text-2xl font-bold">Sequence not found</h1>
-        <Link href="/sequences" className="text-accent hover:underline">
+      <div className="timer-dark-bg text-white min-h-screen flex flex-col items-center justify-center gap-4 px-margin-mobile">
+        <h1 className="font-headline-lg text-headline-lg">Sequence not found</h1>
+        <Link href="/sequences" className="text-gray-400 hover:text-white transition-colors">
           &larr; Back to sequences
         </Link>
       </div>
@@ -219,14 +225,14 @@ export default function PlaySequencePage() {
 
   if (!workout && phase !== 'complete') {
     return (
-      <div className="flex flex-col items-center justify-center flex-1 gap-4 p-8 text-center text-fg">
-        <h1 className="text-2xl font-bold">Workout not found</h1>
-        <p className="text-muted">A workout in this sequence may have been deleted.</p>
+      <div className="timer-dark-bg text-white min-h-screen flex flex-col items-center justify-center gap-4 px-margin-mobile">
+        <h1 className="font-headline-lg text-headline-lg">Workout not found</h1>
+        <p className="font-body-md text-body-md text-gray-400">A workout in this sequence may have been deleted.</p>
         <div className="flex gap-4">
-          <button onClick={handleSkipWorkout} className="px-6 py-3 rounded-lg bg-accent text-accent-on font-medium">
+          <button onClick={handleSkipWorkout} className="px-6 py-3 rounded-full bg-white text-primary font-medium hover:bg-gray-200 transition-colors">
             Skip to next
           </button>
-          <Link href="/sequences" className="px-6 py-3 rounded-lg bg-surface text-fg font-medium">
+          <Link href="/sequences" className="px-6 py-3 rounded-full border border-white/20 text-white font-medium hover:bg-white/10 transition-colors">
             Back to sequences
           </Link>
         </div>
@@ -234,7 +240,6 @@ export default function PlaySequencePage() {
     )
   }
 
-  const badgeClass = currentInterval ? TYPE_BADGES[currentInterval.type] ?? 'bg-zinc-600' : 'bg-zinc-600'
   const totalDuration = flat.reduce((s, i) => s + i.duration, 0)
   const progressVal =
     totalDuration > 0 && currentInterval
@@ -243,113 +248,135 @@ export default function PlaySequencePage() {
       : 0
 
   return (
-    <div className="max-w-lg mx-auto w-full p-6 flex flex-col items-center gap-8 bg-[#1e1416] text-[#f7f3f1] min-h-screen">
-      {/* Progress bar — visible during active and summary phases */}
-      {phase !== 'idle' && (
-        <div className="w-full">
-          <div className="flex justify-between text-sm mb-1" style={{ color: '#8a7678' }}>
-            <span>Workout {progress.current + 1}/{progress.total}</span>
-            <span>{progress.percent}% complete</span>
+    <div className="timer-dark-bg text-white min-h-screen flex flex-col">
+      <PlayHeader title={sequence.title} onClose={() => router.push('/sequences')} />
+
+      <main className="flex-grow flex flex-col items-center px-margin-mobile py-lg w-full max-w-4xl mx-auto">
+        {/* Progress bar — visible during active and summary phases */}
+        {phase !== 'idle' && (
+          <div className="w-full max-w-2xl mb-lg">
+            <div className="flex justify-between items-center mb-sm">
+              <span className="font-data-sm text-data-sm text-gray-400">Sequence Progress</span>
+              <span className="font-data-sm text-data-sm text-white">{progress.percent}%</span>
+            </div>
+            <ProgressBar progress={progress.percent / 100} label="Sequence progress" dark />
+            <div className="flex justify-between w-full font-label-caps text-label-caps text-gray-400 mt-sm">
+              <span>Round {roundInfo?.round ?? 0}/{sequence.repeatCount}</span>
+              <span>Workout {progress.current + 1}/{progress.total}</span>
+            </div>
           </div>
-          <ProgressBar progress={progress.percent / 100} label="Sequence progress" />
-        </div>
-      )}
+        )}
 
-      {phase === 'idle' && (
-        <>
-          <h1 className="text-3xl font-bold text-center mt-12" style={{ color: '#f7f3f1' }}>{sequence.title}</h1>
-          <p className="text-center" style={{ color: '#8a7678' }}>
-            {totalRounds} round{totalRounds !== 1 && 's'} &middot;{' '}
-            {sequence.workoutIds.length} workout{sequence.workoutIds.length !== 1 && 's'}
-            {sequence.repeatCount > 1 && ` × ${sequence.repeatCount}`}
-          </p>
-          <button
-            onClick={handleStart}
-            className="mt-4 px-12 py-4 bg-accent hover:bg-accent text-accent-on rounded-full text-xl font-bold transition-colors min-w-[44px] min-h-[44px]"
-          >
-            Start Sequence
-          </button>
-        </>
-      )}
+        {phase === 'idle' && (
+          <>
+            <h1 className="font-headline-lg text-headline-lg text-white mb-sm mt-lg">{sequence.title}</h1>
+            <p className="font-body-md text-body-md text-gray-400 mb-lg">
+              {totalRounds} round{totalRounds !== 1 && 's'} &middot;{' '}
+              {sequence.workoutIds.length} workout{sequence.workoutIds.length !== 1 && 's'}
+              {sequence.repeatCount > 1 && ` × ${sequence.repeatCount}`}
+            </p>
+            <button
+              onClick={handleStart}
+              className="px-12 py-4 bg-white text-primary rounded-full text-xl font-bold hover:bg-gray-200 transition-colors"
+            >
+              Start Sequence
+            </button>
+          </>
+        )}
 
-      {phase === 'active' && (
-        <>
-          <div className="flex items-center gap-3 w-full">
-            <span className={`px-3 py-1 rounded-full text-xs font-medium text-white ${badgeClass}`}>
-              {currentInterval?.type}
-            </span>
-            <span className="text-sm" style={{ color: '#8a7678' }}>
-              {intervalIdx + 1} / {flat.length}
-            </span>
-            {roundInfo && (
-              <span className="px-2 py-0.5 rounded-full text-xs font-medium border border-accent text-accent">
-                Round {roundInfo.round}/{sequence.repeatCount}
-              </span>
+        {phase === 'active' && (
+          <>
+            {/* Timer Ring */}
+            {currentInterval && (
+              <TimerRing
+                timeLeft={timer.timeLeft}
+                duration={currentInterval.duration}
+                intervalType={currentInterval.type}
+                label={currentInterval.type}
+                nextLabel={nextInterval ? `Next: ${nextInterval.type} (${formatTime(nextInterval.duration)})` : undefined}
+              />
+            )}
+
+            {/* Exercise Panel */}
+            {exercise && (
+              <ExercisePanel
+                name={exercise.name}
+                description={exercise.description}
+                chips={exercise.muscleGroups}
+              />
+            )}
+
+            {/* Controls */}
+            <TimerControls
+              status={timer.status}
+              onPause={timer.pause}
+              onResume={timer.resume}
+              onSkip={handleSkipInterval}
+              onRestart={handleRestart}
+              onRewind={() => timer.addTime(-10)}
+            />
+
+            {/* Workout-level Progress */}
+            <div className="w-full max-w-2xl mt-lg">
+              <div className="flex justify-between items-center mb-sm">
+                <span className="font-data-sm text-data-sm text-gray-400">Workout Progress</span>
+                <span className="font-data-sm text-data-sm text-white">{Math.round(progressVal * 100)}%</span>
+              </div>
+              <ProgressBar progress={progressVal} label="Workout progress" dark />
+              <div className="flex justify-between w-full font-label-caps text-label-caps text-gray-400 mt-sm">
+                <span>{intervalIdx + 1} of {flat.length}</span>
+              </div>
+            </div>
+
+            {/* ponytail: flat skip + finish buttons, no sub-menus */}
+            <div className="flex items-center justify-center gap-4 mt-lg">
+              <button
+                onClick={handleSkipWorkout}
+                className="px-4 py-2 rounded-lg text-sm font-medium border border-white/20 text-gray-400 hover:text-white transition-colors"
+              >
+                Skip to next workout
+              </button>
+              <button
+                onClick={handleFinishEarly}
+                className="px-4 py-2 rounded-lg text-sm font-medium border border-red-400/50 text-red-400 hover:text-white transition-colors"
+              >
+                Finish Early
+              </button>
+            </div>
+          </>
+        )}
+
+        {phase === 'workout-summary' && (
+          <div className="flex flex-col items-center gap-4 mt-12 text-center">
+            <h1 className="font-headline-lg text-headline-lg text-white">Workout Complete!</h1>
+            <p className="font-body-md text-body-md text-gray-400">
+              {workout?.title} &mdash; {flat.length} interval{flat.length !== 1 && 's'}
+            </p>
+            {countdown > 0 && (
+              <>
+                <p className="font-body-lg text-body-lg text-white">Next workout in {countdown}s</p>
+                <button
+                  onClick={goToNextRound}
+                  className="px-6 py-3 rounded-full bg-white text-primary font-medium hover:bg-gray-200 transition-colors"
+                >
+                  Next Workout
+                </button>
+              </>
             )}
           </div>
+        )}
 
-          <h2 className="text-xl font-semibold -mt-4" style={{ color: '#f7f3f1' }}>
-            {workout?.title} &mdash; {currentInterval?.title}
-          </h2>
-
-          <TimerDisplay timeLeft={timer.timeLeft} />
-          <ProgressBar progress={progressVal} label="Workout progress" />
-          <TimerControls
-            status={timer.status}
-            onPause={timer.pause}
-            onResume={timer.resume}
-            onSkip={handleSkipInterval}
-            onRestart={handleRestart}
-          />
-
-          {/* ponytail: flat skip + finish buttons, no sub-menus */}
-          <div className="flex items-center justify-center gap-4">
-            <button
-              onClick={handleSkipWorkout}
-              className="px-4 py-2 rounded-lg text-sm font-medium border border-border text-muted hover:text-fg transition-colors min-w-[44px] min-h-[44px]"
-            >
-              Skip to next workout
-            </button>
-            <button
-              onClick={handleFinishEarly}
-              className="px-4 py-2 rounded-lg text-sm font-medium border border-status-warning text-status-warning hover:text-fg transition-colors min-w-[44px] min-h-[44px]"
-            >
-              Finish Early
-            </button>
+        {phase === 'complete' && (
+          <div className="flex flex-col items-center gap-4 mt-12 text-center">
+            <h1 className="font-headline-lg text-headline-lg text-white">Sequence Complete!</h1>
+            <p className="font-body-md text-body-md text-gray-400">
+              {completedIntervals.length} interval{completedIntervals.length !== 1 && 's'} across{' '}
+              {totalRounds} round{totalRounds !== 1 && 's'}
+            </p>
+            <p className="font-body-md text-body-md text-gray-400">Saving session...</p>
           </div>
-        </>
-      )}
-
-      {phase === 'workout-summary' && (
-        <div className="flex flex-col items-center gap-4 mt-12 text-center">
-          <h1 className="text-3xl font-bold" style={{ color: '#3a7050' }}>Workout Complete!</h1>
-          <p style={{ color: '#8a7678' }}>
-            {workout?.title} &mdash; {flat.length} interval{flat.length !== 1 && 's'}
-          </p>
-          {countdown > 0 && (
-            <>
-              <p className="text-lg" style={{ color: '#f7f3f1' }}>Next workout in {countdown}s</p>
-              <button
-                onClick={goToNextRound}
-                className="px-6 py-3 rounded-lg bg-accent text-accent-on font-medium transition-colors min-w-[44px] min-h-[44px]"
-              >
-                Next Workout
-              </button>
-            </>
-          )}
-        </div>
-      )}
-
-      {phase === 'complete' && (
-        <div className="flex flex-col items-center gap-4 mt-12 text-center">
-          <h1 className="text-3xl font-bold" style={{ color: '#3a7050' }}>Sequence Complete!</h1>
-          <p style={{ color: '#8a7678' }}>
-            {completedIntervals.length} interval{completedIntervals.length !== 1 && 's'} across{' '}
-            {totalRounds} round{totalRounds !== 1 && 's'}
-          </p>
-          <p style={{ color: '#8a7678' }}>Saving session...</p>
-        </div>
-      )}
+        )}
+      </main>
     </div>
   )
 }
