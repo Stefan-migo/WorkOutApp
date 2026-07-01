@@ -16,11 +16,11 @@ function session(overrides: Partial<Session> & { startedAt: number }): Session {
   }
 }
 
-function interval(actual: number) {
+function interval(actual: number, type: 'work' | 'rest' | 'prepare' | 'cooldown' = 'work') {
   return {
     intervalId: 'i1',
-    title: 'Work',
-    type: 'work' as const,
+    title: type === 'work' ? 'Work' : 'Rest',
+    type,
     plannedDuration: actual,
     actualDuration: actual,
     completed: true,
@@ -37,133 +37,137 @@ describe('StatsDashboard', () => {
       expect(link).toHaveAttribute('href', '/workouts')
     })
 
-    it('does not show cards, chart, or session list in empty state', () => {
+    it('does not show populated content in empty state', () => {
       render(<StatsDashboard sessions={[]} />)
 
-      expect(screen.queryByText('Total Workouts')).not.toBeInTheDocument()
-      expect(screen.queryByText('Total Time')).not.toBeInTheDocument()
-      expect(screen.queryByText('Current Streak')).not.toBeInTheDocument()
-      expect(screen.queryByText('This Week')).not.toBeInTheDocument()
-      expect(screen.queryByText('Recent Sessions')).not.toBeInTheDocument()
+      expect(screen.queryByText('Volume per Week')).not.toBeInTheDocument()
+      expect(screen.queryByText('Average Strain')).not.toBeInTheDocument()
+      expect(screen.queryByText('Consistency')).not.toBeInTheDocument()
+      expect(screen.queryByText('Personal Records')).not.toBeInTheDocument()
     })
   })
 
-  describe('summary cards', () => {
-    it('renders 4 summary cards with correct values', () => {
-      const sessions = [
-        session({
-          startedAt: new Date('2026-06-30T10:00:00Z').getTime(),
-          intervals: [interval(3600), interval(600)], // 4200s total = 1.17h
-        }),
-        session({
-          startedAt: new Date('2026-06-29T10:00:00Z').getTime(),
-          intervals: [interval(1800)], // 1800s
-        }),
-      ]
-
-      render(<StatsDashboard sessions={sessions} />)
-
-      // All 4 card labels present
-      expect(screen.getByText('Total Workouts')).toBeInTheDocument()
-      expect(screen.getByText('Total Time')).toBeInTheDocument()
-      expect(screen.getByText('Current Streak')).toBeInTheDocument()
-      expect(screen.getByText('This Week')).toBeInTheDocument()
-
-      // 3 cards show "2" (Total Workouts, Current Streak, This Week)
-      expect(screen.getAllByText('2')).toHaveLength(3)
-
-      // Total Time in hours (6000s = 1.67h, rounded to 1.7)
-      expect(screen.getByText(/1\.7h/)).toBeInTheDocument()
-    })
-
-    it('displays 0 values when sessions exist but are old', () => {
-      const sessions = [
-        session({
-          startedAt: new Date('2026-06-01T10:00:00Z').getTime(),
-          intervals: [interval(600)],
-        }),
-      ]
-
-      render(<StatsDashboard sessions={sessions} />)
-
-      const cards = screen.getAllByText('0')
-      // At least the streak and this week should be 0
-      expect(cards.length).toBeGreaterThanOrEqual(2)
-    })
-  })
-
-  describe('weekly volume chart', () => {
-    it('renders bars for each of 12 weeks', () => {
-      const sessions = [
-        session({
-          startedAt: new Date('2026-06-30T10:00:00Z').getTime(),
-          intervals: [interval(1200)],
-        }),
-      ]
-
-      render(<StatsDashboard sessions={sessions} />)
-
-      // Should show "Weekly Volume" heading
-      expect(screen.getByText('Weekly Volume')).toBeInTheDocument()
-    })
-  })
-
-  describe('export button', () => {
-    it('renders Export All Data button when sessions exist', () => {
-      const sessions = [
-        session({
-          startedAt: new Date('2026-06-30T10:00:00Z').getTime(),
-          intervals: [interval(600)],
-        }),
-      ]
-
-      render(<StatsDashboard sessions={sessions} />)
-
-      const btn = screen.getByRole('button', { name: /export all data/i })
-      expect(btn).toBeInTheDocument()
-      expect(btn).not.toBeDisabled()
-    })
-
-    it('renders Export All Data button in empty state', () => {
-      render(<StatsDashboard sessions={[]} />)
-
-      const btn = screen.getByRole('button', { name: /export all data/i })
-      expect(btn).toBeInTheDocument()
-      expect(btn).not.toBeDisabled()
-    })
-  })
-
-  describe('recent sessions list', () => {
-    it('renders last 10 sessions with date, name, duration, type', () => {
-      const sessions = Array.from({ length: 12 }, (_, i) =>
-        session({
-          startedAt: new Date(`2026-06-${30 - i}T10:00:00Z`).getTime(),
-          intervals: [interval(600)],
-        }),
+  describe('header', () => {
+    it('shows Performance Stats heading and subtitle', () => {
+      render(
+        <StatsDashboard
+          sessions={[
+            session({ startedAt: Date.now(), intervals: [interval(600)] }),
+          ]}
+        />,
       )
 
-      render(<StatsDashboard sessions={sessions} />)
-
-      expect(screen.getByText('Recent Sessions')).toBeInTheDocument()
-      // Should show 10 session entries
-      const items = screen.getAllByText(/Workout/)
-      expect(items.length).toBeGreaterThanOrEqual(1) // At least one rendered session name
+      expect(screen.getByText('Performance Stats')).toBeInTheDocument()
+      expect(screen.getByText('Last 30 Days Overview')).toBeInTheDocument()
     })
 
-    it('shows type badge for each session', () => {
-      const sessions = [
-        session({
-          type: 'sequence',
-          sequenceId: 'seq1',
-          startedAt: new Date('2026-06-30T10:00:00Z').getTime(),
-          intervals: [interval(600)],
-        }),
-      ]
+    it('shows Export CSV and Detailed View buttons', () => {
+      render(
+        <StatsDashboard
+          sessions={[
+            session({ startedAt: Date.now(), intervals: [interval(600)] }),
+          ]}
+        />,
+      )
 
-      render(<StatsDashboard sessions={sessions} />)
+      expect(screen.getByRole('button', { name: /export csv/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /detailed view/i })).toBeInTheDocument()
+    })
+  })
 
-      // Type badge should show "sequence"
-      expect(screen.getByText('sequence')).toBeInTheDocument()
+  describe('bento grid sections', () => {
+    it('renders Volume per Week section with bars', () => {
+      render(
+        <StatsDashboard
+          sessions={[
+            session({ startedAt: Date.now(), intervals: [interval(600)] }),
+          ]}
+        />,
+      )
+
+      expect(screen.getByText('Volume per Week')).toBeInTheDocument()
+      expect(screen.getByText('Wk 1')).toBeInTheDocument()
+    })
+
+    it('renders Average Strain with RPE gauge', () => {
+      render(
+        <StatsDashboard
+          sessions={[
+            session({ startedAt: Date.now(), intervals: [interval(600)] }),
+          ]}
+        />,
+      )
+
+      expect(screen.getByText('Average Strain')).toBeInTheDocument()
+      expect(screen.getByText('RPE Focus')).toBeInTheDocument()
+      expect(screen.getByText('Avg RPE')).toBeInTheDocument()
+    })
+
+    it('renders Consistency heatmap with day labels', () => {
+      render(
+        <StatsDashboard
+          sessions={[
+            session({ startedAt: Date.now(), intervals: [interval(600)] }),
+          ]}
+        />,
+      )
+
+      expect(screen.getByText('Consistency')).toBeInTheDocument()
+      expect(screen.getByText('Mon')).toBeInTheDocument()
+      expect(screen.getByText('Sun')).toBeInTheDocument()
+    })
+
+    it('renders Personal Records section with placeholder exercises', () => {
+      render(
+        <StatsDashboard
+          sessions={[
+            session({ startedAt: Date.now(), intervals: [interval(600)] }),
+          ]}
+        />,
+      )
+
+      expect(screen.getByText('Personal Records')).toBeInTheDocument()
+      expect(screen.getByText('View All')).toBeInTheDocument()
+      expect(screen.getByText('Deadlift')).toBeInTheDocument()
+      expect(screen.getByText('Back Squat')).toBeInTheDocument()
+      expect(screen.getByText('Bench Press')).toBeInTheDocument()
+    })
+  })
+
+  describe('heatmap', () => {
+    it('renders 28 cells (4 weeks × 7 days)', () => {
+      const { container } = render(
+        <StatsDashboard
+          sessions={[
+            session({ startedAt: Date.now(), intervals: [interval(600)] }),
+          ]}
+        />,
+      )
+
+      // Heatmap grid has 28 cells inside the Consistency card
+      const cells = container
+        .querySelector('.glass-card') // first glass-card is volume, need consistency
+        ?.querySelectorAll('.grid > div')
+      // Use a broader approach
+      const consistencyCard = screen.getByText('Consistency').closest('.glass-card')
+      const heatmapCells = consistencyCard?.querySelectorAll('.grid > div')
+      expect(heatmapCells?.length).toBe(28)
+    })
+  })
+
+  describe('formatDuration and formatHours', () => {
+    it('formatHours returns correct string', async () => {
+      const { formatHours } = await import('../StatsDashboard')
+      expect(formatHours(3600)).toBe('1.0h')
+      expect(formatHours(5400)).toBe('1.5h')
+      expect(formatHours(900)).toBe('0.3h')
+    })
+
+    it('formatDuration returns mm:ss format', async () => {
+      const { formatDuration } = await import('../StatsDashboard')
+      expect(formatDuration(65)).toBe('1:05')
+      expect(formatDuration(3600)).toBe('60:00')
+      expect(formatDuration(30)).toBe('0:30')
     })
   })
 })
