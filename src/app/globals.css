@@ -64,12 +64,12 @@
   --color-segment-cooldown: #8b5cf6;
 
   /* Font families */
-  --font-headline: 'Inter', system-ui, sans-serif;
-  --font-body: 'Inter', system-ui, sans-serif;
-  --font-label: 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
-  --font-timer: 'JetBrains Mono', monospace;
-  --font-data: 'JetBrains Mono', monospace;
+  --font-headline: var(--font-inter), system-ui, sans-serif;
+  --font-body: var(--font-inter), system-ui, sans-serif;
+  --font-label: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  --font-timer: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  --font-data: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
 
   /* Font-size utilities with line-height, tracking, weight */
   --text-headline-lg: 32px;
