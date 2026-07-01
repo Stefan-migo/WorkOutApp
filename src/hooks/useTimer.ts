@@ -26,7 +26,7 @@ export function useTimer(duration: number, onComplete?: () => void) {
 
   const tick = useCallback(() => {
     const elapsed = elapsedRef.current + (Date.now() - startTimeRef.current) / 1000
-    const remaining = Math.max(0, Math.round(duration - elapsed))
+    const remaining = Math.max(0, Math.min(duration, Math.round(duration - elapsed)))
     setTimeLeft(remaining)
 
     if (remaining <= 0) {
@@ -66,6 +66,16 @@ export function useTimer(duration: number, onComplete?: () => void) {
     onComplete?.()
   }, [clearTimer, onComplete])
 
+  // ponytail: single-thread assumption, concurrent addTime calls could race
+  const addTime = useCallback((delta: number) => {
+    setTimeLeft((prev) => {
+      const next = Math.max(0, Math.min(duration, prev + delta))
+      const adj = prev - next // positive when rewinding
+      elapsedRef.current += adj
+      return next
+    })
+  }, [duration])
+
   const reset = useCallback(() => {
     clearTimer()
     setTimeLeft(duration)
@@ -73,5 +83,5 @@ export function useTimer(duration: number, onComplete?: () => void) {
     setStatus('idle')
   }, [duration, clearTimer])
 
-  return { status, timeLeft, progress, start, pause, resume, skip, reset }
+  return { status, timeLeft, progress, start, pause, resume, skip, addTime, reset }
 }
