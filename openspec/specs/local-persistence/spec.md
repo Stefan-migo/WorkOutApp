@@ -11,7 +11,7 @@
 | LP-5 | Persist on every save action (not auto-save on edit — save button only) | MUST |
 | LP-6 | Generate unique IDs via `crypto.randomUUID()` or Date-based fallback | MUST |
 | LP-7 | Delete SHALL be available for exercises from `/exercises` page. Delete is NOT supported for workouts (LP-7 unchanged for workouts) | MUST |
-| LP-8 | `localStorage` calls wrapped in try/catch for SSR and quota errors | SHOULD |
+| LP-8 | `useLocalStorage` MUST use a lazy `useState` callback initializer reading from `localStorage`. On quota errors, `console.warn('Storage quota exceeded for key:', key)` MUST fire. | MUST |
 | LP-9 | Persist sequences under key `workoutapp.sequences` using the same try/catch SSR-safe pattern from LP-1 | MUST |
 | LP-10 | Persist sessions under key `workoutapp.sessions` using the same append-only pattern | MUST |
 | LP-11 | Persist `WeekPlan[]` under localStorage key `workoutapp.weekPlans` using same SSR-safe try/catch pattern from LP-1. `getWeekPlan(date)` SHALL return existing or auto-create new plan | MUST |
@@ -97,3 +97,13 @@
 - GIVEN `workoutapp.programTemplates` contains invalid JSON
 - WHEN the calendar sidebar loads
 - THEN the list is empty, no error thrown
+
+### Scenario: Lazy init reads stored value
+- GIVEN `localStorage` has `workoutapp.workouts` = `[{"id":"w1"}]`
+- WHEN `useLocalStorage('workoutapp.workouts', [])` initializes
+- THEN state is `[{"id":"w1"}]` without rendering the default first
+
+### Scenario: Quota error is logged
+- GIVEN `localStorage` is full
+- WHEN `useLocalStorage` tries to write
+- THEN `console.warn('Storage quota exceeded for key:', key)` fires

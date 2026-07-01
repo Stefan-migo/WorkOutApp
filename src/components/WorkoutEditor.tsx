@@ -4,9 +4,10 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import { IntervalRow } from '@/components/IntervalRow'
 import { TimelineStrip } from '@/components/TimelineStrip'
 import { IntervalDetailSheet } from '@/components/IntervalDetailSheet'
+import { SEGMENT_BG, SEGMENT_TEXT, SEGMENT_DOT, TYPE_ICONS } from '@/lib/segment-styles'
 import { flattenWorkout } from '@/lib/interval-engine'
 import { useExercises } from '@/hooks/useExercises'
-import type { Interval, Workout } from '@/types/workout'
+import type { Exercise, Interval, Workout } from '@/types/workout'
 
 // ponytail: counter ID, upgrade to crypto.randomUUID if collisions become an issue
 let nextId = 1
@@ -43,30 +44,34 @@ export function createInterval(type: AddBlockType): Interval {
   }
 }
 
-// ponytail: exhaustive map so Tailwind v4 resolves all class strings
-const SEGMENT_CLASSES: Record<AddBlockType, { bg: string; text: string; border: string; bg10: string }> = {
-  prepare: { bg: 'bg-segment-prepare', text: 'text-segment-prepare', border: 'border-t-segment-prepare', bg10: 'bg-segment-prepare/10' },
-  work: { bg: 'bg-segment-work', text: 'text-segment-work', border: 'border-t-segment-work', bg10: 'bg-segment-work/10' },
-  rest: { bg: 'bg-segment-rest', text: 'text-segment-rest', border: 'border-t-segment-rest', bg10: 'bg-segment-rest/10' },
-  cooldown: { bg: 'bg-segment-cooldown', text: 'text-segment-cooldown', border: 'border-t-segment-cooldown', bg10: 'bg-segment-cooldown/10' },
+export function buildExerciseInterval(exercise: Exercise): Interval {
+  return {
+    id: intervalId(),
+    type: 'work',
+    title: exercise.name,
+    duration: 60,
+    exerciseId: exercise.id,
+  }
 }
 
-const TYPE_ICONS: Record<AddBlockType, string> = {
-  prepare: 'self_improvement',
-  work: 'directions_run',
-  rest: 'pause_circle',
-  cooldown: 'ac_unit',
+// ponytail: exhaustive map so Tailwind v4 resolves all class strings
+const SEGMENT_CLASSES: Record<AddBlockType, { bg: string; text: string; border: string; bg10: string }> = {
+  prepare: { bg: SEGMENT_DOT.prepare, text: SEGMENT_TEXT.prepare, border: 'border-t-segment-prepare', bg10: SEGMENT_BG.prepare },
+  work: { bg: SEGMENT_DOT.work, text: SEGMENT_TEXT.work, border: 'border-t-segment-work', bg10: SEGMENT_BG.work },
+  rest: { bg: SEGMENT_DOT.rest, text: SEGMENT_TEXT.rest, border: 'border-t-segment-rest', bg10: SEGMENT_BG.rest },
+  cooldown: { bg: SEGMENT_DOT.cooldown, text: SEGMENT_TEXT.cooldown, border: 'border-t-segment-cooldown', bg10: SEGMENT_BG.cooldown },
 }
 
 interface WorkoutEditorProps {
   existingWorkout?: Workout
+  initialIntervals?: Interval[]
   onSave: (workout: Workout) => void
   onCancel?: () => void
 }
 
-export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: WorkoutEditorProps) {
+export default function WorkoutEditor({ existingWorkout, initialIntervals, onSave, onCancel }: WorkoutEditorProps) {
   const [title, setTitle] = useState(existingWorkout?.title ?? '')
-  const [intervals, setIntervals] = useState<Interval[]>(existingWorkout?.intervals ?? DEFAULT_INTERVALS)
+  const [intervals, setIntervals] = useState<Interval[]>(existingWorkout?.intervals ?? initialIntervals ?? DEFAULT_INTERVALS)
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const { exercises } = useExercises()
 
@@ -78,9 +83,6 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
 
   // ponytail: dirty flag on user interaction, no deep compare
   const dirtyRef = useRef(false)
-  // ponytail: markDirty is declared but currently unused; kept for future beforeunled check
-  const markDirty = () => { dirtyRef.current = true }
-  const hasChanges = dirtyRef.current
 
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
@@ -127,7 +129,7 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
     dirtyRef.current = true
     setIntervals((prev) => {
       const next = [...prev]
-      ;[next[index - 1], next[index]] = [next[index], next[index - 1]]
+      ;[next[index - 1], next[index]] = [next[index]!, next[index - 1]!]
       return next
     })
   }
@@ -137,7 +139,7 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
     setIntervals((prev) => {
       if (index >= prev.length - 1) return prev
       const next = [...prev]
-      ;[next[index], next[index + 1]] = [next[index + 1], next[index]]
+      ;[next[index]!, next[index + 1]!] = [next[index + 1]!, next[index]!]
       return next
     })
   }
@@ -147,7 +149,7 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
     dirtyRef.current = true
     setIntervals((prev) => {
       const next = [...prev]
-      const parent = next[parentIndex]
+      const parent = next[parentIndex]!
       next[parentIndex] = { ...parent, cycleCount: count }
       return next
     })
@@ -157,9 +159,9 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
     dirtyRef.current = true
     setIntervals((prev) => {
       const next = [...prev]
-      const parent = next[parentIndex]
+      const parent = next[parentIndex]!
       if (!parent.children) return prev
-      const children = [...parent.children]
+      const children = [...parent.children] as Interval[]
       children[childIndex] = child
       next[parentIndex] = { ...parent, children }
       return next
@@ -170,12 +172,12 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
     dirtyRef.current = true
     setIntervals((prev) => {
       const next = [...prev]
-      const parent = next[parentIndex]
+      const parent = next[parentIndex]!
       if (!parent.children) return prev
       const children = parent.children.filter((_, i) => i !== childIndex)
-      next[parentIndex] = children.length === 0
+      next[parentIndex] = (children.length === 0
         ? { ...parent, children: undefined }
-        : { ...parent, children }
+        : { ...parent, children }) as Interval
       return next
     })
   }
@@ -185,10 +187,10 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
     dirtyRef.current = true
     setIntervals((prev) => {
       const next = [...prev]
-      const parent = next[parentIndex]
+      const parent = next[parentIndex]!
       if (!parent.children) return prev
-      const children = [...parent.children]
-      ;[children[childIndex - 1], children[childIndex]] = [children[childIndex], children[childIndex - 1]]
+      const children = [...parent.children] as Interval[]
+      ;[children[childIndex - 1]!, children[childIndex]!] = [children[childIndex]!, children[childIndex - 1]!]
       next[parentIndex] = { ...parent, children }
       return next
     })
@@ -198,10 +200,10 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
     dirtyRef.current = true
     setIntervals((prev) => {
       const next = [...prev]
-      const parent = next[parentIndex]
+      const parent = next[parentIndex]!
       if (!parent.children || childIndex >= parent.children.length - 1) return prev
-      const children = [...parent.children]
-      ;[children[childIndex], children[childIndex + 1]] = [children[childIndex + 1], children[childIndex]]
+      const children = [...parent.children] as Interval[]
+      ;[children[childIndex]!, children[childIndex + 1]!] = [children[childIndex + 1]!, children[childIndex]!]
       next[parentIndex] = { ...parent, children }
       return next
     })
@@ -228,7 +230,7 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
   // ponytail: click timeline block → open sheet for that original interval
   function handleTimelineClick(idx: number) {
     const fi = flat[idx]
-    if (fi.isGenerated) return
+    if (!fi || fi.isGenerated) return
     const origIdx = intervals.findIndex((i) => i.id === fi.id)
     if (origIdx >= 0) setEditingIndex(origIdx)
   }
@@ -255,15 +257,15 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
   const canSave = title.trim().length > 0 && intervals.length > 0
 
   return (
-    <div className="max-w-2xl mx-auto w-full p-6 flex flex-col gap-6">
-      <div className="glass-card rounded-xl p-md flex flex-col md:flex-row justify-between items-start md:items-end gap-lg">
+    <div className="max-w-2xl mx-auto w-full p-margin-mobile md:p-margin-desktop flex flex-col gap-6">
+      <div className="glass-card rounded-xl p-16 flex flex-col md:flex-row justify-between items-start md:items-end gap-24">
         <div className="w-full md:w-2/3">
           <label className="block font-label text-label-caps text-on-surface-variant mb-xs uppercase tracking-wider">Workout Title</label>
           <input
             type="text"
             value={title}
             placeholder="Name your workout..."
-            className="w-full bg-transparent border-0 border-b-2 border-outline-variant pb-xs font-headline text-headline-lg text-on-surface focus:border-secondary focus:ring-0 transition-colors px-0 outline-none placeholder:text-outline/50"
+            className="w-full bg-transparent border-0 border-b-2 border-outline-variant pb-xs font-headline text-headline-lg text-on-surface focus:border-secondary focus:ring-0 transition-colors px-0 outline-none placeholder:text-outline/50 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
             onChange={(e) => { dirtyRef.current = true; setTitle(e.target.value) }}
           />
         </div>
@@ -280,32 +282,38 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
       )}
 
       {intervals.length === 0 ? (
-        <p className="text-on-surface-variant text-center py-12">Add intervals to build your workout</p>
+        <div className="glass-card rounded-xl p-24 flex flex-col items-center justify-center gap-16 text-center py-[64px] border-dashed border-2 border-outline-variant/30">
+          <span className="material-symbols-outlined text-[40px] text-on-surface-variant/40">playlist_add</span>
+          <div>
+            <p className="font-headline-md text-headline-md text-on-surface font-bold">No intervals yet</p>
+            <p className="font-body-md text-body-md text-on-surface-variant mt-xs">Add blocks below to build your workout</p>
+          </div>
+        </div>
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-16">
           {intervals.map((interval, i) => {
             if (interval.children?.length) {
               const childTotal = interval.children.reduce((s, ch) => s + ch.duration, 0)
               const childMin = Math.floor(childTotal / 60)
               const childSec = childTotal % 60
               return (
-                <div key={interval.id} className="mt-lg relative">
+                <div key={interval.id} className="mt-24 relative">
                   {/* Cycle Bracket — CSS-only visual */}
                   <div className="absolute left-0 top-0 bottom-0 w-8 border-l-2 border-y-2 border-outline-variant/40 rounded-l-lg z-0 pointer-events-none" />
                   {/* Cycle Header */}
-                  <div className="flex justify-between items-center pl-sm pr-md py-xs mb-sm relative z-10">
-                    <div className="flex items-center gap-sm">
+                  <div className="flex justify-between items-center pl-8 pr-16 py-xs mb-8 relative z-10">
+                    <div className="flex items-center gap-8">
                       <span className="font-label-caps text-label-caps uppercase text-on-surface-variant font-bold">{interval.title} Cycle</span>
-                      <span className="bg-surface-dim px-sm py-[2px] rounded text-[11px] font-data-sm text-on-surface font-bold">
+                      <span className="bg-surface-dim px-8 py-[2px] rounded text-label-caps font-data-sm text-on-surface font-bold">
                         Total: {childMin}:{String(childSec).padStart(2, '0')}
                       </span>
                     </div>
                     <div className="flex items-center gap-xs">
-                      <span className="font-label-caps text-[10px] uppercase text-on-surface-variant">Repeats:</span>
+                      <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">Repeats:</span>
                       <select
                         value={interval.cycleCount ?? 4}
                         onChange={(e) => handleCycleCountChange(i, Number(e.target.value))}
-                        className="bg-surface border border-outline-variant/50 rounded px-2 py-1 text-data-sm font-data-sm text-primary font-bold focus:ring-secondary focus:border-secondary"
+                        className="bg-surface border border-outline-variant/50 rounded px-2 py-1 text-data-sm font-data-sm text-primary font-bold focus:ring-secondary focus:border-secondary focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
                       >
                         {[2, 3, 4, 5, 6].map((n) => (
                           <option key={n} value={n}>x{n}</option>
@@ -314,7 +322,7 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
                     </div>
                   </div>
                   {/* Children rendered indented inside the bracket */}
-                  <div className="space-y-sm ml-sm relative z-10">
+                  <div className="space-y-8 ml-8 relative z-10">
                     {interval.children.map((child, ci) => (
                       <IntervalRow
                         key={child.id}
@@ -351,7 +359,7 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
 
       {editingIndex !== null && (
         <IntervalDetailSheet
-          interval={intervals[editingIndex]}
+          interval={intervals[editingIndex]!}
           onSave={handleSheetSave}
           onClose={() => setEditingIndex(null)}
           exercises={exercises}
@@ -359,14 +367,14 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
       )}
 
       {/* Add Block bento grid */}
-      <div className="pt-lg border-t border-outline-variant/30 mt-xl">
-        <h3 className="font-label text-label-caps uppercase text-on-surface-variant mb-md text-center tracking-widest">Add Block</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-md">
+      <div className="pt-24 border-t border-outline-variant/30 mt-32">
+        <h3 className="font-label text-label-caps uppercase text-on-surface-variant mb-16 text-center tracking-widest">Add Block</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-16">
           {(['prepare', 'work', 'rest', 'cooldown'] as const).map((type) => (
             <button
               key={type}
               onClick={() => handleAdd(createInterval(type))}
-              className={`glass-card p-md rounded-xl flex flex-col items-center justify-center gap-sm hover:-translate-y-1 hover:shadow-md transition-all duration-200 ${SEGMENT_CLASSES[type].border} group`}
+              className={`glass-card p-16 rounded-xl flex flex-col items-center justify-center gap-8 hover:-translate-y-1 hover:shadow-md transition-all duration-200 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ${SEGMENT_CLASSES[type].border} group`}
             >
               <div className={`w-10 h-10 rounded-full ${SEGMENT_CLASSES[type].bg10} ${SEGMENT_CLASSES[type].text} flex items-center justify-center group-hover:scale-110 transition-transform`}>
                 <span className="material-symbols-outlined">{TYPE_ICONS[type]}</span>
@@ -375,11 +383,11 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
             </button>
           ))}
         </div>
-        <div className="mt-md flex justify-center">
+        <div className="mt-16 flex justify-center">
           <button
             onClick={handleWrapInCycle}
             disabled={intervals.length < 2}
-            className="flex items-center gap-sm px-lg py-sm rounded-lg bg-surface border border-outline-variant hover:border-primary hover:bg-surface-dim transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="flex items-center gap-8 px-24 py-8 rounded-lg bg-surface border border-outline-variant hover:border-primary hover:bg-surface-dim transition-colors disabled:opacity-30 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
           >
             <span className="material-symbols-outlined text-[18px] text-primary">data_object</span>
             <span className="font-label-caps text-label-caps uppercase font-bold text-primary">Wrap in Cycle</span>
@@ -391,7 +399,7 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
         {onCancel && (
           <button
             onClick={onCancel}
-            className="flex-1 py-3 bg-surface border border-outline-variant text-on-surface rounded-lg font-medium transition-colors hover:bg-surface-dim font-label text-label-caps uppercase tracking-wider"
+            className="flex-1 py-3 bg-surface border border-outline-variant text-on-surface rounded-lg font-medium transition-colors hover:bg-surface-dim font-label text-label-caps uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
           >
             Discard
           </button>
@@ -399,7 +407,7 @@ export default function WorkoutEditor({ existingWorkout, onSave, onCancel }: Wor
         <button
           onClick={handleSave}
           disabled={!canSave}
-          className="flex-1 py-3 bg-primary-container hover:bg-primary disabled:bg-surface-container-low disabled:text-on-surface-variant text-on-primary rounded-lg font-medium transition-colors font-label text-label-caps uppercase tracking-wider"
+          className="flex-1 py-3 bg-primary-container hover:bg-primary disabled:bg-surface-container-low disabled:text-on-surface-variant text-on-primary rounded-lg font-medium transition-colors font-label text-label-caps uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
         >
           {existingWorkout ? 'Update Workout' : 'Save Workout'}
         </button>

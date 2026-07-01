@@ -72,7 +72,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises }: In
           overflow-y: auto;
         }
         .interval-sheet::backdrop {
-          background: rgba(30, 20, 22, 0.4);
+          background: rgba(0, 0, 0, 0.1);
         }
       `}</style>
       <dialog

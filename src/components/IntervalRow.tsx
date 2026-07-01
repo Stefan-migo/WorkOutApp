@@ -1,5 +1,6 @@
 'use client'
 
+import { SEGMENT_BORDER, SEGMENT_BG, SEGMENT_TEXT, TYPE_ICONS } from '@/lib/segment-styles'
 import type { Interval } from '@/types/workout'
 import { useExercises } from '@/hooks/useExercises'
 
@@ -12,35 +13,6 @@ interface IntervalRowProps {
   onMoveDown?: (index: number) => void
   isFirst?: boolean
   isLast?: boolean
-}
-
-// ponytail: exhaustive maps so Tailwind v4 resolves all class strings
-const SEGMENT_BORDER: Record<string, string> = {
-  prepare: 'border-l-segment-prepare',
-  work: 'border-l-segment-work',
-  rest: 'border-l-segment-rest',
-  cooldown: 'border-l-segment-cooldown',
-}
-
-const SEGMENT_BG10: Record<string, string> = {
-  prepare: 'bg-segment-prepare/10',
-  work: 'bg-segment-work/10',
-  rest: 'bg-segment-rest/10',
-  cooldown: 'bg-segment-cooldown/10',
-}
-
-const SEGMENT_TEXT: Record<string, string> = {
-  prepare: 'text-segment-prepare',
-  work: 'text-segment-work',
-  rest: 'text-segment-rest',
-  cooldown: 'text-segment-cooldown',
-}
-
-const TYPE_ICON: Record<string, string> = {
-  prepare: 'self_improvement',
-  work: 'directions_run',
-  rest: 'pause_circle',
-  cooldown: 'ac_unit',
 }
 
 export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onMoveDown, isFirst, isLast }: IntervalRowProps) {
@@ -57,13 +29,13 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
   return (
     <div className={`glass-card rounded-lg flex items-center group transition-all duration-200 border-l-4 ${SEGMENT_BORDER[interval.type] ?? 'border-l-segment-work'} pl-0 hover:shadow-md relative overflow-hidden`}>
       {/* Drag Handle */}
-      <div className="px-sm py-md text-outline-variant cursor-grab flex items-center justify-center">
+      <div className="px-8 py-16 text-outline-variant cursor-grab flex items-center justify-center">
         <span className="material-symbols-outlined text-[20px]">drag_indicator</span>
       </div>
 
       {/* Type Icon */}
-      <div className={`p-sm ${SEGMENT_BG10[interval.type] ?? 'bg-segment-work/10'} ${SEGMENT_TEXT[interval.type] ?? 'text-segment-work'} rounded-md mr-md flex items-center justify-center`}>
-        <span className="material-symbols-outlined text-[20px]">{TYPE_ICON[interval.type] ?? 'fitness_center'}</span>
+      <div className={`p-8 ${SEGMENT_BG[interval.type] ?? 'bg-segment-work/10'} ${SEGMENT_TEXT[interval.type] ?? 'text-segment-work'} rounded-md mr-16 flex items-center justify-center`}>
+        <span className="material-symbols-outlined text-[20px]">{TYPE_ICONS[interval.type] ?? 'fitness_center'}</span>
       </div>
 
       {/* Title + Description */}
@@ -81,7 +53,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
       </div>
 
       {/* Duration + Actions */}
-      <div className="px-md flex items-center gap-sm border-l border-outline-variant/30 py-md">
+      <div className="px-16 flex items-center gap-8 border-l border-outline-variant/30 py-16">
         <input
           type="text"
           value={durationStr}
@@ -89,15 +61,15 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
             // ponytail: parse MM:SS input, default to current duration on parse failure
             const parts = e.target.value.split(':')
             if (parts.length === 2) {
-              const m = parseInt(parts[0], 10) || 0
-              const s = parseInt(parts[1], 10) || 0
+              const m = parseInt(parts[0]!, 10) || 0
+              const s = parseInt(parts[1]!, 10) || 0
               onChange(index, { ...interval, duration: m * 60 + s })
             }
           }}
           className="bg-transparent border-none p-0 font-data-lg text-data-lg text-primary focus:ring-0 focus:outline-none w-20 text-center font-bold tracking-tight"
           aria-label={`Interval ${index + 1} duration`}
         />
-        <div className="hidden group-hover:flex gap-xs items-center pl-sm">
+        <div className="hidden group-hover:flex gap-xs items-center pl-8">
           {/* Move Up */}
           <button
             onClick={() => onMoveUp?.(index)}

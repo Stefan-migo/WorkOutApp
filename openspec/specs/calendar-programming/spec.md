@@ -87,3 +87,57 @@ The system MUST define a `ProgramTemplate` type with fields `{ id, title, descri
 - GIVEN a newly saved template
 - WHEN retrieved from storage
 - THEN `createdAt` and `updatedAt` are set to the save timestamp
+
+## Testing Requirements (Phase 4 — Test Migration)
+
+Testing requirements for calendar utility functions, migrated from inline `runCalendarTests()` asserts to proper Vitest `describe`/`it`/`expect`.
+
+### Requirement: CU-T1 — getMonday returns correct Monday ISO date
+
+`getMonday` MUST return the ISO YYYY-MM-DD of the Monday of the week containing the given date, regardless of input day.
+
+#### Scenario: Monday input returns itself
+- GIVEN a Monday date `2026-06-29T12:00:00`
+- WHEN `getMonday(date)` is called
+- THEN the result MUST be `'2026-06-29'`
+
+#### Scenario: Wednesday returns previous Monday
+- GIVEN a Wednesday `2026-07-01T12:00:00`
+- WHEN `getMonday(date)` is called
+- THEN the result MUST be `'2026-06-29'`
+
+#### Scenario: Sunday returns previous Monday
+- GIVEN a Sunday `2026-07-05T12:00:00`
+- WHEN `getMonday(date)` is called
+- THEN the result MUST be `'2026-06-29'`
+
+### Requirement: CU-T2 — formatWeekRange returns human-readable range
+
+`formatWeekRange` MUST format a start Monday into a human range like `"Jun 29 - Jul 5, 2026"`.
+
+#### Scenario: same-month range contains start day, end day, and year
+- GIVEN startDate `'2026-06-29'`
+- WHEN `formatWeekRange(startDate)` is called
+- THEN the result MUST include `'Jun 29'`, `'Jul 5'`, and `'2026'`
+
+### Requirement: CU-T3 — previousWeek and nextWeek shift by 7 days
+
+#### Scenario: nextWeek adds 7 days
+- GIVEN `'2026-06-29'`
+- WHEN `nextWeek(startDate)` is called
+- THEN the result MUST be `'2026-07-06'`
+
+#### Scenario: previousWeek subtracts 7 days
+- GIVEN `'2026-06-29'`
+- WHEN `previousWeek(startDate)` is called
+- THEN the result MUST be `'2026-06-22'`
+
+### Requirement: CU-T4 — getDayOfWeek returns Mon=0 .. Sun=6
+
+#### Scenario: Monday returns 0, Tuesday returns 1, Sunday returns 6
+- GIVEN `2026-06-29` (Monday)
+- WHEN `getDayOfWeek(date)` is called
+- THEN result MUST be 0
+- GIVEN `2026-07-05` (Sunday)
+- WHEN `getDayOfWeek(date)` is called
+- THEN result MUST be 6

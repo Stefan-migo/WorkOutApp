@@ -178,7 +178,7 @@ describe('computeStats', () => {
       expect(r.weeklyVolume).toHaveLength(12)
 
       // Check labels follow ISO week format
-      expect(r.weeklyVolume[0].weekLabel).toMatch(/^\d{4}-W\d{2}$/)
+      expect(r.weeklyVolume[0]!.weekLabel).toMatch(/^\d{4}-W\d{2}$/)
     })
   })
 
@@ -191,9 +191,9 @@ describe('computeStats', () => {
 
       expect(r.recentSessions).toHaveLength(10)
       // First should be most recent (Jun 30)
-      expect(new Date(r.recentSessions[0].startedAt).toISOString().slice(0, 10)).toBe('2026-06-30')
+      expect(new Date(r.recentSessions[0]!.startedAt).toISOString().slice(0, 10)).toBe('2026-06-30')
       // Last should be Jun 21
-      expect(new Date(r.recentSessions[9].startedAt).toISOString().slice(0, 10)).toBe('2026-06-21')
+      expect(new Date(r.recentSessions[9]!.startedAt).toISOString().slice(0, 10)).toBe('2026-06-21')
     })
 
     it('returns all sessions when fewer than 10', () => {

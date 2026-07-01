@@ -17,10 +17,6 @@ export function PlayHeader({ title, onClose }: PlayHeaderProps) {
           <p className="font-body-md text-body-md text-gray-400">{title}</p>
         </div>
       </div>
-      <div className="flex items-center gap-4">
-        <span className="material-symbols-outlined text-white">volume_up</span>
-        <span className="material-symbols-outlined text-white">more_vert</span>
-      </div>
     </header>
   )
 }

@@ -14,7 +14,7 @@ interface TimerControlsProps {
 // ponytail: 3-button layout, no restart UI — add dedicated restart button if users request it
 export function TimerControls({ status, onPause, onResume, onSkip, onRewind }: TimerControlsProps) {
   return (
-    <div className="flex items-center justify-center gap-lg">
+    <div className="flex items-center justify-center gap-24">
       {/* Rewind 10s */}
       {onRewind && (
         <button

@@ -15,16 +15,11 @@ import { PlayHeader } from '@/components/PlayHeader'
 import { ExercisePanel } from '@/components/ExercisePanel'
 import { useExercises } from '@/hooks/useExercises'
 import { flattenWorkout } from '@/lib/interval-engine'
+import { formatTime } from '@/lib/format'
 import type { CompletedInterval } from '@/types/workout'
 import type { FlattenedInterval } from '@/lib/interval-engine'
 
 type Phase = 'idle' | 'active' | 'complete'
-
-function formatTime(seconds: number): string {
-  const m = Math.floor(seconds / 60)
-  const s = seconds % 60
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
-}
 
 export default function PlayWorkoutPage() {
   const { getWorkout } = useWorkoutContext()
@@ -39,7 +34,6 @@ export default function PlayWorkoutPage() {
   const [phase, setPhase] = useState<Phase>('idle')
   const [currentIdx, setCurrentIdx] = useState(0)
   const [completedIntervals, setCompletedIntervals] = useState<CompletedInterval[]>([])
-  const startedRef = useRef(false)
   const skipRef = useRef(false)
   const startedAtRef = useRef(Date.now())
   const sessionSavedRef = useRef(false)
@@ -157,16 +151,16 @@ export default function PlayWorkoutPage() {
     <div className="timer-dark-bg text-white min-h-screen flex flex-col">
       <PlayHeader title={workout.title} onClose={() => router.push('/workouts')} />
 
-      <main className="flex-grow flex flex-col items-center justify-center px-margin-mobile py-lg w-full max-w-4xl mx-auto">
+      <main className="flex-grow flex flex-col items-center justify-center px-margin-mobile py-24 w-full max-w-4xl mx-auto">
         {phase === 'idle' && (
           <>
-            <h1 className="font-headline-lg text-headline-lg text-white mb-sm mt-lg">{workout.title}</h1>
-            <p className="font-body-md text-body-md text-gray-400 mb-lg">
+            <h1 className="font-headline-lg text-headline-lg text-white mb-8 mt-24">{workout.title}</h1>
+            <p className="font-body-md text-body-md text-gray-400 mb-24">
               {total} interval{total !== 1 && 's'} &middot;{' '}
               {Math.floor(flat.reduce((s, i) => s + i.duration, 0) / 60)} min
             </p>
             {(invalidFirst || invalidLast) && (
-              <div className="w-full max-w-md p-3 rounded-lg bg-white/5 border border-yellow-700/50 mb-lg">
+              <div className="w-full max-w-md p-3 rounded-lg bg-white/5 border border-yellow-700/50 mb-24">
                 <p className="text-sm text-center text-yellow-400">
                   {invalidFirst && 'First interval should be "Prepare". '}
                   {invalidLast && 'Last interval should be "Cooldown".'}
@@ -215,13 +209,13 @@ export default function PlayWorkoutPage() {
             />
 
             {/* Progress */}
-            <div className="w-full max-w-2xl mt-lg">
-              <div className="flex justify-between items-center mb-sm">
+            <div className="w-full max-w-2xl mt-24">
+              <div className="flex justify-between items-center mb-8">
                 <span className="font-data-sm text-data-sm text-gray-400">Total Progress</span>
                 <span className="font-data-sm text-data-sm text-white">{Math.round(progressVal * 100)}%</span>
               </div>
               <ProgressBar progress={progressVal} label="Workout progress" dark />
-              <div className="flex justify-between w-full font-label-caps text-label-caps text-gray-400 mt-sm">
+              <div className="flex justify-between w-full font-label-caps text-label-caps text-gray-400 mt-8">
                 <span>Set {currentIdx + 1} of {total}</span>
               </div>
             </div>

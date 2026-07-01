@@ -1,4 +1,4 @@
-import type { Exercise, ExerciseCategory } from '@/types/workout'
+import type { Exercise } from '@/types/workout'
 
 // ponytail: static seed list, move to external JSON if i18n or >50 exercises are needed
 export const EXERCISE_SEEDS: Exercise[] = [

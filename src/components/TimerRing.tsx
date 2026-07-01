@@ -1,5 +1,8 @@
 'use client'
 
+import { formatTime } from '@/lib/format'
+import { SEGMENT_COLORS } from '@/lib/segment-styles'
+
 interface TimerRingProps {
   timeLeft: number
   duration: number
@@ -8,24 +11,10 @@ interface TimerRingProps {
   nextLabel?: string
 }
 
-const RING_COLORS: Record<TimerRingProps['intervalType'], string> = {
-  prepare: '#F59E0B',
-  work: '#84cc16',
-  rest: '#fb7185',
-  cooldown: '#818cf8',
-}
-
 const CIRCUMFERENCE = 283
 
-function formatTime(seconds: number): string {
-  const m = Math.floor(seconds / 60)
-  const s = seconds % 60
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
-}
-
-// ponytail: hardcoded ring colors per type, extract to CSS vars if TimelineStrip needs to share them
 export function TimerRing({ timeLeft, duration, intervalType, label, nextLabel }: TimerRingProps) {
-  const ringColor = RING_COLORS[intervalType]
+  const ringColor = SEGMENT_COLORS[intervalType]
   const progress = duration > 0 ? timeLeft / duration : 0
   const offset = CIRCUMFERENCE * (1 - progress)
 

@@ -116,14 +116,21 @@
   --spacing-margin-mobile: 20px;
   --spacing-margin-desktop: 40px;
   --spacing-gutter: 16px;
+
+  /* Semantic spacing — numeric keys avoid shadowing Tailwind max-w-* utilities */
+  --spacing-xs: 4px;
+  --spacing-8: 8px;
+  --spacing-16: 16px;
+  --spacing-24: 24px;
+  --spacing-32: 32px;
 }
 
 /* Glassmorphism card */
 .glass-card {
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--color-surface);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-outline-variant);
 }
 
 /* Ambient shadow for elevated elements */
@@ -146,8 +153,8 @@
 }
 
 body {
-  background-color: #f8f9ff;
-  color: #0b1c30;
+  background-color: var(--color-background);
+  color: var(--color-on-background);
   font-family: 'Inter', system-ui, sans-serif;
 }
 

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { WorkoutProvider } from '@/context/WorkoutContext'
 import Nav from '@/components/Nav'
+import ErrorBoundary from '@/components/ErrorBoundary'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -34,14 +35,16 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full bg-background text-on-background">
+        <ErrorBoundary>
         <WorkoutProvider>
           <Nav />
-          <main className="flex-1 md:ml-64 flex flex-col min-h-screen pt-14 md:pt-20 pb-16 md:pb-0">
-            <div className="flex-1 flex flex-col px-margin-mobile md:px-margin-desktop py-lg">
+          <main className="flex-1 md:ml-64 flex flex-col min-h-screen pt-14 md:pt-20 pb-[64px] md:pb-0">
+            <div className="flex-1 flex flex-col px-margin-mobile md:px-margin-desktop py-24">
               {children}
             </div>
           </main>
         </WorkoutProvider>
+        </ErrorBoundary>
       </body>
     </html>
   )

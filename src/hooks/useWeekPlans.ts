@@ -3,7 +3,7 @@
 import { useCallback } from 'react'
 import { useLocalStorage } from './useLocalStorage'
 import { getMonday } from '@/lib/calendar-utils'
-import type { WeekPlan, DayAssignment } from '@/types/workout'
+import type { WeekPlan } from '@/types/workout'
 
 const STORAGE_KEY = 'workoutapp.weekplans'
 

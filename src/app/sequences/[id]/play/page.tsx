@@ -19,13 +19,9 @@ import { flattenWorkout } from '@/lib/interval-engine'
 import { getTotalRounds, getRoundAt, getProgress } from '@/lib/sequence-engine'
 import type { CompletedInterval } from '@/types/workout'
 
-type Phase = 'idle' | 'active' | 'workout-summary' | 'complete'
+import { formatTime } from '@/lib/format'
 
-function formatTime(seconds: number): string {
-  const m = Math.floor(seconds / 60)
-  const s = seconds % 60
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
-}
+type Phase = 'idle' | 'active' | 'workout-summary' | 'complete'
 
 export default function PlaySequencePage() {
   const router = useRouter()
@@ -251,11 +247,11 @@ export default function PlaySequencePage() {
     <div className="timer-dark-bg text-white min-h-screen flex flex-col">
       <PlayHeader title={sequence.title} onClose={() => router.push('/sequences')} />
 
-      <main className="flex-grow flex flex-col items-center px-margin-mobile py-lg w-full max-w-4xl mx-auto">
+      <main className="flex-grow flex flex-col items-center px-margin-mobile py-24 w-full max-w-4xl mx-auto">
         {/* Progress bar — visible during active and summary phases */}
         {phase !== 'idle' && (
-          <div className="w-full max-w-2xl mb-lg">
-            <div className="flex justify-between items-center mb-sm">
+          <div className="w-full max-w-2xl mb-24">
+            <div className="flex justify-between items-center mb-8">
               <span className="font-data-sm text-data-sm text-gray-400">Sequence Progress</span>
               <span className="font-data-sm text-data-sm text-white">{progress.percent}%</span>
             </div>
@@ -269,8 +265,8 @@ export default function PlaySequencePage() {
 
         {phase === 'idle' && (
           <>
-            <h1 className="font-headline-lg text-headline-lg text-white mb-sm mt-lg">{sequence.title}</h1>
-            <p className="font-body-md text-body-md text-gray-400 mb-lg">
+            <h1 className="font-headline-lg text-headline-lg text-white mb-8 mt-24">{sequence.title}</h1>
+            <p className="font-body-md text-body-md text-gray-400 mb-24">
               {totalRounds} round{totalRounds !== 1 && 's'} &middot;{' '}
               {sequence.workoutIds.length} workout{sequence.workoutIds.length !== 1 && 's'}
               {sequence.repeatCount > 1 && ` × ${sequence.repeatCount}`}
@@ -317,19 +313,19 @@ export default function PlaySequencePage() {
             />
 
             {/* Workout-level Progress */}
-            <div className="w-full max-w-2xl mt-lg">
-              <div className="flex justify-between items-center mb-sm">
+            <div className="w-full max-w-2xl mt-24">
+              <div className="flex justify-between items-center mb-8">
                 <span className="font-data-sm text-data-sm text-gray-400">Workout Progress</span>
                 <span className="font-data-sm text-data-sm text-white">{Math.round(progressVal * 100)}%</span>
               </div>
               <ProgressBar progress={progressVal} label="Workout progress" dark />
-              <div className="flex justify-between w-full font-label-caps text-label-caps text-gray-400 mt-sm">
+            <div className="flex justify-between w-full font-label-caps text-label-caps text-gray-400 mt-8">
                 <span>{intervalIdx + 1} of {flat.length}</span>
               </div>
             </div>
 
             {/* ponytail: flat skip + finish buttons, no sub-menus */}
-            <div className="flex items-center justify-center gap-4 mt-lg">
+            <div className="flex items-center justify-center gap-4 mt-24">
               <button
                 onClick={handleSkipWorkout}
                 className="px-4 py-2 rounded-lg text-sm font-medium border border-white/20 text-gray-400 hover:text-white transition-colors"

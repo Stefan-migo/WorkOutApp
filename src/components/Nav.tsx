@@ -35,12 +35,12 @@ export default function Nav() {
 
       {/* Sidebar — Desktop (fixed) + Mobile (overlay) */}
       <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-primary z-50 flex flex-col py-lg px-md transition-transform duration-300 ${
+        className={`fixed top-0 left-0 h-full w-64 bg-primary z-50 flex flex-col py-24 px-16 transition-transform duration-300 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } md:translate-x-0`}
       >
         {/* Brand */}
-        <div className="mb-xl px-sm">
+        <div className="mb-32 px-8">
           <h1 className="font-headline text-[24px] font-bold text-surface leading-tight tracking-tight">WorkOutApp</h1>
           <p className="font-mono text-sm text-on-primary-container mt-1">Nordic Athletic</p>
         </div>
@@ -54,7 +54,7 @@ export default function Nav() {
                 key={href}
                 href={href}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-md px-sm py-2.5 rounded-lg transition-all duration-200 ${
+                className={`flex items-center gap-16 px-8 py-2.5 rounded-lg transition-all duration-200 ${
                   active
                     ? 'text-secondary-container font-bold bg-primary-container/50 opacity-90'
                     : 'text-on-primary-fixed-variant hover:bg-primary-container hover:text-on-primary-fixed transition-colors'
@@ -76,7 +76,7 @@ export default function Nav() {
       {/* Top App Bar — hidden on mobile, visible on desktop */}
       <header className="hidden md:flex fixed top-0 left-64 right-0 h-20 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 items-center justify-between px-margin-desktop z-30">
         <span className="font-headline text-headline-md font-bold text-primary tracking-tight">WorkOutApp</span>
-        <div className="flex items-center gap-md">
+        <div className="flex items-center gap-16">
           <Link
             href="/workouts/new"
             className="bg-primary-container text-on-primary font-label text-label-caps px-4 py-2 rounded-full hover:bg-primary transition-colors flex items-center gap-2 ambient-shadow"
@@ -88,7 +88,7 @@ export default function Nav() {
       </header>
 
       {/* Bottom Nav — Mobile only */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-md border-t border-outline-variant/30 flex justify-around items-center px-2 py-1 z-40 pb-safe">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-md border-t border-outline-variant/30 flex justify-around items-center px-2 py-1 z-40 ">
         {navItems.slice(0, 5).map(({ href, label, icon }) => {
           const active = isActive(href)
           return (

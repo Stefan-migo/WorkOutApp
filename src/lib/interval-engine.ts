@@ -140,7 +140,7 @@ export function runEngineTests(): string[] {
     'expected 3 got ' + flatResult.length,
   )
   assert(
-    flatResult[0].depth === 0 && flatResult[1].depth === 0 && flatResult[2].depth === 0,
+    flatResult[0]!.depth === 0 && flatResult[1]!.depth === 0 && flatResult[2]!.depth === 0,
     'flat → all depth 0',
     '',
   )
@@ -181,12 +181,12 @@ export function runEngineTests(): string[] {
     '',
   )
   assert(
-    cycleResult[0].cycleIndex === 1 && cycleResult[0].setIndex === 1,
+    cycleResult[0]!.cycleIndex === 1 && cycleResult[0]!.setIndex === 1,
     'cycle → first has cycleIndex=1 setIndex=1',
     '',
   )
   assert(
-    cycleResult[2].cycleIndex === 2,
+    cycleResult[2]!.cycleIndex === 2,
     'cycle → third has cycleIndex=2',
     '',
   )
@@ -196,12 +196,12 @@ export function runEngineTests(): string[] {
   const setResult = flattenWorkout({ ...baseWorkout, intervals: [setParent] })
   assert(setResult.length === 8, 'set+cycle 2×2×2 → 8', `expected 8 got ${setResult.length}`)
   assert(
-    setResult[4].setIndex === 2,
+    setResult[4]!.setIndex === 2,
     'set → 5th interval has setIndex=2',
     '',
   )
   assert(
-    setResult[4].cycleIndex === 1,
+    setResult[4]!.cycleIndex === 1,
     'set → 5th interval has cycleIndex=1',
     '',
   )
@@ -219,13 +219,13 @@ export function runEngineTests(): string[] {
   }
   const restResult = flattenWorkout({ ...baseWorkout, intervals: [restParent] })
   assert(restResult.length === 3, 'rest 1 child × 2 cycles + rest → 3', `expected 3 got ${restResult.length}`)
-  assert(restResult[1].isGenerated === true, 'rest → middle is generated', '')
-  assert(restResult[1].duration === 10, 'rest → duration 10', '')
-  assert(restResult[1].type === 'rest', 'rest → type is rest', '')
+  assert(restResult[1]!.isGenerated === true, 'rest → middle is generated', '')
+  assert(restResult[1]!.duration === 10, 'rest → duration 10', '')
+  assert(restResult[1]!.type === 'rest', 'rest → type is rest', '')
   assert(
-    restResult[2].duration === 30,
+    restResult[2]!.duration === 30,
     'rest → last child unchanged',
-    `expected 30 got ${restResult[2].duration}`,
+    `expected 30 got ${restResult[2]!.duration}`,
   )
 
   // Nested DFS
@@ -254,21 +254,21 @@ export function runEngineTests(): string[] {
   const nestedResult = flattenWorkout({ ...baseWorkout, intervals: [nested] })
   assert(nestedResult.length === 2, 'nested → 2 leaves', `expected 2 got ${nestedResult.length}`)
   assert(
-    nestedResult[0].depth === 2,
+    nestedResult[0]!.depth === 2,
     'nested → leaf depth 2',
-    `expected 2 got ${nestedResult[0].depth}`,
+    `expected 2 got ${nestedResult[0]!.depth}`,
   )
 
   // Mix: flat + cycle in same workout
   const mixed = {
     ...baseWorkout,
-    intervals: [flat[0], cycleParent as Interval],
+    intervals: [flat[0]!, cycleParent as Interval],
   }
   const mixedResult = flattenWorkout(mixed)
   assert(mixedResult.length === 5, 'mixed → 1 flat + 4 cycle = 5', `expected 5 got ${mixedResult.length}`)
-  assert(mixedResult[0].id === 'a', 'mixed → first is flat leaf A', '')
-  assert(mixedResult[0].depth === 0, 'mixed → flat leaf depth 0', '')
-  assert(mixedResult[2].depth === 1, 'mixed → cycle child depth 1', '')
+  assert(mixedResult[0]!.id === 'a', 'mixed → first is flat leaf A', '')
+  assert(mixedResult[0]!.depth === 0, 'mixed → flat leaf depth 0', '')
+  assert(mixedResult[2]!.depth === 1, 'mixed → cycle child depth 1', '')
 
   return results
 }

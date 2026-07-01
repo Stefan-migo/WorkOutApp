@@ -44,16 +44,16 @@ Chain strategy: stacked-to-main
 
 ## Phase 3: Stats Dashboard Enhancement
 
-- [ ] 3.1 Add consistency heatmap (4-week × 7-day grid from session timestamps)
-- [ ] 3.2 Add hover tooltips on weekly volume bars showing formatted duration
-- [ ] 3.3 Resolve session names via `getWorkout`/`getSequence` (stop using truncated IDs)
-- [ ] 3.4 Add "Last 30 Days Overview" subtitle
-- [ ] 3.5 Remove duplicate Export button from empty state
-- [ ] 3.6 Apply Deep Nordic token pass to any remaining hardcoded colors
+- [x] 3.1 Add consistency heatmap (4-week × 7-day grid from session timestamps)
+- [x] 3.2 Add hover tooltips on weekly volume bars showing formatted duration
+- [x] 3.3 Resolve session names via `getWorkout`/`getSequence` (stop using truncated IDs)
+- [x] 3.4 Add "Last 30 Days Overview" subtitle
+- [x] 3.5 Remove duplicate Export button from empty state
+- [x] 3.6 Apply Deep Nordic token pass to any remaining hardcoded colors
 
 ## Phase 4: Cross-Page Verification
 
-- [ ] 4.1 Run `npm test` — confirm no regressions
+- [x] 4.1 Run `npm test` — confirm no regressions
 - [ ] 4.2 Manually verify calendar, history, session detail, stats all render
 - [ ] 4.3 Verify search filters sessions by title
 - [ ] 4.4 Verify heatmap shows correct training/rest days

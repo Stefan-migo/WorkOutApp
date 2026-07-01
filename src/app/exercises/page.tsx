@@ -6,6 +6,7 @@ import { useWorkoutContext } from '@/context/WorkoutContext'
 import type { Exercise, ExerciseCategory } from '@/types/workout'
 
 // ponytail: flat list CRUD, no pagination, no drag-reorder — add when >50 exercises exist
+import { useRouter } from 'next/navigation'
 const CATEGORIES: ExerciseCategory[] = ['strength', 'cardio', 'stretching', 'mobility', 'other']
 
 const EMPTY_FORM: Omit<Exercise, 'id' | 'createdAt' | 'updatedAt'> = {
@@ -29,6 +30,7 @@ const CATEGORY_LABELS: Record<ExerciseCategory, string> = {
 export default function ExercisesPage() {
   const { exercises, saveExercise, deleteExercise } = useExercises()
   const { workouts } = useWorkoutContext()
+  const router = useRouter()
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -148,9 +150,9 @@ export default function ExercisesPage() {
   const hasNoResults = !hasNoExercises && filtered.length === 0
 
   return (
-    <div className="max-w-[1440px] mx-auto w-full p-margin-mobile md:p-margin-desktop flex flex-col gap-xl pb-32">
+    <div className="max-w-[1440px] mx-auto w-full p-margin-mobile md:p-margin-desktop flex flex-col gap-32 pb-32">
       {/* Header Bento */}
-      <section className="bg-surface rounded-xl p-lg border border-outline-variant/30 flex flex-col gap-lg relative overflow-hidden">
+      <section className="bg-surface rounded-xl p-24 border border-outline-variant/30 flex flex-col gap-24 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary via-transparent to-transparent" />
         <div className="flex flex-col gap-xs z-10">
           <h1 className="font-headline text-headline-lg font-bold text-primary">Exercise Library</h1>
@@ -158,12 +160,10 @@ export default function ExercisesPage() {
             Master your movements. Search, filter, and build your ultimate protocol.
           </p>
         </div>
-        <div className="flex flex-col gap-md z-10">
+        <div className="flex flex-col gap-16 z-10">
           {/* Search */}
           <div className="relative w-full max-w-2xl">
-            <svg className="absolute left-0 bottom-3 text-on-surface-variant w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
-            </svg>
+            <span className="material-symbols-outlined absolute left-0 bottom-3 text-[48px] text-on-surface-variant">search</span>
             <input
               type="text"
               value={search}
@@ -173,13 +173,13 @@ export default function ExercisesPage() {
             />
           </div>
           {/* Filter chips */}
-          <div className="flex flex-wrap gap-x-lg gap-y-md mt-sm">
-            <div className="flex flex-col gap-sm">
-              <span className="font-label text-label-caps text-on-surface-variant uppercase tracking-widest text-[10px]">Muscle Group</span>
+          <div className="flex flex-wrap gap-x-24 gap-y-16 mt-8">
+            <div className="flex flex-col gap-8">
+              <span className="font-label text-label-caps text-on-surface-variant uppercase tracking-widest">Muscle Group</span>
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setMuscleFilter(null)}
-                  className={`px-3 py-1.5 rounded-full font-label text-label-caps transition-colors ${
+                  className={`px-3 py-1.5 rounded-full font-label text-label-caps transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ${
                     muscleFilter === null
                       ? 'bg-secondary-container/10 text-secondary border border-secondary-container/20'
                       : 'bg-surface-container text-on-surface border border-outline-variant/30 hover:bg-surface-container-high'
@@ -191,7 +191,7 @@ export default function ExercisesPage() {
                   <button
                     key={mg}
                     onClick={() => setMuscleFilter(mg === muscleFilter ? null : mg)}
-                    className={`px-3 py-1.5 rounded-full font-label text-label-caps transition-colors ${
+                    className={`px-3 py-1.5 rounded-full font-label text-label-caps transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ${
                       muscleFilter === mg
                         ? 'bg-secondary-container/10 text-secondary border border-secondary-container/20'
                         : 'bg-surface-container text-on-surface border border-outline-variant/30 hover:bg-surface-container-high'
@@ -202,12 +202,12 @@ export default function ExercisesPage() {
                 ))}
               </div>
             </div>
-            <div className="flex flex-col gap-sm">
-              <span className="font-label text-label-caps text-on-surface-variant uppercase tracking-widest text-[10px]">Equipment</span>
+            <div className="flex flex-col gap-8">
+              <span className="font-label text-label-caps text-on-surface-variant uppercase tracking-widest">Equipment</span>
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setEquipmentFilter(null)}
-                  className={`px-3 py-1.5 rounded-full font-label text-label-caps transition-colors ${
+                  className={`px-3 py-1.5 rounded-full font-label text-label-caps transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ${
                     equipmentFilter === null
                       ? 'bg-secondary-container/10 text-secondary border border-secondary-container/20'
                       : 'bg-surface-container text-on-surface border border-outline-variant/30 hover:bg-surface-container-high'
@@ -219,7 +219,7 @@ export default function ExercisesPage() {
                   <button
                     key={eq}
                     onClick={() => setEquipmentFilter(eq === equipmentFilter ? null : eq)}
-                    className={`px-3 py-1.5 rounded-full font-label text-label-caps transition-colors ${
+                    className={`px-3 py-1.5 rounded-full font-label text-label-caps transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ${
                       equipmentFilter === eq
                         ? 'bg-secondary-container/10 text-secondary border border-secondary-container/20'
                         : 'bg-surface-container text-on-surface border border-outline-variant/30 hover:bg-surface-container-high'
@@ -233,7 +233,7 @@ export default function ExercisesPage() {
           </div>
           <button
             onClick={openCreate}
-            className="self-start px-4 py-2 bg-primary text-on-primary font-label text-label-caps rounded-lg hover:bg-primary-container transition-colors"
+            className="self-start px-4 py-2 bg-primary text-on-primary font-label text-label-caps rounded-lg hover:bg-primary-container transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
           >
             + New Exercise
           </button>
@@ -242,11 +242,11 @@ export default function ExercisesPage() {
 
       {/* Empty states */}
       {hasNoExercises && (
-        <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
+        <div className="flex flex-col items-center justify-center gap-4 py-[64px] text-center">
           <p className="font-body text-body-md text-on-surface-variant">No exercises yet. Create your first one!</p>
           <button
             onClick={openCreate}
-            className="px-6 py-3 bg-primary text-on-primary font-label text-label-caps rounded-lg hover:bg-primary-container transition-colors"
+            className="px-6 py-3 bg-primary text-on-primary font-label text-label-caps rounded-lg hover:bg-primary-container transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
           >
             Create Exercise
           </button>
@@ -254,20 +254,20 @@ export default function ExercisesPage() {
       )}
 
       {hasNoResults && !hasNoExercises && (
-        <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
+        <div className="flex flex-col items-center justify-center gap-4 py-[64px] text-center">
           <p className="font-body text-body-md text-on-surface-variant">No exercises match your filters.</p>
         </div>
       )}
 
       {/* Category sections */}
       {!hasNoExercises && !hasNoResults && (
-        <div className="flex flex-col gap-xl">
+        <div className="flex flex-col gap-32">
           {CATEGORIES.map((cat) => {
             const items = grouped.get(cat)
             if (!items || items.length === 0) return null
             return (
-              <section key={cat} className="flex flex-col gap-md">
-                <div className="flex items-center justify-between border-b border-outline-variant/20 pb-sm">
+              <section key={cat} className="flex flex-col gap-16">
+                <div className="flex items-center justify-between border-b border-outline-variant/20 pb-8">
                   <h2 className="font-headline text-headline-md font-semibold text-primary">
                     {CATEGORY_LABELS[cat]}
                   </h2>
@@ -295,13 +295,13 @@ export default function ExercisesPage() {
                         )}
                       </div>
                       {/* Content */}
-                      <div className="p-md flex flex-col gap-sm flex-1">
+                      <div className="p-16 flex flex-col gap-8 flex-1">
                         <div className="flex items-start justify-between gap-2">
                           <h3 className="font-body text-body-lg font-bold text-primary truncate">{ex.name}</h3>
                           <div className="flex gap-1 shrink-0">
                             <button
                               onClick={() => openEdit(ex)}
-                              className="p-1 rounded text-on-surface-variant hover:text-primary transition-colors"
+                              className="p-1 rounded text-on-surface-variant hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
                               title="Edit"
                             >
                               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -310,7 +310,7 @@ export default function ExercisesPage() {
                             </button>
                             <button
                               onClick={() => confirmDelete(ex.id)}
-                              className="p-1 rounded text-on-surface-variant hover:text-error transition-colors"
+                              className="p-1 rounded text-on-surface-variant hover:text-error transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
                               title="Delete"
                             >
                               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -322,24 +322,24 @@ export default function ExercisesPage() {
                         {ex.description && (
                           <p className="font-body text-body-md text-on-surface-variant line-clamp-2">{ex.description}</p>
                         )}
-                        <div className="flex flex-wrap gap-2 mt-auto pt-sm">
+                        <div className="flex flex-wrap gap-2 mt-auto pt-8">
                           {ex.muscleGroups?.slice(0, 3).map((mg) => (
-                            <span key={mg} className="bg-surface-container px-2 py-1 rounded text-[11px] font-label text-label-caps text-on-surface-variant tracking-wider">
+                            <span key={mg} className="bg-surface-container px-2 py-1 rounded font-label-caps text-label-caps text-on-surface-variant tracking-wider">
                               {mg.toUpperCase()}
                             </span>
                           ))}
                           {ex.equipment?.slice(0, 2).map((eq) => (
-                            <span key={eq} className="bg-surface-container px-2 py-1 rounded text-[11px] font-label text-label-caps text-on-surface-variant tracking-wider">
+                            <span key={eq} className="bg-surface-container px-2 py-1 rounded font-label-caps text-label-caps text-on-surface-variant tracking-wider">
                               {eq.toUpperCase()}
                             </span>
                           ))}
                         </div>
                       </div>
                       {/* Bottom CTA */}
-                      <div className="px-md pb-md border-t border-outline-variant/10 pt-sm mt-auto">
+                      <div className="px-16 pb-16 border-t border-outline-variant/10 pt-8 mt-auto">
                         <button
-                          onClick={() => openEdit(ex)}
-                          className="w-full py-2 border border-outline text-primary font-label text-label-caps rounded hover:bg-surface-container transition-colors flex justify-center items-center gap-xs"
+                          onClick={() => router.push(`/workouts/new?exerciseId=${ex.id}`)}
+                          className="w-full py-2 border border-outline text-primary font-label text-label-caps rounded hover:bg-surface-container transition-colors flex justify-center items-center gap-xs focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
                         >
                           <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -359,7 +359,7 @@ export default function ExercisesPage() {
       {/* Create/Edit dialog */}
       <dialog
         ref={dialogRef}
-        className="glass-card rounded-xl p-lg max-w-md w-full backdrop:bg-black/60 open:flex open:flex-col open:gap-4"
+        className="rounded-xl bg-surface border border-outline-variant/50 text-on-surface p-24 max-w-md w-full m-auto backdrop:bg-black/10 max-h-[85vh] overflow-y-auto"
       >
         <form onSubmit={handleSave} className="flex flex-col gap-4">
           <h3 className="font-headline text-headline-md font-semibold text-primary">
@@ -446,13 +446,13 @@ export default function ExercisesPage() {
             <button
               type="button"
               onClick={() => dialogRef.current?.close()}
-              className="px-4 py-2 rounded-lg font-label text-label-caps text-on-surface-variant hover:text-primary transition-colors"
+              className="px-4 py-2 rounded-lg font-label text-label-caps text-on-surface-variant hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-lg font-label text-label-caps bg-primary text-on-primary hover:bg-primary-container transition-colors"
+              className="px-4 py-2 rounded-lg font-label text-label-caps bg-primary text-on-primary hover:bg-primary-container transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
             >
               {editingId ? 'Save' : 'Create'}
             </button>
@@ -463,7 +463,7 @@ export default function ExercisesPage() {
       {/* Delete confirmation dialog */}
       <dialog
         ref={deleteDialogRef}
-        className="glass-card rounded-xl p-lg max-w-sm w-full backdrop:bg-black/60 open:flex open:flex-col open:gap-4"
+        className="rounded-xl bg-surface border border-outline-variant/50 text-on-surface p-24 max-w-sm w-full m-auto backdrop:bg-black/10"
       >
         <div className="flex flex-col gap-4">
           <h3 className="font-headline text-headline-md font-semibold text-primary">Delete Exercise?</h3>
@@ -482,14 +482,14 @@ export default function ExercisesPage() {
             <button
               type="button"
               onClick={() => deleteDialogRef.current?.close()}
-              className="px-4 py-2 rounded-lg font-label text-label-caps text-on-surface-variant hover:text-primary transition-colors"
+              className="px-4 py-2 rounded-lg font-label text-label-caps text-on-surface-variant hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={handleDelete}
-              className="px-4 py-2 rounded-lg font-label text-label-caps bg-error text-on-error hover:bg-error-container hover:text-on-error-container transition-colors"
+              className="px-4 py-2 rounded-lg font-label text-label-caps bg-error text-on-error hover:bg-error-container hover:text-on-error-container transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
             >
               Delete
             </button>

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, type FormEvent } from 'react'
 import type { DayAssignment, Workout, Sequence } from '@/types/workout'
+import { formatDuration } from '@/lib/format'
 
 export interface DayAssignmentModalProps {
   dayIndex: number
@@ -60,7 +61,7 @@ export default function DayAssignmentModal({
     <dialog
       ref={ref}
       onClose={onClose}
-      className="rounded-xl bg-surface border border-outline-variant/50 text-on-surface p-lg w-full max-w-md backdrop:bg-black/40 open:animate-in fade-in-0 zoom-in-95"
+      className="rounded-xl bg-surface border border-outline-variant/50 text-on-surface p-24 w-full max-w-md m-auto backdrop:bg-black/10 max-h-[85vh] overflow-y-auto"
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <h2 className="font-headline-md text-headline-md text-on-surface">
@@ -191,8 +192,4 @@ export default function DayAssignmentModal({
   )
 }
 
-function formatDuration(totalSeconds: number): string {
-  const m = Math.floor(totalSeconds / 60)
-  const s = totalSeconds % 60
-  return `${m}:${String(s).padStart(2, '0')}`
-}
+

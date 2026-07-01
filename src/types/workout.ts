@@ -48,16 +48,6 @@ export interface Sequence {
   updatedAt: number
 }
 
-export interface Sequence {
-  id: string
-  title: string
-  description?: string
-  workoutIds: string[]
-  repeatCount: number
-  createdAt: number
-  updatedAt: number
-}
-
 // Phase 4: Calendar & Programming
 export interface DayAssignment {
   workoutId?: string

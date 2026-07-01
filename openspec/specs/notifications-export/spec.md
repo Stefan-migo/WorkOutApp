@@ -46,7 +46,7 @@ Browser notifications when the tab is hidden during a timer and JSON export of a
 
 | ID | Description | Keyword |
 |----|-------------|---------|
-| EX-1 | SHALL render a button labeled "Export All Data" on the `/stats` page | MUST |
+| EX-1 | SHALL render a button labeled "Export JSON" on the `/stats` page | MUST |
 | EX-2 | SHALL, on click, collect all localStorage keys matching `workoutapp.*` into a single JSON object keyed by collection name | MUST |
 | EX-3 | SHALL trigger download as `workoutapp-export-{YYYY-MM-DD}.json` with `Content-Type: application/json` | MUST |
 | EX-4 | SHALL handle empty data by producing valid JSON where each collection maps to an empty array | MUST |
@@ -54,24 +54,24 @@ Browser notifications when the tab is hidden during a timer and JSON export of a
 
 #### Scenario: Export with data
 - GIVEN localStorage contains workouts, sessions, and sequences under `workoutapp.*` keys
-- WHEN user clicks "Export All Data"
+- WHEN user clicks "Export JSON"
 - THEN a JSON file downloads containing all keys in a single object like `{"workouts":[...],"sessions":[...],"sequences":[...]}`
 - AND the filename follows `workoutapp-export-{YYYY-MM-DD}.json`
 
 #### Scenario: Export with no data
 - GIVEN no `workoutapp.*` keys exist in localStorage
-- WHEN user clicks "Export All Data"
+- WHEN user clicks "Export JSON"
 - THEN a valid JSON file downloads: `{}`
 - AND no error is shown
 
 #### Scenario: Corrupt localStorage entry
 - GIVEN one `workoutapp.*` key contains unparseable data
-- WHEN user clicks "Export All Data"
+- WHEN user clicks "Export JSON"
 - THEN the corrupt key is skipped
 - AND all valid keys are included in the download
 - AND no error is surfaced to the user
 
 #### Scenario: Missing export button on stats page
 - GIVEN user visits `/stats`
-- THEN a button labeled "Export All Data" is visible
+- THEN a button labeled "Export JSON" is visible
 - AND it is not disabled

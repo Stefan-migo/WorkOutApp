@@ -8,15 +8,10 @@ import { useWorkoutContext } from '@/context/WorkoutContext'
 import { useSequences } from '@/hooks/useSequences'
 import { getMonday, formatWeekRange, previousWeek, nextWeek, getDayOfWeek } from '@/lib/calendar-utils'
 import DayAssignmentModal from '@/components/DayAssignmentModal'
+import { formatDuration } from '@/lib/format'
 import type { DayAssignment, ProgramTemplate, Workout, Sequence } from '@/types/workout'
 
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const
-
-function formatDuration(totalSeconds: number): string {
-  const m = Math.floor(totalSeconds / 60)
-  const s = totalSeconds % 60
-  return `${m}:${String(s).padStart(2, '0')}`
-}
 
 // ponytail: heuristic type label from available data — no category field on Workout/Sequence yet
 function deriveTypeLabel(
@@ -60,7 +55,7 @@ export default function CalendarPage() {
     return todayMon === currentMonday ? getDayOfWeek(now) : -1
   }, [currentMonday])
 
-  const todayAssignment = today >= 0 ? weekPlan.days[today] : null
+  const todayAssignment = today >= 0 ? (weekPlan.days[today] ?? null) : null
   const todayWorkout = todayAssignment?.workoutId
     ? getWorkout(todayAssignment.workoutId)
     : undefined
@@ -137,12 +132,12 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen p-margin-mobile md:p-margin-desktop max-w-6xl mx-auto gap-lg">
+    <div className="flex flex-col md:flex-row min-h-screen p-margin-mobile md:p-margin-desktop max-w-6xl mx-auto gap-24">
       {/* Left: calendar grid */}
-      <div className="flex-1 flex flex-col gap-lg">
+      <div className="flex-1 flex flex-col gap-24">
         {/* Week nav */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-md">
+          <div className="flex items-center gap-16">
             <button
               onClick={() => setCurrentMonday(previousWeek(currentMonday))}
               className="p-xs rounded-full hover:bg-surface-container transition-colors"
@@ -164,14 +159,14 @@ export default function CalendarPage() {
         </div>
 
         {/* Day rows + Focus panel */}
-        <div className="flex flex-col lg:flex-row gap-lg">
+        <div className="flex flex-col lg:flex-row gap-24">
           {/* Day rows */}
-          <div className="flex-1 flex flex-col gap-md">
+          <div className="flex-1 flex flex-col gap-16">
             {DAY_NAMES.map((name, i) => {
               const d = new Date(currentMonday + 'T00:00:00')
               d.setDate(d.getDate() + i)
               const dayNum = d.getDate()
-              const assignment = weekPlan.days[i]
+              const assignment = weekPlan.days[i] ?? null
               const isToday = today === i
 
               const workout = assignment?.workoutId
@@ -227,13 +222,13 @@ export default function CalendarPage() {
       </div>
 
       {/* Right sidebar */}
-      <aside className="w-full md:w-80 flex flex-col gap-md">
+      <aside className="w-full md:w-80 flex flex-col gap-16">
         {/* Templates — glass-card panel */}
-        <div className="glass-card rounded-lg p-md flex flex-col gap-md">
+        <div className="glass-card rounded-lg p-16 flex flex-col gap-16">
           <h2 className="font-label-caps text-label-caps text-primary tracking-wider">
             Templates
           </h2>
-          <div className="flex flex-col gap-sm">
+          <div className="flex flex-col gap-8">
             <input
               type="text"
               placeholder="Template name…"
@@ -255,7 +250,7 @@ export default function CalendarPage() {
               Save current week
             </button>
           </div>
-          <div className="flex flex-col gap-sm max-h-48 overflow-y-auto no-scrollbar">
+          <div className="flex flex-col gap-8 max-h-48 overflow-y-auto no-scrollbar">
             {templates.length === 0 && (
               <p className="text-body-md text-sm text-on-surface-variant">
                 No templates saved yet.
@@ -264,7 +259,7 @@ export default function CalendarPage() {
             {templates.map((t) => (
               <div
                 key={t.id}
-                className="flex items-center justify-between p-sm rounded-lg bg-surface-container-lowest border border-outline-variant/20"
+                className="flex items-center justify-between p-8 rounded-lg bg-surface-container-lowest border border-outline-variant/20"
               >
                 <span className="text-body-md text-sm font-medium truncate text-on-surface">
                   {t.title}
@@ -289,8 +284,8 @@ export default function CalendarPage() {
         </div>
 
         {/* Upcoming mini-list */}
-        <div className="bg-surface-container-lowest border border-outline-variant/20 rounded-lg p-md flex flex-col gap-md">
-          <h4 className="font-label-caps text-label-caps text-on-surface-variant border-b border-outline-variant/20 pb-sm">
+        <div className="bg-surface-container-lowest border border-outline-variant/20 rounded-lg p-16 flex flex-col gap-16">
+          <h4 className="font-label-caps text-label-caps text-on-surface-variant border-b border-outline-variant/20 pb-8">
             Upcoming
           </h4>
           {upcomingDays.length === 0 && (
@@ -313,7 +308,7 @@ export default function CalendarPage() {
               ? w.intervals.reduce((sum, iv) => sum + iv.duration, 0)
               : 0
             return (
-              <div key={index} className="flex gap-sm items-start">
+              <div key={index} className="flex gap-8 items-start">
                 <div className="w-12 h-12 bg-surface-container-low rounded-lg flex items-center justify-center flex-shrink-0 text-secondary-container font-data-lg text-data-lg font-bold">
                   {d.getDate()}
                 </div>
@@ -331,25 +326,7 @@ export default function CalendarPage() {
           })}
         </div>
 
-        {/* Motivational card */}
-        <div className="glass-card rounded-lg p-md relative overflow-hidden">
-          <div className="relative z-10">
-            <span className="material-symbols-outlined text-primary mb-sm block">
-              insights
-            </span>
-            <p className="font-body-md text-body-md font-medium text-sm text-primary">
-              On track for a 4-week streak. Maintain focus.
-            </p>
-          </div>
-          <div className="absolute -bottom-10 -right-10 opacity-5">
-            <span
-              className="material-symbols-outlined"
-              style={{ fontSize: 120 }}
-            >
-              fitness_center
-            </span>
-          </div>
-        </div>
+
       </aside>
 
       {/* Modal */}
@@ -396,7 +373,7 @@ function DayRow({
     return (
       <button
         onClick={onClick}
-        className="flex items-center gap-md p-md bg-primary-container border-2 border-primary rounded-lg shadow-lg"
+        className="flex items-center gap-16 p-16 bg-primary-container border-2 border-primary rounded-lg shadow-lg"
       >
         <div className="flex flex-col items-center justify-center w-16 h-16 bg-primary text-on-primary rounded-lg shrink-0">
           <span className="font-label-caps text-label-caps opacity-80">{dayName}</span>
@@ -407,7 +384,7 @@ function DayRow({
             {title}
           </h4>
           <div className="flex gap-xs mt-xs items-center">
-            <span className="px-sm py-0.5 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded-full uppercase tracking-wider">
+            <span className="px-8 py-0.5 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded-full uppercase tracking-wider">
               {typeLabel}
             </span>
             <span className="font-data-sm text-data-sm text-on-primary-container">
@@ -425,7 +402,7 @@ function DayRow({
     return (
       <button
         onClick={onClick}
-        className="flex items-center gap-md p-md bg-surface-container-lowest/50 border border-dashed border-outline-variant/30 rounded-lg hover:border-primary transition-colors cursor-pointer group"
+        className="flex items-center gap-16 p-16 bg-surface-container-lowest/50 border border-dashed border-outline-variant/30 rounded-lg hover:border-primary transition-colors cursor-pointer group"
       >
         <div className="flex flex-col items-center justify-center w-16 h-16 bg-surface-container-low/50 rounded-lg shrink-0">
           <span className="font-label-caps text-label-caps text-on-surface-variant">{dayName}</span>
@@ -455,7 +432,7 @@ function DayRow({
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-md p-md bg-surface-container-lowest border border-outline-variant/20 rounded-lg hover:border-primary transition-colors cursor-pointer group"
+      className="flex items-center gap-16 p-16 bg-surface-container-lowest border border-outline-variant/20 rounded-lg hover:border-primary transition-colors cursor-pointer group"
     >
       <div className="flex flex-col items-center justify-center w-16 h-16 bg-surface-container-low rounded-lg shrink-0">
         <span className="font-label-caps text-label-caps text-on-surface-variant">{dayName}</span>
@@ -466,7 +443,7 @@ function DayRow({
           {title}
         </h4>
         <div className="flex gap-xs mt-xs items-center">
-          <span className="px-sm py-0.5 bg-primary-fixed-dim text-on-primary-fixed-variant text-[10px] font-bold rounded-full uppercase tracking-wider">
+          <span className="px-8 py-0.5 bg-primary-fixed-dim text-on-primary-fixed-variant text-[10px] font-bold rounded-full uppercase tracking-wider">
             {typeLabel}
           </span>
           <span className="font-data-sm text-data-sm text-on-surface-variant">
@@ -503,11 +480,11 @@ function TodaysFocus({
 
   if (!isCurrentWeek || !assignment || !title) {
     return (
-      <div className="w-full lg:w-96 bg-surface-container-low rounded-lg p-lg flex flex-col gap-lg border border-outline-variant/20 self-start">
+      <div className="w-full lg:w-96 bg-surface-container-low rounded-lg p-24 flex flex-col gap-24 border border-outline-variant/20 self-start">
         <span className="font-label-caps text-label-caps text-primary font-bold">
           Today&apos;s Focus
         </span>
-        <div className="flex flex-col items-center gap-sm py-lg text-center">
+        <div className="flex flex-col items-center gap-8 py-24 text-center">
           <span className="material-symbols-outlined text-[40px] text-on-surface-variant">
             event_busy
           </span>
@@ -522,7 +499,7 @@ function TodaysFocus({
   const intervals = workout?.intervals ?? []
 
   return (
-    <div className="w-full lg:w-96 bg-surface-container-low rounded-lg p-lg flex flex-col gap-lg border border-outline-variant/20 self-start">
+    <div className="w-full lg:w-96 bg-surface-container-low rounded-lg p-24 flex flex-col gap-24 border border-outline-variant/20 self-start">
       <div className="flex justify-between items-start">
         <div>
           <span className="font-label-caps text-label-caps text-primary font-bold">
@@ -532,19 +509,19 @@ function TodaysFocus({
             {title}
           </h3>
         </div>
-        <span className="px-md py-xs bg-secondary-container text-on-secondary-container font-label-caps text-label-caps rounded-full">
+        <span className="px-16 py-xs bg-secondary-container text-on-secondary-container font-label-caps text-label-caps rounded-full">
           {typeLabel}
         </span>
       </div>
-      <div className="flex flex-col gap-md">
-        <div className="flex items-center gap-sm text-on-surface-variant">
+      <div className="flex flex-col gap-16">
+        <div className="flex items-center gap-8 text-on-surface-variant">
           <span className="material-symbols-outlined text-sm">timer</span>
           <span className="font-data-sm text-data-sm">
             {totalSec > 0 ? `${Math.floor(totalSec / 60)} Minutes Total` : ''}
           </span>
         </div>
         {intervals.length > 0 && (
-          <div className="flex flex-col gap-sm">
+          <div className="flex flex-col gap-8">
             <h5 className="font-label-caps text-label-caps text-on-surface-variant border-b border-outline-variant/30 pb-xs">
               Exercise List
             </h5>
@@ -566,7 +543,7 @@ function TodaysFocus({
       </div>
       <button
         onClick={onStartWorkout}
-        className="mt-auto w-full py-md bg-primary text-on-primary rounded-lg font-label-caps text-label-caps font-bold hover:bg-primary/90 transition-colors ambient-shadow flex items-center justify-center gap-sm"
+        className="mt-auto w-full py-16 bg-primary text-on-primary rounded-lg font-label-caps text-label-caps font-bold hover:bg-primary/90 transition-colors ambient-shadow flex items-center justify-center gap-8"
       >
         <span className="material-symbols-outlined">play_arrow</span>
         Start Workout

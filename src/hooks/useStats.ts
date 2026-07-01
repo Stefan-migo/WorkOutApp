@@ -37,13 +37,9 @@ function last12WeekLabels(now: Date): string[] {
   return labels
 }
 
-function getTotalSeconds(session: Session): number {
-  return session.intervals.reduce((sum, i) => sum + i.actualDuration, 0)
-}
-
 export function computeStats(sessions: Session[], now: Date = new Date()): StatsData {
   const totalWorkouts = sessions.length
-  const totalTimeSeconds = sessions.reduce((sum, s) => sum + getTotalSeconds(s), 0)
+  const totalTimeSeconds = sessions.reduce((sum, s) => sum + s.intervals.reduce((sum, i) => sum + i.actualDuration, 0), 0)
 
   // Streak: consecutive calendar days (UTC) with ≥1 session, backward from now
   const sessionDates = new Set(
@@ -72,7 +68,7 @@ export function computeStats(sessions: Session[], now: Date = new Date()): Stats
   for (const s of sessions) {
     const label = getISOWeekLabel(new Date(s.startedAt))
     if (volumeByWeek.has(label)) {
-      volumeByWeek.set(label, volumeByWeek.get(label)! + getTotalSeconds(s))
+      volumeByWeek.set(label, volumeByWeek.get(label)! + s.intervals.reduce((sum, i) => sum + i.actualDuration, 0))
     }
   }
   const weeklyVolume = labels.map((weekLabel) => ({

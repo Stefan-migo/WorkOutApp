@@ -5,12 +5,7 @@ import { useSequences } from '@/hooks/useSequences'
 import { useWorkoutContext } from '@/context/WorkoutContext'
 import { resolveWorkouts } from '@/lib/sequence-engine'
 import { flattenWorkout } from '@/lib/interval-engine'
-
-function formatDuration(totalSeconds: number) {
-  const m = Math.floor(totalSeconds / 60)
-  const s = totalSeconds % 60
-  return `${m}:${String(s).padStart(2, '0')}`
-}
+import { formatDuration } from '@/lib/format'
 
 export default function SequenceListPage() {
   const { sequences, deleteSequence } = useSequences()
@@ -19,18 +14,20 @@ export default function SequenceListPage() {
 
   if (sequences.length === 0) {
     return (
-      <div className="max-w-2xl mx-auto w-full p-6 flex flex-col items-center justify-center flex-1 gap-6 text-center">
-        <div className="flex flex-col items-center gap-4">
-          <svg className="w-16 h-16 text-outline-variant/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <h1 className="font-headline text-headline-lg font-bold text-primary">Sequences</h1>
-          <p className="font-body text-body-md text-on-surface-variant">No sequences yet. Chain your workouts!</p>
+      <div className="max-w-2xl mx-auto w-full p-margin-mobile md:p-margin-desktop flex flex-col items-center justify-center flex-1 gap-24 text-center">
+        <div className="glass-card rounded-xl p-32 flex flex-col items-center gap-24 py-[64px] w-full">
+          <span className="material-symbols-outlined text-[48px] text-on-surface-variant/30">reorder</span>
+          <div>
+            <h1 className="font-headline text-headline-lg font-bold text-primary">Sequences</h1>
+            <p className="font-body text-body-md text-on-surface-variant mt-xs max-w-sm">
+              Chain your workouts into powerful sequences. Combine multiple workouts for a complete training session.
+            </p>
+          </div>
           <button
             onClick={() => router.push('/sequences/new')}
-            className="px-6 py-3 bg-primary text-on-primary font-label text-label-caps rounded-lg hover:bg-primary-container transition-colors"
+            className="px-6 py-3 bg-primary text-on-primary font-label text-label-caps rounded-lg hover:bg-primary-container transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ambient-shadow"
           >
-            New Sequence
+            + New Sequence
           </button>
         </div>
       </div>
@@ -38,18 +35,18 @@ export default function SequenceListPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto w-full p-6 flex flex-col gap-6 pb-32">
+      <div className="max-w-2xl mx-auto w-full p-margin-mobile md:p-margin-desktop flex flex-col gap-24 pb-32">
       <div className="flex items-center justify-between">
         <h1 className="font-headline text-headline-lg font-bold text-primary">Sequences</h1>
         <button
           onClick={() => router.push('/sequences/new')}
-          className="px-4 py-2 bg-primary text-on-primary font-label text-label-caps rounded-lg hover:bg-primary-container transition-colors"
+          className="px-4 py-2 bg-primary text-on-primary font-label text-label-caps rounded-lg hover:bg-primary-container transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
         >
           + New Sequence
         </button>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-16">
         {sequences.map((seq) => {
           const resolved = resolveWorkouts(seq, workouts)
           const missing = seq.workoutIds.length - resolved.length
@@ -61,7 +58,7 @@ export default function SequenceListPage() {
           return (
             <div
               key={seq.id}
-              className="glass-card rounded-lg p-md flex items-center gap-md relative"
+              className="glass-card rounded-lg p-16 flex items-center gap-16 relative"
             >
               {/* Left accent bar */}
               <div className="absolute left-0 top-2 bottom-2 w-1 bg-primary rounded-r-sm opacity-50" />
@@ -92,7 +89,7 @@ export default function SequenceListPage() {
               <div className="flex gap-2 shrink-0">
                 <button
                   onClick={() => router.push(`/sequences/${seq.id}/play`)}
-                  className="px-3 py-1.5 bg-primary text-on-primary font-label text-label-caps rounded-lg hover:bg-primary-container transition-colors"
+                  className="px-3 py-1.5 bg-primary text-on-primary font-label text-label-caps rounded-lg hover:bg-primary-container transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
                 >
                   Play
                 </button>
@@ -100,7 +97,7 @@ export default function SequenceListPage() {
                   onClick={() => {
                     if (confirm('Delete this sequence?')) deleteSequence(seq.id)
                   }}
-                  className="px-3 py-1.5 border border-outline-variant/30 text-outline-variant hover:text-error font-label text-label-caps rounded-lg hover:bg-error-container/10 transition-colors"
+                  className="px-3 py-1.5 border border-outline-variant/30 text-outline-variant hover:text-error font-label text-label-caps rounded-lg hover:bg-error-container/10 transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
                 >
                   Delete
                 </button>

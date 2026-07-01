@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import { useSequences } from '@/hooks/useSequences'
 import { useWorkoutContext } from '@/context/WorkoutContext'
 import { flattenWorkout } from '@/lib/interval-engine'
-import type { Sequence, IntervalType } from '@/types/workout'
+import { SEGMENT_DOT } from '@/lib/segment-styles'
+import type { Sequence } from '@/types/workout'
 
 function formatDuration(totalSeconds: number) {
   const h = Math.floor(totalSeconds / 3600)
@@ -20,13 +21,7 @@ function formatShort(totalSeconds: number) {
   return `${m}:${String(s).padStart(2, '0')}`
 }
 
-// ponytail: flat palette mapping for mini timeline bars
-const TYPE_COLORS: Record<IntervalType, string> = {
-  prepare: 'bg-segment-prepare',
-  work: 'bg-segment-work',
-  rest: 'bg-segment-rest',
-  cooldown: 'bg-segment-cooldown',
-}
+
 
 export default function NewSequencePage() {
   const { saveSequence } = useSequences()
@@ -93,7 +88,7 @@ export default function NewSequencePage() {
     if (index <= 0) return
     setSelectedIds((prev) => {
       const next = [...prev]
-      ;[next[index - 1], next[index]] = [next[index], next[index - 1]]
+      ;[next[index - 1], next[index]] = [next[index]!, next[index - 1]!]
       return next
     })
   }
@@ -102,7 +97,7 @@ export default function NewSequencePage() {
     setSelectedIds((prev) => {
       if (index >= prev.length - 1) return prev
       const next = [...prev]
-      ;[next[index], next[index + 1]] = [next[index + 1], next[index]]
+      ;[next[index]!, next[index + 1]!] = [next[index + 1]!, next[index]!]
       return next
     })
   }
@@ -139,7 +134,7 @@ export default function NewSequencePage() {
         {segments.map((i) => (
           <div
             key={i.id}
-            className={`h-full ${TYPE_COLORS[i.type] ?? 'bg-surface-tint'}`}
+            className={`h-full ${SEGMENT_DOT[i.type] ?? 'bg-surface-tint'}`}
             style={{ width: `${Math.max(8, (i.duration / total) * 100)}%` }}
           />
         ))}
@@ -148,7 +143,7 @@ export default function NewSequencePage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen relative pb-24">
+    <div className="flex flex-col min-h-screen relative pb-xl">
       <div className="flex-1 p-margin-mobile md:p-margin-desktop flex flex-col xl:flex-row gap-xl max-w-[1600px] mx-auto w-full">
         {/* Left Column: Sequence Metadata & List */}
         <div className="flex-1 flex flex-col gap-lg">
@@ -164,7 +159,7 @@ export default function NewSequencePage() {
                   type="text"
                   value={title}
                   placeholder="e.g. Friday Full Body Burn"
-                  className="w-full bg-transparent border-0 border-b-2 border-outline-variant focus:border-secondary focus:ring-0 px-0 font-headline text-headline-lg text-on-surface transition-colors pb-sm placeholder:text-outline/50 outline-none"
+                  className="w-full bg-transparent border-0 border-b-2 border-outline-variant focus:border-secondary focus:ring-0 px-0 font-headline text-headline-lg text-on-surface transition-colors pb-8 placeholder:text-outline/50 outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
                   onChange={(e) => setTitle(e.target.value)}
                 />
               </div>
@@ -182,14 +177,14 @@ export default function NewSequencePage() {
                 value={description}
                 placeholder="Optional description"
                 rows={2}
-                className="w-full bg-surface-container-low rounded-lg p-3 font-body text-body-md text-on-surface placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-secondary resize-none"
+                className="w-full bg-surface-container-low rounded-lg p-3 font-body text-body-md text-on-surface placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-secondary resize-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
                 onChange={(e) => setDescription(e.target.value)}
               />
             </div>
 
             {/* Meta chips */}
-            <div className="flex gap-sm flex-wrap">
-              <span className="inline-flex items-center rounded-full bg-surface-variant px-sm py-xs font-data text-data-sm text-on-surface-variant">
+            <div className="flex gap-8 flex-wrap">
+              <span className="inline-flex items-center rounded-full bg-surface-variant px-8 py-xs font-data text-data-sm text-on-surface-variant">
                 <span className="w-2 h-2 rounded-full bg-primary-container mr-xs" />
                 {selectedIds.length} Workout{selectedIds.length !== 1 && 's'}
               </span>
@@ -204,7 +199,7 @@ export default function NewSequencePage() {
                   min={1}
                   max={99}
                   value={repeatCount}
-                  className="w-12 bg-surface-container rounded px-1 py-0.5 text-center text-on-surface outline-none focus:ring-1 focus:ring-secondary"
+                  className="w-12 bg-surface-container rounded px-1 py-0.5 text-center text-on-surface outline-none focus:ring-1 focus:ring-secondary focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
                   onChange={(e) => setRepeatCount(Math.max(1, Math.min(99, parseInt(e.target.value) || 1)))}
                 />
                 rounds ({selectedIds.length * repeatCount} total)
@@ -213,14 +208,14 @@ export default function NewSequencePage() {
           </div>
 
           {/* Workout List */}
-          <div className="flex-1 flex flex-col gap-sm" id="workout-sequence-list">
+          <div className="flex-1 flex flex-col gap-8" id="workout-sequence-list">
             {selectedIds.map((id, i) => {
               const w = workouts.find((x) => x.id === id)
               const woDuration = w ? flattenWorkout(w).reduce((s, x) => s + x.duration, 0) : 0
               return (
                 <div
                   key={id}
-                  className="group glass-card rounded-lg p-md flex items-center gap-md transition-all hover:border-primary-fixed relative"
+                  className="group glass-card rounded-lg p-16 flex items-center gap-16 transition-all hover:border-primary-fixed relative"
                 >
                   {/* Left accent bar */}
                   <div className="absolute left-0 top-2 bottom-2 w-1 bg-surface-tint rounded-r-sm opacity-50 group-hover:opacity-100 transition-opacity" />
@@ -258,26 +253,22 @@ export default function NewSequencePage() {
                     <button
                       onClick={() => moveUp(i)}
                       disabled={i === 0}
-                      className="p-1 rounded text-outline-variant hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      className="p-1 rounded text-outline-variant hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
                       title="Move up"
                     >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
-                      </svg>
+                      <span className="material-symbols-outlined text-[18px]">keyboard_arrow_up</span>
                     </button>
                     <button
                       onClick={() => moveDown(i)}
                       disabled={i === selectedIds.length - 1}
-                      className="p-1 rounded text-outline-variant hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      className="p-1 rounded text-outline-variant hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
                       title="Move down"
                     >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                      </svg>
+                      <span className="material-symbols-outlined text-[18px]">keyboard_arrow_down</span>
                     </button>
                     <button
                       onClick={() => setSelectedIds((prev) => prev.filter((x) => x !== id))}
-                      className="p-1 rounded text-outline-variant hover:text-error transition-colors"
+                      className="p-1 rounded text-outline-variant hover:text-error transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
                       title="Remove"
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -290,8 +281,8 @@ export default function NewSequencePage() {
             })}
 
             {/* Add Workout Area */}
-            <div className="mt-md border-2 border-dashed border-outline-variant/50 rounded-lg p-lg text-center hover:bg-surface-variant/30 hover:border-primary transition-colors cursor-pointer group">
-              <div className="flex flex-col gap-md">
+            <div className="mt-16 border-2 border-dashed border-outline-variant/50 rounded-lg p-24 text-center hover:bg-surface-variant/30 hover:border-primary transition-colors cursor-pointer group">
+              <div className="flex flex-col gap-16">
                 {/* Search bar */}
                 <div className="relative max-w-md mx-auto w-full">
                   <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-outline-variant" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -301,7 +292,7 @@ export default function NewSequencePage() {
                     type="text"
                     value={search}
                     placeholder="Browse & Add Workouts..."
-                    className="w-full pl-10 pr-4 py-2.5 bg-surface-container text-on-surface rounded-lg font-body text-body-md placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-secondary"
+                    className="w-full pl-10 pr-4 py-2.5 bg-surface-container text-on-surface rounded-lg font-body text-body-md placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-secondary focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
                     onChange={(e) => setSearch(e.target.value)}
                   />
                 </div>
@@ -321,7 +312,7 @@ export default function NewSequencePage() {
                             type="checkbox"
                             checked={selectedSet.has(w.id)}
                             onChange={() => toggleWorkout(w.id)}
-                            className="accent-secondary w-4 h-4"
+                            className="accent-secondary w-4 h-4 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
                           />
                           <span className="flex-1 font-body text-body-md text-on-surface truncate">{w.title}</span>
                           <span className="font-data text-data-sm text-on-surface-variant shrink-0">
@@ -351,11 +342,11 @@ export default function NewSequencePage() {
 
         {/* Right Column: Summary Sidebar (desktop) */}
         <div className="w-full xl:w-80 shrink-0">
-          <div className="glass-card rounded-xl p-lg sticky top-28">
-            <h2 className="font-headline text-headline-md font-bold text-on-surface mb-lg">Sequence Profile</h2>
-            <div className="space-y-md">
+          <div className="glass-card rounded-xl p-24 sticky top-28">
+            <h2 className="font-headline text-headline-md font-bold text-on-surface mb-24">Sequence Profile</h2>
+            <div className="space-y-16">
               {/* Mini Chart */}
-              <div className="h-32 rounded-lg bg-surface-container border border-outline-variant/30 relative overflow-hidden flex items-end px-sm pb-sm gap-xs">
+              <div className="h-32 rounded-lg bg-surface-container border border-outline-variant/30 relative overflow-hidden flex items-end px-8 pb-8 gap-xs">
                 {selectedIds.slice(0, 8).map((id, i) => {
                   const w = workouts.find((x) => x.id === id)
                   if (!w) return <div key={id} className="w-full h-1/4 bg-surface-tint rounded-t-sm opacity-60" />
@@ -383,19 +374,19 @@ export default function NewSequencePage() {
               </div>
 
               {/* Stats */}
-              <div className="grid grid-cols-2 gap-sm">
-                <div className="bg-surface-variant p-sm rounded-lg">
+              <div className="grid grid-cols-2 gap-8">
+                <div className="bg-surface-variant p-8 rounded-lg">
                   <div className="font-label text-label-caps text-on-surface-variant uppercase tracking-wider mb-xs">Work Ratio</div>
                   <div className="font-data text-data-lg text-primary">{workRatio}%</div>
                 </div>
-                <div className="bg-surface-variant p-sm rounded-lg">
+                <div className="bg-surface-variant p-8 rounded-lg">
                   <div className="font-label text-label-caps text-on-surface-variant uppercase tracking-wider mb-xs">Rest Ratio</div>
                   <div className="font-data text-data-lg text-primary">{restRatio}%</div>
                 </div>
               </div>
 
               {/* Estimated Strain */}
-              <div className="pt-sm border-t border-outline-variant/20 mt-sm">
+              <div className="pt-8 border-t border-outline-variant/20 mt-8">
                 <div className="flex justify-between items-center mb-xs">
                   <span className="font-label text-label-caps text-on-surface-variant uppercase">Estimated Strain</span>
                   <span className="font-data text-data-sm font-bold text-secondary-container">
@@ -418,14 +409,14 @@ export default function NewSequencePage() {
       <div className="fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-md border-t border-outline-variant/30 p-margin-mobile md:p-margin-desktop flex justify-between items-center z-40">
         <button
           onClick={() => router.push('/sequences')}
-          className="font-label text-label-caps text-on-surface-variant hover:text-error transition-colors px-lg py-sm uppercase tracking-wider"
+          className="font-label text-label-caps text-on-surface-variant hover:text-error transition-colors px-24 py-8 uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
         >
           Discard
         </button>
         <button
           onClick={handleSave}
           disabled={!canSave}
-          className="bg-primary text-on-primary font-label text-label-caps px-xl py-md rounded-full hover:bg-primary-container disabled:bg-surface-container-high disabled:text-on-surface-variant transition-colors shadow-sm ambient-shadow uppercase tracking-wider flex items-center gap-sm"
+          className="bg-primary text-on-primary font-label text-label-caps px-32 py-16 rounded-full hover:bg-primary-container disabled:bg-surface-container-high disabled:text-on-surface-variant transition-colors shadow-sm ambient-shadow uppercase tracking-wider flex items-center gap-8 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />

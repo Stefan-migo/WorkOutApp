@@ -61,7 +61,7 @@ describe('StatsDashboard', () => {
       expect(screen.getByText('Last 30 Days Overview')).toBeInTheDocument()
     })
 
-    it('shows Export CSV and Detailed View buttons', () => {
+    it('shows Export CSV button', () => {
       render(
         <StatsDashboard
           sessions={[
@@ -70,8 +70,7 @@ describe('StatsDashboard', () => {
         />,
       )
 
-      expect(screen.getByRole('button', { name: /export csv/i })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /detailed view/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /export json/i })).toBeInTheDocument()
     })
   })
 
@@ -117,7 +116,7 @@ describe('StatsDashboard', () => {
       expect(screen.getByText('Sun')).toBeInTheDocument()
     })
 
-    it('renders Personal Records section with placeholder exercises', () => {
+    it('renders Personal Records section with coming soon message', () => {
       render(
         <StatsDashboard
           sessions={[
@@ -127,16 +126,13 @@ describe('StatsDashboard', () => {
       )
 
       expect(screen.getByText('Personal Records')).toBeInTheDocument()
-      expect(screen.getByText('View All')).toBeInTheDocument()
-      expect(screen.getByText('Deadlift')).toBeInTheDocument()
-      expect(screen.getByText('Back Squat')).toBeInTheDocument()
-      expect(screen.getByText('Bench Press')).toBeInTheDocument()
+      expect(screen.getByText('PR tracking coming in a future update.')).toBeInTheDocument()
     })
   })
 
   describe('heatmap', () => {
     it('renders 28 cells (4 weeks × 7 days)', () => {
-      const { container } = render(
+      render(
         <StatsDashboard
           sessions={[
             session({ startedAt: Date.now(), intervals: [interval(600)] }),
@@ -145,9 +141,6 @@ describe('StatsDashboard', () => {
       )
 
       // Heatmap grid has 28 cells inside the Consistency card
-      const cells = container
-        .querySelector('.glass-card') // first glass-card is volume, need consistency
-        ?.querySelectorAll('.grid > div')
       // Use a broader approach
       const consistencyCard = screen.getByText('Consistency').closest('.glass-card')
       const heatmapCells = consistencyCard?.querySelectorAll('.grid > div')
@@ -164,7 +157,7 @@ describe('StatsDashboard', () => {
     })
 
     it('formatDuration returns mm:ss format', async () => {
-      const { formatDuration } = await import('../StatsDashboard')
+      const { formatDuration } = await import('@/lib/format')
       expect(formatDuration(65)).toBe('1:05')
       expect(formatDuration(3600)).toBe('60:00')
       expect(formatDuration(30)).toBe('0:30')

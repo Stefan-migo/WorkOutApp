@@ -19,6 +19,7 @@ Manage a persistent library of exercises — list, create, edit, delete. Auto-se
 | EL-9 | Seed SHALL NOT overwrite existing exercises — only triggers on empty array | MUST |
 | EL-10 | `/exercises` page is a RSC shell wrapping a client list component | MUST |
 | EL-11 | Each exercise row SHALL display name, category badge, and muscle group tags | MUST |
+| EL-12 | SHALL, when user clicks "Add to Workout" on an exercise card, navigate to `/workouts/new` with the selected exercise pre-populated as a single-interval workout; the pre-populated interval SHALL use the exercise name as its title and SHALL default to `work` type with 60s duration | MUST |
 
 ## Scenarios
 
@@ -57,3 +58,15 @@ Manage a persistent library of exercises — list, create, edit, delete. Auto-se
 - GIVEN exercises named "Push Up", "Pull Up", "Squat"
 - WHEN user searches "push"
 - THEN "Push Up" is shown; "Pull Up" and "Squat" are hidden
+
+### Scenario: Add exercise creates prepopulated workout
+- GIVEN an exercise "Push Up" exists in the library
+- WHEN user clicks "Add to Workout" on the Push Up card
+- THEN the system navigates to `/workouts/new`
+- AND the new workout contains one interval with title "Push Up", type `work`, duration 60s, and `exerciseId` referencing the clicked exercise
+
+### Scenario: Multiple add-to-workout calls create separate workouts
+- GIVEN two exercises "Push Up" and "Squat"
+- WHEN user clicks "Add to Workout" on Push Up, then on Squat
+- THEN two separate navigations to `/workouts/new` occur
+- AND each new workout contains exactly one interval (the respective exercise)

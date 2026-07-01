@@ -11,19 +11,9 @@ export function getRoundAt(
   if (idx < 0 || idx >= getTotalRounds(seq)) return undefined
   const totalWorkouts = seq.workoutIds.length
   return {
-    workoutId: seq.workoutIds[idx % totalWorkouts],
+    workoutId: seq.workoutIds[idx % totalWorkouts]!,
     round: Math.floor(idx / totalWorkouts) + 1,
   }
-}
-
-export function getNextWorkoutId(seq: Sequence, idx: number): string | null {
-  const total = getTotalRounds(seq)
-  if (idx >= total - 1) return null
-  return getRoundAt(seq, idx + 1)?.workoutId ?? null
-}
-
-export function isComplete(seq: Sequence, idx: number): boolean {
-  return idx >= getTotalRounds(seq)
 }
 
 export function getProgress(
@@ -75,14 +65,6 @@ export function runEngineTests(): string[] {
   assert(getRoundAt(baseSeq, -1) === undefined, 'idx -1 → null', '')
   assert(getRoundAt(baseSeq, 6) === undefined, 'idx 6 → null', '')
 
-  // SE-3
-  assert(getNextWorkoutId(baseSeq, 0) === 'b', 'next 0 → b', '')
-  assert(getNextWorkoutId(baseSeq, 5) === null, 'next last → null', '')
-
-  // SE-4
-  assert(isComplete(baseSeq, 6) === true, '6 → done', '')
-  assert(isComplete(baseSeq, 5) === false, '5 → not done', '')
-
   // SE-5
   assert(getProgress(baseSeq, 3).current === 3, 'prog current', '')
   assert(getProgress(baseSeq, 3).total === 6, 'prog total', '')
@@ -98,8 +80,8 @@ export function runEngineTests(): string[] {
   ]
   const resolved = resolveWorkouts({ ...baseSeq, workoutIds: ['a', 'b', 'missing'] }, workouts)
   assert(resolved.length === 2, 'resolveWorkouts filters missing', `expected 2 got ${resolved.length}`)
-  assert(resolved[0].id === 'a', 'resolve order a', '')
-  assert(resolved[1].id === 'b', 'resolve order b', '')
+  assert(resolved[0]!.id === 'a', 'resolve order a', '')
+  assert(resolved[1]!.id === 'b', 'resolve order b', '')
 
   return results
 }

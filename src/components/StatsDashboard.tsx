@@ -5,13 +5,8 @@ import Link from 'next/link'
 import { useStats } from '@/hooks/useStats'
 import { useSessions } from '@/hooks/useSessions'
 import { exportAllData } from '@/lib/export-data'
+import { formatDuration } from '@/lib/format'
 import type { Session } from '@/types/workout'
-
-function formatDuration(totalSeconds: number) {
-  const m = Math.floor(totalSeconds / 60)
-  const s = totalSeconds % 60
-  return `${m}:${String(s).padStart(2, '0')}`
-}
 
 function formatHours(totalSeconds: number) {
   return (totalSeconds / 3600).toFixed(1) + 'h'
@@ -50,13 +45,6 @@ function buildHeatmap(sessions: Session[]): HeatmapCell[][] {
   return weeks
 }
 
-// ponytail: no PR data stored — hardcoded placeholder values
-const PLACEHOLDER_PRS = [
-  { icon: 'DL', name: 'Deadlift', rm: '1RM', weight: '185 kg', change: '+5kg' },
-  { icon: 'SQ', name: 'Back Squat', rm: '3RM', weight: '150 kg', change: '-' },
-  { icon: 'BP', name: 'Bench Press', rm: '5RM', weight: '100 kg', change: '+2.5kg' },
-] as const
-
 export default function StatsDashboard({ sessions: propSessions }: { sessions?: Session[] } = {}) {
   const { sessions: lsSessions } = useSessions()
   const sessions = propSessions ?? lsSessions
@@ -87,7 +75,7 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
 
   if (sessions.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center flex-1 gap-lg p-margin-mobile md:p-margin-desktop text-center">
+      <div className="flex flex-col items-center justify-center flex-1 gap-24 p-margin-mobile md:p-margin-desktop text-center">
         <span className="material-symbols-outlined text-[64px] text-on-surface-variant">
           monitoring
         </span>
@@ -99,7 +87,7 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
         </p>
         <Link
           href="/workouts"
-          className="px-lg py-md bg-primary text-on-primary rounded-lg font-label-caps text-label-caps hover:bg-primary/90 transition-colors ambient-shadow"
+          className="px-24 py-16 bg-primary text-on-primary rounded-lg font-label-caps text-label-caps hover:bg-primary/90 transition-colors ambient-shadow"
         >
           Browse Workouts
         </Link>
@@ -108,9 +96,9 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
   }
 
   return (
-    <div className="p-margin-mobile md:p-margin-desktop max-w-7xl mx-auto space-y-lg">
+    <div className="p-margin-mobile md:p-margin-desktop max-w-7xl mx-auto space-y-24">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-sm mb-lg">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 mb-24">
         <div>
           <h2 className="font-headline-lg text-headline-lg text-on-surface mb-1">
             Performance Stats
@@ -119,29 +107,26 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
             Last 30 Days Overview
           </p>
         </div>
-        <div className="flex gap-sm">
+        <div className="flex gap-8">
           <button
             onClick={exportAllData}
-            className="px-4 py-2 border border-outline rounded font-label-caps text-label-caps text-on-surface hover:bg-surface-variant transition-colors"
+            className="px-4 py-2 border border-outline rounded font-label-caps text-label-caps text-on-surface hover:bg-surface-variant transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
           >
-            Export CSV
+            Export JSON
           </button>
-          {/* ponytail: placeholder button — no detail route yet */}
-          <button className="px-4 py-2 bg-primary text-on-primary rounded font-label-caps text-label-caps hover:bg-primary/90 transition-colors">
-            Detailed View
-          </button>
+
         </div>
       </div>
 
       {/* Bento Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-lg">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-24">
         {/* Volume per Week — 8 cols */}
-        <div className="md:col-span-8 glass-card rounded-xl p-md flex flex-col h-96 ambient-shadow">
-          <h3 className="font-headline-md text-headline-md text-on-surface mb-md">
+        <div className="md:col-span-8 glass-card rounded-xl p-16 flex flex-col h-96 ambient-shadow">
+          <h3 className="font-headline-md text-headline-md text-on-surface mb-16">
             Volume per Week
           </h3>
           {/* ponytail: CSS div bars, no chart library */}
-          <div className="flex-1 w-full bg-surface-container-lowest rounded-lg border border-outline-variant/30 flex items-end p-sm gap-2 relative overflow-hidden">
+          <div className="flex-1 w-full bg-surface-container-lowest rounded-lg border border-outline-variant/30 flex items-end p-8 gap-2 relative overflow-hidden">
             {recentVolume.map((w) => {
               const pct = (w.totalSeconds / maxVolume) * 100
               const isTop = w.totalSeconds === maxVolume
@@ -165,7 +150,7 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
               )
             })}
           </div>
-          <div className="flex justify-between mt-2 font-data-sm text-data-sm text-on-surface-variant px-sm">
+          <div className="flex justify-between mt-2 font-data-sm text-data-sm text-on-surface-variant px-8">
             {recentVolume.map((w, i) => (
               <span key={w.weekLabel}>Wk {i + 1}</span>
             ))}
@@ -173,7 +158,7 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
         </div>
 
         {/* Average Strain — 4 cols */}
-        <div className="md:col-span-4 glass-card rounded-xl p-md flex flex-col h-96 ambient-shadow justify-between">
+        <div className="md:col-span-4 glass-card rounded-xl p-16 flex flex-col h-96 ambient-shadow justify-between">
           <div className="pb-3">
             <h3 className="font-headline-md text-headline-md text-on-surface">
               Average Strain
@@ -213,8 +198,8 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
         </div>
 
         {/* Consistency Heatmap — 7 cols */}
-        <div className="md:col-span-7 glass-card rounded-xl p-md h-48 ambient-shadow flex flex-col">
-          <h3 className="font-headline-md text-headline-md text-on-surface mb-sm">
+        <div className="md:col-span-7 glass-card rounded-xl p-16 h-48 ambient-shadow flex flex-col">
+          <h3 className="font-headline-md text-headline-md text-on-surface mb-8">
             Consistency
           </h3>
           <div className="flex-1 grid grid-cols-7 gap-1 auto-rows-fr">
@@ -237,50 +222,16 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
         </div>
 
         {/* Personal Records — 5 cols */}
-        <div className="md:col-span-5 glass-card rounded-xl p-md ambient-shadow flex flex-col">
-          <div className="flex justify-between items-center mb-md border-b border-outline-variant/30 pb-sm">
+        <div className="md:col-span-5 glass-card rounded-xl p-16 ambient-shadow flex flex-col">
+          <div className="flex items-center mb-16 border-b border-outline-variant/30 pb-8">
             <h3 className="font-headline-md text-headline-md text-on-surface">
               Personal Records
             </h3>
-            {/* ponytail: placeholder — no PR data collection yet */}
-            <button className="font-label-caps text-label-caps text-secondary-container hover:text-secondary transition-colors">
-              View All
-            </button>
           </div>
-          <div className="flex-1 flex flex-col gap-sm overflow-y-auto">
-            {PLACEHOLDER_PRS.map((pr) => (
-              <div
-                key={pr.icon}
-                className="flex justify-between items-center p-sm bg-surface-container-lowest rounded border border-outline-variant/30 hover:border-primary-fixed transition-colors"
-              >
-                <div className="flex items-center gap-md">
-                  <div className="w-10 h-10 rounded bg-surface-variant flex items-center justify-center text-primary font-bold font-data-sm text-data-sm">
-                    {pr.icon}
-                  </div>
-                  <div>
-                    <p className="font-body-md text-body-md font-bold text-on-surface">
-                      {pr.name}
-                    </p>
-                    <p className="font-data-sm text-data-sm text-on-surface-variant">
-                      {pr.rm}
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-data-lg text-data-lg text-primary">
-                    {pr.weight}
-                  </p>
-                  <p className="font-data-sm text-data-sm text-secondary-container flex items-center gap-1 justify-end">
-                    {pr.change !== '-' && (
-                      <span className="material-symbols-outlined text-[14px]">
-                        arrow_upward
-                      </span>
-                    )}
-                    {pr.change}
-                  </p>
-                </div>
-              </div>
-            ))}
+          <div className="flex-1 flex items-center justify-center">
+            <p className="font-body-md text-body-md text-on-surface-variant text-center">
+              PR tracking coming in a future update.
+            </p>
           </div>
         </div>
       </div>
