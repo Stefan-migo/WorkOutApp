@@ -125,6 +125,68 @@
   --spacing-32: 32px;
 }
 
+/* Dark mode — follows OS preference */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary: #d3e4fe;
+    --color-on-primary: #0b1c30;
+    --color-primary-container: #233153;
+    --color-on-primary-container: #bcc7de;
+    --color-primary-fixed: #091426;
+    --color-primary-fixed-dim: #1e293b;
+    --color-on-primary-fixed: #d8e3fb;
+    --color-on-primary-fixed-variant: #8590a6;
+
+    --color-secondary: #ffb59d;
+    --color-on-secondary: #5d1900;
+    --color-secondary-container: #832600;
+    --color-on-secondary-container: #ffdbd0;
+    --color-secondary-fixed: #ac3400;
+    --color-secondary-fixed-dim: #fd6b36;
+    --color-on-secondary-fixed: #ffdbd0;
+    --color-on-secondary-fixed-variant: #ffb59d;
+
+    --color-tertiary: #c4c7c9;
+    --color-on-tertiary: #191c1e;
+    --color-tertiary-container: #2e3133;
+    --color-on-tertiary-container: #8d9092;
+    --color-tertiary-fixed: #111516;
+    --color-tertiary-fixed-dim: #26292b;
+    --color-on-tertiary-fixed: #e0e3e5;
+    --color-on-tertiary-fixed-variant: #8d9092;
+
+    --color-error: #ffb4ab;
+    --color-on-error: #690005;
+    --color-error-container: #93000a;
+    --color-on-error-container: #ffdad6;
+
+    --color-background: #0a0e1a;
+    --color-on-background: #eaf1ff;
+
+    --color-surface: #111624;
+    --color-on-surface: #eaf1ff;
+    --color-surface-dim: #0a0e1a;
+    --color-surface-bright: #31364a;
+    --color-surface-container-lowest: #050811;
+    --color-surface-container-low: #151a29;
+    --color-surface-container: #1a1f2e;
+    --color-surface-container-high: #242938;
+    --color-surface-container-highest: #2f3444;
+    --color-surface-variant: #2f3444;
+    --color-on-surface-variant: #c5c6cd;
+
+    --color-inverse-surface: #eaf1ff;
+    --color-inverse-on-surface: #0b1c30;
+    --color-inverse-primary: #091426;
+
+    --color-outline: #8e9099;
+    --color-outline-variant: #45474c;
+    --color-surface-tint: #bcc7de;
+  }
+
+  /* ponytail: segment colors stay same — they're already high-contrast on any bg */
+}
+
 /* Glassmorphism card */
 .glass-card {
   background: var(--color-surface);
@@ -155,7 +217,7 @@
 body {
   background-color: var(--color-background);
   color: var(--color-on-background);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-body);
 }
 
 .progress-ring__circle {
