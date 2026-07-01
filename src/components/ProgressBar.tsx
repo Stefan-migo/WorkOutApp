@@ -12,9 +12,9 @@ export function ProgressBar({ progress, label, dark }: ProgressBarProps) {
 
   return (
     <div className="w-full">
-      {label && <span className={`text-sm mb-1 block ${dark ? 'text-gray-400' : 'text-muted'}`}>{label}</span>}
+      {label && <span className={`text-sm mb-1 block ${dark ? 'text-gray-400' : 'text-on-surface-variant'}`}>{label}</span>}
       <div
-        className={`w-full rounded-full overflow-hidden ${dark ? 'bg-[#1E293B] h-2' : 'bg-border min-h-[44px] flex items-center'}`}
+        className={`w-full rounded-full overflow-hidden ${dark ? 'bg-[#1E293B] h-2' : 'bg-surface-dim min-h-[44px] flex items-center'}`}
         role="progressbar"
         aria-valuenow={pct}
         aria-valuemin={0}
@@ -22,7 +22,7 @@ export function ProgressBar({ progress, label, dark }: ProgressBarProps) {
         aria-label={label ?? 'Progress'}
       >
         <div
-          className={`rounded-full transition-all duration-500 ease-out ${dark ? 'h-2 bg-white' : 'h-3 bg-accent'}`}
+          className={`rounded-full transition-all duration-500 ease-out ${dark ? 'h-2 bg-white' : 'h-3 bg-primary-container'}`}
           style={{ width: `${pct}%` }}
         />
       </div>
