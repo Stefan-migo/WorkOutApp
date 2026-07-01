@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import { useExercises } from '@/hooks/useExercises'
 import { useWorkoutContext } from '@/context/WorkoutContext'
 import type { Exercise, ExerciseCategory } from '@/types/workout'
@@ -13,6 +13,17 @@ const EMPTY_FORM: Omit<Exercise, 'id' | 'createdAt' | 'updatedAt'> = {
   category: 'strength',
   description: '',
   muscleGroups: [],
+  equipment: [],
+  difficulty: undefined,
+}
+
+const DIFFICULTIES = ['beginner', 'intermediate', 'advanced'] as const
+const CATEGORY_LABELS: Record<ExerciseCategory, string> = {
+  strength: 'Strength',
+  cardio: 'Cardio',
+  stretching: 'Stretching',
+  mobility: 'Mobility',
+  other: 'Other',
 }
 
 export default function ExercisesPage() {
@@ -24,11 +35,59 @@ export default function ExercisesPage() {
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
   const deleteDialogRef = useRef<HTMLDialogElement>(null)
   const [muscleInput, setMuscleInput] = useState('')
+  const [equipmentInput, setEquipmentInput] = useState('')
+
+  // Filters
+  const [search, setSearch] = useState('')
+  const [muscleFilter, setMuscleFilter] = useState<string | null>(null)
+  const [equipmentFilter, setEquipmentFilter] = useState<string | null>(null)
+
+  // Derive unique filter options
+  const allMuscleGroups = useMemo(() => {
+    const set = new Set<string>()
+    exercises.forEach((ex) => ex.muscleGroups?.forEach((mg) => set.add(mg)))
+    return Array.from(set).sort()
+  }, [exercises])
+
+  const allEquipment = useMemo(() => {
+    const set = new Set<string>()
+    exercises.forEach((ex) => ex.equipment?.forEach((eq) => set.add(eq)))
+    return Array.from(set).sort()
+  }, [exercises])
+
+  // Filter + search
+  const filtered = useMemo(() => {
+    return exercises.filter((ex) => {
+      if (search.trim()) {
+        const q = search.toLowerCase()
+        const nameMatch = ex.name.toLowerCase().includes(q)
+        const descMatch = ex.description?.toLowerCase().includes(q)
+        const muscleMatch = ex.muscleGroups?.some((m) => m.toLowerCase().includes(q))
+        const equipMatch = ex.equipment?.some((e) => e.toLowerCase().includes(q))
+        if (!nameMatch && !descMatch && !muscleMatch && !equipMatch) return false
+      }
+      if (muscleFilter && !ex.muscleGroups?.includes(muscleFilter)) return false
+      if (equipmentFilter && !ex.equipment?.includes(equipmentFilter)) return false
+      return true
+    })
+  }, [exercises, search, muscleFilter, equipmentFilter])
+
+  // Group by category
+  const grouped = useMemo(() => {
+    const map = new Map<ExerciseCategory, Exercise[]>()
+    for (const ex of filtered) {
+      const list = map.get(ex.category) ?? []
+      list.push(ex)
+      map.set(ex.category, list)
+    }
+    return map
+  }, [filtered])
 
   function openCreate() {
     setForm(EMPTY_FORM)
     setEditingId(null)
     setMuscleInput('')
+    setEquipmentInput('')
     dialogRef.current?.showModal()
   }
 
@@ -38,8 +97,11 @@ export default function ExercisesPage() {
       category: ex.category,
       description: ex.description ?? '',
       muscleGroups: ex.muscleGroups ?? [],
+      equipment: ex.equipment ?? [],
+      difficulty: ex.difficulty,
     })
     setMuscleInput((ex.muscleGroups ?? []).join(', '))
+    setEquipmentInput((ex.equipment ?? []).join(', '))
     setEditingId(ex.id)
     dialogRef.current?.showModal()
   }
@@ -47,10 +109,8 @@ export default function ExercisesPage() {
   function handleSave(e: React.FormEvent) {
     e.preventDefault()
     if (!form.name.trim()) return
-    const groups = muscleInput
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean)
+    const groups = muscleInput.split(',').map((s) => s.trim()).filter(Boolean)
+    const equip = equipmentInput.split(',').map((s) => s.trim()).filter(Boolean)
     const now = Date.now()
     const exercise: Exercise = {
       id: editingId || `exercise-${now}`,
@@ -58,6 +118,8 @@ export default function ExercisesPage() {
       category: form.category,
       description: form.description?.trim() || undefined,
       muscleGroups: groups.length > 0 ? groups : undefined,
+      equipment: equip.length > 0 ? equip : undefined,
+      difficulty: form.difficulty || undefined,
       createdAt: editingId ? (exercises.find((e) => e.id === editingId)?.createdAt ?? now) : now,
       updatedAt: now,
     }
@@ -82,106 +144,246 @@ export default function ExercisesPage() {
     return workouts.filter((w) => w.intervals.some((i) => i.exerciseId === id)).length
   }
 
-  return (
-    <div className="max-w-2xl mx-auto w-full p-6 flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Exercises</h1>
-        <button
-          onClick={openCreate}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-medium transition-colors"
-        >
-          + New Exercise
-        </button>
-      </div>
+  const hasNoExercises = exercises.length === 0
+  const hasNoResults = !hasNoExercises && filtered.length === 0
 
-      {exercises.length === 0 && (
-        <div className="flex flex-col items-center justify-center flex-1 gap-4 py-16 text-center">
-          <p className="text-zinc-400">No exercises yet. Create your first one!</p>
+  return (
+    <div className="max-w-[1440px] mx-auto w-full p-margin-mobile md:p-margin-desktop flex flex-col gap-xl pb-32">
+      {/* Header Bento */}
+      <section className="bg-surface rounded-xl p-lg border border-outline-variant/30 flex flex-col gap-lg relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary via-transparent to-transparent" />
+        <div className="flex flex-col gap-xs z-10">
+          <h1 className="font-headline text-headline-lg font-bold text-primary">Exercise Library</h1>
+          <p className="font-body text-body-md text-on-surface-variant">
+            Master your movements. Search, filter, and build your ultimate protocol.
+          </p>
+        </div>
+        <div className="flex flex-col gap-md z-10">
+          {/* Search */}
+          <div className="relative w-full max-w-2xl">
+            <svg className="absolute left-0 bottom-3 text-on-surface-variant w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+            </svg>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-transparent border-0 border-b-2 border-outline-variant/50 pl-10 py-3 font-data text-data-lg text-primary placeholder:text-on-surface-variant focus:ring-0 focus:border-secondary transition-colors outline-none"
+              placeholder="Search by name, muscle, or equipment..."
+            />
+          </div>
+          {/* Filter chips */}
+          <div className="flex flex-wrap gap-x-lg gap-y-md mt-sm">
+            <div className="flex flex-col gap-sm">
+              <span className="font-label text-label-caps text-on-surface-variant uppercase tracking-widest text-[10px]">Muscle Group</span>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setMuscleFilter(null)}
+                  className={`px-3 py-1.5 rounded-full font-label text-label-caps transition-colors ${
+                    muscleFilter === null
+                      ? 'bg-secondary-container/10 text-secondary border border-secondary-container/20'
+                      : 'bg-surface-container text-on-surface border border-outline-variant/30 hover:bg-surface-container-high'
+                  }`}
+                >
+                  All
+                </button>
+                {allMuscleGroups.map((mg) => (
+                  <button
+                    key={mg}
+                    onClick={() => setMuscleFilter(mg === muscleFilter ? null : mg)}
+                    className={`px-3 py-1.5 rounded-full font-label text-label-caps transition-colors ${
+                      muscleFilter === mg
+                        ? 'bg-secondary-container/10 text-secondary border border-secondary-container/20'
+                        : 'bg-surface-container text-on-surface border border-outline-variant/30 hover:bg-surface-container-high'
+                    }`}
+                  >
+                    {mg}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-col gap-sm">
+              <span className="font-label text-label-caps text-on-surface-variant uppercase tracking-widest text-[10px]">Equipment</span>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setEquipmentFilter(null)}
+                  className={`px-3 py-1.5 rounded-full font-label text-label-caps transition-colors ${
+                    equipmentFilter === null
+                      ? 'bg-secondary-container/10 text-secondary border border-secondary-container/20'
+                      : 'bg-surface-container text-on-surface border border-outline-variant/30 hover:bg-surface-container-high'
+                  }`}
+                >
+                  All
+                </button>
+                {allEquipment.map((eq) => (
+                  <button
+                    key={eq}
+                    onClick={() => setEquipmentFilter(eq === equipmentFilter ? null : eq)}
+                    className={`px-3 py-1.5 rounded-full font-label text-label-caps transition-colors ${
+                      equipmentFilter === eq
+                        ? 'bg-secondary-container/10 text-secondary border border-secondary-container/20'
+                        : 'bg-surface-container text-on-surface border border-outline-variant/30 hover:bg-surface-container-high'
+                    }`}
+                  >
+                    {eq}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
           <button
             onClick={openCreate}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg text-white font-medium transition-colors"
+            className="self-start px-4 py-2 bg-primary text-on-primary font-label text-label-caps rounded-lg hover:bg-primary-container transition-colors"
+          >
+            + New Exercise
+          </button>
+        </div>
+      </section>
+
+      {/* Empty states */}
+      {hasNoExercises && (
+        <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
+          <p className="font-body text-body-md text-on-surface-variant">No exercises yet. Create your first one!</p>
+          <button
+            onClick={openCreate}
+            className="px-6 py-3 bg-primary text-on-primary font-label text-label-caps rounded-lg hover:bg-primary-container transition-colors"
           >
             Create Exercise
           </button>
         </div>
       )}
 
-      <div className="flex flex-col gap-2">
-        {exercises.map((ex) => {
-          const refCount = workoutRefCount(ex.id)
-          return (
-            <div
-              key={ex.id}
-              className="p-4 rounded-lg bg-zinc-800 flex items-start justify-between gap-4"
-            >
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-semibold text-white truncate">{ex.name}</h3>
-                  <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-medium bg-zinc-700 text-zinc-400">
-                    {ex.category}
+      {hasNoResults && !hasNoExercises && (
+        <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
+          <p className="font-body text-body-md text-on-surface-variant">No exercises match your filters.</p>
+        </div>
+      )}
+
+      {/* Category sections */}
+      {!hasNoExercises && !hasNoResults && (
+        <div className="flex flex-col gap-xl">
+          {CATEGORIES.map((cat) => {
+            const items = grouped.get(cat)
+            if (!items || items.length === 0) return null
+            return (
+              <section key={cat} className="flex flex-col gap-md">
+                <div className="flex items-center justify-between border-b border-outline-variant/20 pb-sm">
+                  <h2 className="font-headline text-headline-md font-semibold text-primary">
+                    {CATEGORY_LABELS[cat]}
+                  </h2>
+                  <span className="font-data text-data-sm text-on-surface-variant">
+                    {items.length} {items.length === 1 ? 'Movement' : 'Movements'}
                   </span>
                 </div>
-                {ex.description && (
-                  <p className="text-sm text-zinc-500 line-clamp-2 mb-1">{ex.description}</p>
-                )}
-                {ex.muscleGroups && ex.muscleGroups.length > 0 && (
-                  <div className="flex gap-1 flex-wrap">
-                    {ex.muscleGroups.map((mg) => (
-                      <span
-                        key={mg}
-                        className="px-1.5 py-0.5 rounded text-[11px] bg-zinc-700/50 text-zinc-400"
-                      >
-                        {mg}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <div className="flex gap-2 shrink-0">
-                <button
-                  onClick={() => openEdit(ex)}
-                  className="px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 rounded text-sm transition-colors"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => confirmDelete(ex.id)}
-                  className="px-3 py-1.5 bg-red-900/50 hover:bg-red-800/50 rounded text-sm text-red-400 transition-colors"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          )
-        })}
-      </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+                  {items.map((ex) => (
+                    <div
+                      key={ex.id}
+                      className="bg-surface rounded-xl border border-outline-variant/30 overflow-hidden hover:shadow-[0_4px_20px_rgba(30,41,59,0.05)] transition-all duration-300 group flex flex-col"
+                    >
+                      {/* Image area */}
+                      <div className="aspect-[4/3] bg-surface-container-lowest m-xs rounded-lg relative overflow-hidden flex items-center justify-center">
+                        {/* Placeholder exercise icon */}
+                        <svg className="w-12 h-12 text-outline-variant/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                        </svg>
+                        {/* Difficulty badge */}
+                        {ex.difficulty && (
+                          <div className="absolute top-2 right-2 bg-surface/80 backdrop-blur px-2 py-1 rounded font-data text-data-sm text-primary font-bold shadow-sm">
+                            {ex.difficulty.charAt(0).toUpperCase() + ex.difficulty.slice(1)}
+                          </div>
+                        )}
+                      </div>
+                      {/* Content */}
+                      <div className="p-md flex flex-col gap-sm flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="font-body text-body-lg font-bold text-primary truncate">{ex.name}</h3>
+                          <div className="flex gap-1 shrink-0">
+                            <button
+                              onClick={() => openEdit(ex)}
+                              className="p-1 rounded text-on-surface-variant hover:text-primary transition-colors"
+                              title="Edit"
+                            >
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => confirmDelete(ex.id)}
+                              className="p-1 rounded text-on-surface-variant hover:text-error transition-colors"
+                              title="Delete"
+                            >
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                        {ex.description && (
+                          <p className="font-body text-body-md text-on-surface-variant line-clamp-2">{ex.description}</p>
+                        )}
+                        <div className="flex flex-wrap gap-2 mt-auto pt-sm">
+                          {ex.muscleGroups?.slice(0, 3).map((mg) => (
+                            <span key={mg} className="bg-surface-container px-2 py-1 rounded text-[11px] font-label text-label-caps text-on-surface-variant tracking-wider">
+                              {mg.toUpperCase()}
+                            </span>
+                          ))}
+                          {ex.equipment?.slice(0, 2).map((eq) => (
+                            <span key={eq} className="bg-surface-container px-2 py-1 rounded text-[11px] font-label text-label-caps text-on-surface-variant tracking-wider">
+                              {eq.toUpperCase()}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      {/* Bottom CTA */}
+                      <div className="px-md pb-md border-t border-outline-variant/10 pt-sm mt-auto">
+                        <button
+                          onClick={() => openEdit(ex)}
+                          className="w-full py-2 border border-outline text-primary font-label text-label-caps rounded hover:bg-surface-container transition-colors flex justify-center items-center gap-xs"
+                        >
+                          <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                          </svg>
+                          Add to Workout
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )
+          })}
+        </div>
+      )}
 
       {/* Create/Edit dialog */}
       <dialog
         ref={dialogRef}
-        className="bg-zinc-800 text-white rounded-xl p-6 max-w-md w-full backdrop:bg-black/60"
+        className="glass-card rounded-xl p-lg max-w-md w-full backdrop:bg-black/60 open:flex open:flex-col open:gap-4"
       >
         <form onSubmit={handleSave} className="flex flex-col gap-4">
-          <h3 className="text-lg font-semibold">{editingId ? 'Edit Exercise' : 'New Exercise'}</h3>
+          <h3 className="font-headline text-headline-md font-semibold text-primary">
+            {editingId ? 'Edit Exercise' : 'New Exercise'}
+          </h3>
 
           <label className="flex flex-col gap-1">
-            <span className="text-xs text-zinc-400">Name</span>
+            <span className="font-label text-label-caps text-on-surface-variant">Name</span>
             <input
               type="text"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               required
-              className="bg-zinc-700 text-white rounded px-3 py-2 text-sm placeholder:text-zinc-500"
+              className="bg-surface-container text-on-surface rounded-lg px-3 py-2 font-body text-body-md placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-secondary"
               placeholder="Exercise name"
             />
           </label>
 
           <label className="flex flex-col gap-1">
-            <span className="text-xs text-zinc-400">Category</span>
+            <span className="font-label text-label-caps text-on-surface-variant">Category</span>
             <select
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value as ExerciseCategory })}
-              className="bg-zinc-700 text-white rounded px-3 py-2 text-sm"
+              className="bg-surface-container text-on-surface rounded-lg px-3 py-2 font-body text-body-md outline-none focus:ring-2 focus:ring-secondary"
             >
               {CATEGORIES.map((cat) => (
                 <option key={cat} value={cat} className="capitalize">
@@ -192,24 +394,51 @@ export default function ExercisesPage() {
           </label>
 
           <label className="flex flex-col gap-1">
-            <span className="text-xs text-zinc-400">Description</span>
+            <span className="font-label text-label-caps text-on-surface-variant">Difficulty</span>
+            <select
+              value={form.difficulty ?? ''}
+              onChange={(e) => setForm({ ...form, difficulty: (e.target.value || undefined) as Exercise['difficulty'] })}
+              className="bg-surface-container text-on-surface rounded-lg px-3 py-2 font-body text-body-md outline-none focus:ring-2 focus:ring-secondary"
+            >
+              <option value="">Any</option>
+              {DIFFICULTIES.map((d) => (
+                <option key={d} value={d} className="capitalize">
+                  {d.charAt(0).toUpperCase() + d.slice(1)}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="font-label text-label-caps text-on-surface-variant">Description</span>
             <textarea
               value={form.description ?? ''}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               rows={3}
-              className="bg-zinc-700 text-white rounded px-3 py-2 text-sm placeholder:text-zinc-500 resize-none"
+              className="bg-surface-container text-on-surface rounded-lg px-3 py-2 font-body text-body-md placeholder:text-on-surface-variant resize-none outline-none focus:ring-2 focus:ring-secondary"
               placeholder="Optional description"
             />
           </label>
 
           <label className="flex flex-col gap-1">
-            <span className="text-xs text-zinc-400">Muscle Groups</span>
+            <span className="font-label text-label-caps text-on-surface-variant">Muscle Groups</span>
             <input
               type="text"
               value={muscleInput}
               onChange={(e) => setMuscleInput(e.target.value)}
-              className="bg-zinc-700 text-white rounded px-3 py-2 text-sm placeholder:text-zinc-500"
+              className="bg-surface-container text-on-surface rounded-lg px-3 py-2 font-body text-body-md placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-secondary"
               placeholder="Comma-separated: Chest, Triceps"
+            />
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="font-label text-label-caps text-on-surface-variant">Equipment</span>
+            <input
+              type="text"
+              value={equipmentInput}
+              onChange={(e) => setEquipmentInput(e.target.value)}
+              className="bg-surface-container text-on-surface rounded-lg px-3 py-2 font-body text-body-md placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-secondary"
+              placeholder="Comma-separated: Dumbbell, Barbell"
             />
           </label>
 
@@ -217,13 +446,13 @@ export default function ExercisesPage() {
             <button
               type="button"
               onClick={() => dialogRef.current?.close()}
-              className="px-4 py-2 rounded text-sm text-zinc-400 hover:text-white transition-colors"
+              className="px-4 py-2 rounded-lg font-label text-label-caps text-on-surface-variant hover:text-primary transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white transition-colors"
+              className="px-4 py-2 rounded-lg font-label text-label-caps bg-primary text-on-primary hover:bg-primary-container transition-colors"
             >
               {editingId ? 'Save' : 'Create'}
             </button>
@@ -234,18 +463,18 @@ export default function ExercisesPage() {
       {/* Delete confirmation dialog */}
       <dialog
         ref={deleteDialogRef}
-        className="bg-zinc-800 text-white rounded-xl p-6 max-w-sm w-full backdrop:bg-black/60"
+        className="glass-card rounded-xl p-lg max-w-sm w-full backdrop:bg-black/60 open:flex open:flex-col open:gap-4"
       >
         <div className="flex flex-col gap-4">
-          <h3 className="text-lg font-semibold">Delete Exercise?</h3>
+          <h3 className="font-headline text-headline-md font-semibold text-primary">Delete Exercise?</h3>
           {deleteTarget && workoutRefCount(deleteTarget) > 0 ? (
-            <p className="text-sm text-amber-400">
+            <p className="font-body text-body-md text-secondary">
               This exercise is used in {workoutRefCount(deleteTarget)} workout
               {workoutRefCount(deleteTarget) !== 1 && 's'}. Deleting it will not remove existing
               references, but the exercise name will no longer be shown.
             </p>
           ) : (
-            <p className="text-sm text-zinc-400">
+            <p className="font-body text-body-md text-on-surface-variant">
               This exercise is not referenced by any workout. Are you sure?
             </p>
           )}
@@ -253,14 +482,14 @@ export default function ExercisesPage() {
             <button
               type="button"
               onClick={() => deleteDialogRef.current?.close()}
-              className="px-4 py-2 rounded text-sm text-zinc-400 hover:text-white transition-colors"
+              className="px-4 py-2 rounded-lg font-label text-label-caps text-on-surface-variant hover:text-primary transition-colors"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={handleDelete}
-              className="px-4 py-2 rounded text-sm font-medium bg-red-700 hover:bg-red-600 text-white transition-colors"
+              className="px-4 py-2 rounded-lg font-label text-label-caps bg-error text-on-error hover:bg-error-container hover:text-on-error-container transition-colors"
             >
               Delete
             </button>

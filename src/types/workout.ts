@@ -31,6 +31,8 @@ export interface Exercise {
   name: string
   description?: string
   muscleGroups?: string[]
+  equipment?: string[]
+  difficulty?: 'beginner' | 'intermediate' | 'advanced'
   category: ExerciseCategory
   createdAt: number
   updatedAt: number
