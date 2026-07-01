@@ -7,6 +7,11 @@ import { useSessions } from '@/hooks/useSessions'
 import { exportAllData } from '@/lib/export-data'
 import { formatDuration } from '@/lib/format'
 import type { Session } from '@/types/workout'
+import VolumeChart from '@/components/VolumeChart'
+import StrainGauge from '@/components/StrainGauge'
+import ConsistencyHeatmap from '@/components/ConsistencyHeatmap'
+
+export { formatDuration, formatHours }
 
 function formatHours(totalSeconds: number) {
   return (totalSeconds / 3600).toFixed(1) + 'h'
@@ -65,13 +70,8 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
   }, [sessions])
 
   const heatmap = useMemo(() => buildHeatmap(sessions), [sessions])
-
   const recentVolume = stats.weeklyVolume.slice(-4)
   const maxVolume = Math.max(...recentVolume.map((w) => w.totalSeconds), 1)
-
-  const gaugeR = 80
-  const gaugeCirc = 2 * Math.PI * gaugeR
-  const gaugeOffset = gaugeCirc - (avgRpe / 10) * gaugeCirc
 
   if (sessions.length === 0) {
     return (
@@ -114,112 +114,14 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
           >
             Export JSON
           </button>
-
         </div>
       </div>
 
       {/* Bento Grid */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-24">
-        {/* Volume per Week — 8 cols */}
-        <div className="md:col-span-8 glass-card rounded-xl p-16 flex flex-col h-96 ambient-shadow">
-          <h3 className="font-headline-md text-headline-md text-on-surface mb-16">
-            Volume per Week
-          </h3>
-          {/* ponytail: CSS div bars, no chart library */}
-          <div className="flex-1 w-full bg-surface-container-lowest rounded-lg border border-outline-variant/30 flex items-end p-8 gap-2 relative overflow-hidden">
-            {recentVolume.map((w) => {
-              const pct = (w.totalSeconds / maxVolume) * 100
-              const isTop = w.totalSeconds === maxVolume
-              return (
-                <div
-                  key={w.weekLabel}
-                  className="flex-1 h-full flex flex-col justify-end group relative"
-                >
-                  <div
-                    className={`w-full rounded-t transition-all duration-300 ${
-                      isTop ? 'bg-primary' : 'bg-primary-fixed-dim'
-                    }`}
-                    style={{ height: `${Math.max(pct, 1)}%` }}
-                  >
-                    {/* ponytail: CSS-only tooltip, no library */}
-                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-tertiary text-on-tertiary font-data-sm text-data-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                      {formatHours(w.totalSeconds)}
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-          <div className="flex justify-between mt-2 font-data-sm text-data-sm text-on-surface-variant px-8">
-            {recentVolume.map((w, i) => (
-              <span key={w.weekLabel}>Wk {i + 1}</span>
-            ))}
-          </div>
-        </div>
-
-        {/* Average Strain — 4 cols */}
-        <div className="md:col-span-4 glass-card rounded-xl p-16 flex flex-col h-96 ambient-shadow justify-between">
-          <div className="pb-3">
-            <h3 className="font-headline-md text-headline-md text-on-surface">
-              Average Strain
-            </h3>
-            <p className="font-body-md text-body-md text-on-surface-variant">
-              RPE Focus
-            </p>
-          </div>
-          {/* ponytail: work/rest ratio as RPE proxy — no actual RPE tracking */}
-          <div className="flex-1 flex items-center justify-center">
-            <div className="relative w-48 h-48">
-              <svg className="w-full h-full -rotate-90" viewBox="0 0 184 184">
-                <circle
-                  cx="92" cy="92" r={gaugeR}
-                  fill="none" stroke="currentColor" strokeWidth="16"
-                  className="text-surface-variant"
-                />
-                <circle
-                  cx="92" cy="92" r={gaugeR}
-                  fill="none" stroke="currentColor" strokeWidth="16"
-                  strokeLinecap="round"
-                  strokeDasharray={gaugeCirc}
-                  strokeDashoffset={gaugeOffset}
-                  className="text-secondary-container transition-all duration-700 ease-out"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="font-display-timer-mobile text-display-timer-mobile text-primary leading-none">
-                  {avgRpe}
-                </span>
-                <span className="font-label-caps text-label-caps text-on-surface-variant mt-1">
-                  Avg RPE
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Consistency Heatmap — 7 cols */}
-        <div className="md:col-span-7 glass-card rounded-xl p-16 h-48 ambient-shadow flex flex-col">
-          <h3 className="font-headline-md text-headline-md text-on-surface mb-8">
-            Consistency
-          </h3>
-          <div className="flex-1 grid grid-cols-7 gap-1 auto-rows-fr">
-            {heatmap.flat().map((cell) => {
-              let bgClass = 'bg-surface-variant'
-              if (cell.count > 1) bgClass = 'bg-primary'
-              else if (cell.count === 1) bgClass = 'bg-primary/50'
-              return (
-                <div
-                  key={cell.date}
-                  className={`${bgClass} rounded-sm w-full h-full opacity-80 hover:opacity-100 transition-opacity`}
-                />
-              )
-            })}
-          </div>
-          <div className="flex justify-between mt-2 font-data-sm text-data-sm text-on-surface-variant">
-            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span>
-            <span>Fri</span><span>Sat</span><span>Sun</span>
-          </div>
-        </div>
+        <VolumeChart recentVolume={recentVolume} maxVolume={maxVolume} formatHours={formatHours} />
+        <StrainGauge avgRpe={avgRpe} />
+        <ConsistencyHeatmap heatmap={heatmap} />
 
         {/* Personal Records — 5 cols */}
         <div className="md:col-span-5 glass-card rounded-xl p-16 ambient-shadow flex flex-col">
@@ -238,5 +140,3 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
     </div>
   )
 }
-
-export { formatDuration, formatHours }
