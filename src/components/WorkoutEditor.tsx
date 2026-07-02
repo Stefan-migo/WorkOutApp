@@ -116,7 +116,73 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
   function handleRemoveChild(parentIndex: number, childIndex: number) { markDirty(); dispatch({ type: 'REMOVE_CHILD', parentIndex, childIndex }) }
   function handleChildMoveUp(parentIndex: number, childIndex: number) { if (childIndex <= 0) return; markDirty(); dispatch({ type: 'CHILD_MOVE_UP', parentIndex, childIndex }) }
   function handleChildMoveDown(parentIndex: number, childIndex: number) { markDirty(); dispatch({ type: 'CHILD_MOVE_DOWN', parentIndex, childIndex }) }
-  function handleWrapInCycle() { markDirty(); dispatch({ type: 'WRAP_IN_CYCLE' }) }
+  function handleUnwrap(index: number) { markDirty(); dispatch({ type: 'UNWRAP_CYCLE', index }) }
+  function handleTitleChange(index: number, title: string) {
+    markDirty()
+    const interval = intervals[index]
+    if (!interval) return
+    dispatch({ type: 'CHANGE_INTERVAL', index, interval: { ...interval, title } })
+  }
+  function handleAddChild(index: number) { markDirty(); dispatch({ type: 'ADD_CHILD', index }) }
+  function handleRestChange(index: number, seconds: number) { markDirty(); dispatch({ type: 'SET_REST_BETWEEN_CYCLES', index, seconds }) }
+
+  // Selection mode state (local — per design decision)
+  const [selectionMode, setSelectionMode] = useState(false)
+  const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set())
+
+  function toggleSelectionMode() {
+    setSelectionMode(s => !s)
+    setSelectedIndices(new Set())
+  }
+
+  function handleSelectToggle(idx: number) {
+    setSelectedIndices(prev => {
+      const next = new Set(prev)
+      if (next.has(idx)) { next.delete(idx) } else { next.add(idx) }
+      return next
+    })
+  }
+
+  // Exit selection mode on Escape
+  useEffect(() => {
+    if (!selectionMode) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setSelectionMode(false)
+        setSelectedIndices(new Set())
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [selectionMode])
+
+  // Drag-and-drop state
+  const [dragIndex, setDragIndex] = useState<number | null>(null)
+
+  function handleDragStart(i: number) {
+    if (selectionMode) {
+      setSelectionMode(false)
+      setSelectedIndices(new Set())
+    }
+    setDragIndex(i)
+  }
+
+  function handleDragOver(e: React.DragEvent, i: number) {
+    if (dragIndex === null || dragIndex === i) return
+    e.preventDefault() // allow drop
+    // ponytail: visually the drag ghost + cursor give enough feedback; no extra highlight needed
+  }
+
+  function handleDrop(i: number) {
+    if (dragIndex === null || dragIndex === i) return
+    markDirty()
+    dispatch({ type: 'REORDER', fromIndex: dragIndex, toIndex: i })
+    setDragIndex(null)
+  }
+
+  function handleDragEnd() {
+    setDragIndex(null)
+  }
 
   // ponytail: click timeline block → open sheet for that original interval
   function handleTimelineClick(idx: number) {
@@ -180,16 +246,21 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
         <div className="flex flex-col gap-16">
           {intervals.map((interval, i) =>
             interval.children?.length ? (
-              <CycleGroup
-                key={interval.id}
-                interval={interval}
-                index={i}
-                onCycleCountChange={handleCycleCountChange}
-                onChildChange={handleChildChange}
-                onRemoveChild={handleRemoveChild}
-                onChildMoveUp={handleChildMoveUp}
-                onChildMoveDown={handleChildMoveDown}
-              />
+              <div key={interval.id} onDragOver={(e) => handleDragOver(e, i)} className={dragIndex !== null ? 'relative' : ''}>
+                <CycleGroup
+                  interval={interval}
+                  index={i}
+                  onCycleCountChange={handleCycleCountChange}
+                  onChildChange={handleChildChange}
+                  onRemoveChild={handleRemoveChild}
+                  onChildMoveUp={handleChildMoveUp}
+                  onChildMoveDown={handleChildMoveDown}
+                  onUnwrap={handleUnwrap}
+                  onTitleChange={handleTitleChange}
+                  onAddChild={handleAddChild}
+                  onRestChange={handleRestChange}
+                />
+              </div>
             ) : (
               <IntervalRow
                 key={interval.id}
@@ -201,6 +272,14 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
                 onMoveDown={handleMoveDown}
                 isFirst={i === 0}
                 isLast={i === intervals.length - 1}
+                dragIndex={dragIndex}
+                onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                onDragEnd={handleDragEnd}
+                selectionMode={selectionMode}
+                selected={selectedIndices.has(i)}
+                onSelect={handleSelectToggle}
               />
             )
           )}
@@ -233,16 +312,31 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
             </button>
           ))}
         </div>
-        <div className="mt-16 flex justify-center">
+      </div>
+
+      {/* Selection mode toggle + wrap button */}
+      <div className="flex gap-3">
+        <button
+          onClick={toggleSelectionMode}
+          className={`flex-1 py-3 rounded-lg font-medium transition-colors font-label text-label-caps uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none flex items-center justify-center gap-2 ${selectionMode ? 'bg-primary-container text-on-primary' : 'bg-surface border border-outline-variant text-on-surface hover:bg-surface-dim'}`}
+        >
+          <span className="material-symbols-outlined text-[18px]">checklist</span>
+          {selectionMode ? 'Cancel' : 'Select'}
+        </button>
+        {selectionMode && (
           <button
-            onClick={handleWrapInCycle}
-            disabled={intervals.length < 2}
-            className="flex items-center gap-8 px-24 py-8 rounded-lg bg-surface border border-outline-variant hover:border-primary hover:bg-surface-dim transition-colors disabled:opacity-30 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            onClick={() => {
+              dispatch({ type: 'WRAP_SELECTION_IN_CYCLE', selectedIndices: Array.from(selectedIndices).sort() })
+              setSelectionMode(false)
+              setSelectedIndices(new Set())
+            }}
+            disabled={selectedIndices.size < 2}
+            className="flex-1 py-3 bg-primary-btn hover:bg-primary-btn-hover disabled:bg-surface-container-low disabled:text-on-surface-variant text-on-primary-btn rounded-lg font-medium transition-colors font-label text-label-caps uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none flex items-center justify-center gap-2"
           >
-            <span className="material-symbols-outlined text-[18px] text-primary">data_object</span>
-            <span className="font-label-caps text-label-caps uppercase font-bold text-primary">Wrap in Cycle</span>
+            <span className="material-symbols-outlined text-[18px]">combine_blocks</span>
+            Wrap {selectedIndices.size} Selected
           </button>
-        </div>
+        )}
       </div>
 
       <div className="flex gap-3">
@@ -257,7 +351,7 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
         <button
           onClick={handleSave}
           disabled={!canSave}
-          className="flex-1 py-3 bg-primary-container hover:bg-primary disabled:bg-surface-container-low disabled:text-on-surface-variant text-on-primary rounded-lg font-medium transition-colors font-label text-label-caps uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="flex-1 py-3 bg-primary-btn hover:bg-primary-btn-hover disabled:bg-surface-container-low disabled:text-on-surface-variant text-on-primary-btn rounded-lg font-medium transition-colors font-label text-label-caps uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
         >
           {existingWorkout ? 'Update Workout' : 'Save Workout'}
         </button>

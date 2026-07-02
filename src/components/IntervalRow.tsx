@@ -13,9 +13,17 @@ interface IntervalRowProps {
   onMoveDown?: (index: number) => void
   isFirst?: boolean
   isLast?: boolean
+  dragIndex?: number | null
+  onDragStart?: (i: number) => void
+  onDragOver?: (e: React.DragEvent, i: number) => void
+  onDrop?: (i: number) => void
+  onDragEnd?: () => void
+  selectionMode?: boolean
+  selected?: boolean
+  onSelect?: (index: number) => void
 }
 
-export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onMoveDown, isFirst, isLast }: IntervalRowProps) {
+export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onMoveDown, isFirst, isLast, dragIndex, onDragStart, onDragOver, onDrop, onDragEnd, selectionMode, selected, onSelect }: IntervalRowProps) {
   const { getExercise } = useExercises()
   const minutes = Math.floor(interval.duration / 60)
   const seconds = interval.duration % 60
@@ -26,12 +34,34 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
       ? getExercise(interval.exerciseId)?.name
       : undefined
 
+  // ponytail: HTML5 DnD, zero deps. The cursor-grab handle initiates the drag.
+  const isDragging = dragIndex === index
+
   return (
-    <div className={`glass-card rounded-lg flex items-center group transition-all duration-200 border-l-4 ${SEGMENT_BORDER[interval.type] ?? 'border-l-segment-work'} pl-0 hover:shadow-md relative overflow-hidden`}>
-      {/* Drag Handle */}
-      <div className="px-8 py-16 text-outline-variant cursor-grab flex items-center justify-center">
-        <span className="material-symbols-outlined text-[20px]">drag_indicator</span>
-      </div>
+    <div
+      draggable
+      onDragStart={() => onDragStart?.(index)}
+      onDragOver={(e) => onDragOver?.(e, index)}
+      onDrop={() => onDrop?.(index)}
+      onDragEnd={() => onDragEnd?.()}
+      className={`glass-card rounded-lg flex items-center group transition-all duration-200 border-l-4 ${SEGMENT_BORDER[interval.type] ?? 'border-l-segment-work'} pl-0 hover:shadow-md relative overflow-hidden ${isDragging ? 'opacity-40 ring-2 ring-secondary' : ''} ${selected ? 'ring-2 ring-primary bg-primary/5' : ''}`}
+    >
+      {/* Selection checkbox (replaces drag handle in selection mode) */}
+      {selectionMode ? (
+        <div className="px-8 py-16 flex items-center justify-center">
+          <input
+            type="checkbox"
+            checked={!!selected}
+            onChange={() => onSelect?.(index)}
+            className="w-5 h-5 accent-primary cursor-pointer"
+            aria-label={`Select interval ${index + 1}`}
+          />
+        </div>
+      ) : (
+        <div className="px-8 py-16 text-outline-variant cursor-grab flex items-center justify-center active:cursor-grabbing" role="button" aria-label="Drag to reorder">
+          <span className="material-symbols-outlined text-[20px]">drag_indicator</span>
+        </div>
+      )}
 
       {/* Type Icon */}
       <div className={`p-8 ${SEGMENT_BG[interval.type] ?? 'bg-segment-work/10'} ${SEGMENT_TEXT[interval.type] ?? 'text-segment-work'} rounded-md mr-16 flex items-center justify-center`}>

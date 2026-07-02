@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, cleanup } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { IntervalRow } from '../IntervalRow'
 import type { Interval } from '@/types/workout'
@@ -65,6 +65,133 @@ describe('IntervalRow', () => {
       />,
     )
     expect(screen.getByText('Sprint')).toBeInTheDocument()
+  })
+
+  describe('selection mode', () => {
+    it('renders checkbox when selectionMode is true', () => {
+      render(
+        <IntervalRow
+          interval={interval({ id: 'i6' })}
+          index={0}
+          onChange={noop}
+          onRemove={noop}
+          selectionMode={true}
+        />,
+      )
+      expect(screen.getByRole('checkbox')).toBeInTheDocument()
+    })
+
+    it('checkbox is checked when selected is true', () => {
+      render(
+        <IntervalRow
+          interval={interval({ id: 'i7' })}
+          index={0}
+          onChange={noop}
+          onRemove={noop}
+          selectionMode={true}
+          selected={true}
+        />,
+      )
+      expect(screen.getByRole('checkbox')).toBeChecked()
+    })
+
+    it('checkbox is unchecked when selected is false', () => {
+      render(
+        <IntervalRow
+          interval={interval({ id: 'i8' })}
+          index={0}
+          onChange={noop}
+          onRemove={noop}
+          selectionMode={true}
+          selected={false}
+        />,
+      )
+      expect(screen.getByRole('checkbox')).not.toBeChecked()
+    })
+
+    it('onSelect is called with index when checkbox is clicked', () => {
+      const onSelect = vi.fn()
+      render(
+        <IntervalRow
+          interval={interval({ id: 'i9' })}
+          index={3}
+          onChange={noop}
+          onRemove={noop}
+          selectionMode={true}
+          onSelect={onSelect}
+        />,
+      )
+      fireEvent.click(screen.getByRole('checkbox'))
+      expect(onSelect).toHaveBeenCalledWith(3)
+    })
+
+    it('does NOT render checkbox when selectionMode is false', () => {
+      render(
+        <IntervalRow
+          interval={interval({ id: 'i10' })}
+          index={0}
+          onChange={noop}
+          onRemove={noop}
+          selectionMode={false}
+        />,
+      )
+      expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
+    })
+
+    it('does NOT render checkbox when selectionMode is undefined', () => {
+      render(
+        <IntervalRow
+          interval={interval({ id: 'i11' })}
+          index={0}
+          onChange={noop}
+          onRemove={noop}
+        />,
+      )
+      expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
+    })
+
+    it('drag indicator is hidden when selectionMode is true', () => {
+      render(
+        <IntervalRow
+          interval={interval({ id: 'i12' })}
+          index={0}
+          onChange={noop}
+          onRemove={noop}
+          selectionMode={true}
+        />,
+      )
+      // The drag handle container should be hidden or not visible
+      const dragHandle = screen.queryByLabelText('Drag to reorder')
+      expect(dragHandle).not.toBeInTheDocument()
+    })
+
+    it('drag indicator is visible when selectionMode is false', () => {
+      render(
+        <IntervalRow
+          interval={interval({ id: 'i13' })}
+          index={0}
+          onChange={noop}
+          onRemove={noop}
+        />,
+      )
+      expect(screen.getByLabelText('Drag to reorder')).toBeInTheDocument()
+    })
+
+    it('selected row gets visual highlight class', () => {
+      const { container } = render(
+        <IntervalRow
+          interval={interval({ id: 'i14' })}
+          index={0}
+          onChange={noop}
+          onRemove={noop}
+          selectionMode={true}
+          selected={true}
+        />,
+      )
+      // The outer container div should have ring classes when selected
+      const outerDiv = container.firstChild as HTMLElement
+      expect(outerDiv.className).toContain('ring')
+    })
   })
 
   it('renders move up and move down buttons', () => {
