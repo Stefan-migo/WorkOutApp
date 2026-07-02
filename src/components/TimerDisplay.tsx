@@ -17,7 +17,7 @@ export function TimerDisplay({ timeLeft }: TimerDisplayProps) {
     <div
       className={`text-7xl font-timer font-bold tracking-wider tabular-nums ${isLow ? 'text-error animate-pulse' : 'text-white'}`}
       role="timer"
-      aria-live="polite"
+      aria-live="assertive"
       aria-label={`${minutes} minutes ${seconds} seconds remaining`}
     >
       {formatted}
