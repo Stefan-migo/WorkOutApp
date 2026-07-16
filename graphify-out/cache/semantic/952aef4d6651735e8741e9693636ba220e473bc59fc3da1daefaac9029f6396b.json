@@ -1,0 +1,1 @@
+{"nodes": [], "edges": [{"source": "change_workout_model_v2", "target": "spec_timer_controls_tests", "relation": "references", "confidence": "INFERRED", "confidence_score": 0.7, "source_file": "openspec/changes/archive/2026-07-03-workout-model-v2/design.md", "source_location": null, "weight": 1.0}], "hyperedges": []}

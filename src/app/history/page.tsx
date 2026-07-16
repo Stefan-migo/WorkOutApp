@@ -57,17 +57,20 @@ function zoneDistribution(
     prepare: 0,
     work: 0,
     rest: 0,
+    rest_between_cycles: 0,
     cooldown: 0,
   }
   for (const i of intervals) groups[i.type] = (groups[i.type] ?? 0) + i.actualDuration
   const prepare = Math.round(((groups.prepare ?? 0) / total) * 100)
   const work = Math.round(((groups.work ?? 0) / total) * 100)
   const rest = Math.round(((groups.rest ?? 0) / total) * 100)
+  const rest_between_cycles = Math.round(((groups.rest_between_cycles ?? 0) / total) * 100)
   return {
     prepare,
     work,
     rest,
-    cooldown: Math.max(0, 100 - prepare - work - rest),
+    rest_between_cycles,
+    cooldown: Math.max(0, 100 - prepare - work - rest - rest_between_cycles),
   }
 }
 
@@ -79,6 +82,7 @@ function predominantType(
     prepare: 0,
     work: 0,
     rest: 0,
+    rest_between_cycles: 0,
     cooldown: 0,
   }
   for (const i of intervals) totals[i.type] = (totals[i.type] ?? 0) + i.actualDuration

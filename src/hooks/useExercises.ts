@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef } from 'react'
 import { useLocalStorage } from './useLocalStorage'
-import { EXERCISE_SEEDS } from '@/lib/exercise-seed'
+import { fetchAndSeedExercises } from '@/lib/exercise-seed'
+import { useIndexedDB } from './useIndexedDB'
 import type { Exercise } from '@/types/workout'
 
 const STORAGE_KEY = 'workoutapp.exercises'
@@ -11,12 +12,17 @@ const STORAGE_KEY = 'workoutapp.exercises'
 export function useExercises() {
   const [exercises, setExercises] = useLocalStorage<Exercise[]>(STORAGE_KEY, [])
   const seeded = useRef(false)
+  const { getImages, saveImage, deleteImage } = useIndexedDB()
 
-  // Auto-seed on first load if empty
+  // Auto-seed on first load if empty — async fetch from free-exercise-db
   useEffect(() => {
     if (!seeded.current && exercises.length === 0) {
-      setExercises(EXERCISE_SEEDS)
       seeded.current = true
+      fetchAndSeedExercises().then((result) => {
+        if (result.length > 0) {
+          setExercises(result)
+        }
+      })
     }
   }, [exercises, setExercises])
 
@@ -50,5 +56,15 @@ export function useExercises() {
     [setExercises],
   )
 
-  return { exercises, getExercise, saveExercise, deleteExercise }
+  return {
+    exercises,
+    getExercise,
+    saveExercise,
+    deleteExercise,
+    getExerciseImages: getImages,
+    saveExerciseImage: saveImage,
+    deleteExerciseImage: deleteImage,
+  }
 }
+
+export type UseExercisesReturn = ReturnType<typeof useExercises>

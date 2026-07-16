@@ -17,7 +17,7 @@ import { useExercises } from '@/hooks/useExercises'
 import { flattenWorkout } from '@/lib/interval-engine'
 import { formatTime } from '@/lib/format'
 import type { CompletedInterval } from '@/types/workout'
-import type { FlattenedInterval } from '@/lib/interval-engine'
+import type { Interval } from '@/types/workout'
 
 type Phase = 'idle' | 'active' | 'complete'
 
@@ -40,12 +40,13 @@ export default function PlayWorkoutPage() {
 
   const { beep } = useBeep()
   const { notify } = useIntervalNotification()
-  const interval: FlattenedInterval | undefined = flat[currentIdx]
+  const interval: Interval | undefined = flat[currentIdx]
   const total = flat.length
 
-  const { getExercise } = useExercises()
+  const { getExercise, getExerciseImages } = useExercises()
+  const [idbImageUrls, setIdbImageUrls] = useState<string[]>([])
   const timer = useTimer(interval?.duration ?? 0, () => {
-    beep()
+    beep({ volume: 0.5, duration: 0.5, pitch: 1000 }) // louder transition
     notify(workout?.title ?? 'Workout', currentIdx + 1, total)
     if (skipRef.current) {
       skipRef.current = false
@@ -72,7 +73,21 @@ export default function PlayWorkoutPage() {
     } else {
       setPhase('complete')
     }
-  })
+  }, handleTick)
+
+  // ponytail: beep on tick — check by last-beep time only (≥800ms), ignore which second
+  const lastBeepTimeRef = useRef(0)
+  const prevRemainingRef = useRef(0)
+  function handleTick(remaining: number) {
+    if (remaining > 5 || remaining <= 0) return
+    const prev = prevRemainingRef.current
+    prevRemainingRef.current = remaining
+    if (prev === remaining) return // same value as before, skip
+    const now = Date.now()
+    if (now - lastBeepTimeRef.current < 800) return
+    lastBeepTimeRef.current = now
+    beep({ volume: 0.12, duration: 0.15, pitch: 1100 })
+  }
 
   // Auto-start timer when phase activates or interval advances
   useEffect(() => {
@@ -81,6 +96,21 @@ export default function PlayWorkoutPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, currentIdx])
+
+  // ponytail: double-click previous: 1st click restarts interval, 2nd within 800ms goes to previous
+  const [prevClicks, setPrevClicks] = useState(0)
+  const prevTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  function handlePrevious() {
+    if (prevClicks === 0) {
+      timer.start()
+      setPrevClicks(1)
+      if (prevTimerRef.current) clearTimeout(prevTimerRef.current)
+      prevTimerRef.current = setTimeout(() => setPrevClicks(0), 800)
+    } else {
+      setPrevClicks(0)
+      if (currentIdx > 0) setCurrentIdx((prev) => prev - 1)
+    }
+  }
 
   function handleStart() {
     startedAtRef.current = Date.now()
@@ -137,6 +167,17 @@ export default function PlayWorkoutPage() {
   }
 
   const exercise = interval?.exerciseId ? getExercise(interval.exerciseId) : undefined
+  // ponytail: fetch IDB images for the current exercise
+  useEffect(() => {
+    if (exercise?.id) {
+      getExerciseImages(exercise.id).then((entries) => {
+        setIdbImageUrls(entries.map((e) => e.blobUrl))
+      }).catch(() => setIdbImageUrls([]))
+    } else {
+      setIdbImageUrls([])
+    }
+  }, [exercise?.id, getExerciseImages])
+
   const nextInterval = flat[currentIdx + 1]
   const progressVal =
     total > 0
@@ -177,49 +218,64 @@ export default function PlayWorkoutPage() {
         )}
 
         {phase === 'active' && (
-          <>
-            {/* Timer Ring */}
-            {interval && (
-              <TimerRing
-                timeLeft={timer.timeLeft}
-                duration={interval.duration}
-                intervalType={interval.type}
-                label={interval.type}
-                nextLabel={nextInterval ? `Next: ${nextInterval.type} (${formatTime(nextInterval.duration)})` : undefined}
+          <div className="flex flex-col lg:flex-row gap-24 w-full max-w-6xl mx-auto items-start">
+            {/* Left column — Exercise info */}
+            <div className="w-full lg:w-1/2 flex justify-center lg:sticky lg:top-24">
+              {interval?.exerciseId && (
+                <ExercisePanel
+                  name={exercise?.name ?? ''}
+                  exerciseId={interval.exerciseId}
+                  description={exercise?.description}
+                  images={[...(exercise?.images ?? []), ...idbImageUrls]}
+                  instructions={exercise?.instructions}
+                  primaryMuscles={exercise?.primaryMuscles}
+                  secondaryMuscles={exercise?.secondaryMuscles}
+                  force={exercise?.force}
+                  mechanic={exercise?.mechanic}
+                  difficulty={exercise?.difficulty}
+                  equipment={exercise?.equipment}
+                  category={exercise?.category}
+                  chips={exercise?.muscleGroups}
+                />
+              )}
+            </div>
+
+            {/* Right column — Timer + Controls + Progress */}
+            <div className="w-full lg:w-1/2 flex flex-col items-center gap-12">
+              {/* Timer Ring */}
+              {interval && (
+                <TimerRing
+                  timeLeft={timer.timeLeft}
+                  duration={interval.duration}
+                  intervalType={interval.type}
+                  label={interval.type}
+                  nextLabel={nextInterval ? `Next: ${nextInterval.type} (${formatTime(nextInterval.duration)})` : undefined}
+                />
+              )}
+
+              {/* Controls */}
+              <TimerControls
+                status={timer.status}
+                onPause={timer.pause}
+                onResume={timer.resume}
+                onSkip={handleSkip}
+                onRestart={handleRestart}
+                onPrevious={handlePrevious}
               />
-            )}
 
-            {/* Exercise Panel */}
-            {exercise && (
-              <ExercisePanel
-                name={exercise.name}
-                description={exercise.description}
-                chips={exercise.muscleGroups}
-              />
-            )}
-
-            {/* Controls */}
-            <TimerControls
-              status={timer.status}
-              onPause={timer.pause}
-              onResume={timer.resume}
-              onSkip={handleSkip}
-              onRestart={handleRestart}
-              onRewind={() => timer.addTime(-10)}
-            />
-
-            {/* Progress */}
-            <div className="w-full max-w-2xl mt-24">
-              <div className="flex justify-between items-center mb-8">
-                <span className="font-data-sm text-data-sm text-gray-400">Total Progress</span>
-                <span className="font-data-sm text-data-sm text-white">{Math.round(progressVal * 100)}%</span>
-              </div>
-              <ProgressBar progress={progressVal} label="Workout progress" dark />
-              <div className="flex justify-between w-full font-label-caps text-label-caps text-gray-400 mt-8">
-                <span>Set {currentIdx + 1} of {total}</span>
+              {/* Progress */}
+              <div className="w-full max-w-2xl">
+                <div className="flex justify-between items-center mb-8">
+                  <span className="font-data-sm text-data-sm text-gray-400">Total Progress</span>
+                  <span className="font-data-sm text-data-sm text-white">{Math.round(progressVal * 100)}%</span>
+                </div>
+                <ProgressBar progress={progressVal} label="Workout progress" dark />
+                <div className="flex justify-between w-full font-label-caps text-label-caps text-gray-400 mt-8">
+                  <span>Set {currentIdx + 1} of {total}</span>
+                </div>
               </div>
             </div>
-          </>
+          </div>
         )}
 
         {phase === 'complete' && (

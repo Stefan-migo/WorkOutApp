@@ -5,7 +5,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 export type TimerStatus = 'idle' | 'running' | 'paused' | 'complete'
 
 // ponytail: setInterval + Date.now delta correction, upgrade to Web Workers if background-tab drift matters
-export function useTimer(duration: number, onComplete?: () => void) {
+export function useTimer(duration: number, onComplete?: () => void, onTick?: (remaining: number) => void) {
   const [status, setStatus] = useState<TimerStatus>('idle')
   const [timeLeft, setTimeLeft] = useState(duration)
   const startTimeRef = useRef<number>(0)
@@ -28,13 +28,14 @@ export function useTimer(duration: number, onComplete?: () => void) {
     const elapsed = elapsedRef.current + (Date.now() - startTimeRef.current) / 1000
     const remaining = Math.max(0, Math.min(duration, Math.round(duration - elapsed)))
     setTimeLeft(remaining)
+    onTick?.(remaining)
 
     if (remaining <= 0) {
       clearTimer()
       setStatus('complete')
       onComplete?.()
     }
-  }, [duration, onComplete, clearTimer])
+  }, [duration, onComplete, onTick, clearTimer])
 
   const start = useCallback(() => {
     clearTimer()

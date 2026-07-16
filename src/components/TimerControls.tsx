@@ -8,29 +8,29 @@ interface TimerControlsProps {
   onResume: () => void
   onSkip: () => void
   onRestart: () => void
-  onRewind?: () => void
+  onPrevious?: () => void
 }
 
 // ponytail: 3-button layout, no restart UI — add dedicated restart button if users request it
-export function TimerControls({ status, onPause, onResume, onSkip, onRewind }: TimerControlsProps) {
+export function TimerControls({ status, onPause, onResume, onSkip, onPrevious }: TimerControlsProps) {
   return (
     <div className="flex items-center justify-center gap-24">
-      {/* Rewind 10s */}
-      {onRewind && (
+      {/* Previous */}
+      {onPrevious && (
         <button
-          onClick={onRewind}
+          onClick={onPrevious}
           className="w-14 h-14 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors"
-          aria-label="Rewind 10 seconds"
+          aria-label="Previous interval"
         >
-          <span className="material-symbols-outlined text-white text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>replay_10</span>
+          <span className="material-symbols-outlined text-white text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>skip_previous</span>
         </button>
       )}
 
-      {/* Play/Pause (center, 80px, white bg) */}
+      {/* Play/Pause (center, 80px) */}
       {(status === 'running' || status === 'paused') && (
         <button
           onClick={status === 'running' ? onPause : onResume}
-          className="w-20 h-20 rounded-full bg-white text-primary flex items-center justify-center hover:bg-gray-200 transition-colors shadow-[0_4px_20px_rgba(255,255,255,0.15)]"
+          className="w-20 h-20 rounded-full bg-primary text-on-primary flex items-center justify-center hover:opacity-90 transition-colors shadow-[0_4px_20px_rgba(255,255,255,0.15)]"
           aria-label={status === 'running' ? 'Pause' : 'Resume'}
         >
           <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>

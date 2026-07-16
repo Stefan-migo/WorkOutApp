@@ -24,6 +24,7 @@ const TYPE_LABELS: Record<IntervalType, string> = {
   prepare: 'Warm Up',
   work: 'Effort',
   rest: 'Recovery',
+  rest_between_cycles: 'Recovery',
   cooldown: 'Cool Down',
 }
 

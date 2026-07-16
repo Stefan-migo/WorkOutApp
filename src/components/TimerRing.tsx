@@ -2,11 +2,12 @@
 
 import { formatTime } from '@/lib/format'
 import { SEGMENT_COLORS } from '@/lib/segment-styles'
+import type { IntervalType } from '@/types/workout'
 
 interface TimerRingProps {
   timeLeft: number
   duration: number
-  intervalType: 'prepare' | 'work' | 'rest' | 'cooldown'
+  intervalType: IntervalType
   label: string
   nextLabel?: string
 }

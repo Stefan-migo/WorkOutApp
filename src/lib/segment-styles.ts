@@ -7,6 +7,7 @@ export const SEGMENT_BG: Record<IntervalType, string> = {
   prepare: 'bg-segment-prepare/10',
   work: 'bg-segment-work/10',
   rest: 'bg-segment-rest/10',
+  rest_between_cycles: 'bg-segment-rest/10',
   cooldown: 'bg-segment-cooldown/10',
 }
 
@@ -15,6 +16,7 @@ export const SEGMENT_BORDER: Record<IntervalType, string> = {
   prepare: 'border-l-segment-prepare',
   work: 'border-l-segment-work',
   rest: 'border-l-segment-rest',
+  rest_between_cycles: 'border-l-segment-rest',
   cooldown: 'border-l-segment-cooldown',
 }
 
@@ -23,6 +25,7 @@ export const SEGMENT_TEXT: Record<IntervalType, string> = {
   prepare: 'text-segment-prepare',
   work: 'text-segment-work',
   rest: 'text-segment-rest',
+  rest_between_cycles: 'text-segment-rest',
   cooldown: 'text-segment-cooldown',
 }
 
@@ -31,6 +34,7 @@ export const SEGMENT_BG_80: Record<IntervalType, string> = {
   prepare: 'bg-segment-prepare/80',
   work: 'bg-segment-work/80',
   rest: 'bg-segment-rest/80',
+  rest_between_cycles: 'bg-segment-rest/80',
   cooldown: 'bg-segment-cooldown/80',
 }
 
@@ -39,6 +43,7 @@ export const SEGMENT_DOT: Record<IntervalType, string> = {
   prepare: 'bg-segment-prepare',
   work: 'bg-segment-work',
   rest: 'bg-segment-rest',
+  rest_between_cycles: 'bg-segment-rest',
   cooldown: 'bg-segment-cooldown',
 }
 
@@ -47,6 +52,7 @@ export const SEGMENT_COLORS: Record<IntervalType, string> = {
   prepare: '#F59E0B',
   work: '#84cc16',
   rest: '#fb7185',
+  rest_between_cycles: '#fb7185',
   cooldown: '#818cf8',
 }
 
@@ -55,5 +61,6 @@ export const TYPE_ICONS: Record<IntervalType, string> = {
   prepare: 'self_improvement',
   work: 'directions_run',
   rest: 'pause_circle',
+  rest_between_cycles: 'hourglass_bottom',
   cooldown: 'ac_unit',
 }

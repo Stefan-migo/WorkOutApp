@@ -1,11 +1,40 @@
-import { describe, it, expect, vi, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 
 const mockPush = vi.fn()
+const mockToggleFavorite = vi.fn()
+const mockIsFavorite = vi.fn()
+const mockClearOrphans = vi.fn()
+let mockFavoriteIds: string[] = []
+
 const mockExercises = [
-  { id: 'ex1', name: 'Push Up', category: 'strength', createdAt: 1, updatedAt: 1 },
-  { id: 'ex2', name: 'Squat', category: 'strength', createdAt: 2, updatedAt: 2 },
+  {
+    id: 'ex1',
+    name: 'Push Up',
+    category: 'strength',
+    difficulty: 'beginner',
+    force: 'push',
+    mechanic: 'compound',
+    primaryMuscles: ['chest', 'triceps', 'shoulders'],
+    images: ['https://example.com/pushup.jpg'],
+    source: 'free-exercise-db',
+    createdAt: 1,
+    updatedAt: 1,
+  },
+  {
+    id: 'ex2',
+    name: 'Squat',
+    category: 'strength',
+    difficulty: 'intermediate',
+    force: 'pull' as const,
+    mechanic: 'compound' as const,
+    primaryMuscles: ['quadriceps', 'glutes'],
+    images: [],
+    source: 'user' as const,
+    createdAt: 2,
+    updatedAt: 2,
+  },
 ]
 
 vi.mock('next/navigation', () => ({
@@ -16,7 +45,10 @@ vi.mock('@/hooks/useExercises', () => ({
   useExercises: () => ({
     exercises: mockExercises,
     saveExercise: vi.fn(),
+    saveExerciseImage: vi.fn(),
     deleteExercise: vi.fn(),
+    getExercise: vi.fn(),
+    getExerciseImages: vi.fn().mockResolvedValue([]),
   }),
 }))
 
@@ -24,33 +56,266 @@ vi.mock('@/context/WorkoutContext', () => ({
   useWorkoutContext: () => ({ workouts: [] }),
 }))
 
+vi.mock('@/hooks/useFavorites', () => ({
+  useFavorites: () => ({
+    favoriteIds: mockFavoriteIds,
+    isFavorite: mockIsFavorite,
+    toggleFavorite: mockToggleFavorite,
+    clearOrphans: mockClearOrphans,
+  }),
+}))
+
 afterEach(() => {
   cleanup()
   vi.clearAllMocks()
 })
 
-describe('ExercisesPage Add to Workout', () => {
-  it('navigates to /workouts/new with exerciseId query param', async () => {
+describe('ExercisesPage card click navigates', () => {
+  it('navigates to /exercises/{id} when clicking Push Up', async () => {
     const ExercisesPage = (await import('../page')).default
     render(<ExercisesPage />)
 
-    // There should be two "Add to Workout" buttons
-    const addButtons = screen.getAllByText('Add to Workout')
-    expect(addButtons).toHaveLength(2)
+    const cardTitle = screen.getByText('Push Up')
+    fireEvent.click(cardTitle)
 
-    // Click the first one (Push Up)
-    fireEvent.click(addButtons[0]!)
-
-    expect(mockPush).toHaveBeenCalledWith('/workouts/new?exerciseId=ex1')
+    expect(mockPush).toHaveBeenCalledWith('/exercises/ex1')
   })
 
-  it('navigates with correct exerciseId for second exercise', async () => {
+  it('navigates to /exercises/{id} when clicking Squat', async () => {
     const ExercisesPage = (await import('../page')).default
     render(<ExercisesPage />)
 
-    const addButtons = screen.getAllByText('Add to Workout')
-    fireEvent.click(addButtons[1]!)
+    const cardTitle = screen.getByText('Squat')
+    fireEvent.click(cardTitle)
 
-    expect(mockPush).toHaveBeenCalledWith('/workouts/new?exerciseId=ex2')
+    expect(mockPush).toHaveBeenCalledWith('/exercises/ex2')
+  })
+})
+
+describe('ExercisesPage star toggle', () => {
+  beforeEach(() => {
+    mockFavoriteIds = []
+    mockToggleFavorite.mockClear()
+    mockIsFavorite.mockClear()
+    mockClearOrphans.mockClear()
+  })
+
+  it('renders a star button for each exercise card', async () => {
+    mockIsFavorite.mockReturnValue(false)
+    const ExercisesPage = (await import('../page')).default
+    render(<ExercisesPage />)
+
+    const stars = screen.getAllByRole('button', { name: /add to favorites|remove from favorites/i })
+    expect(stars).toHaveLength(2)
+  })
+
+  it('shows filled star (★) when exercise is favorited', async () => {
+    mockIsFavorite.mockImplementation((id: string) => id === 'ex1')
+    const ExercisesPage = (await import('../page')).default
+    render(<ExercisesPage />)
+
+    const stars = screen.getAllByRole('button', { name: /add to favorites|remove from favorites/i })
+    expect(stars[0]).toHaveTextContent('★')
+    expect(stars[1]).toHaveTextContent('☆')
+  })
+
+  it('calls toggleFavorite with correct ID on click', async () => {
+    mockIsFavorite.mockReturnValue(false)
+    const ExercisesPage = (await import('../page')).default
+    render(<ExercisesPage />)
+
+    const stars = screen.getAllByRole('button', { name: /add to favorites|remove from favorites/i })
+    fireEvent.click(stars[0]!)
+    expect(mockToggleFavorite).toHaveBeenCalledWith('ex1')
+  })
+
+  it('does not navigate when star button is clicked', async () => {
+    mockIsFavorite.mockReturnValue(false)
+    const ExercisesPage = (await import('../page')).default
+    render(<ExercisesPage />)
+
+    const stars = screen.getAllByRole('button', { name: /add to favorites|remove from favorites/i })
+    fireEvent.click(stars[0]!)
+    expect(mockPush).not.toHaveBeenCalledWith('/exercises/ex1')
+  })
+})
+
+describe('ExercisesPage Favorites filter tab', () => {
+  beforeEach(() => {
+    mockFavoriteIds = ['ex1']
+    mockIsFavorite.mockImplementation((id: string) => id === 'ex1')
+    mockToggleFavorite.mockClear()
+  })
+
+  it('renders a Favorites filter button', async () => {
+    const ExercisesPage = (await import('../page')).default
+    render(<ExercisesPage />)
+
+    expect(screen.getByText('☆ Favorites')).toBeInTheDocument()
+  })
+
+  it('toggles favorites filter when clicked', async () => {
+    const ExercisesPage = (await import('../page')).default
+    render(<ExercisesPage />)
+
+    const filterBtn = screen.getByText('☆ Favorites')
+    fireEvent.click(filterBtn)
+
+    // After clicking, should show only favorited exercises
+    expect(screen.getByText('Push Up')).toBeInTheDocument()
+    expect(screen.queryByText('Squat')).not.toBeInTheDocument()
+  })
+})
+
+describe('ExercisesPage favorites empty state', () => {
+  beforeEach(() => {
+    mockFavoriteIds = []
+    mockIsFavorite.mockReturnValue(false)
+  })
+
+  it('shows empty state when favorites filter is active with no favorites', async () => {
+    const ExercisesPage = (await import('../page')).default
+    render(<ExercisesPage />)
+
+    const favoritesBtn = screen.getByText('☆ Favorites')
+    fireEvent.click(favoritesBtn)
+
+    expect(screen.getByText(/no favorites yet/i)).toBeInTheDocument()
+  })
+})
+
+describe('ExercisesPage empty state boundaries', () => {
+  beforeEach(() => {
+    mockFavoriteIds = ['ex1']
+    mockIsFavorite.mockImplementation((id: string) => id === 'ex1')
+  })
+
+  it('shows generic empty state when favorites filter is active but search yields no match', async () => {
+    const ExercisesPage = (await import('../page')).default
+    render(<ExercisesPage />)
+
+    const favoritesBtn = screen.getByText('☆ Favorites')
+    fireEvent.click(favoritesBtn)
+
+    // Favorites should show ex1 (Push Up) but not ex2 (Squat)
+    expect(screen.getByText('Push Up')).toBeInTheDocument()
+    expect(screen.queryByText('Squat')).not.toBeInTheDocument()
+
+    // Now search for something that doesn't match any favorites
+    const searchInput = screen.getByRole('textbox')
+    fireEvent.change(searchInput, { target: { value: 'zzznonexistent' } })
+
+    expect(screen.getByText(/no exercises match/i)).toBeInTheDocument()
+    expect(screen.queryByText(/no favorites yet/i)).not.toBeInTheDocument()
+  })
+})
+
+describe('ExercisesPage card display', () => {
+  it('shows difficulty badge on card', async () => {
+    const ExercisesPage = (await import('../page')).default
+    render(<ExercisesPage />)
+
+    // Difficulty text also appears in the form select options
+    const beginnerBadges = screen.getAllByText('Beginner')
+    expect(beginnerBadges.length).toBeGreaterThanOrEqual(1)
+    const intermediateBadges = screen.getAllByText('Intermediate')
+    expect(intermediateBadges.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('shows primary muscles chips with +N overflow', async () => {
+    const ExercisesPage = (await import('../page')).default
+    render(<ExercisesPage />)
+
+    // ex1 has 3 muscles -> show 2 + "+1" overflow
+    expect(screen.getByText('CHEST')).toBeInTheDocument()
+    expect(screen.getByText('TRICEPS')).toBeInTheDocument()
+    expect(screen.getByText('+1')).toBeInTheDocument()
+
+    // ex2 has 2 muscles -> show both
+    expect(screen.getByText('QUADRICEPS')).toBeInTheDocument()
+    expect(screen.getByText('GLUTES')).toBeInTheDocument()
+  })
+
+  it('shows image thumbnail when exercise has images', async () => {
+    const ExercisesPage = (await import('../page')).default
+    render(<ExercisesPage />)
+
+    // ponytail: images rendered as CSS background-image on a div, not <img> elements
+    const cards = document.querySelectorAll('[style*="background-image"]')
+    expect(cards.length).toBeGreaterThanOrEqual(1)
+    expect(cards[0].getAttribute('style')).toContain('https://example.com/pushup.jpg')
+  })
+
+  it('shows SVG placeholder when exercise has no images', async () => {
+    const ExercisesPage = (await import('../page')).default
+    render(<ExercisesPage />)
+
+    const svgs = document.querySelectorAll('svg')
+    expect(svgs.length).toBeGreaterThan(0)
+  })
+
+  it('shows category badge on each card', async () => {
+    const ExercisesPage = (await import('../page')).default
+    render(<ExercisesPage />)
+
+    const cardBadges = screen.getAllByText('strength')
+    expect(cardBadges.length).toBeGreaterThanOrEqual(2)
+  })
+
+  it('does not show +N overflow when muscles ≤ 2', async () => {
+    const ExercisesPage = (await import('../page')).default
+    render(<ExercisesPage />)
+
+    // ex2 has 2 muscles -> no overflow label
+    expect(screen.queryByText('+0')).not.toBeInTheDocument()
+  })
+})
+
+describe('ExercisesPage responsive grid', () => {
+  it('renders all 2 exercises in the grid', async () => {
+    const ExercisesPage = (await import('../page')).default
+    render(<ExercisesPage />)
+
+    expect(screen.getByText('Push Up')).toBeInTheDocument()
+    expect(screen.getByText('Squat')).toBeInTheDocument()
+  })
+})
+
+describe('ExercisesPage filter dropdowns', () => {
+  it('shows all filter dropdowns including Level', async () => {
+    const ExercisesPage = (await import('../page')).default
+    render(<ExercisesPage />)
+
+    // All filters are now inline dropdowns (no more collapsible section)
+    expect(screen.getByLabelText('Muscle')).toBeInTheDocument()
+    expect(screen.getByLabelText('Equipment')).toBeInTheDocument()
+    expect(screen.getByLabelText('Force')).toBeInTheDocument()
+    expect(screen.getByLabelText('Mechanic')).toBeInTheDocument()
+    expect(screen.getByLabelText('Level')).toBeInTheDocument()
+  })
+
+  it('filtering by Force dropdown filters exercises', async () => {
+    const ExercisesPage = (await import('../page')).default
+    render(<ExercisesPage />)
+
+    // Push Up is "push", Squat is "pull"
+    expect(screen.getByText('Push Up')).toBeInTheDocument()
+    expect(screen.getByText('Squat')).toBeInTheDocument()
+
+    const forceSelect = screen.getByLabelText('Force') as HTMLSelectElement
+    fireEvent.change(forceSelect, { target: { value: 'push' } })
+
+    expect(screen.getByText('Push Up')).toBeInTheDocument()
+    expect(screen.queryByText('Squat')).not.toBeInTheDocument()
+  })
+})
+
+describe('ExercisesPage category section headers', () => {
+  it('shows category name and count in header', async () => {
+    const ExercisesPage = (await import('../page')).default
+    render(<ExercisesPage />)
+
+    // Both exercises are in "strength" category
+    expect(screen.getByText('Strength (2)')).toBeInTheDocument()
   })
 })

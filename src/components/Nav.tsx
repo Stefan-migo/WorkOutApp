@@ -35,14 +35,14 @@ export default function Nav() {
 
       {/* Sidebar — Desktop (fixed) + Mobile (overlay) */}
       <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-primary z-50 flex flex-col py-24 px-16 transition-transform duration-300 ${
+        className={`fixed top-0 left-0 h-full w-64 bg-sidebar z-50 flex flex-col py-24 px-16 transition-transform duration-300 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } md:translate-x-0`}
       >
         {/* Brand */}
         <div className="mb-32 px-8">
-          <h1 className="font-headline text-[24px] font-bold text-surface leading-tight tracking-tight">WorkOutApp</h1>
-          <p className="font-mono text-sm text-on-primary-container mt-1">Nordic Athletic</p>
+          <h1 className="font-headline text-[24px] font-bold text-on-sidebar leading-tight tracking-tight">WorkOutApp</h1>
+          <p className="font-mono text-sm text-on-sidebar-muted mt-1">Nordic Athletic</p>
         </div>
 
         {/* Nav items */}
@@ -56,8 +56,8 @@ export default function Nav() {
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-16 px-8 py-2.5 rounded-lg transition-all duration-200 ${
                   active
-                    ? 'text-secondary-container font-bold bg-primary-container/50 opacity-90'
-                    : 'text-on-primary-fixed-variant hover:bg-primary-container hover:text-on-primary-fixed transition-colors'
+                    ? 'text-on-sidebar font-bold bg-sidebar-active'
+                    : 'text-on-sidebar-muted hover:bg-sidebar-hover hover:text-on-sidebar transition-colors'
                 }`}
               >
                 <span
@@ -74,17 +74,8 @@ export default function Nav() {
       </aside>
 
       {/* Top App Bar — hidden on mobile, visible on desktop */}
-      <header className="hidden md:flex fixed top-0 left-64 right-0 h-20 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 items-center justify-between px-margin-desktop z-30">
+      <header className="hidden md:flex fixed top-0 left-64 right-0 h-20 bg-surface border-b border-outline-variant/30 items-center px-margin-desktop z-[60]">
         <span className="font-headline text-headline-md font-bold text-primary tracking-tight">WorkOutApp</span>
-        <div className="flex items-center gap-16">
-          <Link
-            href="/workouts/new"
-            className="bg-primary-container text-on-primary font-label text-label-caps px-4 py-2 rounded-full hover:bg-primary transition-colors flex items-center gap-2 ambient-shadow"
-          >
-            <span className="material-symbols-outlined text-[18px]">add</span>
-            Create New
-          </Link>
-        </div>
       </header>
 
       {/* Bottom Nav — Mobile only */}

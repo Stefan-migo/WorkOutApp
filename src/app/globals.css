@@ -123,6 +123,21 @@
   --spacing-16: 16px;
   --spacing-24: 24px;
   --spacing-32: 32px;
+
+  /* Sidebar — always dark, never inverts with OS theme */
+  --color-sidebar: #1e293b;
+  --color-on-sidebar: #f1f5f9;
+  --color-on-sidebar-muted: #94a3b8;
+  --color-sidebar-active: rgba(255, 255, 255, 0.1);
+  --color-sidebar-hover: rgba(255, 255, 255, 0.06);
+
+  /* Primary button — consistent across themes (avoids inverted dark-on-dark) */
+  --color-primary-btn: #1e293b;
+  --color-on-primary-btn: #ffffff;
+  --color-primary-btn-hover: #091426;
+
+  /* Light text on consistently-dark backgrounds (primary-container, etc.) */
+  --color-on-primary-dark-bg: #f1f5f9;
 }
 
 /* Dark mode — follows OS preference */
@@ -192,7 +207,6 @@
   background: var(--color-surface);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--color-outline-variant);
 }
 
 /* Ambient shadow for elevated elements */

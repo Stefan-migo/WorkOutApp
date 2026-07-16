@@ -1,130 +1,170 @@
-import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, cleanup } from '@testing-library/react'
+import { describe, it, expect, vi, afterEach, beforeAll } from 'vitest'
+import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
-import { createInterval, buildExerciseInterval } from '../WorkoutEditor'
-import type { Interval } from '@/types/workout'
-import type { Exercise } from '@/types/workout'
+import type { Interval, Workout } from '@/types/workout'
+
+// ponytail: jsdom polyfill for HTMLDialogElement
+beforeAll(() => {
+  if (typeof HTMLDialogElement !== 'undefined' && !HTMLDialogElement.prototype.showModal) {
+    HTMLDialogElement.prototype.showModal = function () { this.open = true }
+    HTMLDialogElement.prototype.close = function () { this.open = false }
+  }
+})
 
 vi.mock('@/hooks/useExercises', () => ({
-  useExercises: () => ({ exercises: [] }),
+  useExercises: () => ({ exercises: [], getExercise: vi.fn() }),
 }))
+
 vi.mock('@/components/TimelineStrip', () => ({
   TimelineStrip: () => null,
 }))
-vi.mock('@/components/IntervalDetailSheet', () => ({
-  default: () => null,
-}))
-vi.mock('@/lib/segment-styles', () => ({
-  SEGMENT_BG: { prepare: '', work: '', rest: '', cooldown: '' },
-  SEGMENT_TEXT: { prepare: '', work: '', rest: '', cooldown: '' },
-  SEGMENT_DOT: { prepare: '', work: '', rest: '', cooldown: '' },
-  TYPE_ICONS: { prepare: '', work: '', rest: '', cooldown: '' },
-}))
+
+// ponytail: simplified mock — renders the interval title
 vi.mock('@/components/IntervalRow', () => ({
-  IntervalRow: ({ interval }: { interval: Interval }) => <div data-testid="interval-row">{interval.title}</div>,
+  IntervalRow: ({ interval, index, onChange }: any) => (
+    <div
+      data-testid={`interval-row-${index}`}
+      onClick={() => onChange?.(index, { ...interval, title: 'Changed' })}
+    >
+      {interval.title}
+    </div>
+  ),
 }))
 
-describe('createInterval', () => {
-  it('creates work interval with default title "Work" and default duration 30', () => {
-    const interval = createInterval('work')
-    expect(interval.type).toBe('work')
-    expect(interval.title).toBe('Work')
-    expect(interval.duration).toBe(30)
-  })
-
-  it('creates prepare interval with default title "Prepare" and default duration 180 (3 min)', () => {
-    const interval = createInterval('prepare')
-    expect(interval.type).toBe('prepare')
-    expect(interval.title).toBe('Prepare')
-    expect(interval.duration).toBe(180)
-  })
-
-  it('creates rest interval with default title "Rest" and default duration 30', () => {
-    const interval = createInterval('rest')
-    expect(interval.type).toBe('rest')
-    expect(interval.title).toBe('Rest')
-    expect(interval.duration).toBe(30)
-  })
-
-  it('creates cooldown interval with default title "Cooldown" and default duration 120 (2 min)', () => {
-    const interval = createInterval('cooldown')
-    expect(interval.type).toBe('cooldown')
-    expect(interval.title).toBe('Cooldown')
-    expect(interval.duration).toBe(120)
-  })
-
-  it('generates ID matching int-{number} pattern', () => {
-    const interval = createInterval('work')
-    expect(interval.id).toMatch(/^int-\d+$/)
-  })
-})
+// ponytail: mock the sheet — just renders interval type
+vi.mock('@/components/IntervalDetailSheet', () => ({
+  IntervalDetailSheet: ({ interval, onSave }: any) => (
+    <div data-testid="detail-sheet">
+      <span>{interval.title}</span>
+      <button onClick={() => onSave({ ...interval, title: 'Sheet Saved' })}>mock-save</button>
+    </div>
+  ),
+}))
 
 afterEach(cleanup)
 
-describe('buildExerciseInterval', () => {
-  const pushUp: Exercise = {
-    id: 'ex1', name: 'Push Up', category: 'strength',
-    createdAt: 1, updatedAt: 1,
-  }
-
-  it('creates a work interval with exercise name as title', () => {
-    const interval = buildExerciseInterval(pushUp)
-    expect(interval.title).toBe('Push Up')
-  })
-
-  it('sets type to work', () => {
-    const interval = buildExerciseInterval(pushUp)
-    expect(interval.type).toBe('work')
-  })
-
-  it('sets default duration to 60', () => {
-    const interval = buildExerciseInterval(pushUp)
-    expect(interval.duration).toBe(60)
-  })
-
-  it('sets exerciseId from the exercise', () => {
-    const interval = buildExerciseInterval(pushUp)
-    expect(interval.exerciseId).toBe('ex1')
-  })
-
-  it('generates a unique ID with int- prefix', () => {
-    const interval = buildExerciseInterval(pushUp)
-    expect(interval.id).toMatch(/^int-\d+$/)
-  })
-})
-
-describe('WorkoutEditor initialIntervals', () => {
-  it('renders initialIntervals when no existingWorkout', async () => {
+describe('WorkoutEditor', () => {
+  it('renders intervals from initialIntervals', async () => {
     const WorkoutEditor = (await import('../WorkoutEditor')).default
     const intervals: Interval[] = [
-      { id: 'w1', type: 'work', title: 'Push Up', duration: 60, exerciseId: 'ex1' },
+      { id: 'i1', type: 'work', title: 'Push Up', duration: 60 },
+      { id: 'i2', type: 'rest', title: 'Rest', duration: 30 },
     ]
     render(<WorkoutEditor initialIntervals={intervals} onSave={vi.fn()} />)
     expect(screen.getByText('Push Up')).toBeInTheDocument()
+    expect(screen.getByText('Rest')).toBeInTheDocument()
   })
 
-  it('shows no-intervals message when initialIntervals is empty', async () => {
+  it('shows no-intervals message when empty', async () => {
     const WorkoutEditor = (await import('../WorkoutEditor')).default
     render(<WorkoutEditor initialIntervals={[]} onSave={vi.fn()} />)
     expect(screen.getByText('No intervals yet')).toBeInTheDocument()
   })
 
-  it('prioritizes existingWorkout intervals over initialIntervals', async () => {
+  it('uses existingWorkout intervals over initialIntervals', async () => {
     const WorkoutEditor = (await import('../WorkoutEditor')).default
     const initial: Interval[] = [
       { id: 'init1', type: 'work', title: 'From Initial', duration: 60 },
     ]
-    const existing = {
-      id: 'w1',
-      title: 'Existing',
-      intervals: [
-        { id: 'ex1', type: 'work' as const, title: 'From Existing', duration: 30 },
-      ],
-      createdAt: 1,
-      updatedAt: 1,
+    const existing: Workout = {
+      id: 'w1', title: 'Existing',
+      intervals: [{ id: 'ex1', type: 'work', title: 'From Existing', duration: 30 }],
+      createdAt: 1, updatedAt: 1,
     }
     render(<WorkoutEditor existingWorkout={existing} initialIntervals={initial} onSave={vi.fn()} />)
     expect(screen.getByText('From Existing')).toBeInTheDocument()
     expect(screen.queryByText('From Initial')).not.toBeInTheDocument()
+  })
+
+  it('renders title input from existing workout', async () => {
+    const WorkoutEditor = (await import('../WorkoutEditor')).default
+    const existing: Workout = {
+      id: 'w1', title: 'Morning Routine',
+      intervals: [{ id: 'i1', type: 'work', title: 'Push Up', duration: 60 }],
+      createdAt: 1, updatedAt: 1,
+    }
+    render(<WorkoutEditor existingWorkout={existing} onSave={vi.fn()} />)
+    expect(screen.getByDisplayValue('Morning Routine')).toBeInTheDocument()
+  })
+
+  it('shows estimated duration', async () => {
+    const WorkoutEditor = (await import('../WorkoutEditor')).default
+    const intervals: Interval[] = [
+      { id: 'i1', type: 'work', title: 'Work', duration: 90 },
+      { id: 'i2', type: 'rest', title: 'Rest', duration: 30 },
+    ]
+    render(<WorkoutEditor initialIntervals={intervals} onSave={vi.fn()} />)
+    // 90 + 30 = 120s = 2:00
+    expect(screen.getByText('2:00')).toBeInTheDocument()
+  })
+
+  it('renders Add Block with 5 interval types (no Cycle)', async () => {
+    const WorkoutEditor = (await import('../WorkoutEditor')).default
+    render(<WorkoutEditor initialIntervals={[]} onSave={vi.fn()} />)
+    expect(screen.getByText('Add Block')).toBeInTheDocument()
+    // Check each type appears in the grid (use exact match to avoid substring conflicts)
+    expect(screen.getByText('prepare', { exact: true })).toBeInTheDocument()
+    expect(screen.getByText('work', { exact: true })).toBeInTheDocument()
+    expect(screen.getByText('cooldown', { exact: true })).toBeInTheDocument()
+    expect(screen.queryByText(/^cycle$/i)).not.toBeInTheDocument()
+  })
+
+  it('adds an interval via Add Block button', async () => {
+    const WorkoutEditor = (await import('../WorkoutEditor')).default
+    vi.useFakeTimers()
+    render(<WorkoutEditor initialIntervals={[]} onSave={vi.fn()} />)
+    vi.advanceTimersByTime(10)
+    // Find and click the prepare block button
+    const addBlockButtons = screen.getAllByRole('button')
+    const prepareBtn = addBlockButtons.find(b => b.textContent?.toLowerCase().includes('prepare'))
+    expect(prepareBtn).toBeTruthy()
+    fireEvent.click(prepareBtn!)
+    // The mock IntervalRow renders title — after adding, the new interval appears
+    const rows = screen.getAllByTestId(/interval-row-/)
+    expect(rows.length).toBe(1)
+    vi.useRealTimers()
+  })
+
+  it('saves a flat workout', async () => {
+    const WorkoutEditor = (await import('../WorkoutEditor')).default
+    const onSave = vi.fn()
+    const intervals: Interval[] = [
+      { id: 'i1', type: 'work', title: 'Sprint', duration: 60 },
+    ]
+    render(<WorkoutEditor existingWorkout={{ id: 'w1', title: 'Test', intervals, createdAt: 1, updatedAt: 1 }} onSave={onSave} />)
+    fireEvent.click(screen.getByText('Update Workout'))
+    expect(onSave).toHaveBeenCalledTimes(1)
+    const saved = onSave.mock.calls[0]![0] as Workout
+    expect(saved.title).toBe('Test')
+    expect(saved.intervals).toHaveLength(1)
+    expect(saved.intervals[0]).toMatchObject({ id: 'i1', type: 'work', title: 'Sprint' })
+  })
+
+  it('save is disabled when title is empty', async () => {
+    const WorkoutEditor = (await import('../WorkoutEditor')).default
+    render(<WorkoutEditor initialIntervals={[{ id: 'i1', type: 'work', title: 'Test', duration: 30 }]} onSave={vi.fn()} />)
+    const saveBtn = screen.getByText('Save Workout')
+    expect(saveBtn).toBeDisabled()
+  })
+
+  it('save is disabled when intervals are empty', async () => {
+    const WorkoutEditor = (await import('../WorkoutEditor')).default
+    const existing: Workout = {
+      id: 'w1', title: 'Test',
+      intervals: [],
+      createdAt: 1, updatedAt: 1,
+    }
+    const onSave = vi.fn()
+    render(<WorkoutEditor existingWorkout={existing} onSave={onSave} />)
+    const saveBtn = screen.getByText('Update Workout')
+    expect(saveBtn).toBeDisabled()
+  })
+
+  it('discard button calls onCancel', async () => {
+    const WorkoutEditor = (await import('../WorkoutEditor')).default
+    const onCancel = vi.fn()
+    render(<WorkoutEditor initialIntervals={[{ id: 'i1', type: 'work', title: 'Test', duration: 30 }]} onSave={vi.fn()} onCancel={onCancel} />)
+    fireEvent.click(screen.getByText('Discard'))
+    expect(onCancel).toHaveBeenCalledTimes(1)
   })
 })

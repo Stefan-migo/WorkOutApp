@@ -1,15 +1,14 @@
 'use client'
 
-import { useState, useEffect, useRef, useMemo, useReducer } from 'react'
+import { useState, useEffect, useRef, useReducer } from 'react'
 import { IntervalRow } from '@/components/IntervalRow'
-import CycleGroup from '@/components/CycleGroup'
 import { TimelineStrip } from '@/components/TimelineStrip'
 import { IntervalDetailSheet } from '@/components/IntervalDetailSheet'
-import { SEGMENT_BG, SEGMENT_TEXT, SEGMENT_DOT, TYPE_ICONS } from '@/lib/segment-styles'
-import { flattenWorkout } from '@/lib/interval-engine'
-import { workoutReducer } from '@/lib/workout-reducer'
 import { useExercises } from '@/hooks/useExercises'
-import type { Exercise, Interval, Workout } from '@/types/workout'
+import { SEGMENT_BG, SEGMENT_TEXT, SEGMENT_DOT, TYPE_ICONS } from '@/lib/segment-styles'
+import { workoutReducer } from '@/lib/workout-reducer'
+import { createInterval } from '@/components/WorkoutBuilder'
+import type { Exercise, Interval, IntervalType, Workout } from '@/types/workout'
 
 // ponytail: counter ID, upgrade to crypto.randomUUID if collisions become an issue
 let nextId = 1
@@ -17,53 +16,90 @@ function generateId(): string {
   return `workout-${Date.now()}-${nextId++}`
 }
 
-// ponytail: simple counter for interval IDs
-let intervalIdCounter = 1
-function intervalId(): string {
-  return `int-${intervalIdCounter++}`
-}
-
 const DEFAULT_INTERVALS: Interval[] = [
-  { id: intervalId(), type: 'prepare', title: 'Prepare', duration: 10 },
-  { id: intervalId(), type: 'cooldown', title: 'Cooldown', duration: 10 },
+  { id: crypto.randomUUID(), type: 'prepare', title: 'Prepare', duration: 10 },
+  { id: crypto.randomUUID(), type: 'cooldown', title: 'Cooldown', duration: 10 },
 ]
 
-type AddBlockType = 'prepare' | 'work' | 'rest' | 'cooldown'
-
-const DEFAULT_DURATIONS: Record<AddBlockType, number> = {
-  prepare: 180,
-  work: 30,
-  rest: 30,
-  cooldown: 120,
-}
-
-export function createInterval(type: AddBlockType): Interval {
-  return {
-    id: intervalId(),
-    type,
-    title: type.charAt(0).toUpperCase() + type.slice(1),
-    duration: DEFAULT_DURATIONS[type],
-  }
-}
-
-export function buildExerciseInterval(exercise: Exercise): Interval {
-  return {
-    id: intervalId(),
-    type: 'work',
-    title: exercise.name,
-    duration: 60,
-    exerciseId: exercise.id,
-  }
-}
-
 // ponytail: exhaustive map so Tailwind v4 resolves all class strings
-const SEGMENT_CLASSES: Record<AddBlockType, { bg: string; text: string; border: string; bg10: string }> = {
+const ADD_BLOCK_TYPES: IntervalType[] = ['prepare', 'work', 'rest', 'rest_between_cycles', 'cooldown']
+
+const SEGMENT_CLASSES: Record<IntervalType, { bg: string; text: string; border: string; bg10: string }> = {
   prepare: { bg: SEGMENT_DOT.prepare, text: SEGMENT_TEXT.prepare, border: 'border-t-segment-prepare', bg10: SEGMENT_BG.prepare },
   work: { bg: SEGMENT_DOT.work, text: SEGMENT_TEXT.work, border: 'border-t-segment-work', bg10: SEGMENT_BG.work },
   rest: { bg: SEGMENT_DOT.rest, text: SEGMENT_TEXT.rest, border: 'border-t-segment-rest', bg10: SEGMENT_BG.rest },
+  rest_between_cycles: { bg: SEGMENT_DOT.rest_between_cycles, text: SEGMENT_TEXT.rest_between_cycles, border: 'border-t-segment-rest', bg10: SEGMENT_BG.rest_between_cycles },
   cooldown: { bg: SEGMENT_DOT.cooldown, text: SEGMENT_TEXT.cooldown, border: 'border-t-segment-cooldown', bg10: SEGMENT_BG.cooldown },
 }
 
+// ---------------------------------------------------------------------------
+// BulkApplyDialog
+// ---------------------------------------------------------------------------
+function BulkApplyDialog({
+  type,
+  changedFields,
+  onApplyAll,
+  onApplyOne,
+}: {
+  type: IntervalType
+  changedFields: string[]
+  onApplyAll: () => void
+  onApplyOne: () => void
+}) {
+  const label = type.replace(/_/g, ' ')
+  return (
+    <>
+      <style>{`
+        @keyframes bulk-slide-up {
+          from { transform: translateY(100%); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        .bulk-sheet {
+          animation: bulk-slide-up 0.25s ease-out;
+        }
+      `}</style>
+      <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40" onClick={onApplyOne} />
+      <div className="fixed inset-0 z-50 flex items-end justify-center pb-24">
+        <div
+          className="bulk-sheet bg-surface rounded-2xl shadow-xl border border-outline-variant/30 p-24 w-full max-w-md mx-8"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-start gap-12 mb-16">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-2">
+              <span className="material-symbols-outlined text-primary text-[22px]">sync_alt</span>
+            </div>
+            <div>
+              <h3 className="font-headline-md text-headline-md text-on-surface font-bold mb-4">
+                Apply to all {label}?
+              </h3>
+              <p className="font-body-md text-body-md text-on-surface-variant">
+                You changed <strong className="text-on-surface">{changedFields.join(', ')}</strong>. Do you want to apply this change to all <strong className="text-on-surface">{label}</strong> intervals?
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-8">
+            <button
+              onClick={onApplyOne}
+              className="flex-1 py-10 bg-surface border border-outline-variant text-on-surface rounded-xl font-medium hover:bg-surface-dim transition-colors"
+            >
+              Just this one
+            </button>
+            <button
+              onClick={onApplyAll}
+              className="flex-1 py-10 bg-primary-btn hover:bg-primary-btn-hover text-on-primary-btn rounded-xl font-medium transition-colors"
+            >
+              Apply to all
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// WorkoutEditor
+// ---------------------------------------------------------------------------
 interface WorkoutEditorProps {
   existingWorkout?: Workout
   initialIntervals?: Interval[]
@@ -72,19 +108,14 @@ interface WorkoutEditorProps {
 }
 
 export default function WorkoutEditor({ existingWorkout, initialIntervals, onSave, onCancel }: WorkoutEditorProps) {
+  const { exercises, saveExerciseImage } = useExercises()
   const [title, setTitle] = useState(existingWorkout?.title ?? '')
   const [intervals, dispatch] = useReducer(
     workoutReducer,
     existingWorkout?.intervals ?? initialIntervals ?? DEFAULT_INTERVALS,
   )
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
-  const { exercises } = useExercises()
-
-  // ponytail: synthetic workout object for flatten; temp id/createdAt/updatedAt not persisted
-  const flat = useMemo(
-    () => flattenWorkout({ id: '', title: '', intervals, createdAt: 0, updatedAt: 0 }),
-    [intervals],
-  )
+  const [originalInterval, setOriginalInterval] = useState<Interval | null>(null)
 
   // ponytail: dirty flag on user interaction, no deep compare
   const dirtyRef = useRef(false)
@@ -99,104 +130,134 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
     return () => window.removeEventListener('beforeunload', handler)
   }, [])
 
-  // ponytail: reuse flat for total to avoid double-flatten; equals totalDuration() result
-  const totalDurationSec = flat.reduce((s, i) => s + i.duration, 0)
+  const totalDurationSec = intervals.reduce((s, i) => s + i.duration, 0)
   const totalMin = Math.floor(totalDurationSec / 60)
   const totalSec = totalDurationSec % 60
 
   function markDirty() { dirtyRef.current = true }
 
-  function handleAdd(interval: Interval) { markDirty(); dispatch({ type: 'ADD_INTERVAL', interval }) }
-  function handleChange(index: number, interval: Interval) { markDirty(); dispatch({ type: 'CHANGE_INTERVAL', index, interval }) }
-  function handleRemove(index: number) { markDirty(); dispatch({ type: 'REMOVE_INTERVAL', index }) }
-  function handleMoveUp(index: number) { if (index <= 0) return; markDirty(); dispatch({ type: 'MOVE_UP', index }) }
-  function handleMoveDown(index: number) { markDirty(); dispatch({ type: 'MOVE_DOWN', index }) }
-  function handleCycleCountChange(parentIndex: number, count: number) { markDirty(); dispatch({ type: 'CYCLE_COUNT_CHANGE', parentIndex, count }) }
-  function handleChildChange(parentIndex: number, childIndex: number, child: Interval) { markDirty(); dispatch({ type: 'CHILD_CHANGE', parentIndex, childIndex, child }) }
-  function handleRemoveChild(parentIndex: number, childIndex: number) { markDirty(); dispatch({ type: 'REMOVE_CHILD', parentIndex, childIndex }) }
-  function handleChildMoveUp(parentIndex: number, childIndex: number) { if (childIndex <= 0) return; markDirty(); dispatch({ type: 'CHILD_MOVE_UP', parentIndex, childIndex }) }
-  function handleChildMoveDown(parentIndex: number, childIndex: number) { markDirty(); dispatch({ type: 'CHILD_MOVE_DOWN', parentIndex, childIndex }) }
-  function handleUnwrap(index: number) { markDirty(); dispatch({ type: 'UNWRAP_CYCLE', index }) }
-  function handleTitleChange(index: number, title: string) {
+  function handleAdd(type: IntervalType) {
     markDirty()
-    const interval = intervals[index]
-    if (!interval) return
-    dispatch({ type: 'CHANGE_INTERVAL', index, interval: { ...interval, title } })
-  }
-  function handleAddChild(index: number) { markDirty(); dispatch({ type: 'ADD_CHILD', index }) }
-  function handleRestChange(index: number, seconds: number) { markDirty(); dispatch({ type: 'SET_REST_BETWEEN_CYCLES', index, seconds }) }
-
-  // Selection mode state (local — per design decision)
-  const [selectionMode, setSelectionMode] = useState(false)
-  const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set())
-
-  function toggleSelectionMode() {
-    setSelectionMode(s => !s)
-    setSelectedIndices(new Set())
+    dispatch({ type: 'ADD_INTERVAL', interval: createInterval(type) })
   }
 
-  function handleSelectToggle(idx: number) {
-    setSelectedIndices(prev => {
-      const next = new Set(prev)
-      if (next.has(idx)) { next.delete(idx) } else { next.add(idx) }
-      return next
-    })
+  function handleChange(index: number, interval: Interval) {
+    markDirty()
+    dispatch({ type: 'CHANGE_INTERVAL', index, interval })
   }
 
-  // Exit selection mode on Escape
-  useEffect(() => {
-    if (!selectionMode) return
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        setSelectionMode(false)
-        setSelectedIndices(new Set())
-      }
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [selectionMode])
+  function handleRemove(index: number) {
+    markDirty()
+    dispatch({ type: 'REMOVE_INTERVAL', index })
+  }
 
-  // Drag-and-drop state
+  function handleMoveUp(index: number) {
+    if (index <= 0) return
+    markDirty()
+    dispatch({ type: 'REORDER', fromIndex: index, toIndex: index - 1 })
+  }
+
+  function handleMoveDown(index: number) {
+    if (index >= intervals.length - 1) return
+    markDirty()
+    dispatch({ type: 'REORDER', fromIndex: index, toIndex: index + 1 })
+  }
+
+  // ponytail: DragState — simple flat index only
   const [dragIndex, setDragIndex] = useState<number | null>(null)
 
-  function handleDragStart(i: number) {
-    if (selectionMode) {
-      setSelectionMode(false)
-      setSelectedIndices(new Set())
+  // ponytail: wheel scroll during HTML5 DnD — browser blocks scroll, so we handle it manually
+  useEffect(() => {
+    if (dragIndex === null) return
+    function onWheel(e: WheelEvent) {
+      window.scrollBy(0, e.deltaY)
+      e.preventDefault()
     }
-    setDragIndex(i)
-  }
+    window.addEventListener('wheel', onWheel, { passive: false })
+    return () => window.removeEventListener('wheel', onWheel)
+  }, [dragIndex])
 
+  function handleDragStart(i: number) { setDragIndex(i) }
   function handleDragOver(e: React.DragEvent, i: number) {
     if (dragIndex === null || dragIndex === i) return
-    e.preventDefault() // allow drop
-    // ponytail: visually the drag ghost + cursor give enough feedback; no extra highlight needed
+    e.preventDefault()
+    // Auto-scroll when near viewport edges (fixes HTML5 DnD scroll lock)
+    const threshold = 60
+    const cy = e.clientY
+    if (cy < threshold) window.scrollBy(0, Math.max(cy - threshold, -12))
+    else if (cy > window.innerHeight - threshold) window.scrollBy(0, Math.min(cy - (window.innerHeight - threshold), 12))
   }
-
   function handleDrop(i: number) {
     if (dragIndex === null || dragIndex === i) return
     markDirty()
     dispatch({ type: 'REORDER', fromIndex: dragIndex, toIndex: i })
     setDragIndex(null)
   }
+  function handleDragEnd() { setDragIndex(null) }
 
-  function handleDragEnd() {
-    setDragIndex(null)
-  }
-
-  // ponytail: click timeline block → open sheet for that original interval
   function handleTimelineClick(idx: number) {
-    const fi = flat[idx]
-    if (!fi || fi.isGenerated) return
-    const origIdx = intervals.findIndex((i) => i.id === fi.id)
-    if (origIdx >= 0) setEditingIndex(origIdx)
+    if (idx >= 0 && idx < intervals.length) {
+      setOriginalInterval(intervals[idx]!)
+      setEditingIndex(idx)
+    }
   }
+
+  function handleRowClick(idx: number) {
+    setOriginalInterval(intervals[idx]!)
+    setEditingIndex(idx)
+  }
+
+  // Bulk apply state
+  const [bulkPrompt, setBulkPrompt] = useState<{
+    type: IntervalType
+    changes: Partial<Interval>
+    changedFields: string[]
+    index: number
+  } | null>(null)
 
   function handleSheetSave(updated: Interval) {
     if (editingIndex === null) return
     markDirty()
-    dispatch({ type: 'SHEET_SAVE', index: editingIndex, interval: updated })
+    dispatch({ type: 'CHANGE_INTERVAL', index: editingIndex, interval: updated })
     setEditingIndex(null)
+
+    // Detect changes for bulk apply
+    if (originalInterval) {
+      const changes: Partial<Interval> = {}
+      const changedFields: string[] = []
+      for (const key of ['title', 'duration', 'description', 'imageUrl'] as const) {
+        if (updated[key] !== originalInterval[key]) {
+          ;(changes as Record<string, unknown>)[key] = updated[key]
+          changedFields.push(key)
+        }
+      }
+      if (changedFields.length > 0) {
+        // Check if there are other intervals of the same type
+        const sameType = intervals.filter((_, i) => i !== editingIndex && intervals[i]?.type === updated.type)
+        if (sameType.length > 0) {
+          setBulkPrompt({ type: updated.type, changes, changedFields, index: editingIndex })
+          return
+        }
+      }
+    }
+    setOriginalInterval(null)
+  }
+
+  function handleBulkApplyAll() {
+    if (!bulkPrompt) return
+    markDirty()
+    for (let i = 0; i < intervals.length; i++) {
+      if (i !== bulkPrompt.index && intervals[i]?.type === bulkPrompt.type) {
+        dispatch({ type: 'CHANGE_INTERVAL', index: i, interval: { ...intervals[i]!, ...bulkPrompt.changes } })
+      }
+    }
+    setBulkPrompt(null)
+    setOriginalInterval(null)
+  }
+
+  function handleBulkApplyOne() {
+    setBulkPrompt(null)
+    setOriginalInterval(null)
   }
 
   function handleSave() {
@@ -231,7 +292,7 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
       </div>
 
       {intervals.length > 0 && (
-        <TimelineStrip intervals={flat} onIntervalClick={handleTimelineClick} />
+        <TimelineStrip intervals={intervals} onIntervalClick={handleTimelineClick} />
       )}
 
       {intervals.length === 0 ? (
@@ -244,26 +305,15 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
         </div>
       ) : (
         <div className="flex flex-col gap-16">
-          {intervals.map((interval, i) =>
-            interval.children?.length ? (
-              <div key={interval.id} onDragOver={(e) => handleDragOver(e, i)} className={dragIndex !== null ? 'relative' : ''}>
-                <CycleGroup
-                  interval={interval}
-                  index={i}
-                  onCycleCountChange={handleCycleCountChange}
-                  onChildChange={handleChildChange}
-                  onRemoveChild={handleRemoveChild}
-                  onChildMoveUp={handleChildMoveUp}
-                  onChildMoveDown={handleChildMoveDown}
-                  onUnwrap={handleUnwrap}
-                  onTitleChange={handleTitleChange}
-                  onAddChild={handleAddChild}
-                  onRestChange={handleRestChange}
-                />
-              </div>
-            ) : (
+          {intervals.map((interval, i) => (
+            <div
+              key={interval.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => handleRowClick(i)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleRowClick(i) } }}
+            >
               <IntervalRow
-                key={interval.id}
                 interval={interval}
                 index={i}
                 onChange={handleChange}
@@ -277,67 +327,50 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
                 onDragEnd={handleDragEnd}
-                selectionMode={selectionMode}
-                selected={selectedIndices.has(i)}
-                onSelect={handleSelectToggle}
               />
-            )
-          )}
+            </div>
+          ))}
         </div>
       )}
 
-      {editingIndex !== null && (
-        <IntervalDetailSheet
-          interval={intervals[editingIndex]!}
-          onSave={handleSheetSave}
-          onClose={() => setEditingIndex(null)}
-          exercises={exercises}
-        />
-      )}
-
-      {/* Add Block bento grid */}
+      {/* Add Block grid — 5 types, no Cycle */}
       <div className="pt-24 border-t border-outline-variant/30 mt-32">
         <h3 className="font-label text-label-caps uppercase text-on-surface-variant mb-16 text-center tracking-widest">Add Block</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-16">
-          {(['prepare', 'work', 'rest', 'cooldown'] as const).map((type) => (
+        <div className="grid grid-cols-3 md:grid-cols-5 gap-12">
+          {ADD_BLOCK_TYPES.map((type) => (
             <button
               key={type}
-              onClick={() => handleAdd(createInterval(type))}
-              className={`glass-card p-16 rounded-xl flex flex-col items-center justify-center gap-8 hover:-translate-y-1 hover:shadow-md transition-all duration-200 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ${SEGMENT_CLASSES[type].border} group`}
+              onClick={() => handleAdd(type)}
+              className={`glass-card p-12 rounded-xl flex flex-col items-center justify-center gap-6 hover:-translate-y-1 hover:shadow-md transition-all duration-200 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ${SEGMENT_CLASSES[type].border} group`}
             >
               <div className={`w-10 h-10 rounded-full ${SEGMENT_CLASSES[type].bg10} ${SEGMENT_CLASSES[type].text} flex items-center justify-center group-hover:scale-110 transition-transform`}>
                 <span className="material-symbols-outlined">{TYPE_ICONS[type]}</span>
               </div>
-              <span className="font-label text-label-caps uppercase text-on-surface font-semibold">{type}</span>
+              <span className="font-label text-label-caps uppercase text-on-surface font-semibold text-[10px] leading-tight text-center">{type.replace(/_/g, ' ')}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Selection mode toggle + wrap button */}
-      <div className="flex gap-3">
-        <button
-          onClick={toggleSelectionMode}
-          className={`flex-1 py-3 rounded-lg font-medium transition-colors font-label text-label-caps uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none flex items-center justify-center gap-2 ${selectionMode ? 'bg-primary-container text-on-primary' : 'bg-surface border border-outline-variant text-on-surface hover:bg-surface-dim'}`}
-        >
-          <span className="material-symbols-outlined text-[18px]">checklist</span>
-          {selectionMode ? 'Cancel' : 'Select'}
-        </button>
-        {selectionMode && (
-          <button
-            onClick={() => {
-              dispatch({ type: 'WRAP_SELECTION_IN_CYCLE', selectedIndices: Array.from(selectedIndices).sort() })
-              setSelectionMode(false)
-              setSelectedIndices(new Set())
-            }}
-            disabled={selectedIndices.size < 2}
-            className="flex-1 py-3 bg-primary-btn hover:bg-primary-btn-hover disabled:bg-surface-container-low disabled:text-on-surface-variant text-on-primary-btn rounded-lg font-medium transition-colors font-label text-label-caps uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none flex items-center justify-center gap-2"
-          >
-            <span className="material-symbols-outlined text-[18px]">combine_blocks</span>
-            Wrap {selectedIndices.size} Selected
-          </button>
-        )}
-      </div>
+      {editingIndex !== null && intervals[editingIndex] && (
+        <IntervalDetailSheet
+          interval={intervals[editingIndex]!}
+          onSave={handleSheetSave}
+          onClose={() => { setEditingIndex(null); setOriginalInterval(null) }}
+          exercises={exercises}
+          onImageUpload={(file) => saveExerciseImage(intervals[editingIndex]!.id, file)}
+        />
+      )}
+
+      {/* Bulk apply dialog */}
+      {bulkPrompt && (
+        <BulkApplyDialog
+          type={bulkPrompt.type}
+          changedFields={bulkPrompt.changedFields}
+          onApplyAll={handleBulkApplyAll}
+          onApplyOne={handleBulkApplyOne}
+        />
+      )}
 
       <div className="flex gap-3">
         {onCancel && (
@@ -358,4 +391,14 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
       </div>
     </div>
   )
+}
+
+export function buildExerciseInterval(exercise: Exercise): Interval {
+  return {
+    id: crypto.randomUUID(),
+    type: 'work',
+    title: exercise.name,
+    duration: 60,
+    exerciseId: exercise.id,
+  }
 }

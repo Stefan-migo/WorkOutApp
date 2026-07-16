@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { SEGMENT_BORDER, SEGMENT_BG, SEGMENT_TEXT, TYPE_ICONS } from '@/lib/segment-styles'
 import type { Interval } from '@/types/workout'
 import { useExercises } from '@/hooks/useExercises'
@@ -18,20 +19,17 @@ interface IntervalRowProps {
   onDragOver?: (e: React.DragEvent, i: number) => void
   onDrop?: (i: number) => void
   onDragEnd?: () => void
-  selectionMode?: boolean
-  selected?: boolean
-  onSelect?: (index: number) => void
 }
 
-export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onMoveDown, isFirst, isLast, dragIndex, onDragStart, onDragOver, onDrop, onDragEnd, selectionMode, selected, onSelect }: IntervalRowProps) {
+export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onMoveDown, isFirst, isLast, dragIndex, onDragStart, onDragOver, onDrop, onDragEnd }: IntervalRowProps) {
   const { getExercise } = useExercises()
   const minutes = Math.floor(interval.duration / 60)
   const seconds = interval.duration % 60
   const durationStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
   // ponytail: inline exercise lookup, memoize if list grows
-  const exerciseName =
+  const exercise =
     interval.type === 'work' && interval.exerciseId
-      ? getExercise(interval.exerciseId)?.name
+      ? getExercise(interval.exerciseId)
       : undefined
 
   // ponytail: HTML5 DnD, zero deps. The cursor-grab handle initiates the drag.
@@ -44,24 +42,12 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
       onDragOver={(e) => onDragOver?.(e, index)}
       onDrop={() => onDrop?.(index)}
       onDragEnd={() => onDragEnd?.()}
-      className={`glass-card rounded-lg flex items-center group transition-all duration-200 border-l-4 ${SEGMENT_BORDER[interval.type] ?? 'border-l-segment-work'} pl-0 hover:shadow-md relative overflow-hidden ${isDragging ? 'opacity-40 ring-2 ring-secondary' : ''} ${selected ? 'ring-2 ring-primary bg-primary/5' : ''}`}
+      className={`glass-card rounded-lg flex items-center group transition-all duration-200 border-l-4 ${SEGMENT_BORDER[interval.type] ?? 'border-l-segment-work'} pl-0 hover:shadow-md relative overflow-hidden ${isDragging ? 'opacity-40 ring-2 ring-secondary' : ''}`}
     >
-      {/* Selection checkbox (replaces drag handle in selection mode) */}
-      {selectionMode ? (
-        <div className="px-8 py-16 flex items-center justify-center">
-          <input
-            type="checkbox"
-            checked={!!selected}
-            onChange={() => onSelect?.(index)}
-            className="w-5 h-5 accent-primary cursor-pointer"
-            aria-label={`Select interval ${index + 1}`}
-          />
-        </div>
-      ) : (
-        <div className="px-8 py-16 text-outline-variant cursor-grab flex items-center justify-center active:cursor-grabbing" role="button" aria-label="Drag to reorder">
-          <span className="material-symbols-outlined text-[20px]">drag_indicator</span>
-        </div>
-      )}
+      {/* Drag handle */}
+      <div className="px-8 py-16 text-outline-variant cursor-grab flex items-center justify-center active:cursor-grabbing" role="button" aria-label="Drag to reorder">
+        <span className="material-symbols-outlined text-[20px]">drag_indicator</span>
+      </div>
 
       {/* Type Icon */}
       <div className={`p-8 ${SEGMENT_BG[interval.type] ?? 'bg-segment-work/10'} ${SEGMENT_TEXT[interval.type] ?? 'text-segment-work'} rounded-md mr-16 flex items-center justify-center`}>
@@ -77,8 +63,39 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
           className="bg-transparent border-none p-0 font-body-md font-semibold text-on-surface w-full focus:ring-0 focus:outline-none placeholder-on-surface-variant/50"
           aria-label={`Interval ${index + 1} title`}
         />
-        {exerciseName && (
-          <p className="text-[11px] text-on-surface-variant font-body-md mt-xs">{exerciseName}</p>
+        {exercise && (
+          <div className="flex items-center gap-8 mt-xs">
+            {exercise.images?.[0] ? (
+              <img
+                src={exercise.images[0]}
+                alt={exercise.name}
+                className="w-8 h-8 rounded object-cover shrink-0"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded bg-surface-dim flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[14px] text-on-surface-variant">fitness_center</span>
+              </div>
+            )}
+            <Link
+              href={`/exercises/${interval.exerciseId}`}
+              className="text-[11px] font-body-md text-secondary hover:underline"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {exercise.name}
+            </Link>
+            {exercise.primaryMuscles && exercise.primaryMuscles.length > 0 && (
+              <div className="flex gap-4">
+                {exercise.primaryMuscles.slice(0, 2).map((muscle) => (
+                  <span
+                    key={muscle}
+                    className="text-[9px] px-4 py-1 rounded-full bg-primary/10 text-primary font-medium whitespace-nowrap"
+                  >
+                    {muscle}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </div>
 

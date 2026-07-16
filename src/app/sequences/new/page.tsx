@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useSequences } from '@/hooks/useSequences'
 import { useWorkoutContext } from '@/context/WorkoutContext'
 import { flattenWorkout } from '@/lib/interval-engine'
-import { SEGMENT_DOT } from '@/lib/segment-styles'
 import type { Sequence } from '@/types/workout'
 
 function formatDuration(totalSeconds: number) {
@@ -33,6 +32,7 @@ export default function NewSequencePage() {
   const [repeatCount, setRepeatCount] = useState(1)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [search, setSearch] = useState('')
+  const [dragIndex, setDragIndex] = useState<number | null>(null)
 
   // ponytail: filtered list on search input, no debounce needed at this scale
   const filtered = useMemo(
@@ -84,22 +84,29 @@ export default function NewSequencePage() {
     })
   }
 
-  function moveUp(index: number) {
-    if (index <= 0) return
-    setSelectedIds((prev) => {
-      const next = [...prev]
-      ;[next[index - 1], next[index]] = [next[index]!, next[index - 1]!]
-      return next
-    })
+  // HTML5 DnD — matches pattern from WorkoutBuilder
+  function handleDragStart(i: number) {
+    setDragIndex(i)
   }
 
-  function moveDown(index: number) {
+  function handleDragOver(e: React.DragEvent) {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+  }
+
+  function handleDrop(i: number) {
+    if (dragIndex === null || dragIndex === i) return
     setSelectedIds((prev) => {
-      if (index >= prev.length - 1) return prev
       const next = [...prev]
-      ;[next[index]!, next[index + 1]!] = [next[index + 1]!, next[index]!]
+      const [moved] = next.splice(dragIndex, 1)
+      next.splice(i, 0, moved!)
       return next
     })
+    setDragIndex(null)
+  }
+
+  function handleDragEnd() {
+    setDragIndex(null)
   }
 
   function handleSave() {
@@ -121,34 +128,36 @@ export default function NewSequencePage() {
 
   const canSave = title.trim().length > 0 && selectedIds.length > 0
 
-  // Mini timeline for a workout (first few interval segments)
-  function MiniTimeline({ workoutId }: { workoutId: string }) {
+  // Compact interval stats badge — replaces MiniTimeline
+  function IntervalBadge({ workoutId }: { workoutId: string }) {
     const w = workouts.find((x) => x.id === workoutId)
     if (!w) return null
     const flat = flattenWorkout(w)
-    const total = flat.reduce((s, i) => s + i.duration, 0)
-    // ponytail: show at most 5 segments in mini preview
-    const segments = flat.slice(0, 5)
+    const count = flat.length
+    const work = flat.filter((i) => i.type === 'work').length
+    const rest = flat.filter((i) => i.type === 'rest' || i.type === 'rest_between_cycles').length
     return (
-      <div className="hidden sm:flex w-32 h-6 bg-surface-container rounded-full overflow-hidden shrink-0">
-        {segments.map((i) => (
-          <div
-            key={i.id}
-            className={`h-full ${SEGMENT_DOT[i.type] ?? 'bg-surface-tint'}`}
-            style={{ width: `${Math.max(8, (i.duration / total) * 100)}%` }}
-          />
-        ))}
-      </div>
+      <span className="hidden sm:inline-flex items-center gap-8 font-data text-data-sm text-on-surface-variant shrink-0 bg-surface-variant/60 rounded-full px-12 py-4 border border-outline-variant/20">
+        <span>{count} int</span>
+        <span className="flex items-center gap-4">
+          <span className="w-2 h-2 rounded-full bg-segment-work" />
+          {work}
+        </span>
+        <span className="flex items-center gap-4">
+          <span className="w-2 h-2 rounded-full bg-segment-rest" />
+          {rest}
+        </span>
+      </span>
     )
   }
 
   return (
-    <div className="flex flex-col min-h-screen relative pb-xl">
-      <div className="flex-1 p-margin-mobile md:p-margin-desktop flex flex-col xl:flex-row gap-xl max-w-[1600px] mx-auto w-full">
+    <div className="flex flex-col min-h-screen relative pb-[100px]">
+      <div className="flex-1 p-margin-mobile md:p-margin-desktop flex flex-col xl:flex-row gap-[48px] max-w-[1600px] mx-auto w-full">
         {/* Left Column: Sequence Metadata & List */}
-        <div className="flex-1 flex flex-col gap-lg">
+        <div className="flex-1 flex flex-col gap-32">
           {/* Glass Header Panel */}
-          <div className="glass-card rounded-xl p-lg space-y-md">
+          <div className="glass-card rounded-xl p-32 space-y-24">
             <div className="flex flex-col md:flex-row justify-between md:items-end gap-md border-b border-outline-variant/20 pb-md">
               <div className="flex-1 w-full">
                 <label className="block font-label text-label-caps text-on-surface-variant mb-xs uppercase tracking-wider" htmlFor="sequence-title">
@@ -183,46 +192,49 @@ export default function NewSequencePage() {
             </div>
 
             {/* Meta chips */}
-            <div className="flex gap-8 flex-wrap">
-              <span className="inline-flex items-center rounded-full bg-surface-variant px-8 py-xs font-data text-data-sm text-on-surface-variant">
-                <span className="w-2 h-2 rounded-full bg-primary-container mr-xs" />
+            <div className="flex gap-24 flex-wrap items-center">
+              <span className="inline-flex items-center gap-8 rounded-full bg-surface-variant px-16 py-8 font-data text-data-sm text-on-surface-variant">
+                <span className="w-2 h-2 rounded-full bg-primary-container" />
                 {selectedIds.length} Workout{selectedIds.length !== 1 && 's'}
               </span>
-              <span className="inline-flex items-center rounded-full bg-surface-variant px-sm py-xs font-data text-data-sm text-on-surface-variant gap-1">
-                <span className="w-2 h-2 rounded-full bg-secondary-container mr-xs" />
-                {repeatCount}×
+              <span className="inline-flex items-center gap-8 rounded-full bg-surface-variant px-16 py-8 font-data text-data-sm text-on-surface-variant">
+                <span className="w-2 h-2 rounded-full bg-secondary-container" />
+                {repeatCount} cycle{repeatCount !== 1 && 's'}
               </span>
-              <label className="inline-flex items-center gap-1 font-data text-data-sm text-on-surface-variant">
-                <span className="w-2 h-2 rounded-full bg-segment-work mr-xs" />
+              <label className="inline-flex items-center gap-8 font-data text-data-sm text-on-surface-variant bg-surface-variant/40 rounded-full px-16 py-8 border border-outline-variant/20">
+                <span className="w-2 h-2 rounded-full bg-segment-work" />
                 <input
                   type="number"
                   min={1}
                   max={99}
                   value={repeatCount}
-                  className="w-12 bg-surface-container rounded px-1 py-0.5 text-center text-on-surface outline-none focus:ring-1 focus:ring-secondary focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                  className="w-[36px] bg-surface-container rounded text-center text-data-sm leading-none text-on-surface outline-none focus:ring-1 focus:ring-secondary focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   onChange={(e) => setRepeatCount(Math.max(1, Math.min(99, parseInt(e.target.value) || 1)))}
                 />
-                rounds ({selectedIds.length * repeatCount} total)
+                <span>cycles ({selectedIds.length * repeatCount} total workouts)</span>
               </label>
             </div>
           </div>
 
           {/* Workout List */}
-          <div className="flex-1 flex flex-col gap-8" id="workout-sequence-list">
+          <div className="flex-1 flex flex-col gap-24" id="workout-sequence-list">
             {selectedIds.map((id, i) => {
               const w = workouts.find((x) => x.id === id)
               const woDuration = w ? flattenWorkout(w).reduce((s, x) => s + x.duration, 0) : 0
+              const isDragging = dragIndex === i
               return (
                 <div
                   key={id}
-                  className="group glass-card rounded-lg p-16 flex items-center gap-16 transition-all hover:border-primary-fixed relative"
+                  draggable
+                  onDragStart={() => handleDragStart(i)}
+                  onDragOver={handleDragOver}
+                  onDrop={() => handleDrop(i)}
+                  onDragEnd={handleDragEnd}
+                  className={`group glass-card rounded-lg p-24 flex items-center gap-16 transition-all hover:border-primary-fixed relative border-l-4 border-l-surface-tint ${isDragging ? 'opacity-40 ring-2 ring-secondary' : ''}`}
                 >
-                  {/* Left accent bar */}
-                  <div className="absolute left-0 top-2 bottom-2 w-1 bg-surface-tint rounded-r-sm opacity-50 group-hover:opacity-100 transition-opacity" />
-
                   {/* Drag handle */}
-                  <div className="text-outline-variant group-hover:text-primary transition-colors cursor-grab shrink-0">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <div className="text-outline-variant/40 group-hover:text-primary transition-colors cursor-grab shrink-0">
+                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
                     </svg>
                   </div>
@@ -241,47 +253,29 @@ export default function NewSequencePage() {
                       {w?.title ?? 'Unknown workout'}
                     </h3>
                     <p className="font-data text-data-sm text-on-surface-variant mt-xs">
-                      {formatShort(woDuration)} · {w?.intervals.length ?? 0} interval{(w?.intervals.length ?? 0) !== 1 && 's'}
+                      {formatShort(woDuration)}
                     </p>
                   </div>
 
-                  {/* Mini timeline */}
-                  <MiniTimeline workoutId={id} />
+                  {/* Interval stats badge */}
+                  <IntervalBadge workoutId={id} />
 
-                  {/* Reorder + Remove */}
-                  <div className="flex gap-1 shrink-0">
-                    <button
-                      onClick={() => moveUp(i)}
-                      disabled={i === 0}
-                      className="p-1 rounded text-outline-variant hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
-                      title="Move up"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">keyboard_arrow_up</span>
-                    </button>
-                    <button
-                      onClick={() => moveDown(i)}
-                      disabled={i === selectedIds.length - 1}
-                      className="p-1 rounded text-outline-variant hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
-                      title="Move down"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">keyboard_arrow_down</span>
-                    </button>
-                    <button
-                      onClick={() => setSelectedIds((prev) => prev.filter((x) => x !== id))}
-                      className="p-1 rounded text-outline-variant hover:text-error transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
-                      title="Remove"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </div>
+                  {/* Remove */}
+                  <button
+                    onClick={() => setSelectedIds((prev) => prev.filter((x) => x !== id))}
+                    className="p-8 rounded-lg text-outline-variant hover:text-error hover:bg-error/5 transition-colors shrink-0 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                    title="Remove workout"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
                 </div>
               )
             })}
 
             {/* Add Workout Area */}
-            <div className="mt-16 border-2 border-dashed border-outline-variant/50 rounded-lg p-24 text-center hover:bg-surface-variant/30 hover:border-primary transition-colors cursor-pointer group">
+            <div className="mt-16 border-2 border-dashed border-outline-variant/50 rounded-lg p-24 text-center hover:bg-surface-variant/30 hover:border-primary transition-colors group">
               <div className="flex flex-col gap-16">
                 {/* Search bar */}
                 <div className="relative max-w-md mx-auto w-full">
@@ -297,44 +291,39 @@ export default function NewSequencePage() {
                   />
                 </div>
 
-                {/* Results list */}
-                {search.trim() && (
-                  <div className="max-h-48 overflow-y-auto bg-surface rounded-lg border border-outline-variant/30 divide-y divide-outline-variant/10 text-left">
-                    {filtered.length === 0 ? (
-                      <p className="px-3 py-2 font-body text-body-md text-on-surface-variant">No workouts found</p>
-                    ) : (
-                      filtered.map((w) => (
-                        <label
-                          key={w.id}
-                          className="flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-surface-container transition-colors"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={selectedSet.has(w.id)}
-                            onChange={() => toggleWorkout(w.id)}
-                            className="accent-secondary w-4 h-4 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
-                          />
-                          <span className="flex-1 font-body text-body-md text-on-surface truncate">{w.title}</span>
-                          <span className="font-data text-data-sm text-on-surface-variant shrink-0">
-                            {formatShort(flattenWorkout(w).reduce((s, i) => s + i.duration, 0))}
-                          </span>
-                        </label>
-                      ))
-                    )}
-                  </div>
-                )}
-
-                {/* Empty state CTA when no search */}
-                {!search.trim() && (
-                  <>
-                    <svg className="w-10 h-10 mx-auto text-outline-variant group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                    <span className="font-label text-label-caps text-on-surface-variant group-hover:text-primary uppercase tracking-wider block">
-                      Browse &amp; Add Workouts
-                    </span>
-                  </>
-                )}
+                {/* Results list: show all workouts when no search, filtered when typing */}
+                <div className="max-h-48 overflow-y-auto bg-surface rounded-lg border border-outline-variant/30 divide-y divide-outline-variant/10 text-left">
+                  {workouts.length === 0 ? (
+                    <div className="px-3 py-8 text-center">
+                      <svg className="w-10 h-10 mx-auto text-outline-variant" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                      </svg>
+                      <span className="font-label text-label-caps text-on-surface-variant uppercase tracking-wider block mt-8">
+                        Browse &amp; Add Workouts
+                      </span>
+                    </div>
+                  ) : filtered.length === 0 ? (
+                    <p className="px-3 py-2 font-body text-body-md text-on-surface-variant">No workouts match &quot;{search}&quot;</p>
+                  ) : (
+                    filtered.map((w) => (
+                      <label
+                        key={w.id}
+                        className="flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-surface-container transition-colors"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedSet.has(w.id)}
+                          onChange={() => toggleWorkout(w.id)}
+                          className="accent-secondary w-4 h-4 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                        />
+                        <span className="flex-1 font-body text-body-md text-on-surface truncate">{w.title}</span>
+                        <span className="font-data text-data-sm text-on-surface-variant shrink-0">
+                          {formatShort(flattenWorkout(w).reduce((s, i) => s + i.duration, 0))}
+                        </span>
+                      </label>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -374,12 +363,12 @@ export default function NewSequencePage() {
               </div>
 
               {/* Stats */}
-              <div className="grid grid-cols-2 gap-8">
-                <div className="bg-surface-variant p-8 rounded-lg">
+              <div className="grid grid-cols-2 gap-16">
+                <div className="bg-surface-variant p-16 rounded-lg">
                   <div className="font-label text-label-caps text-on-surface-variant uppercase tracking-wider mb-xs">Work Ratio</div>
                   <div className="font-data text-data-lg text-primary">{workRatio}%</div>
                 </div>
-                <div className="bg-surface-variant p-8 rounded-lg">
+                <div className="bg-surface-variant p-16 rounded-lg">
                   <div className="font-label text-label-caps text-on-surface-variant uppercase tracking-wider mb-xs">Rest Ratio</div>
                   <div className="font-data text-data-lg text-primary">{restRatio}%</div>
                 </div>

@@ -36,19 +36,19 @@ export function DayRow({
           <span className="font-headline-md text-headline-md font-bold">{dayNum}</span>
         </div>
         <div className="flex-1 min-w-0 text-left">
-          <h4 className="font-body-md text-body-md font-bold text-on-primary truncate">
+          <h4 className="font-body-md text-body-md font-bold text-on-primary-dark-bg truncate">
             {title}
           </h4>
           <div className="flex gap-xs mt-xs items-center">
             <span className="px-8 py-0.5 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded-full uppercase tracking-wider">
               {typeLabel}
             </span>
-            <span className="font-data-sm text-data-sm text-on-primary-container">
+            <span className="font-data-sm text-data-sm text-on-primary-dark-bg/70">
               {duration > 0 ? `${Math.floor(duration / 60)} min` : ''}
             </span>
           </div>
         </div>
-        <span className="material-symbols-outlined text-on-primary">check_circle</span>
+        <span className="material-symbols-outlined text-on-primary-dark-bg">check_circle</span>
       </button>
     )
   }

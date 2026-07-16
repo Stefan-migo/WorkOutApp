@@ -1,14 +1,32 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, cleanup, fireEvent } from '@testing-library/react'
+import { render, screen, cleanup } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { IntervalRow } from '../IntervalRow'
 import type { Interval } from '@/types/workout'
 
+vi.mock('next/link', () => {
+  const Link = ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: unknown }) => (
+    <a href={href} {...props}>{children}</a>
+  )
+  return { default: Link }
+})
+
 vi.mock('@/hooks/useExercises', () => ({
   useExercises: () => ({
-    getExercise: vi.fn((id: string) =>
-      id === 'ex-1' ? { id: 'ex-1', name: 'Sprint', category: 'cardio', createdAt: 0, updatedAt: 0 } : undefined,
-    ),
+    getExercise: vi.fn((id: string) => {
+      if (id === 'ex-1') {
+        return {
+          id: 'ex-1',
+          name: 'Sprint',
+          category: 'cardio',
+          primaryMuscles: ['Quadriceps', 'Hamstrings', 'Glutes'],
+          images: ['https://example.com/sprint.jpg'],
+          createdAt: 0,
+          updatedAt: 0,
+        }
+      }
+      return undefined
+    }),
     exercises: [],
     saveExercise: vi.fn(),
     deleteExercise: vi.fn(),
@@ -55,7 +73,7 @@ describe('IntervalRow', () => {
     expect(durationInput).toBeInTheDocument()
   })
 
-  it('shows exercise name for work type with exerciseId', () => {
+  it('shows exercise preview for work type with exerciseId', () => {
     render(
       <IntervalRow
         interval={interval({ id: 'i3', type: 'work', exerciseId: 'ex-1' })}
@@ -64,137 +82,46 @@ describe('IntervalRow', () => {
         onRemove={noop}
       />,
     )
-    expect(screen.getByText('Sprint')).toBeInTheDocument()
+    // Exercise name shown as link
+    const link = screen.getByRole('link', { name: 'Sprint' })
+    expect(link).toBeInTheDocument()
+    expect(link).toHaveAttribute('href', '/exercises/ex-1')
+    // Thumbnail image
+    const img = screen.getByAltText('Sprint')
+    expect(img).toBeInTheDocument()
+    expect(img).toHaveAttribute('src', 'https://example.com/sprint.jpg')
+    // Primary muscles chips (max 2 of 3)
+    expect(screen.getByText('Quadriceps')).toBeInTheDocument()
+    expect(screen.getByText('Hamstrings')).toBeInTheDocument()
+    expect(screen.queryByText('Glutes')).not.toBeInTheDocument()
   })
 
-  describe('selection mode', () => {
-    it('renders checkbox when selectionMode is true', () => {
-      render(
-        <IntervalRow
-          interval={interval({ id: 'i6' })}
-          index={0}
-          onChange={noop}
-          onRemove={noop}
-          selectionMode={true}
-        />,
-      )
-      expect(screen.getByRole('checkbox')).toBeInTheDocument()
-    })
-
-    it('checkbox is checked when selected is true', () => {
-      render(
-        <IntervalRow
-          interval={interval({ id: 'i7' })}
-          index={0}
-          onChange={noop}
-          onRemove={noop}
-          selectionMode={true}
-          selected={true}
-        />,
-      )
-      expect(screen.getByRole('checkbox')).toBeChecked()
-    })
-
-    it('checkbox is unchecked when selected is false', () => {
-      render(
-        <IntervalRow
-          interval={interval({ id: 'i8' })}
-          index={0}
-          onChange={noop}
-          onRemove={noop}
-          selectionMode={true}
-          selected={false}
-        />,
-      )
-      expect(screen.getByRole('checkbox')).not.toBeChecked()
-    })
-
-    it('onSelect is called with index when checkbox is clicked', () => {
-      const onSelect = vi.fn()
-      render(
-        <IntervalRow
-          interval={interval({ id: 'i9' })}
-          index={3}
-          onChange={noop}
-          onRemove={noop}
-          selectionMode={true}
-          onSelect={onSelect}
-        />,
-      )
-      fireEvent.click(screen.getByRole('checkbox'))
-      expect(onSelect).toHaveBeenCalledWith(3)
-    })
-
-    it('does NOT render checkbox when selectionMode is false', () => {
-      render(
-        <IntervalRow
-          interval={interval({ id: 'i10' })}
-          index={0}
-          onChange={noop}
-          onRemove={noop}
-          selectionMode={false}
-        />,
-      )
-      expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
-    })
-
-    it('does NOT render checkbox when selectionMode is undefined', () => {
-      render(
-        <IntervalRow
-          interval={interval({ id: 'i11' })}
-          index={0}
-          onChange={noop}
-          onRemove={noop}
-        />,
-      )
-      expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
-    })
-
-    it('drag indicator is hidden when selectionMode is true', () => {
-      render(
-        <IntervalRow
-          interval={interval({ id: 'i12' })}
-          index={0}
-          onChange={noop}
-          onRemove={noop}
-          selectionMode={true}
-        />,
-      )
-      // The drag handle container should be hidden or not visible
-      const dragHandle = screen.queryByLabelText('Drag to reorder')
-      expect(dragHandle).not.toBeInTheDocument()
-    })
-
-    it('drag indicator is visible when selectionMode is false', () => {
-      render(
-        <IntervalRow
-          interval={interval({ id: 'i13' })}
-          index={0}
-          onChange={noop}
-          onRemove={noop}
-        />,
-      )
-      expect(screen.getByLabelText('Drag to reorder')).toBeInTheDocument()
-    })
-
-    it('selected row gets visual highlight class', () => {
-      const { container } = render(
-        <IntervalRow
-          interval={interval({ id: 'i14' })}
-          index={0}
-          onChange={noop}
-          onRemove={noop}
-          selectionMode={true}
-          selected={true}
-        />,
-      )
-      // The outer container div should have ring classes when selected
-      const outerDiv = container.firstChild as HTMLElement
-      expect(outerDiv.className).toContain('ring')
-    })
+  it('does not show exercise preview for rest interval', () => {
+    render(
+      <IntervalRow
+        interval={interval({ id: 'i9', type: 'rest', title: 'Rest' })}
+        index={0}
+        onChange={noop}
+        onRemove={noop}
+      />,
+    )
+    expect(screen.queryByRole('link')).not.toBeInTheDocument()
+    expect(screen.queryByAltText(/Sprint|Rest/)).not.toBeInTheDocument()
   })
 
-  it('renders move up and move down buttons', () => {
+  it('does not show exercise preview for work interval without exerciseId', () => {
+    render(
+      <IntervalRow
+        interval={interval({ id: 'i10', type: 'work', title: 'Free Work' })}
+        index={0}
+        onChange={noop}
+        onRemove={noop}
+      />,
+    )
+    expect(screen.queryByRole('link')).not.toBeInTheDocument()
+  })
+
+  it('renders move up and move down buttons visible on hover', () => {
     render(
       <IntervalRow
         interval={interval({ id: 'i4' })}
@@ -221,5 +148,45 @@ describe('IntervalRow', () => {
       />,
     )
     expect(screen.getByRole('button', { name: /remove interval 1/i })).toBeInTheDocument()
+  })
+
+  it('does NOT render checkbox (selection mode removed)', () => {
+    render(
+      <IntervalRow
+        interval={interval({ id: 'i6' })}
+        index={0}
+        onChange={noop}
+        onRemove={noop}
+      />,
+    )
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
+  })
+
+  it('renders drag handle for DnD reorder', () => {
+    render(
+      <IntervalRow
+        interval={interval({ id: 'i7' })}
+        index={0}
+        onChange={noop}
+        onRemove={noop}
+      />,
+    )
+    expect(screen.getByLabelText('Drag to reorder')).toBeInTheDocument()
+  })
+
+  it('accepts onDragStart prop without parentIndex parameter', () => {
+    const onDragStart = vi.fn()
+    render(
+      <IntervalRow
+        interval={interval({ id: 'i8' })}
+        index={2}
+        onChange={noop}
+        onRemove={noop}
+        onDragStart={(i) => onDragStart(i)}
+      />,
+    )
+    // Trigger drag via draggable attribute
+    const row = screen.getByLabelText('Drag to reorder').closest('[draggable]') as HTMLElement
+    expect(row).toBeInTheDocument()
   })
 })

@@ -2,19 +2,18 @@ import { describe, it, expect, afterEach } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { TimelineStrip } from '../TimelineStrip'
-import type { FlattenedInterval } from '@/lib/interval-engine'
+import type { Interval } from '@/types/workout'
 
 afterEach(cleanup)
 
-function interval(overrides: Partial<FlattenedInterval>): FlattenedInterval {
+function interval(overrides: Partial<Interval>): Interval {
   return {
     id: 'test',
     type: 'work',
     title: 'Work',
     duration: 60,
-    depth: 0,
     ...overrides,
-  } as FlattenedInterval
+  }
 }
 
 const noop = () => {}

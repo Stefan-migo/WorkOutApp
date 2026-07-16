@@ -1,10 +1,10 @@
 'use client'
 
 import { SEGMENT_BG_80, SEGMENT_DOT } from '@/lib/segment-styles'
-import type { FlattenedInterval } from '@/lib/interval-engine'
+import type { Interval } from '@/types/workout'
 
 interface TimelineStripProps {
-  intervals: FlattenedInterval[]
+  intervals: Interval[]
   onIntervalClick?: (index: number) => void
 }
 

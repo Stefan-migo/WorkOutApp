@@ -1,4 +1,4 @@
-export type IntervalType = 'prepare' | 'work' | 'rest' | 'cooldown'
+export type IntervalType = 'prepare' | 'work' | 'rest' | 'rest_between_cycles' | 'cooldown'
 
 export interface Interval {
   id: string
@@ -6,33 +6,37 @@ export interface Interval {
   title: string
   duration: number // seconds
   description?: string
+  imageUrl?: string // external URL only
   exerciseId?: string // only for type='work'
-  // Phase 1: nesting
-  children?: Interval[]
-  cycleCount?: number       // repeats children this many times
-  setCount?: number         // repeats entire block this many times
-  restBetweenCycles?: number // rest seconds inserted between cycles
-  isGenerated?: true        // synthetic rest from engine expansion
 }
 
 export interface Workout {
   id: string
   title: string
   description?: string
+  imageUrl?: string
   intervals: Interval[]
   createdAt: number
   updatedAt: number
 }
 
-export type ExerciseCategory = 'strength' | 'cardio' | 'stretching' | 'mobility' | 'other'
+export type ExerciseCategory = 'strength' | 'cardio' | 'stretching' | 'mobility' | 'plyometrics' | 'strongman' | 'powerlifting' | 'other'
 
 export interface Exercise {
   id: string
   name: string
   description?: string
+  // deprecated — use primaryMuscles + secondaryMuscles
   muscleGroups?: string[]
+  primaryMuscles?: string[]
+  secondaryMuscles?: string[]
   equipment?: string[]
+  instructions?: string[]
+  force?: 'push' | 'pull' | 'static'
+  mechanic?: 'compound' | 'isolation'
   difficulty?: 'beginner' | 'intermediate' | 'advanced'
+  images?: string[]
+  source?: 'user' | 'free-exercise-db'
   category: ExerciseCategory
   createdAt: number
   updatedAt: number
@@ -92,4 +96,18 @@ export interface ProgramTemplate {
   days: (DayAssignment | null)[] // length 7
   createdAt: number
   updatedAt: number
+}
+
+/**
+ * @internal Transient creation-time helper. NOT persisted to localStorage.
+ * Used in Workout Builder to define a repeated block before expanding to flat intervals on save.
+ */
+export interface CycleTemplate {
+  id: string
+  title: string
+  description?: string
+  repeat: number
+  workDuration: number
+  restDuration: number
+  skipLastRest: boolean
 }

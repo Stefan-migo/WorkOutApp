@@ -94,25 +94,25 @@ describe('TimerControls', () => {
     })
   })
 
-  describe('conditional rewind button', () => {
-    it('renders rewind button when onRewind prop is provided', () => {
-      render(<TimerControls {...baseProps} status="running" onRewind={vi.fn()} />)
+  describe('conditional previous button', () => {
+    it('renders previous button when onPrevious prop is provided', () => {
+      render(<TimerControls {...baseProps} status="running" onPrevious={vi.fn()} />)
 
-      expect(screen.getByLabelText('Rewind 10 seconds')).toBeInTheDocument()
+      expect(screen.getByLabelText('Previous interval')).toBeInTheDocument()
     })
 
-    it('does not render rewind button when onRewind prop is absent', () => {
+    it('does not render previous button when onPrevious prop is absent', () => {
       render(<TimerControls {...baseProps} status="running" />)
 
-      expect(screen.queryByLabelText('Rewind 10 seconds')).not.toBeInTheDocument()
+      expect(screen.queryByLabelText('Previous interval')).not.toBeInTheDocument()
     })
 
-    it('clicking rewind fires onRewind handler', () => {
-      const onRewind = vi.fn()
-      render(<TimerControls {...baseProps} status="running" onRewind={onRewind} />)
+    it('clicking previous fires onPrevious handler', () => {
+      const onPrevious = vi.fn()
+      render(<TimerControls {...baseProps} status="running" onPrevious={onPrevious} />)
 
-      fireEvent.click(screen.getByLabelText('Rewind 10 seconds'))
-      expect(onRewind).toHaveBeenCalledTimes(1)
+      fireEvent.click(screen.getByLabelText('Previous interval'))
+      expect(onPrevious).toHaveBeenCalledTimes(1)
     })
   })
 })

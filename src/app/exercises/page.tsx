@@ -1,24 +1,25 @@
 'use client'
 
-import { useState, useRef, useMemo } from 'react'
+import { useState, useRef, useMemo, useEffect } from 'react'
 import { useExercises } from '@/hooks/useExercises'
-import { useWorkoutContext } from '@/context/WorkoutContext'
+import { useFavorites } from '@/hooks/useFavorites'
 import { useRouter } from 'next/navigation'
 import type { Exercise, ExerciseCategory } from '@/types/workout'
 import { ExerciseSearchHeader } from '@/components/ExerciseSearchHeader'
 import { ExerciseFormDialog } from '@/components/ExerciseFormDialog'
-import { ExerciseDeleteDialog } from '@/components/ExerciseDeleteDialog'
+import type { ExerciseFormData } from '@/components/ExerciseFormDialog'
 
 // ponytail: flat list CRUD, no pagination, no drag-reorder — add when >50 exercises exist
 const CATEGORIES: ExerciseCategory[] = ['strength', 'cardio', 'stretching', 'mobility', 'other']
 
-const EMPTY_FORM: Omit<Exercise, 'id' | 'createdAt' | 'updatedAt'> = {
+const EMPTY_FORM: ExerciseFormData = {
   name: '',
   category: 'strength',
-  description: '',
-  muscleGroups: [],
+  primaryMuscles: [],
+  secondaryMuscles: [],
   equipment: [],
-  difficulty: undefined,
+  instructions: [],
+  images: [],
 }
 
 const CATEGORY_LABELS: Record<ExerciseCategory, string> = {
@@ -26,30 +27,41 @@ const CATEGORY_LABELS: Record<ExerciseCategory, string> = {
   cardio: 'Cardio',
   stretching: 'Stretching',
   mobility: 'Mobility',
+  plyometrics: 'Plyometrics',
+  strongman: 'Strongman',
+  powerlifting: 'Powerlifting',
   other: 'Other',
 }
 
 export default function ExercisesPage() {
-  const { exercises, saveExercise, deleteExercise } = useExercises()
-  const { workouts } = useWorkoutContext()
+  const { exercises, saveExercise, saveExerciseImage, getExerciseImages } = useExercises()
+  const { favoriteIds, isFavorite, toggleFavorite, clearOrphans } = useFavorites()
   const router = useRouter()
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
-  const deleteDialogRef = useRef<HTMLDialogElement>(null)
-  const [muscleInput, setMuscleInput] = useState('')
-  const [equipmentInput, setEquipmentInput] = useState('')
+  const [favoritesFilter, setFavoritesFilter] = useState(false)
+
+  // ponytail: clearOrphans on every exercise list refresh to keep favorites clean
+  useEffect(() => { clearOrphans(exercises.map((e) => e.id)) }, [exercises, clearOrphans])
 
   // Filters
   const [search, setSearch] = useState('')
   const [muscleFilter, setMuscleFilter] = useState<string | null>(null)
   const [equipmentFilter, setEquipmentFilter] = useState<string | null>(null)
+  const [forceFilter, setForceFilter] = useState<string | null>(null)
+  const [mechanicFilter, setMechanicFilter] = useState<string | null>(null)
+  const [difficultyFilter, setDifficultyFilter] = useState<string | null>(null)
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null)
 
   // Derive unique filter options
   const allMuscleGroups = useMemo(() => {
     const set = new Set<string>()
-    exercises.forEach((ex) => ex.muscleGroups?.forEach((mg) => set.add(mg)))
+    exercises.forEach((ex) => {
+      ex.primaryMuscles?.forEach((m) => set.add(m))
+      ex.secondaryMuscles?.forEach((m) => set.add(m))
+      ex.muscleGroups?.forEach((m) => set.add(m))
+    })
     return Array.from(set).sort()
   }, [exercises])
 
@@ -66,15 +78,23 @@ export default function ExercisesPage() {
         const q = search.toLowerCase()
         const nameMatch = ex.name.toLowerCase().includes(q)
         const descMatch = ex.description?.toLowerCase().includes(q)
-        const muscleMatch = ex.muscleGroups?.some((m) => m.toLowerCase().includes(q))
+        const muscleMatch = [...(ex.primaryMuscles ?? ex.muscleGroups ?? []), ...(ex.secondaryMuscles ?? [])].some((m) => m.toLowerCase().includes(q))
         const equipMatch = ex.equipment?.some((e) => e.toLowerCase().includes(q))
         if (!nameMatch && !descMatch && !muscleMatch && !equipMatch) return false
       }
-      if (muscleFilter && !ex.muscleGroups?.includes(muscleFilter)) return false
+      if (muscleFilter) {
+        const muscles = [...(ex.primaryMuscles ?? ex.muscleGroups ?? []), ...(ex.secondaryMuscles ?? [])]
+        if (!muscles.includes(muscleFilter)) return false
+      }
       if (equipmentFilter && !ex.equipment?.includes(equipmentFilter)) return false
+      if (forceFilter && ex.force !== forceFilter) return false
+      if (mechanicFilter && ex.mechanic !== mechanicFilter) return false
+      if (difficultyFilter && ex.difficulty !== difficultyFilter) return false
+      if (categoryFilter && ex.category !== categoryFilter) return false
+      if (favoritesFilter && !isFavorite(ex.id)) return false
       return true
     })
-  }, [exercises, search, muscleFilter, equipmentFilter])
+  }, [exercises, search, muscleFilter, equipmentFilter, forceFilter, mechanicFilter, difficultyFilter, categoryFilter, favoritesFilter, isFavorite])
 
   // Group by category
   const grouped = useMemo(() => {
@@ -87,69 +107,60 @@ export default function ExercisesPage() {
     return map
   }, [filtered])
 
-  function openCreate() {
-    setForm(EMPTY_FORM)
-    setEditingId(null)
-    setMuscleInput('')
-    setEquipmentInput('')
-    dialogRef.current?.showModal()
-  }
-
-  function openEdit(ex: Exercise) {
-    setForm({
-      name: ex.name,
-      category: ex.category,
-      description: ex.description ?? '',
-      muscleGroups: ex.muscleGroups ?? [],
-      equipment: ex.equipment ?? [],
-      difficulty: ex.difficulty,
+  // ponytail: only query IDB for exercises WITHOUT an external image — saves 800+ IDB calls
+  const [idbImageMap, setIdbImageMap] = useState<Record<string, string>>({})
+  useEffect(() => {
+    const candidates = (filtered.length > 0 ? filtered : exercises).filter((e) => !e.images?.[0])
+    if (candidates.length === 0) { setIdbImageMap({}); return }
+    Promise.all(candidates.map(async (ex) => {
+      const entries = await getExerciseImages(ex.id).catch(() => [] as { blobUrl: string }[])
+      return entries.length > 0 ? [ex.id, entries[0]!.blobUrl] as const : null
+    })).then((results) => {
+      const map: Record<string, string> = {}
+      for (const r of results) { if (r) map[r[0]] = r[1] }
+      setIdbImageMap(map)
     })
-    setMuscleInput((ex.muscleGroups ?? []).join(', '))
-    setEquipmentInput((ex.equipment ?? []).join(', '))
-    setEditingId(ex.id)
+  }, [filtered, exercises, getExerciseImages])
+
+  function openCreate() {
+    // ponytail: generate ID upfront so uploads can store under the correct key
+    const newId = crypto.randomUUID()
+    setForm(EMPTY_FORM)
+    setEditingId(newId)
     dialogRef.current?.showModal()
   }
 
   function handleSave(e: React.FormEvent) {
     e.preventDefault()
     if (!form.name.trim()) return
-    const groups = muscleInput.split(',').map((s) => s.trim()).filter(Boolean)
-    const equip = equipmentInput.split(',').map((s) => s.trim()).filter(Boolean)
     const now = Date.now()
+    // ponytail: filter out ephemeral blob: URLs — only persist real URLs
+    const persistentImages = form.images.filter((url) => !url.startsWith('blob:'))
     const exercise: Exercise = {
-      id: editingId || `exercise-${now}`,
+      id: editingId!,
       name: form.name.trim(),
       category: form.category,
       description: form.description?.trim() || undefined,
-      muscleGroups: groups.length > 0 ? groups : undefined,
-      equipment: equip.length > 0 ? equip : undefined,
-      difficulty: form.difficulty || undefined,
-      createdAt: editingId ? (exercises.find((e) => e.id === editingId)?.createdAt ?? now) : now,
+      primaryMuscles: form.primaryMuscles.length > 0 ? form.primaryMuscles : undefined,
+      secondaryMuscles: form.secondaryMuscles.length > 0 ? form.secondaryMuscles : undefined,
+      equipment: form.equipment.length > 0 ? form.equipment : undefined,
+      instructions: form.instructions.length > 0 ? form.instructions : undefined,
+      images: persistentImages.length > 0 ? persistentImages : undefined,
+      force: form.force,
+      mechanic: form.mechanic,
+      difficulty: form.difficulty,
+      createdAt: exercises.find((e) => e.id === editingId)?.createdAt ?? now,
       updatedAt: now,
     }
     saveExercise(exercise)
     dialogRef.current?.close()
   }
 
-  function confirmDelete(id: string) {
-    setDeleteTarget(id)
-    deleteDialogRef.current?.showModal()
-  }
-
-  function handleDelete() {
-    if (deleteTarget) {
-      deleteExercise(deleteTarget)
-      setDeleteTarget(null)
-      deleteDialogRef.current?.close()
-    }
-  }
-
-  function workoutRefCount(id: string): number {
-    return workouts.filter((w) => w.intervals.some((i) => i.exerciseId === id)).length
-  }
+  // ponytail: delete dialog removed from compact cards — add back via context menu or detail page
 
   const hasNoExercises = exercises.length === 0
   const hasNoResults = !hasNoExercises && filtered.length === 0
+  const isFavoritesEmpty = favoritesFilter && favoriteIds.length === 0
 
   return (
     <div className="max-w-[1440px] mx-auto w-full p-margin-mobile md:p-margin-desktop flex flex-col gap-32 pb-32">
@@ -163,6 +174,16 @@ export default function ExercisesPage() {
         onEquipmentFilter={setEquipmentFilter}
         allEquipment={allEquipment}
         onCreate={openCreate}
+        forceFilter={forceFilter}
+        onForceFilter={setForceFilter}
+        mechanicFilter={mechanicFilter}
+        onMechanicFilter={setMechanicFilter}
+        difficultyFilter={difficultyFilter}
+        onDifficultyFilter={setDifficultyFilter}
+        categoryFilter={categoryFilter}
+        onCategoryFilter={setCategoryFilter}
+        favoritesFilter={favoritesFilter}
+        onFavoritesFilterChange={setFavoritesFilter}
       />
 
       {/* Empty states */}
@@ -180,7 +201,11 @@ export default function ExercisesPage() {
 
       {hasNoResults && !hasNoExercises && (
         <div className="flex flex-col items-center justify-center gap-4 py-[64px] text-center">
-          <p className="font-body text-body-md text-on-surface-variant">No exercises match your filters.</p>
+          <p className="font-body text-body-md text-on-surface-variant">
+            {isFavoritesEmpty
+              ? 'No favorites yet — star exercises to add them'
+              : 'No exercises match your filters.'}
+          </p>
         </div>
       )}
 
@@ -194,82 +219,92 @@ export default function ExercisesPage() {
               <section key={cat} className="flex flex-col gap-16">
                 <div className="flex items-center justify-between border-b border-outline-variant/20 pb-8">
                   <h2 className="font-headline text-headline-md font-semibold text-primary">
-                    {CATEGORY_LABELS[cat]}
+                    {CATEGORY_LABELS[cat]} ({items.length})
                   </h2>
-                  <span className="font-data text-data-sm text-on-surface-variant">
-                    {items.length} {items.length === 1 ? 'Movement' : 'Movements'}
-                  </span>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
-                  {items.map((ex) => (
-                    <div
-                      key={ex.id}
-                      className="bg-surface rounded-xl border border-outline-variant/30 overflow-hidden hover:shadow-[0_4px_20px_rgba(30,41,59,0.05)] transition-all duration-300 group flex flex-col"
+                  {items.length > 20 && (
+                    <button
+                      onClick={() => {}}
+                      className="font-label text-label-caps text-secondary hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
                     >
-                      {/* ponytail: SVG placeholder — replace with actual exercise images later */}
-                      <div className="aspect-[4/3] bg-surface-container-lowest m-xs rounded-lg relative overflow-hidden flex items-center justify-center">
-                        <svg className="w-12 h-12 text-outline-variant/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                        </svg>
-                        {ex.difficulty && (
-                          <div className="absolute top-2 right-2 bg-surface/80 backdrop-blur px-2 py-1 rounded font-data text-data-sm text-primary font-bold shadow-sm">
-                            {ex.difficulty.charAt(0).toUpperCase() + ex.difficulty.slice(1)}
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-16 flex flex-col gap-8 flex-1">
-                        <div className="flex items-start justify-between gap-2">
-                          <h3 className="font-body text-body-lg font-bold text-primary truncate">{ex.name}</h3>
-                          <div className="flex gap-1 shrink-0">
-                            <button
-                              onClick={() => openEdit(ex)}
-                              className="p-1 rounded text-on-surface-variant hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
-                              title="Edit"
-                            >
-                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                              </svg>
-                            </button>
-                            <button
-                              onClick={() => confirmDelete(ex.id)}
-                              className="p-1 rounded text-on-surface-variant hover:text-error transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
-                              title="Delete"
-                            >
-                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-                        {ex.description && (
-                          <p className="font-body text-body-md text-on-surface-variant line-clamp-2">{ex.description}</p>
-                        )}
-                        <div className="flex flex-wrap gap-2 mt-auto pt-8">
-                          {ex.muscleGroups?.slice(0, 3).map((mg) => (
-                            <span key={mg} className="bg-surface-container px-2 py-1 rounded font-label-caps text-label-caps text-on-surface-variant tracking-wider">
-                              {mg.toUpperCase()}
-                            </span>
-                          ))}
-                          {ex.equipment?.slice(0, 2).map((eq) => (
-                            <span key={eq} className="bg-surface-container px-2 py-1 rounded font-label-caps text-label-caps text-on-surface-variant tracking-wider">
-                              {eq.toUpperCase()}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="px-16 pb-16 border-t border-outline-variant/10 pt-8 mt-auto">
-                        <button
-                          onClick={() => router.push(`/workouts/new?exerciseId=${ex.id}`)}
-                          className="w-full py-2 border border-outline text-primary font-label text-label-caps rounded hover:bg-surface-container transition-colors flex justify-center items-center gap-xs focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                      {/* ponytail: show all/show less — add real toggle when >20 exercises in any category */}
+                    </button>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-4 lg:gap-6">
+                  {items.map((ex) => {
+                    const muscles = ex.primaryMuscles ?? ex.muscleGroups ?? []
+                    const maxMuscles = 2
+                    const overflow = muscles.length > maxMuscles ? muscles.length - maxMuscles : 0
+                    return (
+                      <div
+                        key={ex.id}
+                        onClick={() => router.push(`/exercises/${ex.id}`)}
+                        className="bg-surface rounded-xl border border-outline-variant/30 overflow-hidden hover:shadow-[0_4px_20px_rgba(30,41,59,0.05)] transition-all duration-300 group flex flex-col cursor-pointer"
+                      >
+                        {/* ponytail: 2:1 image — background-image for static display (no GIF animation) */}
+                        <div className="relative aspect-[2/1] bg-surface-container-lowest overflow-hidden flex items-center justify-center"
+                          style={
+                            (ex.images?.[0] ?? idbImageMap[ex.id])
+                              ? { backgroundImage: `url(${ex.images?.[0] ?? idbImageMap[ex.id]})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+                              : undefined
+                          }
                         >
-                          <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                          </svg>
-                          Add to Workout
-                        </button>
+                          {!(ex.images?.[0] ?? idbImageMap[ex.id]) && (
+                            <svg className="w-10 h-10 text-outline-variant/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                            </svg>
+                          )}
+                          {/* Star toggle top-left */}
+                          <button
+                            onClick={(e) => { e.stopPropagation(); toggleFavorite(ex.id) }}
+                            className="absolute top-2 left-2 w-8 h-8 flex items-center justify-center rounded-full bg-surface/80 backdrop-blur text-lg shadow-sm hover:bg-surface transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                            aria-label={isFavorite(ex.id) ? 'Remove from favorites' : 'Add to favorites'}
+                          >
+                            {isFavorite(ex.id) ? '★' : '☆'}
+                          </button>
+                          {/* Category badge top-right */}
+                          <span className="absolute top-2 right-2 bg-surface/80 backdrop-blur px-2 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-on-surface-variant font-semibold shadow-sm uppercase tracking-wider">
+                            {ex.category}
+                          </span>
+                          {/* Force/mechanic badges on hover — overlay bottom-center of image */}
+                          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                            {ex.force && (
+                              <span className="px-2 py-0.5 rounded bg-surface/90 backdrop-blur text-on-surface font-label-caps text-[10px] shadow-sm">
+                                {ex.force}
+                              </span>
+                            )}
+                            {ex.mechanic && (
+                              <span className="px-2 py-0.5 rounded bg-surface/90 backdrop-blur text-on-surface font-label-caps text-[10px] shadow-sm">
+                                {ex.mechanic}
+                              </span>
+                            )}
+                          </div>
+                          {/* Difficulty badge bottom-left of image */}
+                          {ex.difficulty && (
+                            <span className="absolute bottom-2 left-2 bg-primary/80 backdrop-blur px-2 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-on-primary font-semibold shadow-sm">
+                              {ex.difficulty.charAt(0).toUpperCase() + ex.difficulty.slice(1)}
+                            </span>
+                          )}
+                        </div>
+                        {/* Compact content area — p-12 */}
+                        <div className="p-12 flex flex-col gap-2">
+                          <h3 className="font-body text-body-md font-bold text-primary line-clamp-1">{ex.name}</h3>
+                          <div className="flex flex-wrap gap-1.5">
+                            {muscles.slice(0, maxMuscles).map((mg) => (
+                              <span key={mg} className="bg-surface-container px-1.5 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-on-surface-variant tracking-wider">
+                                {mg.toUpperCase()}
+                              </span>
+                            ))}
+                            {overflow > 0 && (
+                              <span className="bg-surface-container-high px-1.5 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-on-surface-variant font-semibold">
+                                +{overflow}
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </section>
             )
@@ -282,20 +317,13 @@ export default function ExercisesPage() {
         form={form}
         onFormChange={setForm}
         editingId={editingId}
-        muscleInput={muscleInput}
-        onMuscleInput={setMuscleInput}
-        equipmentInput={equipmentInput}
-        onEquipmentInput={setEquipmentInput}
         onSave={handleSave}
         dialogRef={dialogRef}
+        allMuscleGroups={allMuscleGroups}
+        allEquipment={allEquipment}
+        onImageUpload={editingId ? (file) => saveExerciseImage(editingId, file) : undefined}
       />
 
-      <ExerciseDeleteDialog
-        onClose={() => deleteDialogRef.current?.close()}
-        workoutRefCount={deleteTarget ? workoutRefCount(deleteTarget) : 0}
-        onDelete={handleDelete}
-        dialogRef={deleteDialogRef}
-      />
     </div>
   )
 }

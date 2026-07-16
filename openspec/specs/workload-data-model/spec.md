@@ -4,49 +4,51 @@
 
 | ID | Description | Keyword |
 |----|-------------|---------|
-| DM-1 | Define `Interval { id, type, title, duration, description?, exerciseId?, order, children?, cycleCount?, setCount?, restBetweenCycles? }` — now supports nesting via optional fields with safe defaults | MUST |
-| DM-2 | Define `Workout { id, name, intervals: Interval[], createdAt, updatedAt }` | MUST |
+| DM-1 | Define `Interval { id, type: IntervalType, title, duration, description?, imageUrl? }` — flat interval model, no nesting fields | MUST |
+| DM-2 | Define `Workout { id, title, description?, imageUrl?, intervals: Interval[], createdAt, updatedAt }` | MUST |
 | DM-3 | Define `Exercise { id, name, description?, muscleGroups: string[], category: ExerciseCategory, createdAt: string, updatedAt: string }` — `category` uses the `ExerciseCategory` enum, `muscleGroups` is an array (default `[]`), timestamps are ISO strings | MUST |
 | DM-4 | Types are plain `.ts` interfaces — no classes, no framework dependency | MUST |
-| DM-5 | Export all types from `src/lib/types.ts` | MUST |
-| DM-6 | `Interval` gains optional `children?: Interval[]` for nested/cycle structures | MUST |
-| DM-7 | `Interval` gains optional `cycleCount?: number` defaulting to 1 — repetitions of a cycle group | MUST |
-| DM-8 | `Interval` gains optional `setCount?: number` defaulting to 1 — sets within each cycle | MUST |
-| DM-9 | `Interval` gains optional `restBetweenCycles?: number` defaulting to 0 — rest inserted between cycles | MUST |
-| DM-10 | A parent interval (`children` present and non-empty) is a cycle container — its own `duration` is SHALL be ignored; children define effective duration | MUST |
+| DM-5 | Export all types from `src/types/workout.ts` | MUST |
 | DM-11 | Define `Sequence { id, title, description?, workoutIds[], createdAt, updatedAt }` | MUST |
 | DM-12 | Define `Session { id, sequenceId?, workoutId?, startedAt, completedAt?, intervals: CompletedInterval[] }` | MUST |
 | DM-13 | Define `CompletedInterval { intervalId, title, type, plannedDuration, actualDuration, completed }` | MUST |
 | DM-14 | Define `WeekPlan { id, title?, startDate (ISO Monday), days: DayAssignment[7], createdAt, updatedAt }` and `DayAssignment { workoutId?, sequenceId?, notes? }`. At least one of workoutId/sequenceId MAY be null | MUST |
 | DM-15 | Define `ProgramTemplate { id, title, description?, days: DayAssignment[7], createdAt, updatedAt }` — reusable snapshot of a week's assignments | MUST |
 | DM-16 | Define `ExerciseCategory = 'strength' \| 'cardio' \| 'stretching' \| 'mobility' \| 'other'` | MUST |
+| DM-17 | Define `IntervalType = 'prepare' \| 'work' \| 'rest' \| 'rest_between_cycles' \| 'cooldown'` | MUST |
+| DM-18 | Define `CycleTemplate { id, title, description?, repeat, workDuration, restDuration, skipLastRest }` — Transient creation-time helper, NOT persisted to localStorage | MUST |
 
 ## Scenarios
 
 ### Scenario: Create interval for each type
 - GIVEN valid parameters for each interval type
-- WHEN creating `Interval` objects with `type: 'prepare'`, `'work'`, `'rest'`, and `'cooldown'`
-- THEN all four objects are structurally valid
+- WHEN creating `Interval` objects with `type: 'prepare'`, `'work'`, `'rest'`, `'rest_between_cycles'`, and `'cooldown'`
+- THEN all five objects are structurally valid
 
-### Scenario: Exercise assignment on Work intervals
-- GIVEN an Interval with `type: 'work'`
-- WHEN `exerciseId` is set to a known exercise ID
-- THEN the interval references a valid exercise
+### Scenario: imageUrl on interval
+- GIVEN an interval with `imageUrl: 'https://example.com/demo.png'`
+- WHEN validated
+- THEN it is structurally valid
+
+### Scenario: Workout with description and imageUrl
+- GIVEN a Workout with description and imageUrl set
+- WHEN inspected
+- THEN both optional fields are present
 
 ### Scenario: Workout with interval list
 - GIVEN a Workout object with 4 intervals
 - WHEN created with `intervals` array
-- THEN intervals maintain their `order` field sequence
+- THEN intervals maintain their array sequence
 
-### Scenario: Interval with children forms a cycle
-- GIVEN an Interval with 2 children and `cycleCount=3`, `setCount=1`
-- WHEN imported by any consumer
-- THEN the interval is structurally valid and its children form a 3-cycle
+### Scenario: CycleTemplate created with defaults
+- GIVEN the builder creates a new CycleTemplate
+- WHEN inspected
+- THEN repeat=4, workDuration=30, restDuration=15, skipLastRest=true
 
-### Scenario: Optional fields absent on legacy data
-- GIVEN an Interval loaded from localStorage (before this change)
-- WHEN `children`, `cycleCount`, `setCount` are absent
-- THEN they resolve to `undefined`, `1`, `1`, `0` respectively — no crash
+### Scenario: CycleTemplate is NOT persisted
+- GIVEN a CycleTemplate used during workout creation
+- WHEN the workout is saved
+- THEN CycleTemplate is expanded to flat Interval[] and is absent from storage
 
 ### Scenario: Create WeekPlan for current week
 - GIVEN no WeekPlan exists for the week containing a given date
@@ -83,3 +85,8 @@
 - GIVEN a template with all 7 days unassigned
 - WHEN queried
 - THEN `days` is an array of 7 DayAssignments with all optional fields absent
+
+### Scenario: rest_between_cycles is valid
+- GIVEN an Interval with `type: 'rest_between_cycles'`
+- WHEN validated
+- THEN it is structurally valid

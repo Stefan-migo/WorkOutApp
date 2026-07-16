@@ -11,8 +11,8 @@ afterEach(() => {
 function mockCtx() {
   const gain = {
     connect: vi.fn().mockReturnThis(),
-    gain: { value: 0, exponentialRampToValueAtTime: vi.fn() },
-  } as unknown as GainNode & { gain: { value: number; exponentialRampToValueAtTime: ReturnType<typeof vi.fn> } }
+    gain: { value: 0, setValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() },
+  } as unknown as GainNode & { gain: { value: number; setValueAtTime: ReturnType<typeof vi.fn>; exponentialRampToValueAtTime: ReturnType<typeof vi.fn> } }
 
   const osc = {
     connect: vi.fn().mockReturnValue(gain),
@@ -45,14 +45,15 @@ describe('useBeep', () => {
       const { result } = renderHook(() => useBeep())
       act(() => { result.current.beep() })
 
-      expect(acSpy).toHaveBeenCalled()
+      expect(acSpy).toHaveBeenCalledTimes(1)
       expect(ctx.createOscillator).toHaveBeenCalled()
       expect(ctx.createGain).toHaveBeenCalled()
       expect(osc.connect).toHaveBeenCalledWith(gain)
       expect(gain.connect).toHaveBeenCalledWith(ctx.destination)
       expect(osc.frequency.value).toBe(800)
-      expect(gain.gain.exponentialRampToValueAtTime).toHaveBeenCalledWith(0.01, ctx.currentTime + 0.3)
-      expect(osc.start).toHaveBeenCalled()
+      expect(gain.gain.setValueAtTime).toHaveBeenCalledWith(0.3, ctx.currentTime)
+      expect(gain.gain.exponentialRampToValueAtTime).toHaveBeenCalledWith(0.001, ctx.currentTime + 0.3)
+      expect(osc.start).toHaveBeenCalledWith(ctx.currentTime)
       expect(osc.stop).toHaveBeenCalledWith(ctx.currentTime + 0.3)
     })
   })
@@ -97,7 +98,7 @@ describe('useBeep', () => {
   })
 
   describe('idempotent calls', () => {
-    it('multiple beep() calls do not throw and create new AudioContext each time', () => {
+    it('multiple beep() calls reuse one AudioContext and do not throw', () => {
       const { ctx } = mockCtx()
       let callCount = 0
       function CountingAudioContext() {
@@ -112,7 +113,7 @@ describe('useBeep', () => {
       act(() => { result.current.beep() })
       act(() => { result.current.beep() })
 
-      expect(callCount).toBe(3)
+      expect(callCount).toBe(1) // shared AudioContext
       expect(() => result.current.beep()).not.toThrow()
     })
   })

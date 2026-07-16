@@ -5,6 +5,7 @@ interface ExerciseDeleteDialogProps {
   workoutRefCount: number
   onDelete: () => void
   dialogRef: React.RefObject<HTMLDialogElement | null>
+  exerciseName: string
 }
 
 export function ExerciseDeleteDialog({
@@ -12,6 +13,7 @@ export function ExerciseDeleteDialog({
   workoutRefCount,
   onDelete,
   dialogRef,
+  exerciseName,
 }: ExerciseDeleteDialogProps) {
   return (
     <dialog
@@ -20,7 +22,7 @@ export function ExerciseDeleteDialog({
       onClose={onClose}
     >
       <div className="flex flex-col gap-4">
-        <h3 className="font-headline text-headline-md font-semibold text-primary">Delete Exercise?</h3>
+        <h3 className="font-headline text-headline-md font-semibold text-primary">Delete {exerciseName}?</h3>
         {workoutRefCount > 0 ? (
           <p className="font-body text-body-md text-secondary">
             This exercise is used in {workoutRefCount} workout

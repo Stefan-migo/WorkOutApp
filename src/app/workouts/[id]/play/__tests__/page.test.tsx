@@ -30,8 +30,9 @@ vi.mock('@/hooks/useIntervalNotification', () => ({
 }))
 
 const mockGetExercise = vi.fn()
+const mockGetExerciseImages = vi.fn().mockResolvedValue([])
 vi.mock('@/hooks/useExercises', () => ({
-  useExercises: () => ({ getExercise: mockGetExercise }),
+  useExercises: () => ({ getExercise: mockGetExercise, getExerciseImages: mockGetExerciseImages }),
 }))
 
 // ─── Controllable useTimer mock ────────────────────────────────────
