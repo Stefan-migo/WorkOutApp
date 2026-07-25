@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
+import { AuthProvider } from '@/context/AuthContext'
 import { WorkoutProvider } from '@/context/WorkoutContext'
 import Nav from '@/components/Nav'
 import ErrorBoundary from '@/components/ErrorBoundary'
@@ -45,6 +46,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full bg-background text-on-background">
         <ErrorBoundary>
+        <AuthProvider>
         <WorkoutProvider>
           <Nav />
           <main className="flex-1 md:ml-64 flex flex-col min-h-screen pt-14 md:pt-20 pb-[64px] md:pb-0">
@@ -53,6 +55,7 @@ export default function RootLayout({
             </div>
           </main>
         </WorkoutProvider>
+        </AuthProvider>
         </ErrorBoundary>
       </body>
     </html>

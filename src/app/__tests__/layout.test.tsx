@@ -19,6 +19,9 @@ vi.mock('@/components/Nav', () => ({ default: () => <nav>Nav</nav> }))
 vi.mock('@/components/ErrorBoundary', () => ({
   default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
+vi.mock('@/context/AuthContext', () => ({
+  AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}))
 vi.mock('@/context/WorkoutContext', () => ({
   WorkoutProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
