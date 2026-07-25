@@ -10,6 +10,7 @@
     "audit:tokens": "grep -r \"text-fg\\|bg-accent\\|border-border\\|text-muted\\|bg-surface-alt\\|bg-interval-\" src/ --include=\"*.tsx\" --include=\"*.ts\" || echo \"✅ No old tokens found\""
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.3",
     "next": "16.2.9",
     "react": "19.2.4",
     "react-dom": "19.2.4"
