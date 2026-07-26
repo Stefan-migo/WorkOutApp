@@ -22,14 +22,14 @@ interface IntervalRowProps {
 }
 
 export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onMoveDown, isFirst, isLast, dragIndex, onDragStart, onDragOver, onDrop, onDragEnd }: IntervalRowProps) {
-  const { getExercise } = useExercises()
+  const { exercises } = useExercises()
   const minutes = Math.floor(interval.duration / 60)
   const seconds = interval.duration % 60
   const durationStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-  // ponytail: inline exercise lookup, memoize if list grows
+  // ponytail: inline exercise lookup from loaded list, memoize if list grows
   const exercise =
     interval.type === 'work' && interval.exerciseId
-      ? getExercise(interval.exerciseId)
+      ? exercises.find((e) => e.id === interval.exerciseId)
       : undefined
 
   // ponytail: HTML5 DnD, zero deps. The cursor-grab handle initiates the drag.

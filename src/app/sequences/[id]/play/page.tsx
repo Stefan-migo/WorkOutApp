@@ -26,12 +26,12 @@ type Phase = 'idle' | 'active' | 'workout-summary' | 'complete'
 export default function PlaySequencePage() {
   const router = useRouter()
   const params = useParams<{ id: string }>()
-  const { getWorkout } = useWorkoutContext()
+  const { workouts } = useWorkoutContext()
   const { getSequence } = useSequences()
   const { addSession } = useSessions()
   const { beep } = useBeep()
   const { notify } = useIntervalNotification()
-  const { getExercise, getExerciseImages } = useExercises()
+  const { exercises, getExerciseImages } = useExercises()
 
   const [sequence, setSequence] = useState<Sequence | undefined>(undefined)
   useEffect(() => {
@@ -49,13 +49,16 @@ export default function PlaySequencePage() {
   const sessionSavedRef = useRef(false)
 
   const roundInfo = sequence ? getRoundAt(sequence, roundIdx) : undefined
-  const workout = roundInfo ? getWorkout(roundInfo.workoutId) : undefined
+  const workout = roundInfo ? workouts.find((w) => w.id === roundInfo.workoutId) : undefined
   // ponytail: re-flatten at each workout boundary, stable within a workout
   const flat = useMemo(() => (workout ? flattenWorkout(workout) : []), [workout?.id])
   const currentInterval = flat[intervalIdx]
   const progress = sequence ? getProgress(sequence, roundIdx) : { current: 0, total: 0, percent: 0 }
 
-  const exercise = currentInterval?.exerciseId ? getExercise(currentInterval.exerciseId) : undefined
+  // ponytail: exercises already loaded — use find, not async getExercise
+  const exercise = currentInterval?.exerciseId
+    ? exercises.find((e) => e.id === currentInterval.exerciseId)
+    : undefined
   // ponytail: fetch IDB images for the current exercise
   useEffect(() => {
     if (exercise?.id) {

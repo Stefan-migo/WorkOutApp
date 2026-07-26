@@ -16,7 +16,7 @@ export default function ExerciseDetailPage() {
   const params = useParams<{ id: string }>()
   const router = useRouter()
   const {
-    exercises, getExercise, saveExercise, deleteExercise,
+    exercises, isLoading, error, saveExercise, deleteExercise,
     getExerciseImages, saveExerciseImage,
   } = useExercises()
   const { isFavorite, toggleFavorite } = useFavorites()
@@ -25,7 +25,8 @@ export default function ExerciseDetailPage() {
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const exercise = useMemo(() => getExercise(params.id), [params.id, getExercise])
+  // ponytail: exercises already loaded into state array — use find, not async getExercise
+  const exercise = useMemo(() => exercises.find((e) => e.id === params.id), [exercises, params.id])
 
   // Load IDB images on mount and when exercise changes
   useEffect(() => {
@@ -53,6 +54,28 @@ export default function ExerciseDetailPage() {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const deleteDialogRef = useRef<HTMLDialogElement>(null)
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
+
+  if (isLoading) {
+    return (
+      <div className="max-w-[1440px] mx-auto w-full p-margin-mobile md:p-margin-desktop flex flex-col items-center justify-center gap-4 py-[64px] text-center">
+        <p className="font-headline text-headline-md font-semibold text-primary">Loading...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-[1440px] mx-auto w-full p-margin-mobile md:p-margin-desktop flex flex-col items-center justify-center gap-4 py-[64px] text-center">
+        <p className="font-headline text-headline-md font-semibold text-error">{error}</p>
+        <Link
+          href="/exercises"
+          className="px-6 py-3 bg-primary text-on-primary font-label text-label-caps rounded-lg hover:bg-primary-container transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+        >
+          ← Back to exercises
+        </Link>
+      </div>
+    )
+  }
 
   if (!exercise) {
     return (

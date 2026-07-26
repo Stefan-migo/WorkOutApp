@@ -6,9 +6,9 @@ import type { Workout } from '@/types/workout'
 
 interface WorkoutContextValue {
   workouts: Workout[]
-  getWorkout: (id: string) => Workout | undefined
-  saveWorkout: (workout: Workout) => void
-  deleteWorkout: (id: string) => void
+  getWorkout: (id: string) => Promise<Workout | undefined>
+  saveWorkout: (workout: Workout) => Promise<void>
+  deleteWorkout: (id: string) => Promise<void>
 }
 
 const WorkoutContext = createContext<WorkoutContextValue | null>(null)

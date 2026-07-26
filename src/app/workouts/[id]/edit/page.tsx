@@ -5,10 +5,10 @@ import { useWorkoutContext } from '@/context/WorkoutContext'
 import WorkoutEditor from '@/components/WorkoutEditor'
 
 export default function EditWorkoutPage() {
-  const { getWorkout, saveWorkout } = useWorkoutContext()
+  const { workouts, saveWorkout } = useWorkoutContext()
   const router = useRouter()
   const params = useParams<{ id: string }>()
-  const existing = getWorkout(params.id)
+  const existing = workouts.find((w) => w.id === params.id)
 
   if (!existing) {
     return (

@@ -22,11 +22,12 @@ import type { Interval } from '@/types/workout'
 type Phase = 'idle' | 'active' | 'complete'
 
 export default function PlayWorkoutPage() {
-  const { getWorkout } = useWorkoutContext()
+  const { workouts } = useWorkoutContext()
   const { addSession } = useSessions()
   const router = useRouter()
   const params = useParams<{ id: string }>()
-  const workout = getWorkout(params.id)
+  // ponytail: workouts already loaded in context — use find, not async getWorkout
+  const workout = workouts.find((w) => w.id === params.id)
 
   // ponytail: flatten once, workout reference stable during playback
   const flat = useMemo(() => (workout ? flattenWorkout(workout) : []), [workout])
@@ -43,7 +44,7 @@ export default function PlayWorkoutPage() {
   const interval: Interval | undefined = flat[currentIdx]
   const total = flat.length
 
-  const { getExercise, getExerciseImages } = useExercises()
+  const { exercises, getExerciseImages } = useExercises()
   const [idbImageUrls, setIdbImageUrls] = useState<string[]>([])
   const timer = useTimer(interval?.duration ?? 0, () => {
     beep({ volume: 0.5, duration: 0.5, pitch: 1000 }) // louder transition
@@ -166,7 +167,10 @@ export default function PlayWorkoutPage() {
     )
   }
 
-  const exercise = interval?.exerciseId ? getExercise(interval.exerciseId) : undefined
+  // ponytail: exercises already loaded — use find, not async getExercise
+  const exercise = interval?.exerciseId
+    ? exercises.find((e) => e.id === interval.exerciseId)
+    : undefined
   // ponytail: fetch IDB images for the current exercise
   useEffect(() => {
     if (exercise?.id) {

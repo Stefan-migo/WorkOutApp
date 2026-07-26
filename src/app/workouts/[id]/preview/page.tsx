@@ -6,10 +6,10 @@ import { SEGMENT_BG, SEGMENT_BORDER, SEGMENT_TEXT, TYPE_ICONS } from '@/lib/segm
 import { formatDuration } from '@/lib/format'
 
 export default function PreviewWorkoutPage() {
-  const { getWorkout } = useWorkoutContext()
+  const { workouts } = useWorkoutContext()
   const router = useRouter()
   const params = useParams<{ id: string }>()
-  const workout = getWorkout(params.id)
+  const workout = workouts.find((w) => w.id === params.id)
 
   if (!workout) {
     return (
