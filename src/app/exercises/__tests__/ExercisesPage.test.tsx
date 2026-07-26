@@ -243,7 +243,7 @@ describe('ExercisesPage card display', () => {
     // ponytail: images rendered as CSS background-image on a div, not <img> elements
     const cards = document.querySelectorAll('[style*="background-image"]')
     expect(cards.length).toBeGreaterThanOrEqual(1)
-    expect(cards[0].getAttribute('style')).toContain('https://example.com/pushup.jpg')
+    expect(cards[0]!.getAttribute('style')).toContain('https://example.com/pushup.jpg')
   })
 
   it('shows SVG placeholder when exercise has no images', async () => {

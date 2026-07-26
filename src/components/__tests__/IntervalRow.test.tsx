@@ -13,21 +13,17 @@ vi.mock('next/link', () => {
 
 vi.mock('@/hooks/useExercises', () => ({
   useExercises: () => ({
-    getExercise: vi.fn((id: string) => {
-      if (id === 'ex-1') {
-        return {
-          id: 'ex-1',
-          name: 'Sprint',
-          category: 'cardio',
-          primaryMuscles: ['Quadriceps', 'Hamstrings', 'Glutes'],
-          images: ['https://example.com/sprint.jpg'],
-          createdAt: 0,
-          updatedAt: 0,
-        }
-      }
-      return undefined
-    }),
-    exercises: [],
+    exercises: [
+      {
+        id: 'ex-1',
+        name: 'Sprint',
+        category: 'cardio',
+        primaryMuscles: ['Quadriceps', 'Hamstrings', 'Glutes'],
+        images: ['https://example.com/sprint.jpg'],
+        createdAt: 0,
+        updatedAt: 0,
+      },
+    ],
     saveExercise: vi.fn(),
     deleteExercise: vi.fn(),
   }),

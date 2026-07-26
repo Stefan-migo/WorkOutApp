@@ -25,12 +25,13 @@ vi.mock('@/hooks/useFavorites', () => ({
   }),
 }))
 
-const mockGetExercise = vi.fn()
+let mockExercises: any[] = []
 
 vi.mock('@/hooks/useExercises', () => ({
   useExercises: () => ({
-    getExercise: mockGetExercise,
-    exercises: [],
+    exercises: mockExercises,
+    isLoading: false,
+    error: null,
     saveExercise: vi.fn(),
     deleteExercise: vi.fn(),
     getExerciseImages: vi.fn().mockResolvedValue([]),
@@ -58,6 +59,7 @@ afterEach(() => {
 
 beforeEach(() => {
   mockParamsId = 'ex-1'
+  mockExercises = []
 })
 
 describe('ExerciseDetailPage', () => {
@@ -68,7 +70,7 @@ describe('ExerciseDetailPage', () => {
   })
 
   it('renders a star toggle button', async () => {
-    mockGetExercise.mockReturnValue(createMockExercise())
+    mockExercises = [createMockExercise()]
     mockIsFavorite.mockReturnValue(false)
     const Page = (await import('../page')).default
     render(<Page />)
@@ -79,7 +81,7 @@ describe('ExerciseDetailPage', () => {
   })
 
   it('shows filled star when exercise is favorited', async () => {
-    mockGetExercise.mockReturnValue(createMockExercise())
+    mockExercises = [createMockExercise()]
     mockIsFavorite.mockReturnValue(true)
     const Page = (await import('../page')).default
     render(<Page />)
@@ -89,7 +91,7 @@ describe('ExerciseDetailPage', () => {
   })
 
   it('calls toggleFavorite with the exercise ID on click', async () => {
-    mockGetExercise.mockReturnValue(createMockExercise())
+    mockExercises = [createMockExercise()]
     mockIsFavorite.mockReturnValue(false)
     const Page = (await import('../page')).default
     render(<Page />)
@@ -99,16 +101,14 @@ describe('ExerciseDetailPage', () => {
     expect(mockToggleFavorite).toHaveBeenCalledWith('ex-1')
   })
   it('renders exercise name as heading', async () => {
-    mockGetExercise.mockReturnValue(createMockExercise())
+    mockExercises = [createMockExercise()]
     const Page = (await import('../page')).default
     render(<Page />)
     expect(screen.getByRole('heading', { level: 1, name: 'Push Up' })).toBeInTheDocument()
   })
 
   it('renders category, difficulty, force, and mechanic badges', async () => {
-    mockGetExercise.mockReturnValue(
-      createMockExercise({ difficulty: 'beginner', force: 'push', mechanic: 'compound' }),
-    )
+    mockExercises = [createMockExercise({ difficulty: 'beginner', force: 'push', mechanic: 'compound' })]
     const Page = (await import('../page')).default
     render(<Page />)
     expect(screen.getByText('strength')).toBeInTheDocument()
@@ -118,7 +118,7 @@ describe('ExerciseDetailPage', () => {
   })
 
   it('renders instructions as a numbered list', async () => {
-    mockGetExercise.mockReturnValue(createMockExercise())
+    mockExercises = [createMockExercise()]
     const Page = (await import('../page')).default
     render(<Page />)
 
@@ -132,7 +132,7 @@ describe('ExerciseDetailPage', () => {
   })
 
   it('renders primary and secondary muscle chips', async () => {
-    mockGetExercise.mockReturnValue(createMockExercise())
+    mockExercises = [createMockExercise()]
     const Page = (await import('../page')).default
     render(<Page />)
 
@@ -144,7 +144,7 @@ describe('ExerciseDetailPage', () => {
   })
 
   it('renders equipment chips', async () => {
-    mockGetExercise.mockReturnValue(createMockExercise())
+    mockExercises = [createMockExercise()]
     const Page = (await import('../page')).default
     render(<Page />)
 
@@ -152,7 +152,7 @@ describe('ExerciseDetailPage', () => {
   })
 
   it('renders image when exercise has images', async () => {
-    mockGetExercise.mockReturnValue(createMockExercise())
+    mockExercises = [createMockExercise()]
     const Page = (await import('../page')).default
     render(<Page />)
 
@@ -161,7 +161,7 @@ describe('ExerciseDetailPage', () => {
   })
 
   it('shows SVG placeholder when exercise has no images', async () => {
-    mockGetExercise.mockReturnValue(createMockExercise({ images: [] }))
+    mockExercises = [createMockExercise({ images: [] })]
     const Page = (await import('../page')).default
     render(<Page />)
 
@@ -170,7 +170,7 @@ describe('ExerciseDetailPage', () => {
   })
 
   it('shows source badge as free-exercise-db', async () => {
-    mockGetExercise.mockReturnValue(createMockExercise())
+    mockExercises = [createMockExercise()]
     const Page = (await import('../page')).default
     render(<Page />)
 
@@ -178,7 +178,7 @@ describe('ExerciseDetailPage', () => {
   })
 
   it('shows source badge as User created', async () => {
-    mockGetExercise.mockReturnValue(createMockExercise({ source: 'user' }))
+    mockExercises = [createMockExercise({ source: 'user' })]
     const Page = (await import('../page')).default
     render(<Page />)
 
@@ -186,7 +186,7 @@ describe('ExerciseDetailPage', () => {
   })
 
   it('renders Edit, Delete, and Add to Workout buttons', async () => {
-    mockGetExercise.mockReturnValue(createMockExercise())
+    mockExercises = [createMockExercise()]
     const Page = (await import('../page')).default
     render(<Page />)
 
@@ -196,7 +196,7 @@ describe('ExerciseDetailPage', () => {
   })
 
   it('navigates to /workouts/new with exerciseId on Add to Workout', async () => {
-    mockGetExercise.mockReturnValue(createMockExercise())
+    mockExercises = [createMockExercise()]
     const Page = (await import('../page')).default
     render(<Page />)
 
@@ -206,7 +206,7 @@ describe('ExerciseDetailPage', () => {
 
   it('opens ExerciseFormDialog pre-populated on Edit', async () => {
     const { ExerciseFormDialog } = await import('@/components/ExerciseFormDialog')
-    mockGetExercise.mockReturnValue(createMockExercise())
+    mockExercises = [createMockExercise()]
 
     const Page = (await import('../page')).default
     render(<Page />)
@@ -218,7 +218,7 @@ describe('ExerciseDetailPage', () => {
 
   it('opens ExerciseDeleteDialog on Delete', async () => {
     const { ExerciseDeleteDialog } = await import('@/components/ExerciseDeleteDialog')
-    mockGetExercise.mockReturnValue(createMockExercise())
+    mockExercises = [createMockExercise()]
 
     const Page = (await import('../page')).default
     render(<Page />)
@@ -229,7 +229,7 @@ describe('ExerciseDetailPage', () => {
 
   it('renders ExerciseDeleteDialog with correct exerciseName', async () => {
     const { ExerciseDeleteDialog } = await import('@/components/ExerciseDeleteDialog')
-    mockGetExercise.mockReturnValue(createMockExercise())
+    mockExercises = [createMockExercise()]
 
     const Page = (await import('../page')).default
     render(<Page />)
@@ -240,7 +240,7 @@ describe('ExerciseDetailPage', () => {
   })
 
   it('renders 404 when exercise is not found', async () => {
-    mockGetExercise.mockReturnValue(undefined)
+    mockExercises = []
     mockParamsId = 'nonexistent'
 
     const Page = (await import('../page')).default

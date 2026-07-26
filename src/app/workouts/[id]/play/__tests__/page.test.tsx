@@ -11,9 +11,9 @@ vi.mock('next/navigation', () => ({
   useParams: () => ({ id: 'w1' }),
 }))
 
-const mockGetWorkout = vi.fn()
+let mockWorkouts: any[] = []
 vi.mock('@/context/WorkoutContext', () => ({
-  useWorkoutContext: () => ({ getWorkout: mockGetWorkout }),
+  useWorkoutContext: () => ({ workouts: mockWorkouts }),
 }))
 
 const mockAddSession = vi.fn()
@@ -29,10 +29,10 @@ vi.mock('@/hooks/useIntervalNotification', () => ({
   useIntervalNotification: () => ({ notify: vi.fn() }),
 }))
 
-const mockGetExercise = vi.fn()
+let mockExercisesData: any[] = []
 const mockGetExerciseImages = vi.fn().mockResolvedValue([])
 vi.mock('@/hooks/useExercises', () => ({
-  useExercises: () => ({ getExercise: mockGetExercise, getExerciseImages: mockGetExerciseImages }),
+  useExercises: () => ({ exercises: mockExercisesData, getExerciseImages: mockGetExerciseImages }),
 }))
 
 // ─── Controllable useTimer mock ────────────────────────────────────
@@ -76,8 +76,8 @@ beforeEach(() => {
   mockTimer.status = 'idle'
   mockTimer.timeLeft = 60
   mockTimer.progress = 0
-  mockGetWorkout.mockReset()
-  mockGetExercise.mockReset()
+  mockWorkouts = []
+  mockExercisesData = []
 })
 
 afterEach(() => {
@@ -85,8 +85,8 @@ afterEach(() => {
 })
 
 describe('PlayWorkoutPage', () => {
-  it('shows workout not found when getWorkout returns undefined', async () => {
-    mockGetWorkout.mockReturnValue(undefined)
+  it('shows workout not found when workout is not in list', async () => {
+    mockWorkouts = []
     const Page = (await import('../page')).default
     render(<Page />)
 
@@ -96,7 +96,7 @@ describe('PlayWorkoutPage', () => {
 
   describe('idle phase', () => {
     it('renders workout title, interval count, and Start button', async () => {
-      mockGetWorkout.mockReturnValue(mockWorkout)
+      mockWorkouts = [mockWorkout]
       const Page = (await import('../page')).default
       render(<Page />)
 
@@ -112,7 +112,7 @@ describe('PlayWorkoutPage', () => {
 
   describe('Start click transitions to active', () => {
     it('calls timer.start and renders timer ring + controls', async () => {
-      mockGetWorkout.mockReturnValue(mockWorkout)
+      mockWorkouts = [mockWorkout]
       mockTimer.status = 'running'
       mockTimer.timeLeft = 60
 
@@ -134,7 +134,7 @@ describe('PlayWorkoutPage', () => {
 
   describe('skip captures partial duration', () => {
     it('captures actualDuration when skip is clicked', async () => {
-      mockGetWorkout.mockReturnValue(mockWorkout)
+      mockWorkouts = [mockWorkout]
       mockTimer.status = 'running'
       mockTimer.timeLeft = 45 // 15s elapsed of 60s warmup
 
@@ -174,13 +174,8 @@ describe('PlayWorkoutPage', () => {
     }
 
     it('natural completion on last interval calls addSession and redirects', async () => {
-      mockGetWorkout.mockReturnValue(mockWorkout)
-      mockGetExercise.mockImplementation((id: string) => {
-        if (id === 'ex1') {
-          return { id: 'ex1', name: 'Sprints', category: 'strength' as const, createdAt: 0, updatedAt: 0 }
-        }
-        return undefined
-      })
+      mockWorkouts = [mockWorkout]
+      mockExercisesData = [{ id: 'ex1', name: 'Sprints', category: 'strength' as const, createdAt: 0, updatedAt: 0 }]
       mockTimer.status = 'running'
 
       const Page = (await import('../page')).default
@@ -212,7 +207,7 @@ describe('PlayWorkoutPage', () => {
     })
 
     it('last interval skip also saves partial session and redirects', async () => {
-      mockGetWorkout.mockReturnValue(mockWorkout)
+      mockWorkouts = [mockWorkout]
       mockTimer.status = 'running'
 
       const Page = (await import('../page')).default

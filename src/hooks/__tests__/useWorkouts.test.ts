@@ -215,7 +215,7 @@ describe('useWorkouts', () => {
     })
     // After save, list is refreshed
     expect(result.current.workouts).toHaveLength(1)
-    expect(result.current.workouts[0].title).toBe('Morning HIIT')
+    expect(result.current.workouts[0]!.title).toBe('Morning HIIT')
   })
 
   it('saveWorkout sets error on failure', async () => {

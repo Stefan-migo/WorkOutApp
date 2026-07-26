@@ -215,7 +215,7 @@ describe('useSequences', () => {
     })
     // After save, list is refreshed
     expect(result.current.sequences).toHaveLength(1)
-    expect(result.current.sequences[0].title).toBe('Morning Circuit')
+    expect(result.current.sequences[0]!.title).toBe('Morning Circuit')
   })
 
   it('saveSequence sets error on failure', async () => {

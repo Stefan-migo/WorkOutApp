@@ -180,7 +180,7 @@ describe('useProgramTemplates', () => {
     })
     // After save, list is refreshed
     expect(result.current.templates).toHaveLength(1)
-    expect(result.current.templates[0].title).toBe('5/3/1 Template')
+    expect(result.current.templates[0]!.title).toBe('5/3/1 Template')
   })
 
   it('saveTemplate sets error on failure', async () => {

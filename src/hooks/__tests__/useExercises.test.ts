@@ -78,7 +78,7 @@ const mockPublicRow = {
   mechanic: 'compound',
   difficulty: 'beginner',
   images: [],
-  source: 'system',
+  source: 'free-exercise-db',
   created_at: '2026-07-25T10:00:00.000Z',
   updated_at: '2026-07-25T10:00:00.000Z',
 }
@@ -116,7 +116,7 @@ const expectedExercises: Exercise[] = [
     mechanic: 'compound',
     difficulty: 'beginner',
     images: [],
-    source: 'system',
+    source: 'free-exercise-db',
     createdAt: new Date('2026-07-25T10:00:00.000Z').getTime(),
     updatedAt: new Date('2026-07-25T10:00:00.000Z').getTime(),
   },
@@ -254,7 +254,7 @@ describe('useExercises', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
-    const updated = { ...expectedExercises[1], name: 'Updated Name' }
+    const updated = { ...expectedExercises[1]!, name: 'Updated Name' }
     await result.current.saveExercise(updated)
 
     expect(upsertQb.upsert).toHaveBeenCalledWith({
@@ -289,7 +289,7 @@ describe('useExercises', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
-    const updated = { ...expectedExercises[1], name: 'Updated' }
+    const updated = { ...expectedExercises[1]!, name: 'Updated' }
     await result.current.saveExercise(updated)
 
     await waitFor(() => expect(result.current.error).toBe('Upsert failed'))
@@ -347,7 +347,7 @@ describe('useExercises', () => {
     expect(url).toBe('url')
     expect(mockSaveImage).toHaveBeenCalledWith('ex-1', expect.any(File))
 
-    await result.current.deleteExerciseImage('ex-1/img.jpg')
-    expect(mockDeleteImage).toHaveBeenCalledWith('ex-1/img.jpg')
+    await result.current.deleteExerciseImage('ex-1', 'img.jpg')
+    expect(mockDeleteImage).toHaveBeenCalledWith('ex-1', 'img.jpg')
   })
 })
