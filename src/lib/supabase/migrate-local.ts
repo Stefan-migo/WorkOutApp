@@ -79,6 +79,27 @@ export async function migrateLocalData(userId: string): Promise<MigrationResult>
     }
   }
 
+  // Migrate IndexedDB images to Supabase Storage
+  try {
+    const dbReq = indexedDB.open('workoutapp-images', 1)
+    dbReq.onsuccess = async () => {
+      const db = dbReq.result
+      const tx = db.transaction('images', 'readonly')
+      const store = tx.objectStore('images')
+      const allReq = store.getAll()
+      allReq.onsuccess = async () => {
+        const records = allReq.result as Array<{ id: string; exerciseId: string; blobData: ArrayBuffer; blobType: string }>
+        for (const record of records) {
+          const file = new File([record.blobData], record.id, { type: record.blobType })
+          const path = `${record.exerciseId}/${record.id.split('::')[1] ?? record.id}.${record.blobType.split('/')[1] ?? 'png'}`
+          await supabase.storage.from('exercise-images').upload(path, file, { upsert: true })
+        }
+      }
+    }
+  } catch {
+    // Non-fatal — images are nice-to-have, not critical
+  }
+
   // Mark as migrated
   localStorage.setItem(`workoutapp.migrated_${userId}`, 'true')
 
