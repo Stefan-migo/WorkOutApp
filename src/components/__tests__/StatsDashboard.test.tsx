@@ -1,8 +1,57 @@
-import { describe, it, expect, afterEach } from 'vitest'
+import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import StatsDashboard from '../StatsDashboard'
 import type { Session } from '@/types/workout'
+
+// ponytail: mock supabase client + auth to avoid env vars and provider requirements
+const mockData = { data: [], error: null }
+vi.mock('@/lib/supabase/client', () => ({
+  createClient: vi.fn(() => ({
+    from: vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          order: vi.fn(() => mockData),
+          single: vi.fn(() => mockData),
+          maybeSingle: vi.fn(() => mockData),
+        })),
+        or: vi.fn(() => ({
+          order: vi.fn(() => mockData),
+        })),
+      })),
+      insert: vi.fn(() => mockData),
+      upsert: vi.fn(() => mockData),
+      delete: vi.fn(() => ({
+        eq: vi.fn(() => mockData),
+      })),
+    })),
+    storage: {
+      from: vi.fn(() => ({
+        upload: vi.fn(() => mockData),
+        getPublicUrl: vi.fn(() => ({ data: { publicUrl: '' } })),
+        remove: vi.fn(() => mockData),
+        list: vi.fn(() => mockData),
+      })),
+    },
+    auth: {
+      getSession: vi.fn(() => ({ data: { session: null } })),
+      onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
+      signInWithPassword: vi.fn(() => mockData),
+      signUp: vi.fn(() => mockData),
+      signOut: vi.fn(),
+    },
+  })),
+}))
+
+vi.mock('@/context/AuthContext', () => ({
+  useAuth: () => ({
+    user: { id: 'test-user' },
+    loading: false,
+    signIn: vi.fn(),
+    signUp: vi.fn(),
+    signOut: vi.fn(),
+  }),
+}))
 
 afterEach(cleanup)
 
