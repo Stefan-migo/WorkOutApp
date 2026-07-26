@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, useMemo, type ReactNode } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { migrateLocalData } from '@/lib/supabase/migrate-local'
 import type { User } from '@supabase/supabase-js'
 
 interface AuthContextValue {
@@ -25,8 +26,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false)
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null)
+      // ponytail: fire-and-forget migration on sign-in, does not block auth flow
+      if (event === 'SIGNED_IN' && session?.user) {
+        migrateLocalData(session.user.id).catch(() => {})
+      }
     })
 
     return () => subscription.unsubscribe()
