@@ -1,8 +1,17 @@
 import { createClient } from './client'
 
 const BUCKET = 'exercise-images'
+const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp']
+const MAX_SIZE = 10 * 1024 * 1024 // 10MB
 
 export async function uploadImage(exerciseId: string, file: File): Promise<string> {
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    throw new Error(`Invalid file type: ${file.type}. Allowed: ${ALLOWED_TYPES.join(', ')}`)
+  }
+  if (file.size > MAX_SIZE) {
+    throw new Error(`File too large: ${(file.size / 1024 / 1024).toFixed(1)}MB. Max: 10MB`)
+  }
+
   const supabase = createClient()
   const ext = file.name.split('.').pop() ?? 'png'
   const path = `${exerciseId}/${crypto.randomUUID()}.${ext}`
