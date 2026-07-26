@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getFallback, setFallback } from '@/lib/supabase/offline-fallback'
 import { useAuth } from '@/context/AuthContext'
 import type { Sequence } from '@/types/workout'
 
@@ -54,9 +55,11 @@ export function useSequences() {
 
     if (fetchError) {
       setError(fetchError.message)
-      setSequences([])
+      setSequences(getFallback<Sequence>('sequences'))
     } else {
-      setSequences((data ?? []).map(mapRowToSequence))
+      const mapped = (data ?? []).map(mapRowToSequence)
+      setSequences(mapped)
+      setFallback('sequences', mapped)
     }
     setIsLoading(false)
   }, [user, supabase])

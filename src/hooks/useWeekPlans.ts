@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getFallback, setFallback } from '@/lib/supabase/offline-fallback'
 import { useAuth } from '@/context/AuthContext'
 import { getMonday } from '@/lib/calendar-utils'
 import type { WeekPlan } from '@/types/workout'
@@ -57,9 +58,11 @@ export function useWeekPlans() {
 
     if (fetchError) {
       setError(fetchError.message)
-      setWeekPlans([])
+      setWeekPlans(getFallback<WeekPlan>('week_plans'))
     } else {
-      setWeekPlans((data ?? []).map(mapRowToWeekPlan))
+      const mapped = (data ?? []).map(mapRowToWeekPlan)
+      setWeekPlans(mapped)
+      setFallback('week_plans', mapped)
     }
     setIsLoading(false)
   }, [user, supabase])

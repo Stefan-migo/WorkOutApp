@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getFallback, setFallback } from '@/lib/supabase/offline-fallback'
 import { useAuth } from '@/context/AuthContext'
 
 export interface UseFavoritesReturn {
@@ -39,9 +40,11 @@ export function useFavorites(): UseFavoritesReturn {
 
     if (fetchError) {
       setError(fetchError.message)
-      setFavoriteIds([])
+      setFavoriteIds(getFallback<string>('favorites'))
     } else {
-      setFavoriteIds((data ?? []).map((row: Record<string, unknown>) => row.exercise_id as string))
+      const ids = (data ?? []).map((row: Record<string, unknown>) => row.exercise_id as string)
+      setFavoriteIds(ids)
+      setFallback('favorites', ids)
     }
     setIsLoading(false)
   }, [user, supabase])

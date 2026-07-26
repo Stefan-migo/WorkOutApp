@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getFallback, setFallback } from '@/lib/supabase/offline-fallback'
 import { useAuth } from '@/context/AuthContext'
 import type { Session } from '@/types/workout'
 
@@ -59,9 +60,11 @@ export function useSessions() {
 
     if (fetchError) {
       setError(fetchError.message)
-      setSessions([])
+      setSessions(getFallback<Session>('sessions'))
     } else {
-      setSessions((data ?? []).map(mapRowToSession))
+      const mapped = (data ?? []).map(mapRowToSession)
+      setSessions(mapped)
+      setFallback('sessions', mapped)
     }
     setIsLoading(false)
   }, [user, supabase])

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getFallback, setFallback } from '@/lib/supabase/offline-fallback'
 import { useAuth } from '@/context/AuthContext'
 import { useIndexedDB } from './useIndexedDB'
 import type { Exercise } from '@/types/workout'
@@ -73,9 +74,11 @@ export function useExercises() {
 
     if (fetchError) {
       setError(fetchError.message)
-      setExercises([])
+      setExercises(getFallback<Exercise>('exercises'))
     } else {
-      setExercises((data ?? []).map(mapRowToExercise))
+      const mapped = (data ?? []).map(mapRowToExercise)
+      setExercises(mapped)
+      setFallback('exercises', mapped)
     }
     setIsLoading(false)
   }, [user, supabase])

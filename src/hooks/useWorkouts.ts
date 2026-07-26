@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getFallback, setFallback } from '@/lib/supabase/offline-fallback'
 import { useAuth } from '@/context/AuthContext'
 import type { Workout } from '@/types/workout'
 
@@ -54,9 +55,11 @@ export function useWorkouts() {
 
     if (fetchError) {
       setError(fetchError.message)
-      setWorkouts([])
+      setWorkouts(getFallback<Workout>('workouts'))
     } else {
-      setWorkouts((data ?? []).map(mapRowToWorkout))
+      const mapped = (data ?? []).map(mapRowToWorkout)
+      setWorkouts(mapped)
+      setFallback('workouts', mapped)
     }
     setIsLoading(false)
   }, [user, supabase])

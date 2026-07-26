@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getFallback, setFallback } from '@/lib/supabase/offline-fallback'
 import { useAuth } from '@/context/AuthContext'
 import type { ProgramTemplate } from '@/types/workout'
 
@@ -52,9 +53,11 @@ export function useProgramTemplates() {
 
     if (fetchError) {
       setError(fetchError.message)
-      setTemplates([])
+      setTemplates(getFallback<ProgramTemplate>('program_templates'))
     } else {
-      setTemplates((data ?? []).map(mapRowToTemplate))
+      const mapped = (data ?? []).map(mapRowToTemplate)
+      setTemplates(mapped)
+      setFallback('program_templates', mapped)
     }
     setIsLoading(false)
   }, [user, supabase])
