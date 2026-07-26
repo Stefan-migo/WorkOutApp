@@ -17,7 +17,7 @@ import { ExercisePanel } from '@/components/ExercisePanel'
 import { useExercises } from '@/hooks/useExercises'
 import { flattenWorkout } from '@/lib/interval-engine'
 import { getTotalRounds, getRoundAt, getProgress } from '@/lib/sequence-engine'
-import type { CompletedInterval } from '@/types/workout'
+import type { CompletedInterval, Sequence } from '@/types/workout'
 
 import { formatTime } from '@/lib/format'
 
@@ -33,7 +33,10 @@ export default function PlaySequencePage() {
   const { notify } = useIntervalNotification()
   const { getExercise, getExerciseImages } = useExercises()
 
-  const sequence = getSequence(params.id)
+  const [sequence, setSequence] = useState<Sequence | undefined>(undefined)
+  useEffect(() => {
+    getSequence(params.id).then(setSequence)
+  }, [params.id, getSequence])
   const totalRounds = sequence ? getTotalRounds(sequence) : 0
 
   const [roundIdx, setRoundIdx] = useState(0)

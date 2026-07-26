@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useWeekPlans } from '@/hooks/useWeekPlans'
 import { useProgramTemplates } from '@/hooks/useProgramTemplates'
@@ -13,7 +13,7 @@ import { TodaysFocus } from '@/components/TodaysFocus'
 import { TemplatesPanel } from '@/components/TemplatesPanel'
 import { UpcomingList } from '@/components/UpcomingList'
 import DayAssignmentModal from '@/components/DayAssignmentModal'
-import type { DayAssignment } from '@/types/workout'
+import type { DayAssignment, WeekPlan } from '@/types/workout'
 
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const
 
@@ -22,15 +22,16 @@ export default function CalendarPage() {
   const [modalDay, setModalDay] = useState<number | null>(null)
   const router = useRouter()
 
-  const { weekPlans, getWeekPlan, saveWeekPlan } = useWeekPlans()
+  const { getWeekPlan, saveWeekPlan } = useWeekPlans()
   const { templates, saveTemplate, deleteTemplate } = useProgramTemplates()
-  const { workouts, getWorkout } = useWorkoutContext()
-  const { sequences, getSequence } = useSequences()
+  const { workouts } = useWorkoutContext()
+  const { sequences } = useSequences()
 
-  const weekPlan = useMemo(
-    () => getWeekPlan(currentMonday),
-    [currentMonday, weekPlans, getWeekPlan],
-  )
+  // der: load weekPlan for currentMonday (async getWeekPlan with auto-create)
+  const [weekPlan, setWeekPlan] = useState<WeekPlan | undefined>(undefined)
+  useEffect(() => {
+    getWeekPlan(currentMonday).then(setWeekPlan)
+  }, [currentMonday, getWeekPlan])
 
   // -1 if viewing a different week
   const today = useMemo(() => {
@@ -39,26 +40,26 @@ export default function CalendarPage() {
     return todayMon === currentMonday ? getDayOfWeek(now) : -1
   }, [currentMonday])
 
-  const todayAssignment = today >= 0 ? (weekPlan.days[today] ?? null) : null
+  // ponytail: resolve from arrays (sync) — avoids async getWorkout/getSequence
+  const todayAssignment = today >= 0 && weekPlan ? (weekPlan.days[today] ?? null) : null
   const todayWorkout = todayAssignment?.workoutId
-    ? getWorkout(todayAssignment.workoutId)
+    ? workouts.find((w) => w.id === todayAssignment.workoutId)
     : undefined
   const todaySequence = todayAssignment?.sequenceId
-    ? getSequence(todayAssignment.sequenceId)
+    ? sequences.find((sq) => sq.id === todayAssignment.sequenceId)
     : undefined
   const todayTypeLabel = todayAssignment
     ? deriveTypeLabel(todayAssignment, todayWorkout, todaySequence)
     : ''
 
   const upcomingDays = useMemo(() => {
+    if (!weekPlan) return []
     const result: { index: number; assignment: DayAssignment }[] = []
     const isCurrentWeek = today >= 0
-    // Collect assigned days after "today" (or all if another week)
     for (let i = isCurrentWeek ? today + 1 : 0; i < 7 && result.length < 3; i++) {
       const a = weekPlan.days[i]
       if (a) result.push({ index: i, assignment: a })
     }
-    // Wrap from Monday if not enough
     if (result.length < 3 && isCurrentWeek) {
       for (let i = 0; i <= today && result.length < 3; i++) {
         const a = weekPlan.days[i]
@@ -70,6 +71,7 @@ export default function CalendarPage() {
   }, [weekPlan, today])
 
   function handleAssign(dayIndex: number, assignment: DayAssignment) {
+    if (!weekPlan) return
     const days = [...weekPlan.days] as typeof weekPlan.days
     days[dayIndex] = assignment
     saveWeekPlan({ ...weekPlan, days })
@@ -77,6 +79,7 @@ export default function CalendarPage() {
   }
 
   function handleClear(dayIndex: number) {
+    if (!weekPlan) return
     const days = [...weekPlan.days] as typeof weekPlan.days
     days[dayIndex] = null
     saveWeekPlan({ ...weekPlan, days })
@@ -87,7 +90,6 @@ export default function CalendarPage() {
     <div className="flex flex-col md:flex-row min-h-screen p-margin-mobile md:p-margin-desktop max-w-6xl mx-auto gap-24">
       {/* Left: calendar grid */}
       <div className="flex-1 flex flex-col gap-24">
-        {/* Week nav */}
         <WeekNav
           weekStart={currentMonday}
           onPrev={() => setCurrentMonday((prev) => {
@@ -102,22 +104,20 @@ export default function CalendarPage() {
           })}
         />
 
-        {/* Day rows + Focus panel */}
         <div className="flex flex-col lg:flex-row gap-24">
-          {/* Day rows */}
           <div className="flex-1 flex flex-col gap-16">
             {DAY_NAMES.map((name, i) => {
+              if (!weekPlan) return null
               const d = new Date(currentMonday + 'T00:00:00')
               d.setDate(d.getDate() + i)
               const dayNum = d.getDate()
               const assignment = weekPlan.days[i] ?? null
               const isToday = today === i
-
               const workout = assignment?.workoutId
-                ? getWorkout(assignment.workoutId)
+                ? workouts.find((w) => w.id === assignment.workoutId)
                 : undefined
               const sequence = assignment?.sequenceId
-                ? getSequence(assignment.sequenceId)
+                ? sequences.find((sq) => sq.id === assignment.sequenceId)
                 : undefined
               const isDeleted = assignment !== null && !workout && !sequence
               const title = isDeleted
@@ -148,7 +148,6 @@ export default function CalendarPage() {
             })}
           </div>
 
-          {/* Today's Focus panel */}
           <TodaysFocus
             assignment={todayAssignment}
             workout={todayWorkout}
@@ -165,8 +164,8 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      {/* Right sidebar */}
       <aside className="w-full md:w-80 flex flex-col gap-16">
+        {weekPlan && (
         <TemplatesPanel
           templates={templates}
           weekPlan={weekPlan}
@@ -174,6 +173,7 @@ export default function CalendarPage() {
           saveWeekPlan={saveWeekPlan}
           deleteTemplate={deleteTemplate}
         />
+        )}
         <UpcomingList
           upcomingDays={upcomingDays}
           weekStart={currentMonday}
@@ -182,8 +182,7 @@ export default function CalendarPage() {
         />
       </aside>
 
-      {/* Modal */}
-      {modalDay !== null && (
+      {modalDay !== null && weekPlan && (
         <DayAssignmentModal
           dayIndex={modalDay}
           currentAssignment={weekPlan.days[modalDay]}

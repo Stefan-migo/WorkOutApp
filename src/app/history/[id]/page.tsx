@@ -44,8 +44,8 @@ export default function SessionDetailPage() {
   const router = useRouter()
   const params = useParams<{ id: string }>()
   const { sessions } = useSessions()
-  const { getWorkout } = useWorkoutContext()
-  const { getSequence } = useSequences()
+  const { workouts } = useWorkoutContext()
+  const { sequences } = useSequences()
 
   const session = useMemo(
     () => sessions.find((s) => s.id === params.id),
@@ -70,8 +70,8 @@ export default function SessionDetailPage() {
 
   const name =
     session.type === 'workout'
-      ? getWorkout(session.workoutId!)?.title ?? 'Unknown Workout'
-      : getSequence(session.sequenceId!)?.title ?? 'Unknown Sequence'
+      ? workouts.find((w) => w.id === session.workoutId)?.title ?? 'Unknown Workout'
+      : sequences.find((sq) => sq.id === session.sequenceId)?.title ?? 'Unknown Sequence'
 
   const totalDuration = session.intervals.reduce(
     (s, i) => s + i.actualDuration,

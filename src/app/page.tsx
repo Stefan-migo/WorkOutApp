@@ -4,11 +4,12 @@ import { useWorkoutContext } from '@/context/WorkoutContext'
 import { useSessions } from '@/hooks/useSessions'
 import { useWeekPlans } from '@/hooks/useWeekPlans'
 import { getMonday } from '@/lib/calendar-utils'
-import { useMemo } from 'react'
+import { useMemo, useEffect, useState } from 'react'
 import HeroCard from '@/components/HeroCard'
 import MiniCalendar from '@/components/MiniCalendar'
 import QuickActions from '@/components/QuickActions'
 import UpNextCard from '@/components/UpNextCard'
+import type { WeekPlan } from '@/types/workout'
 
 function getGreeting() {
   const h = new Date().getHours()
@@ -26,7 +27,11 @@ export default function DashboardPage() {
   const { sessions } = useSessions()
   const { getWeekPlan } = useWeekPlans()
   const monday = useMemo(() => getMonday(new Date()), [])
-  const weekPlan = useMemo(() => getWeekPlan(monday), [monday, getWeekPlan])
+
+  const [weekPlan, setWeekPlan] = useState<WeekPlan | undefined>(undefined)
+  useEffect(() => {
+    getWeekPlan(monday).then(setWeekPlan)
+  }, [monday, getWeekPlan])
 
   const totalSessions = sessions.length
   const thisWeekSessions = sessions.filter((s) => {
@@ -37,13 +42,13 @@ export default function DashboardPage() {
     return mon.toISOString().slice(0, 10) === monday
   }).length
 
-  const assignedDays = weekPlan.days.filter((d) => d !== null).length
+  const assignedDays = weekPlan?.days.filter((d) => d !== null).length ?? 0
   const weekProgress = Math.round((assignedDays / 5) * 100)
 
   // ponytail: first workout as "today's focus" — naive, pick by day of week
   const today = new Date().getDay()
   const todayIndex = today === 0 ? 6 : today - 1
-  const todayAssignment = weekPlan.days[todayIndex]
+  const todayAssignment = weekPlan?.days[todayIndex]
   const todayWorkout =
     todayAssignment?.workoutId
       ? workouts.find((w) => w.id === todayAssignment.workoutId)
@@ -74,7 +79,7 @@ export default function DashboardPage() {
         <MiniCalendar
           monday={monday}
           todayIndex={todayIndex}
-          weekPlanDays={weekPlan.days}
+          weekPlanDays={weekPlan?.days ?? [null, null, null, null, null, null, null]}
           assignedDays={assignedDays}
           weekProgress={weekProgress}
         />

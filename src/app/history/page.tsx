@@ -94,22 +94,22 @@ function predominantType(
 
 export default function HistoryPage() {
   const { sessions } = useSessions()
-  const { getWorkout } = useWorkoutContext()
-  const { getSequence } = useSequences()
+  const { workouts } = useWorkoutContext()
+  const { sequences } = useSequences()
   const [search, setSearch] = useState('')
 
-  // ponytail: client-side filter on session name
+  // ponytail: client-side filter on session name — use arrays to avoid async getters
   const filtered = useMemo(() => {
     if (!search.trim()) return sessions
     const q = search.toLowerCase()
     return sessions.filter((s) => {
       const name =
         s.type === 'workout'
-          ? getWorkout(s.workoutId!)?.title ?? ''
-          : getSequence(s.sequenceId!)?.title ?? ''
+          ? workouts.find((w) => w.id === s.workoutId)?.title ?? ''
+          : sequences.find((sq) => sq.id === s.sequenceId)?.title ?? ''
       return name.toLowerCase().includes(q)
     })
-  }, [sessions, search, getWorkout, getSequence])
+  }, [sessions, search, workouts, sequences])
 
   if (sessions.length === 0) {
     return (
@@ -171,8 +171,8 @@ export default function HistoryPage() {
         ) : filtered.map((s) => {
           const name =
             s.type === 'workout'
-              ? getWorkout(s.workoutId!)?.title ?? 'Unknown Workout'
-              : getSequence(s.sequenceId!)?.title ?? 'Unknown Sequence'
+              ? workouts.find((w) => w.id === s.workoutId)?.title ?? 'Unknown Workout'
+              : sequences.find((sq) => sq.id === s.sequenceId)?.title ?? 'Unknown Sequence'
           const totalDuration = s.intervals.reduce(
             (sum, i) => sum + i.actualDuration,
             0,
