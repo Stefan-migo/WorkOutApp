@@ -125,3 +125,8 @@ CREATE POLICY "Users can CRUD their own favorites" ON favorites
 -- Public seed exercises RLS: allow all authenticated users to read exercises where user_id IS NULL
 CREATE POLICY "Anyone can read public exercises" ON exercises
   FOR SELECT USING (user_id IS NULL);
+
+-- Storage bucket for exercise images
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('exercise-images', 'exercise-images', true)
+ON CONFLICT (id) DO NOTHING;
