@@ -70,12 +70,12 @@ Chain base: `main` (after PR 1 merges)
 
 Chain base: `main` (after PR 2 merges)
 
-- [ ] 3.1 Rewrite `src/hooks/useWorkouts.ts` — `supabase.from('workouts')` select/insert/update/delete with `{ data, isLoading, error }` return
-- [ ] 3.2 Rewrite `src/hooks/useSessions.ts` — `supabase.from('sessions')` append-only insert with loading/error
-- [ ] 3.3 Rewrite `src/hooks/useExercises.ts` — `supabase.from('exercises')` select (public + user rows), CRUD, image ops via storage.ts stub
-- [ ] 3.4 Create `src/hooks/__tests__/useWorkouts.test.ts` — mock `supabase.from('workouts')` chain, assert CRUD calls and state transitions
-- [ ] 3.5 Create `src/hooks/__tests__/useSessions.test.ts` — mock append-only insert, verify no update/delete exposed
-- [ ] 3.6 Create `src/hooks/__tests__/useExercises.test.ts` — mock select with RLS filter for public + own rows, assert image op stubs
+- [x] 3.1 Rewrite `src/hooks/useWorkouts.ts` — `supabase.from('workouts')` select/insert/update/delete with `{ data, isLoading, error }` return
+- [x] 3.2 Rewrite `src/hooks/useSessions.ts` — `supabase.from('sessions')` append-only insert with loading/error
+- [x] 3.3 Rewrite `src/hooks/useExercises.ts` — `supabase.from('exercises')` select (public + user rows), CRUD, image ops via storage.ts stub
+- [x] 3.4 Create `src/hooks/__tests__/useWorkouts.test.ts` — mock `supabase.from('workouts')` chain, assert CRUD calls and state transitions
+- [x] 3.5 Create `src/hooks/__tests__/useSessions.test.ts` — mock append-only insert, verify no update/delete exposed
+- [x] 3.6 Create `src/hooks/__tests__/useExercises.test.ts` — mock select with RLS filter for public + own rows, assert image op stubs
 
 **Files**: `useWorkouts.ts`, `useSessions.ts`, `useExercises.ts`, `__tests__/useWorkouts.test.ts`, `__tests__/useSessions.test.ts`, `__tests__/useExercises.test.ts`
 **Deps**: PR 2 (auth for `user_id`), PR 1 (client factories)
@@ -87,14 +87,14 @@ Chain base: `main` (after PR 2 merges)
 
 Chain base: `main` (after PR 3 merges)
 
-- [ ] 4.1 Rewrite `src/hooks/useSequences.ts` — `supabase.from('sequences')` select/insert/update/delete with `{ data, isLoading, error }`
-- [ ] 4.2 Rewrite `src/hooks/useWeekPlans.ts` — `supabase.from('week_plans')` CRUD, auto-create plan on miss by week ID
-- [ ] 4.3 Rewrite `src/hooks/useProgramTemplates.ts` — `supabase.from('program_templates')` select/insert/update/delete
-- [ ] 4.4 Rewrite `src/hooks/useFavorites.ts` — `supabase.from('favorites')` row-based toggle via `unique(user_id, exercise_id)` constraint
-- [ ] 4.5 Rewrite `src/hooks/__tests__/useFavorites.test.ts` — swap localStorage mock for Supabase mock chain assertions
-- [ ] 4.6 Create `src/hooks/__tests__/useSequences.test.ts` — mock chain, verify CRUD calls
-- [ ] 4.7 Create `src/hooks/__tests__/useWeekPlans.test.ts` — mock chain, verify auto-create + CRUD
-- [ ] 4.8 Create `src/hooks/__tests__/useProgramTemplates.test.ts` — mock chain, verify CRUD
+- [x] 4.1 Rewrite `src/hooks/useSequences.ts` — `supabase.from('sequences')` select/insert/update/delete with `{ data, isLoading, error }`
+- [x] 4.2 Rewrite `src/hooks/useWeekPlans.ts` — `supabase.from('week_plans')` CRUD, auto-create plan on miss by week ID
+- [x] 4.3 Rewrite `src/hooks/useProgramTemplates.ts` — `supabase.from('program_templates')` select/insert/update/delete
+- [x] 4.4 Rewrite `src/hooks/useFavorites.ts` — `supabase.from('favorites')` row-based toggle via `unique(user_id, exercise_id)` constraint
+- [x] 4.5 Rewrite `src/hooks/__tests__/useFavorites.test.ts` — swap localStorage mock for Supabase mock chain assertions
+- [x] 4.6 Create `src/hooks/__tests__/useSequences.test.ts` — mock chain, verify CRUD calls
+- [x] 4.7 Create `src/hooks/__tests__/useWeekPlans.test.ts` — mock chain, verify auto-create + CRUD
+- [x] 4.8 Create `src/hooks/__tests__/useProgramTemplates.test.ts` — mock chain, verify CRUD
 
 **Files**: `useSequences.ts`, `useWeekPlans.ts`, `useProgramTemplates.ts`, `useFavorites.ts`, `__tests__/useFavorites.test.ts`, `__tests__/useSequences.test.ts`, `__tests__/useWeekPlans.test.ts`, `__tests__/useProgramTemplates.test.ts`
 **Deps**: PR 2 (auth), PR 3 (same pattern)
@@ -106,12 +106,12 @@ Chain base: `main` (after PR 3 merges)
 
 Chain base: `main` (after PR 3/4 merge — needs exercises table + auth)
 
-- [ ] 5.1 Create `src/lib/supabase/storage.ts` — `uploadImage(exerciseId, file)` with file type (`image/*`) and size cap (10 MB), `listImages(exerciseId)`, `deleteImage(path)`, public bucket `exercise-images`
-- [ ] 5.2 Rewrite `src/hooks/useIndexedDB.ts` — delegate get/save/delete to Supabase Storage, keep IndexedDB as offline fallback
-- [ ] 5.3 Create `src/lib/supabase/migrate-local.ts` — read 7 localStorage entities + IndexedDB images, upsert each entity with per-entity try/catch, set `workoutapp.migrated` flag
-- [ ] 5.4 Wire migration trigger in `AuthContext.tsx` — after `signIn`, check `workoutapp.migrated`, call `migrateLocal()` on first auth
-- [ ] 5.5 Create `src/lib/supabase/__tests__/storage.test.ts` — mock `supabase.storage.from()` chain, assert upload/list/delete with validation
-- [ ] 5.6 Create `src/lib/supabase/__tests__/migrate-local.test.ts` — mock localStorage keys + Supabase upsert, assert flag gating, empty-skip, and per-entity failure handling
+- [x] 5.1 Create `src/lib/supabase/storage.ts` — `uploadImage(exerciseId, file)` with file type (`image/*`) and size cap (10 MB), `listImages(exerciseId)`, `deleteImage(path)`, public bucket `exercise-images`
+- [x] 5.2 Rewrite `src/hooks/useIndexedDB.ts` — delegate get/save/delete to Supabase Storage, keep IndexedDB as offline fallback
+- [x] 5.3 Create `src/lib/supabase/migrate-local.ts` — read 7 localStorage entities + IndexedDB images, upsert each entity with per-entity try/catch, set `workoutapp.migrated` flag
+- [x] 5.4 Wire migration trigger in `AuthContext.tsx` — after `signIn`, check `workoutapp.migrated`, call `migrateLocal()` on first auth
+- [x] 5.5 Create `src/lib/supabase/__tests__/storage.test.ts` — mock `supabase.storage.from()` chain, assert upload/list/delete with validation
+- [x] 5.6 Create `src/lib/supabase/__tests__/migrate-local.test.ts` — mock localStorage keys + Supabase upsert, assert flag gating, empty-skip, and per-entity failure handling
 
 **Files**: `supabase/storage.ts`, `useIndexedDB.ts`, `migrate-local.ts`, `AuthContext.tsx` (migration gate), `__tests__/storage.test.ts`, `__tests__/migrate-local.test.ts`
 **Deps**: PR 2 (auth), PR 3 (exercises table for Storage URLs)

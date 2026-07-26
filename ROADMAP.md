@@ -64,19 +64,30 @@ de historial.
 
 ---
 
-## Fase 3 — Base de datos remota (Supabase)
+## Fase 3 — Base de datos remota (Supabase) ✅ En progreso
 
 **Objetivo**: Migrar de localStorage 100% local a Supabase como backend
 persistente con autenticación y sync.
 
 ### Scope tentativo
 
-1. **Esquema DB** — migrar modelos actuales a tablas PostgreSQL
-2. **Auth** — registro/login con Supabase Auth (email + Google)
-3. **Data Layer** — abstraer hooks para que usen Supabase en vez de localStorage
-4. **Migración** — script para migrar datos de localStorage a Supabase
-5. **Offline?** — decidir si usar cache local como fallback
-6. **Tests** — mockear Supabase client en tests existentes
+1. **Esquema DB** — migrar modelos actuales a tablas PostgreSQL ✅
+2. **Auth** — registro/login con Supabase Auth (email + Google) ✅
+3. **Data Layer** — abstraer hooks para que usen Supabase en vez de localStorage ✅
+4. **Migración** — script para migrar datos de localStorage a Supabase ✅
+5. **Imágenes** — migrar de IndexedDB a Supabase Storage ✅
+6. **Tests** — mockear Supabase client en tests existentes ✅
+
+### Changes completados
+
+| Change | Estado |
+|--------|--------|
+| `supabase-auth-data-layer` | ✅ Archivado (2026-07-26) — esquema, auth, data layer, migración, storage |
+
+### Pendiente
+- Verificación manual end-to-end contra Supabase local
+- Offline cache / fallback layer (Phase 3.2)
+- CI con Supabase local para tests de integración
 
 ### Dependencias
 - Fase 1 (estructura open-source lista)
