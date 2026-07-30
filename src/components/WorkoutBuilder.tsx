@@ -21,6 +21,9 @@ function isCycle(item: BuilderItem): item is CycleTemplate {
 export function expandCycle(cycle: CycleTemplate): Interval[] {
   const intervals: Interval[] = []
   for (let i = 0; i < cycle.repeat; i++) {
+    // ponytail: spread reps/weight only when defined, keeps legacy intervals clean
+    const repFields = cycle.workReps != null ? { reps: cycle.workReps } : {}
+    const weightFields = cycle.workWeight != null ? { weight: cycle.workWeight } : {}
     intervals.push({
       id: crypto.randomUUID(),
       type: 'work',
@@ -29,6 +32,8 @@ export function expandCycle(cycle: CycleTemplate): Interval[] {
       cycleIndex: i,
       cycleId: cycle.id,
       cycleTitle: cycle.title,
+      ...repFields,
+      ...weightFields,
     })
     const isLast = i === cycle.repeat - 1
     if (!isLast || !cycle.skipLastRest) {
@@ -374,6 +379,40 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                         />
                         <span className="text-[8px] leading-tight text-on-surface-variant/70">Skip last rest</span>
                       </label>
+                    </div>
+                  </div>
+
+                  {/* Reps row */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1">
+                      <span className="font-label-caps text-label-caps text-on-surface-variant/50 text-[9px] uppercase tracking-wider">Work reps</span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={item.workReps != null ? String(item.workReps) : ''}
+                        onChange={(e) => {
+                          const v = e.target.value ? parseInt(e.target.value, 10) : undefined
+                          updateCycleField(i, 'workReps', v != null && !isNaN(v) ? Math.max(1, v) : undefined)
+                        }}
+                        className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-on-surface focus:border-secondary focus:ring-0 outline-none"
+                        aria-label="Work reps"
+                        placeholder="—"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="font-label-caps text-label-caps text-on-surface-variant/50 text-[9px] uppercase tracking-wider">Work weight (kg)</span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={item.workWeight != null ? String(item.workWeight) : ''}
+                        onChange={(e) => {
+                          const v = e.target.value ? parseInt(e.target.value, 10) : undefined
+                          updateCycleField(i, 'workWeight', v != null && !isNaN(v) ? Math.max(0, v) : undefined)
+                        }}
+                        className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-on-surface focus:border-secondary focus:ring-0 outline-none"
+                        aria-label="Work weight (kg)"
+                        placeholder="—"
+                      />
                     </div>
                   </div>
 

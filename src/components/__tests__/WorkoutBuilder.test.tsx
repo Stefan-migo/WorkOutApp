@@ -59,6 +59,42 @@ describe('expandCycle', () => {
     expect(result[3]!.type).toBe('rest')
   })
 
+  it('propagates workReps to expanded intervals', async () => {
+    const { expandCycle } = await import('../WorkoutBuilder')
+    const cycle: CycleTemplate = {
+      id: 'c-r', title: 'Rep Cycle', repeat: 2,
+      workDuration: 30, restDuration: 15, skipLastRest: true,
+      workReps: 10,
+    }
+    // skipLastRest=true: work, rest, work = 3 intervals
+    const result = expandCycle(cycle)
+    expect(result).toHaveLength(3)
+    expect(result[0]!.reps).toBe(10)
+    expect(result[2]!.reps).toBe(10)
+  })
+
+  it('propagates workWeight to expanded intervals', async () => {
+    const { expandCycle } = await import('../WorkoutBuilder')
+    const cycle: CycleTemplate = {
+      id: 'c-w', title: 'Weight Cycle', repeat: 2,
+      workDuration: 30, restDuration: 15, skipLastRest: true,
+      workReps: 10, workWeight: 20,
+    }
+    const result = expandCycle(cycle)
+    expect(result[0]!.weight).toBe(20)
+    expect(result[0]!.reps).toBe(10)
+  })
+
+  it('omits reps when CycleTemplate has no workReps', async () => {
+    const { expandCycle } = await import('../WorkoutBuilder')
+    const cycle: CycleTemplate = {
+      id: 'c-nr', title: 'No Rep Cycle', repeat: 1,
+      workDuration: 30, restDuration: 15, skipLastRest: true,
+    }
+    const result = expandCycle(cycle)
+    expect(result[0]!.reps).toBeUndefined()
+  })
+
   it('expands Cycle(repeat=1, skipLastRest=true) to 1 interval', async () => {
     const { expandCycle } = await import('../WorkoutBuilder')
     const cycle: CycleTemplate = {
@@ -143,6 +179,25 @@ describe('WorkoutBuilder palette', () => {
 // ===========================================================================
 // Component: WorkoutBuilder save / expansion
 // ===========================================================================
+describe('WorkoutBuilder cycle reps', () => {
+  it('shows workReps and workWeight inputs in Cycle card', async () => {
+    const WorkoutBuilder = (await import('../WorkoutBuilder')).default
+    render(<WorkoutBuilder onSave={vi.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Add Cycle' }))
+    expect(screen.getByLabelText('Work reps')).toBeInTheDocument()
+    expect(screen.getByLabelText('Work weight (kg)')).toBeInTheDocument()
+  })
+
+  it('workReps input updates cycle workReps value', async () => {
+    const WorkoutBuilder = (await import('../WorkoutBuilder')).default
+    render(<WorkoutBuilder onSave={vi.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Add Cycle' }))
+    const repsInput = screen.getByLabelText('Work reps')
+    fireEvent.change(repsInput, { target: { value: '12' } })
+    expect(repsInput).toHaveValue('12')
+  })
+})
+
 describe('WorkoutBuilder save', () => {
   it('expands default Cycle(repeat=4, skipLastRest=true) to 7 intervals on Build Workout', async () => {
     const WorkoutBuilder = (await import('../WorkoutBuilder')).default
