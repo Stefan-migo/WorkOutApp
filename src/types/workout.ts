@@ -80,6 +80,7 @@ export interface CompletedInterval {
   plannedDuration: number
   actualDuration: number
   completed: boolean
+  notes?: string
 }
 
 export interface Session {

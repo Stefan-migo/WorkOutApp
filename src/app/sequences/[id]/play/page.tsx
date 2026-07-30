@@ -17,6 +17,7 @@ import { ExercisePanel } from '@/components/ExercisePanel'
 import { useExercises } from '@/hooks/useExercises'
 import { flattenWorkout } from '@/lib/interval-engine'
 import { getTotalRounds, getRoundAt, getProgress } from '@/lib/sequence-engine'
+import { getIntervalName } from '@/lib/interval-display'
 import type { CompletedInterval, Sequence } from '@/types/workout'
 
 import { formatTime } from '@/lib/format'
@@ -69,6 +70,8 @@ export default function PlaySequencePage() {
       setIdbImageUrls([])
     }
   }, [exercise?.id, getExerciseImages])
+  // Work count up to current interval (1-based, for display naming)
+  const seqWorkCount = flat.slice(0, intervalIdx + 1).filter((i) => i.type === 'work').length
   const nextInterval = flat[intervalIdx + 1]
 
   const timer = useTimer(currentInterval?.duration ?? 0, () => {
@@ -343,8 +346,8 @@ export default function PlaySequencePage() {
                   timeLeft={timer.timeLeft}
                   duration={currentInterval.duration}
                   intervalType={currentInterval.type}
-                  label={currentInterval.title}
-                  nextLabel={nextInterval ? `Next: ${nextInterval.title} (${formatTime(nextInterval.duration)})` : undefined}
+                  label={getIntervalName(currentInterval, seqWorkCount, exercise)}
+                  nextLabel={nextInterval ? `Next: ${nextInterval.type === 'work' ? getIntervalName(nextInterval, seqWorkCount + 1) : nextInterval.title} (${formatTime(nextInterval.duration)})` : undefined}
                 />
               )}
 
@@ -371,7 +374,7 @@ export default function PlaySequencePage() {
                 <ProgressBar progress={progressVal} dark />
                 <div className="flex justify-between w-full font-label-caps text-label-caps text-gray-400 mt-8">
                   <span>{intervalIdx + 1} of {flat.length}</span>
-                  <span>{currentInterval?.title ?? ''}</span>
+                  <span>{currentInterval ? getIntervalName(currentInterval, seqWorkCount, exercise) : ''}</span>
                 </div>
               </div>
 

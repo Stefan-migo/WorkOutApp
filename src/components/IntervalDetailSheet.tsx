@@ -56,6 +56,8 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
 
   function handlePickerSelect(exercise: Exercise) {
     setExerciseId(exercise.id)
+    // Auto-name the interval to the exercise name if title is still the default "Work"
+    if (title === 'Work') setTitle(exercise.name)
   }
 
   // ponytail: CSS in <style> tag — no extra file, no CSS-in-JS lib

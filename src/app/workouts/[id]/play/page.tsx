@@ -16,6 +16,7 @@ import { ExercisePanel } from '@/components/ExercisePanel'
 import { useExercises } from '@/hooks/useExercises'
 import { flattenWorkout } from '@/lib/interval-engine'
 import { formatTime } from '@/lib/format'
+import { getIntervalName } from '@/lib/interval-display'
 import type { CompletedInterval } from '@/types/workout'
 import type { Interval } from '@/types/workout'
 
@@ -183,6 +184,8 @@ export default function PlayWorkoutPage() {
   }, [exercise?.id, getExerciseImages])
 
   const nextInterval = flat[currentIdx + 1]
+  // Work count up to current interval (1-based, for display naming)
+  const workCount = flat.slice(0, currentIdx + 1).filter((i) => i.type === 'work').length
   const progressVal =
     total > 0
       ? (currentIdx + (1 - timer.timeLeft / (interval?.duration || 1))) / total
@@ -252,8 +255,8 @@ export default function PlayWorkoutPage() {
                   timeLeft={timer.timeLeft}
                   duration={interval.duration}
                   intervalType={interval.type}
-                  label={interval.type}
-                  nextLabel={nextInterval ? `Next: ${nextInterval.type} (${formatTime(nextInterval.duration)})` : undefined}
+                  label={getIntervalName(interval, workCount, exercise)}
+                  nextLabel={nextInterval ? `Next: ${nextInterval.type === 'work' ? getIntervalName(nextInterval, workCount + 1) : nextInterval.title} (${formatTime(nextInterval.duration)})` : undefined}
                 />
               )}
 

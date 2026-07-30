@@ -4,9 +4,12 @@ import Link from 'next/link'
 import { useWorkoutContext } from '@/context/WorkoutContext'
 import { SEGMENT_BG, SEGMENT_BORDER, SEGMENT_TEXT, TYPE_ICONS } from '@/lib/segment-styles'
 import { formatDuration } from '@/lib/format'
+import { getIntervalName } from '@/lib/interval-display'
+import { useExercises } from '@/hooks/useExercises'
 
 export default function PreviewWorkoutPage() {
   const { workouts } = useWorkoutContext()
+  const { exercises } = useExercises()
   const router = useRouter()
   const params = useParams<{ id: string }>()
   const workout = workouts.find((w) => w.id === params.id)
@@ -43,25 +46,36 @@ export default function PreviewWorkoutPage() {
         <span className="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider px-4">
           {workout.intervals.length} interval{workout.intervals.length !== 1 && 's'}
         </span>
-        {workout.intervals.map((interval) => (
-          <div
-            key={interval.id}
-            className={`glass-card rounded-lg flex items-center pl-0 border-l-4 ${SEGMENT_BORDER[interval.type] ?? 'border-l-segment-work'}`}
-          >
-            <div className={`p-8 mx-8 ${SEGMENT_BG[interval.type]} ${SEGMENT_TEXT[interval.type]} rounded-md flex items-center justify-center`}>
-              <span className="material-symbols-outlined text-[20px]">{TYPE_ICONS[interval.type]}</span>
-            </div>
-            <div className="flex-1 py-md">
-              <span className="font-body-md font-semibold text-on-surface">{interval.title}</span>
-              {interval.description && (
-                <p className="text-[11px] text-on-surface-variant font-body-md mt-2">{interval.description}</p>
-              )}
-            </div>
-            <div className="px-16 font-data-lg text-data-lg text-primary font-bold tracking-tight font-mono">
-              {formatDuration(interval.duration)}
-            </div>
-          </div>
-        ))}
+        {(() => {
+          let workCount = 0
+          return workout.intervals.map((interval) => {
+            if (interval.type === 'work') workCount++
+            const exercise = interval.exerciseId
+              ? exercises.find((e) => e.id === interval.exerciseId)
+              : undefined
+            return (
+              <div
+                key={interval.id}
+                className={`glass-card rounded-lg flex items-center pl-0 border-l-4 ${SEGMENT_BORDER[interval.type] ?? 'border-l-segment-work'}`}
+              >
+                <div className={`p-8 mx-8 ${SEGMENT_BG[interval.type]} ${SEGMENT_TEXT[interval.type]} rounded-md flex items-center justify-center`}>
+                  <span className="material-symbols-outlined text-[20px]">{TYPE_ICONS[interval.type]}</span>
+                </div>
+                <div className="flex-1 py-md">
+                  <span className="font-body-md font-semibold text-on-surface">
+                    {getIntervalName(interval, workCount, exercise)}
+                  </span>
+                  {interval.description && (
+                    <p className="text-[11px] text-on-surface-variant font-body-md mt-2">{interval.description}</p>
+                  )}
+                </div>
+                <div className="px-16 font-data-lg text-data-lg text-primary font-bold tracking-tight font-mono">
+                  {formatDuration(interval.duration)}
+                </div>
+              </div>
+            )
+          })
+        })()}
       </div>
 
       {/* Back button */}

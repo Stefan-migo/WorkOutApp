@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useSessions } from '@/hooks/useSessions'
@@ -8,7 +8,8 @@ import { useWorkoutContext } from '@/context/WorkoutContext'
 import { useSequences } from '@/hooks/useSequences'
 import { formatDuration } from '@/lib/format'
 import { SEGMENT_BORDER } from '@/lib/segment-styles'
-import type { IntervalType } from '@/types/workout'
+import { getIntervalName } from '@/lib/interval-display'
+import type { IntervalType, CompletedInterval } from '@/types/workout'
 
 function formatDateFull(ts: number) {
   return new Date(ts).toLocaleDateString(undefined, {
@@ -43,9 +44,10 @@ function deriveTypeChips(
 export default function SessionDetailPage() {
   const router = useRouter()
   const params = useParams<{ id: string }>()
-  const { sessions } = useSessions()
+  const { sessions, updateSession } = useSessions()
   const { workouts } = useWorkoutContext()
   const { sequences } = useSequences()
+  const { exercises } = useExercises()
 
   const session = useMemo(
     () => sessions.find((s) => s.id === params.id),
@@ -78,6 +80,28 @@ export default function SessionDetailPage() {
     0,
   )
   const chips = deriveTypeChips(session.intervals)
+
+  // ponytail: inline notes editing — local state, save on blur
+  const [notes, setNotes] = useState<Record<string, string>>(() => {
+    const init: Record<string, string> = {}
+    for (const intv of session.intervals) {
+      if (intv.type === 'work') init[intv.intervalId] = intv.notes ?? ''
+    }
+    return init
+  })
+  const [savingNotes, setSavingNotes] = useState(false)
+
+  const handleSaveNotes = useCallback(async () => {
+    if (savingNotes) return
+    setSavingNotes(true)
+    const updated: CompletedInterval[] = session.intervals.map((intv) =>
+      intv.type === 'work'
+        ? { ...intv, notes: notes[intv.intervalId] || undefined }
+        : intv,
+    )
+    await updateSession(session.id, { intervals: updated })
+    setSavingNotes(false)
+  }, [session, notes, updateSession, savingNotes])
 
   function handleRepeat() {
     if (!session) return
@@ -151,49 +175,81 @@ export default function SessionDetailPage() {
 
       {/* Interval Breakdown */}
       <section className="flex flex-col gap-16 mb-32">
-        <h3 className="font-headline-md text-headline-md text-on-surface">
-          Interval Breakdown
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="font-headline-md text-headline-md text-on-surface">
+            Interval Breakdown
+          </h3>
+          <button
+            onClick={handleSaveNotes}
+            disabled={savingNotes}
+            className="px-4 py-2 bg-primary text-on-primary rounded-lg font-label-caps text-label-caps hover:bg-primary/90 transition-colors disabled:opacity-50 text-sm"
+          >
+            {savingNotes ? 'Saving...' : 'Save Notes'}
+          </button>
+        </div>
+
         <div className="flex flex-col gap-8">
-          {session.intervals.map((intv, idx) => (
-            <div
-              key={`${intv.intervalId}-${idx}`}
-              className={`bg-surface-container-lowest border-l-4 ${SEGMENT_BORDER[intv.type]} border-y border-r border-outline-variant/30 rounded-r-lg p-16 flex justify-between items-center hover:bg-surface-container-low transition-colors group cursor-default`}
-            >
-              <div className="flex items-center gap-16">
-                <div className="w-12 h-12 bg-surface flex items-center justify-center rounded font-data-sm text-data-sm text-on-surface-variant border border-outline-variant/20">
-                  {idx + 1}
+          {(() => {
+            let workCount = 0
+            return session.intervals.map((intv, idx) => {
+              if (intv.type === 'work') workCount++
+              return (
+                <div key={`${intv.intervalId}-${idx}`} className="flex flex-col">
+                  <div
+                    className={`bg-surface-container-lowest border-l-4 ${SEGMENT_BORDER[intv.type]} border-y border-r border-outline-variant/30 rounded-r-lg p-16 flex justify-between items-center hover:bg-surface-container-low transition-colors group cursor-default`}
+                  >
+                    <div className="flex items-center gap-16">
+                      <div className="w-12 h-12 bg-surface flex items-center justify-center rounded font-data-sm text-data-sm text-on-surface-variant border border-outline-variant/20">
+                        {idx + 1}
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-body-md text-body-md font-bold text-on-surface">
+                          {getIntervalName(intv, workCount)}
+                        </span>
+                        <span className="font-label-caps text-label-caps text-on-surface-variant mt-1">
+                          {TYPE_LABELS[intv.type]}
+                          {intv.completed ? '' : ' \u2022 Incomplete'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex gap-24 items-center">
+                      <div className="flex flex-col items-end">
+                        <span className="font-label-caps text-label-caps text-on-surface-variant">
+                          Target
+                        </span>
+                        <span className="font-data-sm text-data-sm text-on-surface">
+                          {formatDuration(intv.plannedDuration)}
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-end w-16">
+                        <span className="font-label-caps text-label-caps text-on-surface-variant">
+                          Actual
+                        </span>
+                        <span className="font-data-sm text-data-sm text-on-surface font-bold">
+                          {formatDuration(intv.actualDuration)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Notes textarea for work intervals */}
+                  {intv.type === 'work' && (
+                    <div className="ml-16 mt-2 mb-4">
+                      <textarea
+                        value={notes[intv.intervalId] ?? ''}
+                        onChange={(e) =>
+                          setNotes((prev) => ({ ...prev, [intv.intervalId]: e.target.value }))
+                        }
+                        placeholder="Add notes about this interval (weight, fatigue, etc.)"
+                        rows={2}
+                        className="w-full bg-surface-container-low text-on-surface rounded-lg px-3 py-2 text-sm border border-outline-variant/30 resize-none focus:outline-none focus:ring-1 focus:ring-secondary placeholder-on-surface-variant/50"
+                      />
+                    </div>
+                  )}
                 </div>
-                <div className="flex flex-col">
-                  <span className="font-body-md text-body-md font-bold text-on-surface">
-                    {intv.title}
-                  </span>
-                  <span className="font-label-caps text-label-caps text-on-surface-variant mt-1">
-                    {TYPE_LABELS[intv.type]}
-                    {intv.completed ? '' : ' \u2022 Incomplete'}
-                  </span>
-                </div>
-              </div>
-              <div className="flex gap-24 items-center">
-                <div className="flex flex-col items-end">
-                  <span className="font-label-caps text-label-caps text-on-surface-variant">
-                    Target
-                  </span>
-                  <span className="font-data-sm text-data-sm text-on-surface">
-                    {formatDuration(intv.plannedDuration)}
-                  </span>
-                </div>
-                <div className="flex flex-col items-end w-16">
-                  <span className="font-label-caps text-label-caps text-on-surface-variant">
-                    Actual
-                  </span>
-                  <span className="font-data-sm text-data-sm text-on-surface font-bold">
-                    {formatDuration(intv.actualDuration)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
+              )
+            })
+          })()}
         </div>
       </section>
     </div>

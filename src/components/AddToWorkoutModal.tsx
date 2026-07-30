@@ -2,6 +2,7 @@
 
 import { useMemo, useEffect, useRef, useState } from 'react'
 import { useWorkoutContext } from '@/context/WorkoutContext'
+import { getIntervalName } from '@/lib/interval-display'
 import type { Exercise, Workout } from '@/types/workout'
 import { detectCycles, isInCycle } from '@/lib/detect-cycles'
 
@@ -42,7 +43,9 @@ export function AddToWorkoutModal({ exercise, onClose }: Props) {
     const updated: Workout = {
       ...selectedWorkout,
       intervals: selectedWorkout.intervals.map((i) =>
-        i.id === intervalId ? { ...i, exerciseId: exercise.id } : i,
+        i.id === intervalId
+          ? { ...i, exerciseId: exercise.id, title: exercise.name }
+          : i,
       ),
       updatedAt: Date.now(),
     }
@@ -101,7 +104,7 @@ export function AddToWorkoutModal({ exercise, onClose }: Props) {
                       {workIntervals.length === 0 ? (
                         <p className="px-4 py-3 text-body-sm text-on-surface-variant">No work intervals.</p>
                       ) : (
-                        workIntervals.map(({ interval, globalIdx }) => {
+                        workIntervals.map(({ interval, globalIdx }, wi) => {
                           const cycle = isInCycle(globalIdx, cycles)
                           const already = interval.exerciseId
                           return (
@@ -113,7 +116,7 @@ export function AddToWorkoutModal({ exercise, onClose }: Props) {
                             >
                               <div className="flex flex-col gap-0.5">
                                 <span className="font-body text-body-sm text-on-surface">
-                                  {interval.title || 'Work'}
+                                  {getIntervalName(interval, wi + 1)}
                                   {cycle && (
                                     <span className="text-body-xs text-on-surface-variant ml-2">
                                       · {cycle.label}

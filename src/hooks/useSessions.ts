@@ -73,7 +73,34 @@ export function useSessions() {
     fetchSessions()
   }, [fetchSessions])
 
-  // ponytail: append-only, no update/delete — add when MVP needs session editing
+  const updateSession = useCallback(
+    async (sessionId: string, updates: Partial<Session>) => {
+      if (!user) return
+      setError(null)
+
+      const payload: Record<string, unknown> = {}
+      if (updates.intervals) payload.intervals = updates.intervals
+      if (updates.completedAt) payload.completed_at = new Date(updates.completedAt).toISOString()
+
+      if (Object.keys(payload).length === 0) return
+
+      const { error: updateError } = await supabase
+        .from('sessions')
+        .update(payload)
+        .eq('id', sessionId)
+        .eq('user_id', user.id)
+
+      if (updateError) {
+        setError(updateError.message)
+      } else {
+        setSessions((prev) =>
+          prev.map((s) => (s.id === sessionId ? { ...s, ...updates } : s)),
+        )
+      }
+    },
+    [user, supabase],
+  )
+
   const addSession = useCallback(
     async (session: Session) => {
       if (!user) return
@@ -92,5 +119,5 @@ export function useSessions() {
     [user, supabase, fetchSessions],
   )
 
-  return { sessions, addSession, isLoading, error }
+  return { sessions, addSession, updateSession, isLoading, error }
 }
