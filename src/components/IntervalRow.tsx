@@ -99,23 +99,29 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
         )}
       </div>
 
-      {/* Duration + Actions */}
+      {/* Duration + Reps + Actions */}
       <div className="px-16 flex items-center gap-8 border-l border-outline-variant/30 py-16">
-        <input
-          type="text"
-          value={durationStr}
-          onChange={(e) => {
-            // ponytail: parse MM:SS input, default to current duration on parse failure
-            const parts = e.target.value.split(':')
-            if (parts.length === 2) {
-              const m = parseInt(parts[0]!, 10) || 0
-              const s = parseInt(parts[1]!, 10) || 0
-              onChange(index, { ...interval, duration: m * 60 + s })
-            }
-          }}
-          className="bg-transparent border-none p-0 font-data-lg text-data-lg text-primary focus:ring-0 focus:outline-none w-20 text-center font-bold tracking-tight"
-          aria-label={`Interval ${index + 1} duration`}
-        />
+        {interval.reps != null ? (
+          <div className="font-data-lg text-data-lg text-primary font-bold tracking-tight whitespace-nowrap">
+            {interval.weight != null ? `${interval.reps} reps @ ${interval.weight}kg` : `${interval.reps} reps`}
+          </div>
+        ) : (
+          <input
+            type="text"
+            value={durationStr}
+            onChange={(e) => {
+              // ponytail: parse MM:SS input, default to current duration on parse failure
+              const parts = e.target.value.split(':')
+              if (parts.length === 2) {
+                const m = parseInt(parts[0]!, 10) || 0
+                const s = parseInt(parts[1]!, 10) || 0
+                onChange(index, { ...interval, duration: m * 60 + s })
+              }
+            }}
+            className="bg-transparent border-none p-0 font-data-lg text-data-lg text-primary focus:ring-0 focus:outline-none w-20 text-center font-bold tracking-tight"
+            aria-label={`Interval ${index + 1} duration`}
+          />
+        )}
         <div className="hidden group-hover:flex gap-xs items-center pl-8">
           {/* Move Up */}
           <button

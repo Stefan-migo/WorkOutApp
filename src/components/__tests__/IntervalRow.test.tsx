@@ -92,6 +92,43 @@ describe('IntervalRow', () => {
     expect(screen.queryByText('Glutes')).not.toBeInTheDocument()
   })
 
+  it('shows reps badge when interval has reps', () => {
+    render(
+      <IntervalRow
+        interval={interval({ id: 'ir-reps', reps: 12 })}
+        index={0}
+        onChange={noop}
+        onRemove={noop}
+      />,
+    )
+    expect(screen.getByText('12 reps')).toBeInTheDocument()
+  })
+
+  it('shows reps and weight when interval has both', () => {
+    render(
+      <IntervalRow
+        interval={interval({ id: 'ir-weight', reps: 12, weight: 20 })}
+        index={0}
+        onChange={noop}
+        onRemove={noop}
+      />,
+    )
+    expect(screen.getByText('12 reps @ 20kg')).toBeInTheDocument()
+  })
+
+  it('hides reps badge and shows duration when interval has no reps', () => {
+    render(
+      <IntervalRow
+        interval={interval({ id: 'ir-noreps' })}
+        index={0}
+        onChange={noop}
+        onRemove={noop}
+      />,
+    )
+    expect(screen.getByDisplayValue('01:00')).toBeInTheDocument()
+    expect(screen.queryByText(/reps/)).not.toBeInTheDocument()
+  })
+
   it('does not show exercise preview for rest interval', () => {
     render(
       <IntervalRow
