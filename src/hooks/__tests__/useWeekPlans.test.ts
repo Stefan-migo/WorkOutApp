@@ -145,28 +145,35 @@ describe('useWeekPlans', () => {
     expect(mockFrom).not.toHaveBeenCalled()
   })
 
-  it('getWeekPlan returns existing plan by date', async () => {
+  it('getWeekPlan returns existing plan from local state', async () => {
     const loadQb = mockQueryBuilder({ data: [mockRow], error: null })
-    const maybeQb = mockQueryBuilder({ data: mockRow, error: null })
-    mockFrom
-      .mockReturnValueOnce(loadQb)  // initial fetch
-      .mockReturnValue(maybeQb)      // getWeekPlan call
+    mockFrom.mockReturnValueOnce(loadQb)  // initial fetch
 
     const { result } = renderHook(() => useWeekPlans())
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
+    // Plan was loaded during initial fetch — getWeekPlan finds it locally
     const plan = await result.current.getWeekPlan('2026-07-20')
 
     expect(plan).toEqual(expectedWeekPlan)
-    expect(maybeQb.select).toHaveBeenCalledWith('*')
-    expect(maybeQb.eq).toHaveBeenCalledWith('user_id', 'user-1')
-    expect(maybeQb.eq).toHaveBeenCalledWith('start_date', '2026-07-20')
+    // No additional Supabase calls after initial fetch
+    expect(mockFrom).toHaveBeenCalledTimes(1)
   })
 
   it('getWeekPlan auto-creates a new plan when none exists for that date', async () => {
     const loadQb = mockQueryBuilder({ data: [mockRow], error: null })
-    const insertQb = mockQueryBuilder({ data: null, error: null })
+    // Insert returns the newly created row with a UUID
+    const insertedRow = {
+      id: '550e8400-e29b-41d4-a716-446655440000',
+      user_id: 'user-1',
+      title: null,
+      start_date: '2026-07-27',
+      days: [null, null, null, null, null, null, null],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+    const insertQb = mockQueryBuilder({ data: insertedRow, error: null })
 
     // For the getWeekPlan, it chains select/eq/maybeSingle for the lookup
     const lookupQb = mockQueryBuilder({ data: null, error: null })
@@ -185,8 +192,13 @@ describe('useWeekPlans', () => {
     expect(plan).toBeDefined()
     expect(plan!.startDate).toBe('2026-07-27')
     expect(plan!.days).toEqual([null, null, null, null, null, null, null])
-    // Insert was called
-    expect(insertQb.insert).toHaveBeenCalled()
+    // Insert was called with the correct shape (no hardcoded id)
+    expect(insertQb.insert).toHaveBeenCalledWith({
+      user_id: 'user-1',
+      start_date: '2026-07-27',
+      days: [null, null, null, null, null, null, null],
+      updated_at: expect.any(String),
+    })
 
     // Verify the plan was added to the local list
     await waitFor(() => expect(result.current.weekPlans).toHaveLength(2))

@@ -78,10 +78,9 @@ export function useWeekPlans() {
         date.length === 10
           ? getMonday(new Date(date + 'T00:00:00'))
           : getMonday(new Date(date))
-      const id = `week-${monday}`
 
       // Check local state first
-      const local = weekPlans.find((wp) => wp.id === id)
+      const local = weekPlans.find((wp) => wp.startDate === monday)
       if (local) return local
 
       // Try to fetch from Supabase
@@ -98,26 +97,26 @@ export function useWeekPlans() {
         return plan
       }
 
-      // Auto-create on miss
-      const newPlan: WeekPlan = {
-        id,
-        startDate: monday,
-        days: emptyDays(),
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      }
-
-      const { error: insertError } = await supabase
+      // Auto-create on miss — let DB generate UUID
+      const { data: inserted, error: insertError } = await supabase
         .from('week_plans')
-        .insert(toInsertPayload(newPlan, user.id))
+        .insert({
+          user_id: user.id,
+          start_date: monday,
+          days: emptyDays(),
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single()
 
-      if (insertError) {
-        setError(insertError.message)
+      if (insertError || !inserted) {
+        if (insertError) setError(insertError.message)
         return undefined
       }
 
-      setWeekPlans((prev) => [...prev, newPlan])
-      return newPlan
+      const plan = mapRowToWeekPlan(inserted as Record<string, unknown>)
+      setWeekPlans((prev) => [...prev, plan])
+      return plan
     },
     [user, supabase, weekPlans],
   )
