@@ -1,5 +1,7 @@
 export type IntervalType = 'prepare' | 'work' | 'rest' | 'rest_between_cycles' | 'cooldown'
 
+export type WorkoutMode = 'timed' | 'reps'
+
 export interface Interval {
   id: string
   type: IntervalType
@@ -11,6 +13,9 @@ export interface Interval {
   cycleIndex?: number // position within a cycle (0-based)
   cycleId?: string    // identifies which CycleTemplate this came from; all intervals from the same expanded cycle share the same id
   cycleTitle?: string // custom name the user gave the cycle, e.g. "Superset A"
+  reps?: number
+  weight?: number
+  mode?: WorkoutMode
 }
 
 export interface Workout {
@@ -19,6 +24,7 @@ export interface Workout {
   description?: string
   imageUrl?: string
   intervals: Interval[]
+  mode?: WorkoutMode
   createdAt: number
   updatedAt: number
 }
@@ -81,6 +87,9 @@ export interface CompletedInterval {
   actualDuration: number
   completed: boolean
   notes?: string
+  plannedReps?: number
+  actualReps?: number
+  weight?: number
 }
 
 export interface Session {
@@ -114,4 +123,6 @@ export interface CycleTemplate {
   workDuration: number
   restDuration: number
   skipLastRest: boolean
+  workReps?: number
+  workWeight?: number
 }

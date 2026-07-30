@@ -1,4 +1,9 @@
-import type { Interval, Workout } from '@/types/workout'
+import type { Interval, Workout, WorkoutMode } from '@/types/workout'
+
+// ponytail: cascade: interval.mode ?? workout.mode ?? 'timed'
+export function getEffectiveMode(workout: Workout, interval: { mode?: WorkoutMode }): WorkoutMode {
+  return interval.mode ?? workout.mode ?? 'timed'
+}
 
 // ponytail: identity passthrough — flatten is a no-op in the flat model
 export function flattenWorkout(workout: Workout): Interval[] {

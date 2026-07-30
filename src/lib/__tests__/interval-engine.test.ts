@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import type { Workout } from '@/types/workout'
-import { flattenWorkout, totalDuration, durationAt } from '../interval-engine'
+import type { Workout, WorkoutMode } from '@/types/workout'
+import { flattenWorkout, totalDuration, durationAt, getEffectiveMode } from '../interval-engine'
 
 function makeWorkout(intervals: Workout['intervals'] = []): Workout {
   return { id: 'test', title: 'Test', intervals, createdAt: 0, updatedAt: 0 }
@@ -46,6 +46,34 @@ describe('totalDuration', () => {
 
   it('returns 0 for empty workout', () => {
     expect(totalDuration(makeWorkout([]))).toBe(0)
+  })
+})
+
+describe('getEffectiveMode', () => {
+  it('returns timed when no mode is set on workout or interval', () => {
+    const workout = makeWorkout([])
+    const interval = { id: 'a', type: 'work' as const, title: 'A', duration: 30 }
+    expect(getEffectiveMode(workout, interval)).toBe('timed')
+  })
+
+  it('returns workout mode when interval has no mode', () => {
+    const workout = makeWorkout([])
+    workout.mode = 'reps'
+    const interval = { id: 'a', type: 'work' as const, title: 'A', duration: 30 }
+    expect(getEffectiveMode(workout, interval)).toBe('reps')
+  })
+
+  it('returns interval mode when set', () => {
+    const workout = makeWorkout([])
+    const interval = { id: 'a', type: 'work' as const, title: 'A', duration: 30, mode: 'reps' as WorkoutMode }
+    expect(getEffectiveMode(workout, interval)).toBe('reps')
+  })
+
+  it('prefers interval mode over workout mode', () => {
+    const workout = makeWorkout([])
+    workout.mode = 'timed'
+    const interval = { id: 'a', type: 'work' as const, title: 'A', duration: 30, mode: 'reps' as WorkoutMode }
+    expect(getEffectiveMode(workout, interval)).toBe('reps')
   })
 })
 
