@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useReducer } from 'react'
+import { useMemo, useState, useEffect, useRef, useReducer } from 'react'
 import { IntervalRow } from '@/components/IntervalRow'
 import { TimelineStrip } from '@/components/TimelineStrip'
 import { IntervalDetailSheet } from '@/components/IntervalDetailSheet'
@@ -8,6 +8,7 @@ import { useExercises } from '@/hooks/useExercises'
 import { SEGMENT_BG, SEGMENT_TEXT, SEGMENT_DOT, TYPE_ICONS } from '@/lib/segment-styles'
 import { workoutReducer } from '@/lib/workout-reducer'
 import { createInterval } from '@/components/WorkoutBuilder'
+import { detectCycles, isInCycle } from '@/lib/detect-cycles'
 import type { Exercise, Interval, IntervalType, Workout } from '@/types/workout'
 
 // ponytail: counter ID, upgrade to crypto.randomUUID if collisions become an issue
@@ -129,6 +130,8 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
     window.addEventListener('beforeunload', handler)
     return () => window.removeEventListener('beforeunload', handler)
   }, [])
+
+  const cycles = useMemo(() => detectCycles(intervals), [intervals])
 
   const totalDurationSec = intervals.reduce((s, i) => s + i.duration, 0)
   const totalMin = Math.floor(totalDurationSec / 60)
@@ -305,31 +308,55 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
         </div>
       ) : (
         <div className="flex flex-col gap-16">
-          {intervals.map((interval, i) => (
-            <div
-              key={interval.id}
-              role="button"
-              tabIndex={0}
-              onClick={() => handleRowClick(i)}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleRowClick(i) } }}
-            >
-              <IntervalRow
-                interval={interval}
-                index={i}
-                onChange={handleChange}
-                onRemove={handleRemove}
-                onMoveUp={handleMoveUp}
-                onMoveDown={handleMoveDown}
-                isFirst={i === 0}
-                isLast={i === intervals.length - 1}
-                dragIndex={dragIndex}
-                onDragStart={handleDragStart}
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-                onDragEnd={handleDragEnd}
-              />
-            </div>
-          ))}
+          {intervals.map((interval, i) => {
+            const cycle = isInCycle(i, cycles)
+            const isFirstInCycle = cycle && i === cycle.startIdx
+            return (
+              <div key={interval.id} className="relative">
+                {/* Cycle bracket indicator */}
+                {cycle && (
+                  <div
+                    className={`absolute left-0 top-0 w-1 rounded-full bg-primary/40 ${isFirstInCycle ? 'h-full' : 'h-full'}`}
+                    style={{ minHeight: isFirstInCycle ? '100%' : undefined }}
+                  />
+                )}
+
+                {/* Cycle label at start */}
+                {isFirstInCycle && (
+                  <div className="flex items-center gap-2 mb-2 ml-4">
+                    <span className="text-body-xs text-primary font-medium uppercase tracking-wider">
+                      {cycle!.label}
+                    </span>
+                    <div className="h-px flex-1 bg-primary/20" />
+                  </div>
+                )}
+
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handleRowClick(i)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleRowClick(i) } }}
+                  className={cycle ? 'ml-4' : ''}
+                >
+                  <IntervalRow
+                    interval={interval}
+                    index={i}
+                    onChange={handleChange}
+                    onRemove={handleRemove}
+                    onMoveUp={handleMoveUp}
+                    onMoveDown={handleMoveDown}
+                    isFirst={i === 0}
+                    isLast={i === intervals.length - 1}
+                    dragIndex={dragIndex}
+                    onDragStart={handleDragStart}
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
+                    onDragEnd={handleDragEnd}
+                  />
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
 

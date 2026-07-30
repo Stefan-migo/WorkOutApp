@@ -8,6 +8,7 @@ import { useFavorites } from '@/hooks/useFavorites'
 import { useWorkoutContext } from '@/context/WorkoutContext'
 import { ExerciseFormDialog } from '@/components/ExerciseFormDialog'
 import { ExerciseDeleteDialog } from '@/components/ExerciseDeleteDialog'
+import { AddToWorkoutModal } from '@/components/AddToWorkoutModal'
 import type { Exercise } from '@/types/workout'
 import type { ExerciseFormData } from '@/components/ExerciseFormDialog'
 import type { ImageEntry } from '@/hooks/useIndexedDB'
@@ -27,6 +28,23 @@ export default function ExerciseDetailPage() {
 
   // ponytail: exercises already loaded into state array — use find, not async getExercise
   const exercise = useMemo(() => exercises.find((e) => e.id === params.id), [exercises, params.id])
+
+  // MUST be before early returns — all hooks unconditional
+  const allMuscleGroups = useMemo(() => {
+    const set = new Set<string>()
+    exercises.forEach((ex) => {
+      ex.primaryMuscles?.forEach((m) => set.add(m))
+      ex.secondaryMuscles?.forEach((m) => set.add(m))
+      ex.muscleGroups?.forEach((m) => set.add(m))
+    })
+    return Array.from(set).sort()
+  }, [exercises])
+
+  const allEquipment = useMemo(() => {
+    const set = new Set<string>()
+    exercises.forEach((ex) => ex.equipment?.forEach((eq) => set.add(eq)))
+    return Array.from(set).sort()
+  }, [exercises])
 
   // Load IDB images on mount and when exercise changes
   useEffect(() => {
@@ -54,6 +72,7 @@ export default function ExerciseDetailPage() {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const deleteDialogRef = useRef<HTMLDialogElement>(null)
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
+  const [showAssignModal, setShowAssignModal] = useState(false)
 
   if (isLoading) {
     return (
@@ -154,22 +173,6 @@ export default function ExerciseDetailPage() {
   function workoutRefCount(id: string): number {
     return workouts.filter((w) => w.intervals.some((i) => i.exerciseId === id)).length
   }
-
-  const allMuscleGroups = useMemo(() => {
-    const set = new Set<string>()
-    exercises.forEach((ex) => {
-      ex.primaryMuscles?.forEach((m) => set.add(m))
-      ex.secondaryMuscles?.forEach((m) => set.add(m))
-      ex.muscleGroups?.forEach((m) => set.add(m))
-    })
-    return Array.from(set).sort()
-  }, [exercises])
-
-  const allEquipment = useMemo(() => {
-    const set = new Set<string>()
-    exercises.forEach((ex) => ex.equipment?.forEach((eq) => set.add(eq)))
-    return Array.from(set).sort()
-  }, [exercises])
 
   return (
     <div className="max-w-[1440px] mx-auto w-full p-margin-mobile md:p-margin-desktop flex flex-col gap-24 pb-32">
@@ -380,10 +383,10 @@ export default function ExerciseDetailPage() {
           Delete
         </button>
         <button
-          onClick={() => router.push(`/workouts/new?exerciseId=${ex.id}`)}
+          onClick={() => setShowAssignModal(true)}
           className="px-6 py-3 border border-outline text-primary font-label text-label-caps rounded-lg hover:bg-surface-container transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
         >
-          Add to Workout
+          Assign to Workout
         </button>
       </div>
 
@@ -415,6 +418,13 @@ export default function ExerciseDetailPage() {
         dialogRef={deleteDialogRef}
         exerciseName={ex.name}
       />
+
+      {showAssignModal && (
+        <AddToWorkoutModal
+          exercise={ex}
+          onClose={() => setShowAssignModal(false)}
+        />
+      )}
     </div>
   )
 }

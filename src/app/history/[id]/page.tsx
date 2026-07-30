@@ -157,7 +157,7 @@ export default function SessionDetailPage() {
         <div className="flex flex-col gap-8">
           {session.intervals.map((intv, idx) => (
             <div
-              key={intv.intervalId}
+              key={`${intv.intervalId}-${idx}`}
               className={`bg-surface-container-lowest border-l-4 ${SEGMENT_BORDER[intv.type]} border-y border-r border-outline-variant/30 rounded-r-lg p-16 flex justify-between items-center hover:bg-surface-container-low transition-colors group cursor-default`}
             >
               <div className="flex items-center gap-16">

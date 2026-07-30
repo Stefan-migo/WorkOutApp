@@ -52,6 +52,10 @@ vi.mock('@/components/ExerciseDeleteDialog', () => ({
   ExerciseDeleteDialog: vi.fn(() => null),
 }))
 
+vi.mock('@/components/AddToWorkoutModal', () => ({
+  AddToWorkoutModal: vi.fn(({ exercise }) => <div>Assign &quot;{exercise.name}&quot;</div>),
+}))
+
 afterEach(() => {
   cleanup()
   vi.clearAllMocks()
@@ -185,23 +189,24 @@ describe('ExerciseDetailPage', () => {
     expect(screen.getByText('User created')).toBeInTheDocument()
   })
 
-  it('renders Edit, Delete, and Add to Workout buttons', async () => {
+  it('renders Edit, Delete, and Assign to Workout buttons', async () => {
     mockExercises = [createMockExercise()]
     const Page = (await import('../page')).default
     render(<Page />)
 
     expect(screen.getByRole('button', { name: /edit/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /add to workout/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /assign to workout/i })).toBeInTheDocument()
   })
 
-  it('navigates to /workouts/new with exerciseId on Add to Workout', async () => {
+  it('opens Assign to Workout modal on button click', async () => {
     mockExercises = [createMockExercise()]
     const Page = (await import('../page')).default
     render(<Page />)
 
-    fireEvent.click(screen.getByRole('button', { name: /add to workout/i }))
-    expect(mockPush).toHaveBeenCalledWith('/workouts/new?exerciseId=ex-1')
+    fireEvent.click(screen.getByRole('button', { name: /assign to workout/i }))
+    // Modal shows exercise name in the header
+    expect(screen.getByText(/assign.*push/i)).toBeInTheDocument()
   })
 
   it('opens ExerciseFormDialog pre-populated on Edit', async () => {

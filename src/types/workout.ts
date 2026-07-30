@@ -8,6 +8,9 @@ export interface Interval {
   description?: string
   imageUrl?: string // external URL only
   exerciseId?: string // only for type='work'
+  cycleIndex?: number // position within a cycle (0-based)
+  cycleId?: string    // identifies which CycleTemplate this came from; all intervals from the same expanded cycle share the same id
+  cycleTitle?: string // custom name the user gave the cycle, e.g. "Superset A"
 }
 
 export interface Workout {

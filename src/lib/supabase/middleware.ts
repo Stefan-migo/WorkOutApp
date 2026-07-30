@@ -30,8 +30,8 @@ export async function updateSession(request: NextRequest) {
     },
   )
 
-  // Important: refresh session — no await, fire and forget
-  await supabase.auth.getUser()
+  // Refresh session — getUser() reads cookies, refreshes token if needed
+  const { data: { user } } = await supabase.auth.getUser()
 
-  return supabaseResponse
+  return { response: supabaseResponse, user }
 }

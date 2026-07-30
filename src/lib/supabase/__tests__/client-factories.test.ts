@@ -79,10 +79,11 @@ describe('updateSession (middleware)', () => {
       url: 'http://localhost:3000/workouts',
     }
 
-    const response = await updateSession(mockRequest as any)
+    const result = await updateSession(mockRequest as any)
 
-    expect(response).toBeDefined()
-    expect(response.headers).toBeDefined()
+    expect(result).toBeDefined()
+    expect(result.response).toBeDefined()
+    expect(result.response.headers).toBeDefined()
     expect(createServerClient).toHaveBeenCalled()
   })
 })

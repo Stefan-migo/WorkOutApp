@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import type { Exercise, ExerciseCategory } from '@/types/workout'
 import { ExerciseSearchHeader } from '@/components/ExerciseSearchHeader'
 import { ExerciseFormDialog } from '@/components/ExerciseFormDialog'
+import { AddToWorkoutModal } from '@/components/AddToWorkoutModal'
 import type { ExerciseFormData } from '@/components/ExerciseFormDialog'
 
 // ponytail: flat list CRUD, no pagination, no drag-reorder — add when >50 exercises exist
@@ -41,6 +42,7 @@ export default function ExercisesPage() {
   const [form, setForm] = useState(EMPTY_FORM)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [favoritesFilter, setFavoritesFilter] = useState(false)
+  const [assigningExercise, setAssigningExercise] = useState<Exercise | null>(null)
 
   // ponytail: clearOrphans on every exercise list refresh to keep favorites clean
   useEffect(() => { clearOrphans(exercises.map((e) => e.id)) }, [exercises, clearOrphans])
@@ -262,6 +264,16 @@ export default function ExercisesPage() {
                           >
                             {isFavorite(ex.id) ? '★' : '☆'}
                           </button>
+                          {/* Quick assign bottom-right */}
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setAssigningExercise(ex) }}
+                            className="absolute bottom-2 right-2 w-10 h-10 flex items-center justify-center rounded-full bg-surface/90 backdrop-blur shadow-md hover:bg-primary-btn hover:text-on-primary-btn hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none z-10"
+                            aria-label="Assign to workout"
+                          >
+                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                          </button>
                           {/* Category badge top-right */}
                           <span className="absolute top-2 right-2 bg-surface/80 backdrop-blur px-2 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-on-surface-variant font-semibold shadow-sm uppercase tracking-wider">
                             {ex.category}
@@ -324,6 +336,12 @@ export default function ExercisesPage() {
         onImageUpload={editingId ? (file) => saveExerciseImage(editingId, file) : undefined}
       />
 
+      {assigningExercise && (
+        <AddToWorkoutModal
+          exercise={assigningExercise}
+          onClose={() => setAssigningExercise(null)}
+        />
+      )}
     </div>
   )
 }

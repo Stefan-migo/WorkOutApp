@@ -56,6 +56,10 @@ vi.mock('@/context/WorkoutContext', () => ({
   useWorkoutContext: () => ({ workouts: [] }),
 }))
 
+vi.mock('@/components/AddToWorkoutModal', () => ({
+  AddToWorkoutModal: vi.fn(({ exercise }) => <div data-testid="assign-modal">Assign &quot;{exercise.name}&quot;</div>),
+}))
+
 vi.mock('@/hooks/useFavorites', () => ({
   useFavorites: () => ({
     favoriteIds: mockFavoriteIds,
@@ -317,5 +321,40 @@ describe('ExercisesPage category section headers', () => {
 
     // Both exercises are in "strength" category
     expect(screen.getByText('Strength (2)')).toBeInTheDocument()
+  })
+})
+
+describe('ExercisesPage quick assign', () => {
+  beforeEach(() => {
+    mockIsFavorite.mockReturnValue(false)
+  })
+
+  it('renders an assign button on each exercise card', async () => {
+    const ExercisesPage = (await import('../page')).default
+    render(<ExercisesPage />)
+
+    const assignBtns = screen.getAllByRole('button', { name: /assign to workout/i })
+    expect(assignBtns).toHaveLength(2)
+  })
+
+  it('opens assign modal with correct exercise name on click', async () => {
+    const ExercisesPage = (await import('../page')).default
+    render(<ExercisesPage />)
+
+    const assignBtns = screen.getAllByRole('button', { name: /assign to workout/i })
+    fireEvent.click(assignBtns[0]!)
+
+    expect(screen.getByTestId('assign-modal')).toBeInTheDocument()
+    expect(screen.getByText(/assign.*push up/i)).toBeInTheDocument()
+  })
+
+  it('does not navigate to exercise detail when assign button is clicked', async () => {
+    const ExercisesPage = (await import('../page')).default
+    render(<ExercisesPage />)
+
+    const assignBtns = screen.getAllByRole('button', { name: /assign to workout/i })
+    fireEvent.click(assignBtns[0]!)
+
+    expect(mockPush).not.toHaveBeenCalled()
   })
 })

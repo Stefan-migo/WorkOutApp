@@ -26,6 +26,9 @@ export function expandCycle(cycle: CycleTemplate): Interval[] {
       type: 'work',
       title: 'Work',
       duration: cycle.workDuration,
+      cycleIndex: i,
+      cycleId: cycle.id,
+      cycleTitle: cycle.title,
     })
     const isLast = i === cycle.repeat - 1
     if (!isLast || !cycle.skipLastRest) {
@@ -34,6 +37,8 @@ export function expandCycle(cycle: CycleTemplate): Interval[] {
         type: 'rest',
         title: 'Rest',
         duration: cycle.restDuration,
+        cycleId: cycle.id,
+        cycleTitle: cycle.title,
       })
     }
   }
