@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useMemo } from 'react'
-import type { Interval, Exercise } from '@/types/workout'
+import type { Interval, Exercise, WorkoutMode } from '@/types/workout'
 import { ExercisePicker } from './ExercisePicker'
 
 interface IntervalDetailSheetProps {
@@ -10,9 +10,10 @@ interface IntervalDetailSheetProps {
   onClose: () => void
   exercises?: Exercise[]
   onImageUpload?: (file: File) => Promise<string>
+  mode?: WorkoutMode
 }
 
-export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onImageUpload }: IntervalDetailSheetProps) {
+export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onImageUpload, mode }: IntervalDetailSheetProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [title, setTitle] = useState(interval.title)
@@ -22,6 +23,12 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
   const [imageUrl, setImageUrl] = useState(interval.imageUrl ?? '')
   const [pickerOpen, setPickerOpen] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [reps, setReps] = useState(interval.reps ?? 0)
+  const [weight, setWeight] = useState(interval.weight ?? 0)
+
+  // ponytail: effective mode cascade: interval.mode ?? workout.mode ?? 'timed'
+  const effectiveMode: WorkoutMode = interval.mode ?? mode ?? 'timed'
+  const showRepsInput = effectiveMode === 'reps' && interval.type === 'work'
 
   useEffect(() => {
     dialogRef.current?.showModal()
@@ -31,7 +38,9 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
     onSave({
       ...interval,
       title,
-      duration,
+      ...(showRepsInput
+        ? { reps: Math.max(1, reps), weight: weight > 0 ? weight : undefined, duration: interval.duration }
+        : { duration }),
       description: description || undefined,
       exerciseId: exerciseId || undefined,
       imageUrl: imageUrl || undefined,
@@ -109,18 +118,46 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
             />
           </label>
 
-          {/* Duration */}
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs text-on-surface-variant">Duration (seconds)</span>
-            <input
-              type="number"
-              value={duration}
-              onChange={(e) => setDuration(Math.max(1, Math.min(3600, Number(e.target.value))))}
-              min={1}
-              max={3600}
-              className="bg-surface-container-low text-on-surface rounded-lg px-3 py-2.5 text-sm w-28 border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
-            />
-          </label>
+          {/* Duration / Reps */}
+          {showRepsInput ? (
+            <>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-xs text-on-surface-variant">Reps</span>
+                <input
+                  type="number"
+                  value={reps}
+                  onChange={(e) => setReps(Math.max(1, Math.min(999, Number(e.target.value))))}
+                  min={1}
+                  max={999}
+                  className="bg-surface-container-low text-on-surface rounded-lg px-3 py-2.5 text-sm w-28 border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
+                />
+              </label>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-xs text-on-surface-variant">Weight (kg)</span>
+                <input
+                  type="number"
+                  value={weight || ''}
+                  onChange={(e) => setWeight(e.target.value ? Math.max(0, Math.min(9999, Number(e.target.value))) : 0)}
+                  min={0}
+                  max={9999}
+                  placeholder="0"
+                  className="bg-surface-container-low text-on-surface rounded-lg px-3 py-2.5 text-sm w-28 border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
+                />
+              </label>
+            </>
+          ) : (
+            <label className="flex flex-col gap-1.5">
+              <span className="text-xs text-on-surface-variant">Duration (seconds)</span>
+              <input
+                type="number"
+                value={duration}
+                onChange={(e) => setDuration(Math.max(1, Math.min(3600, Number(e.target.value))))}
+                min={1}
+                max={3600}
+                className="bg-surface-container-low text-on-surface rounded-lg px-3 py-2.5 text-sm w-28 border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
+              />
+            </label>
+          )}
 
           {/* Exercise picker trigger — only for work type */}
           {interval.type === 'work' && exercises && exercises.length > 0 && (
