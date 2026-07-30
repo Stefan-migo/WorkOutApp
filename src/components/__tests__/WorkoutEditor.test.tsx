@@ -160,6 +160,42 @@ describe('WorkoutEditor', () => {
     expect(saveBtn).toBeDisabled()
   })
 
+  it('renders mode toggle with Timed and Reps buttons', async () => {
+    const WorkoutEditor = (await import('../WorkoutEditor')).default
+    const intervals: Interval[] = [
+      { id: 'i1', type: 'work', title: 'Test', duration: 30 },
+    ]
+    render(<WorkoutEditor initialIntervals={intervals} onSave={vi.fn()} />)
+    expect(screen.getByRole('button', { name: /timed/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /reps/i })).toBeInTheDocument()
+  })
+
+  it('persists mode in workout on save', async () => {
+    const WorkoutEditor = (await import('../WorkoutEditor')).default
+    const onSave = vi.fn()
+    const intervals: Interval[] = [
+      { id: 'i1', type: 'work', title: 'Test', duration: 30 },
+    ]
+    render(<WorkoutEditor existingWorkout={{ id: 'w1', title: 'Test', intervals, createdAt: 1, updatedAt: 1 }} onSave={onSave} />)
+    fireEvent.click(screen.getByRole('button', { name: /reps/i }))
+    fireEvent.click(screen.getByText('Update Workout'))
+    expect(onSave).toHaveBeenCalledTimes(1)
+    const saved = onSave.mock.calls[0]![0] as Workout
+    expect(saved.mode).toBe('reps')
+  })
+
+  it('shows Timed as active by default', async () => {
+    const WorkoutEditor = (await import('../WorkoutEditor')).default
+    const intervals: Interval[] = [
+      { id: 'i1', type: 'work', title: 'Test', duration: 30 },
+    ]
+    render(<WorkoutEditor initialIntervals={intervals} onSave={vi.fn()} />)
+    // Timed button should be in the active state (has primary/filled style)
+    const timedBtn = screen.getByRole('button', { name: /timed/i })
+    const repsBtn = screen.getByRole('button', { name: /reps/i })
+    expect(timedBtn.className).not.toBe(repsBtn.className)
+  })
+
   it('discard button calls onCancel', async () => {
     const WorkoutEditor = (await import('../WorkoutEditor')).default
     const onCancel = vi.fn()

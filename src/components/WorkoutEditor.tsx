@@ -9,7 +9,7 @@ import { SEGMENT_BG, SEGMENT_TEXT, SEGMENT_DOT, TYPE_ICONS } from '@/lib/segment
 import { workoutReducer } from '@/lib/workout-reducer'
 import { createInterval } from '@/components/WorkoutBuilder'
 import { detectCycles, isInCycle } from '@/lib/detect-cycles'
-import type { Exercise, Interval, IntervalType, Workout } from '@/types/workout'
+import type { Exercise, Interval, IntervalType, Workout, WorkoutMode } from '@/types/workout'
 
 // ponytail: counter ID, upgrade to crypto.randomUUID if collisions become an issue
 let nextId = 1
@@ -111,6 +111,7 @@ interface WorkoutEditorProps {
 export default function WorkoutEditor({ existingWorkout, initialIntervals, onSave, onCancel }: WorkoutEditorProps) {
   const { exercises, saveExerciseImage } = useExercises()
   const [title, setTitle] = useState(existingWorkout?.title ?? '')
+  const [workoutMode, setWorkoutMode] = useState<WorkoutMode>(existingWorkout?.mode ?? 'timed')
   const [intervals, dispatch] = useReducer(
     workoutReducer,
     existingWorkout?.intervals ?? initialIntervals ?? DEFAULT_INTERVALS,
@@ -228,7 +229,8 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
     if (originalInterval) {
       const changes: Partial<Interval> = {}
       const changedFields: string[] = []
-      for (const key of ['title', 'duration', 'description', 'imageUrl'] as const) {
+      // ponytail: reps included for bulk apply in reps mode; safe to always check since undefined !== undefined is false
+      for (const key of ['title', 'duration', 'description', 'imageUrl', 'reps'] as const) {
         if (updated[key] !== originalInterval[key]) {
           ;(changes as Record<string, unknown>)[key] = updated[key]
           changedFields.push(key)
@@ -266,8 +268,8 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
   function handleSave() {
     if (!title.trim() || intervals.length === 0) return
     const workout: Workout = existingWorkout
-      ? { ...existingWorkout, title: title.trim(), intervals, updatedAt: Date.now() }
-      : { id: generateId(), title: title.trim(), intervals, createdAt: Date.now(), updatedAt: Date.now() }
+      ? { ...existingWorkout, title: title.trim(), intervals, mode: workoutMode, updatedAt: Date.now() }
+      : { id: generateId(), title: title.trim(), intervals, mode: workoutMode, createdAt: Date.now(), updatedAt: Date.now() }
     onSave(workout)
   }
 
@@ -275,21 +277,52 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
 
   return (
     <div className="max-w-2xl mx-auto w-full p-margin-mobile md:p-margin-desktop flex flex-col gap-6">
-      <div className="glass-card rounded-xl p-16 flex flex-col md:flex-row justify-between items-start md:items-end gap-24">
-        <div className="w-full md:w-2/3">
-          <label className="block font-label text-label-caps text-on-surface-variant mb-xs uppercase tracking-wider">Workout Title</label>
-          <input
-            type="text"
-            value={title}
-            placeholder="Name your workout..."
-            className="w-full bg-transparent border-0 border-b-2 border-outline-variant pb-xs font-headline text-headline-lg text-on-surface focus:border-secondary focus:ring-0 transition-colors px-0 outline-none placeholder:text-outline/50 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
-            onChange={(e) => { markDirty(); setTitle(e.target.value) }}
-          />
+      <div className="glass-card rounded-xl p-16 flex flex-col gap-12">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-24">
+          <div className="w-full md:w-2/3">
+            <label className="block font-label text-label-caps text-on-surface-variant mb-xs uppercase tracking-wider">Workout Title</label>
+            <input
+              type="text"
+              value={title}
+              placeholder="Name your workout..."
+              className="w-full bg-transparent border-0 border-b-2 border-outline-variant pb-xs font-headline text-headline-lg text-on-surface focus:border-secondary focus:ring-0 transition-colors px-0 outline-none placeholder:text-outline/50 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+              onChange={(e) => { markDirty(); setTitle(e.target.value) }}
+            />
+          </div>
+          <div className="text-right w-full md:w-auto">
+            <span className="block font-label text-label-caps text-on-surface-variant mb-xs uppercase tracking-wider">Est. Duration</span>
+            <div className="font-mono text-display-timer-mobile text-primary tracking-tighter">
+              {totalMin}:{String(totalSec).padStart(2, '0')}
+            </div>
+          </div>
         </div>
-        <div className="text-right w-full md:w-auto">
-          <span className="block font-label text-label-caps text-on-surface-variant mb-xs uppercase tracking-wider">Est. Duration</span>
-          <div className="font-mono text-display-timer-mobile text-primary tracking-tighter">
-            {totalMin}:{String(totalSec).padStart(2, '0')}
+
+        {/* Mode toggle */}
+        <div className="flex items-center gap-8 pt-4 border-t border-outline-variant/20">
+          <span className="font-label-caps text-[10px] text-on-surface-variant uppercase tracking-wider">Mode</span>
+          <div className="flex rounded-lg overflow-hidden border border-outline-variant/30">
+            <button
+              type="button"
+              onClick={() => { markDirty(); setWorkoutMode('timed') }}
+              className={`px-12 py-4 text-xs font-medium transition-colors ${
+                workoutMode === 'timed'
+                  ? 'bg-primary-btn text-on-primary-btn'
+                  : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container'
+              }`}
+            >
+              Timed
+            </button>
+            <button
+              type="button"
+              onClick={() => { markDirty(); setWorkoutMode('reps') }}
+              className={`px-12 py-4 text-xs font-medium transition-colors ${
+                workoutMode === 'reps'
+                  ? 'bg-primary-btn text-on-primary-btn'
+                  : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container'
+              }`}
+            >
+              Reps
+            </button>
           </div>
         </div>
       </div>
@@ -386,6 +419,7 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
           onClose={() => { setEditingIndex(null); setOriginalInterval(null) }}
           exercises={exercises}
           onImageUpload={(file) => saveExerciseImage(intervals[editingIndex]!.id, file)}
+          mode={workoutMode}
         />
       )}
 
