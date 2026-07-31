@@ -140,6 +140,32 @@ describe('WorkoutEditor', () => {
     expect(saved.intervals[0]).toMatchObject({ id: 'i1', type: 'work', title: 'Sprint' })
   })
 
+  it('preserves legacy workout mode on save (no global mode selector)', async () => {
+    const WorkoutEditor = (await import('../WorkoutEditor')).default
+    const onSave = vi.fn()
+    const intervals: Interval[] = [
+      { id: 'i1', type: 'work', title: 'Test', duration: 30 },
+    ]
+    render(<WorkoutEditor existingWorkout={{ id: 'w1', title: 'Test', mode: 'reps', intervals, createdAt: 1, updatedAt: 1 }} onSave={onSave} />)
+    // No global mode toggle in the editor anymore
+    expect(screen.queryByRole('button', { name: /^timed$/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^reps$/i })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByText('Update Workout'))
+    const saved = onSave.mock.calls[0]![0] as Workout
+    // Spread of ...existingWorkout keeps the legacy mode
+    expect(saved.mode).toBe('reps')
+  })
+
+  it('new workouts save without a mode field (defaults to timed)', async () => {
+    const WorkoutEditor = (await import('../WorkoutEditor')).default
+    const onSave = vi.fn()
+    render(<WorkoutEditor initialIntervals={[{ id: 'i1', type: 'work', title: 'Test', duration: 30 }]} onSave={onSave} />)
+    fireEvent.change(screen.getByPlaceholderText('Name your workout...'), { target: { value: 'New Workout' } })
+    fireEvent.click(screen.getByText('Save Workout'))
+    const saved = onSave.mock.calls[0]![0] as Workout
+    expect(saved).not.toHaveProperty('mode')
+  })
+
   it('save is disabled when title is empty', async () => {
     const WorkoutEditor = (await import('../WorkoutEditor')).default
     render(<WorkoutEditor initialIntervals={[{ id: 'i1', type: 'work', title: 'Test', duration: 30 }]} onSave={vi.fn()} />)
@@ -158,42 +184,6 @@ describe('WorkoutEditor', () => {
     render(<WorkoutEditor existingWorkout={existing} onSave={onSave} />)
     const saveBtn = screen.getByText('Update Workout')
     expect(saveBtn).toBeDisabled()
-  })
-
-  it('renders mode toggle with Timed and Reps buttons', async () => {
-    const WorkoutEditor = (await import('../WorkoutEditor')).default
-    const intervals: Interval[] = [
-      { id: 'i1', type: 'work', title: 'Test', duration: 30 },
-    ]
-    render(<WorkoutEditor initialIntervals={intervals} onSave={vi.fn()} />)
-    expect(screen.getByRole('button', { name: /timed/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /reps/i })).toBeInTheDocument()
-  })
-
-  it('persists mode in workout on save', async () => {
-    const WorkoutEditor = (await import('../WorkoutEditor')).default
-    const onSave = vi.fn()
-    const intervals: Interval[] = [
-      { id: 'i1', type: 'work', title: 'Test', duration: 30 },
-    ]
-    render(<WorkoutEditor existingWorkout={{ id: 'w1', title: 'Test', intervals, createdAt: 1, updatedAt: 1 }} onSave={onSave} />)
-    fireEvent.click(screen.getByRole('button', { name: /reps/i }))
-    fireEvent.click(screen.getByText('Update Workout'))
-    expect(onSave).toHaveBeenCalledTimes(1)
-    const saved = onSave.mock.calls[0]![0] as Workout
-    expect(saved.mode).toBe('reps')
-  })
-
-  it('shows Timed as active by default', async () => {
-    const WorkoutEditor = (await import('../WorkoutEditor')).default
-    const intervals: Interval[] = [
-      { id: 'i1', type: 'work', title: 'Test', duration: 30 },
-    ]
-    render(<WorkoutEditor initialIntervals={intervals} onSave={vi.fn()} />)
-    // Timed button should be in the active state (has primary/filled style)
-    const timedBtn = screen.getByRole('button', { name: /timed/i })
-    const repsBtn = screen.getByRole('button', { name: /reps/i })
-    expect(timedBtn.className).not.toBe(repsBtn.className)
   })
 
   it('discard button calls onCancel', async () => {

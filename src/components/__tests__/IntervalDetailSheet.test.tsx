@@ -11,7 +11,7 @@ beforeAll(() => {
 import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { IntervalDetailSheet } from '../IntervalDetailSheet'
-import type { Interval, Exercise, WorkoutMode } from '@/types/workout'
+import type { Interval, Exercise } from '@/types/workout'
 
 vi.mock('@/hooks/useFavorites', () => ({
   useFavorites: () => ({
@@ -151,83 +151,135 @@ describe('IntervalDetailSheet', () => {
     expect(screen.getByDisplayValue('https://example.com/img.jpg')).toBeInTheDocument()
   })
 
-  it('shows reps input for work interval when mode is reps', () => {
+  it('shows mode toggle for work intervals', () => {
+    render(
+      <IntervalDetailSheet
+        interval={interval({ id: 'i-toggle', type: 'work' })}
+        onSave={vi.fn()}
+        onClose={vi.fn()}
+      />,
+    )
+    expect(screen.getByRole('button', { name: /timed/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /reps/i })).toBeInTheDocument()
+  })
+
+  it('does NOT show mode toggle for non-work intervals', () => {
+    render(
+      <IntervalDetailSheet
+        interval={interval({ id: 'i-toggle-rest', type: 'rest' })}
+        onSave={vi.fn()}
+        onClose={vi.fn()}
+      />,
+    )
+    expect(screen.queryByRole('button', { name: /timed/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /reps/i })).not.toBeInTheDocument()
+  })
+
+  it('shows reps input for work interval when Reps mode is selected', () => {
     render(
       <IntervalDetailSheet
         interval={interval({ id: 'i-reps', type: 'work' })}
         onSave={vi.fn()}
         onClose={vi.fn()}
-        mode="reps"
       />,
     )
+    fireEvent.click(screen.getByRole('button', { name: /reps/i }))
     expect(screen.getByLabelText('Reps')).toBeInTheDocument()
   })
 
-  it('shows weight input for work interval when mode is reps', () => {
+  it('shows weight input for work interval when Reps mode is selected', () => {
     render(
       <IntervalDetailSheet
         interval={interval({ id: 'i-weight', type: 'work' })}
         onSave={vi.fn()}
         onClose={vi.fn()}
-        mode="reps"
       />,
     )
+    fireEvent.click(screen.getByRole('button', { name: /reps/i }))
     expect(screen.getByLabelText('Weight (kg)')).toBeInTheDocument()
   })
 
-  it('hides duration input for work interval when mode is reps', () => {
+  it('hides duration input for work interval when Reps mode is selected', () => {
     render(
       <IntervalDetailSheet
         interval={interval({ id: 'i-hide-dur', type: 'work' })}
         onSave={vi.fn()}
         onClose={vi.fn()}
-        mode="reps"
       />,
     )
+    fireEvent.click(screen.getByRole('button', { name: /reps/i }))
     expect(screen.queryByLabelText('Duration (seconds)')).not.toBeInTheDocument()
   })
 
-  it('does not show reps input for non-work type even in reps mode', () => {
+  it('does not show reps input for non-work type (no toggle, always timed)', () => {
     render(
       <IntervalDetailSheet
         interval={interval({ id: 'i-rest-reps', type: 'rest' })}
         onSave={vi.fn()}
         onClose={vi.fn()}
-        mode="reps"
-      />,
-    )
-    expect(screen.queryByLabelText('Reps')).not.toBeInTheDocument()
-  })
-
-  it('does not show reps input when mode is timed', () => {
-    render(
-      <IntervalDetailSheet
-        interval={interval({ id: 'i-timed', type: 'work' })}
-        onSave={vi.fn()}
-        onClose={vi.fn()}
-        mode="timed"
       />,
     )
     expect(screen.queryByLabelText('Reps')).not.toBeInTheDocument()
     expect(screen.getByLabelText('Duration (seconds)')).toBeInTheDocument()
   })
 
-  it('includes reps and weight in onSave when in reps mode', () => {
+  it('does not show reps input when mode is timed (default)', () => {
+    render(
+      <IntervalDetailSheet
+        interval={interval({ id: 'i-timed', type: 'work' })}
+        onSave={vi.fn()}
+        onClose={vi.fn()}
+      />,
+    )
+    expect(screen.queryByLabelText('Reps')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Duration (seconds)')).toBeInTheDocument()
+  })
+
+  it('includes reps, weight and mode in onSave when in reps mode', () => {
     const onSave = vi.fn()
     render(
       <IntervalDetailSheet
         interval={interval({ id: 'i-save-reps', type: 'work' })}
         onSave={onSave}
         onClose={vi.fn()}
-        mode="reps"
       />,
     )
+    fireEvent.click(screen.getByRole('button', { name: /reps/i }))
     const repsInput = screen.getByLabelText('Reps')
     fireEvent.change(repsInput, { target: { value: '10' } })
     fireEvent.click(screen.getByText('Save'))
     expect(onSave).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'i-save-reps', reps: 10 }),
+      expect.objectContaining({ id: 'i-save-reps', mode: 'reps', reps: 10 }),
     )
+  })
+
+  it('includes mode: timed in onSave for work intervals', () => {
+    const onSave = vi.fn()
+    render(
+      <IntervalDetailSheet
+        interval={interval({ id: 'i-save-timed', type: 'work' })}
+        onSave={onSave}
+        onClose={vi.fn()}
+      />,
+    )
+    fireEvent.click(screen.getByText('Save'))
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'i-save-timed', mode: 'timed' }),
+    )
+  })
+
+  it('does NOT include mode in onSave for non-work intervals', () => {
+    const onSave = vi.fn()
+    render(
+      <IntervalDetailSheet
+        interval={interval({ id: 'i-save-rest', type: 'rest' })}
+        onSave={onSave}
+        onClose={vi.fn()}
+      />,
+    )
+    fireEvent.click(screen.getByText('Save'))
+    const saved = onSave.mock.calls[0]![0] as Interval
+    expect(saved).not.toHaveProperty('mode')
   })
 
   it('does NOT render cycle/set/rest-between-cycles controls (V2 flat model)', () => {

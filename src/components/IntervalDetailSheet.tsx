@@ -10,10 +10,9 @@ interface IntervalDetailSheetProps {
   onClose: () => void
   exercises?: Exercise[]
   onImageUpload?: (file: File) => Promise<string>
-  mode?: WorkoutMode
 }
 
-export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onImageUpload, mode }: IntervalDetailSheetProps) {
+export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onImageUpload }: IntervalDetailSheetProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [title, setTitle] = useState(interval.title)
@@ -25,26 +24,35 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
   const [uploading, setUploading] = useState(false)
   const [reps, setReps] = useState(interval.reps ?? 0)
   const [weight, setWeight] = useState(interval.weight ?? 0)
+  const [editMode, setEditMode] = useState<WorkoutMode>(interval.mode ?? 'timed')
 
-  // ponytail: effective mode cascade: interval.mode ?? workout.mode ?? 'timed'
-  const effectiveMode: WorkoutMode = interval.mode ?? mode ?? 'timed'
-  const showRepsInput = effectiveMode === 'reps' && interval.type === 'work'
+  // ponytail: per-interval mode; rest/prepare/cooldown always stay timed
+  const showRepsInput = editMode === 'reps' && interval.type === 'work'
 
   useEffect(() => {
     dialogRef.current?.showModal()
   }, [])
 
   function handleSave() {
-    onSave({
+    const payload: Interval = {
       ...interval,
       title,
-      ...(showRepsInput
-        ? { reps: Math.max(1, reps), weight: weight > 0 ? weight : undefined, duration: interval.duration }
-        : { duration }),
       description: description || undefined,
       exerciseId: exerciseId || undefined,
       imageUrl: imageUrl || undefined,
-    })
+    }
+    if (showRepsInput) {
+      payload.mode = 'reps'
+      payload.reps = Math.max(1, reps)
+      payload.weight = weight > 0 ? weight : undefined
+      // Keep the interval's duration even in reps mode (used as fallback timing)
+      payload.duration = interval.duration
+    } else {
+      payload.duration = duration
+      // Only work intervals carry a mode; non-work (rest/prepare/cooldown) preserve theirs via ...interval
+      if (interval.type === 'work') payload.mode = 'timed'
+    }
+    onSave(payload)
     dialogRef.current?.close()
   }
 
@@ -117,6 +125,35 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
               className="bg-surface-container-low text-on-surface rounded-lg px-3 py-2.5 text-sm border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
             />
           </label>
+
+          {/* Mode toggle — work intervals only; rest/prepare/cooldown are always timed */}
+          {interval.type === 'work' && (
+            <div className="flex items-center gap-2">
+              <span className="font-label-caps text-label-caps text-on-surface-variant text-[9px] uppercase tracking-wider">Mode</span>
+              <button
+                type="button"
+                onClick={() => setEditMode('timed')}
+                className={`px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider transition-colors ${
+                  editMode !== 'reps'
+                    ? 'bg-primary text-on-primary-btn'
+                    : 'bg-surface-dim text-on-surface-variant'
+                }`}
+              >
+                Timed
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditMode('reps')}
+                className={`px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider transition-colors ${
+                  editMode === 'reps'
+                    ? 'bg-primary text-on-primary-btn'
+                    : 'bg-surface-dim text-on-surface-variant'
+                }`}
+              >
+                Reps
+              </button>
+            </div>
+          )}
 
           {/* Duration / Reps */}
           {showRepsInput ? (

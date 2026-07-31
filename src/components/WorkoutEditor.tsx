@@ -9,7 +9,7 @@ import { SEGMENT_BG, SEGMENT_TEXT, SEGMENT_DOT, TYPE_ICONS } from '@/lib/segment
 import { workoutReducer } from '@/lib/workout-reducer'
 import { createInterval } from '@/components/WorkoutBuilder'
 import { detectCycles, isInCycle } from '@/lib/detect-cycles'
-import type { Exercise, Interval, IntervalType, Workout, WorkoutMode } from '@/types/workout'
+import type { Exercise, Interval, IntervalType, Workout } from '@/types/workout'
 
 // ponytail: counter ID, upgrade to crypto.randomUUID if collisions become an issue
 let nextId = 1
@@ -111,7 +111,6 @@ interface WorkoutEditorProps {
 export default function WorkoutEditor({ existingWorkout, initialIntervals, onSave, onCancel }: WorkoutEditorProps) {
   const { exercises, saveExerciseImage } = useExercises()
   const [title, setTitle] = useState(existingWorkout?.title ?? '')
-  const [workoutMode, setWorkoutMode] = useState<WorkoutMode>(existingWorkout?.mode ?? 'timed')
   const [intervals, dispatch] = useReducer(
     workoutReducer,
     existingWorkout?.intervals ?? initialIntervals ?? DEFAULT_INTERVALS,
@@ -229,7 +228,7 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
     if (originalInterval) {
       const changes: Partial<Interval> = {}
       const changedFields: string[] = []
-      // ponytail: reps included for bulk apply in reps mode; safe to always check since undefined !== undefined is false
+      // ponytail: reps always checked so reps-mode changes bulk-apply; safe since undefined !== undefined is false
       for (const key of ['title', 'duration', 'description', 'imageUrl', 'reps'] as const) {
         if (updated[key] !== originalInterval[key]) {
           ;(changes as Record<string, unknown>)[key] = updated[key]
@@ -268,8 +267,8 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
   function handleSave() {
     if (!title.trim() || intervals.length === 0) return
     const workout: Workout = existingWorkout
-      ? { ...existingWorkout, title: title.trim(), intervals, mode: workoutMode, updatedAt: Date.now() }
-      : { id: generateId(), title: title.trim(), intervals, mode: workoutMode, createdAt: Date.now(), updatedAt: Date.now() }
+      ? { ...existingWorkout, title: title.trim(), intervals, updatedAt: Date.now() }
+      : { id: generateId(), title: title.trim(), intervals, createdAt: Date.now(), updatedAt: Date.now() }
     onSave(workout)
   }
 
@@ -294,35 +293,6 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
             <div className="font-mono text-display-timer-mobile text-primary tracking-tighter">
               {totalMin}:{String(totalSec).padStart(2, '0')}
             </div>
-          </div>
-        </div>
-
-        {/* Mode toggle */}
-        <div className="flex items-center gap-8 pt-4 border-t border-outline-variant/20">
-          <span className="font-label-caps text-[10px] text-on-surface-variant uppercase tracking-wider">Mode</span>
-          <div className="flex rounded-lg overflow-hidden border border-outline-variant/30">
-            <button
-              type="button"
-              onClick={() => { markDirty(); setWorkoutMode('timed') }}
-              className={`px-12 py-4 text-xs font-medium transition-colors ${
-                workoutMode === 'timed'
-                  ? 'bg-primary-btn text-on-primary-btn'
-                  : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container'
-              }`}
-            >
-              Timed
-            </button>
-            <button
-              type="button"
-              onClick={() => { markDirty(); setWorkoutMode('reps') }}
-              className={`px-12 py-4 text-xs font-medium transition-colors ${
-                workoutMode === 'reps'
-                  ? 'bg-primary-btn text-on-primary-btn'
-                  : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container'
-              }`}
-            >
-              Reps
-            </button>
           </div>
         </div>
       </div>
@@ -419,7 +389,6 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
           onClose={() => { setEditingIndex(null); setOriginalInterval(null) }}
           exercises={exercises}
           onImageUpload={(file) => saveExerciseImage(intervals[editingIndex]!.id, file)}
-          mode={workoutMode}
         />
       )}
 
