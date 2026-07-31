@@ -138,6 +138,17 @@
 
   /* Light text on consistently-dark backgrounds (primary-container, etc.) */
   --color-on-primary-dark-bg: #f1f5f9;
+
+  /* Timer play screens — always dark (.timer-dark-bg is unguarded, no light variant) */
+  --color-timer-bg: #091426;
+  --color-timer-surface: rgba(255, 255, 255, 0.05);
+  --color-timer-on: #ffffff;
+  --color-timer-border: rgba(255, 255, 255, 0.2);
+  --color-timer-muted: #9ca3af;
+
+  /* Elevation shadows */
+  --shadow-card-hover: 0 8px 30px rgba(11, 28, 48, 0.04);
+  --shadow-fab: 0 4px 20px rgba(30, 41, 59, 0.2);
 }
 
 /* Dark mode — follows OS preference */
@@ -216,7 +227,7 @@
 
 /* Timer dark background */
 .timer-dark-bg {
-  background-color: #091426;
+  background-color: var(--color-timer-bg);
 }
 
 /* Hide scrollbar for clean lists */
@@ -241,8 +252,9 @@ body {
 }
 
 .glass-panel-dark {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-timer-surface);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  /* rgba(255,255,255,0.1) — half of --color-timer-border (0.2) */
+  border: 1px solid color-mix(in srgb, var(--color-timer-border) 50%, transparent);
 }
