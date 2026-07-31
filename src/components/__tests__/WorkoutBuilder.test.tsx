@@ -115,6 +115,42 @@ describe('expandCycle', () => {
     const ids = result.map((i) => i.id)
     expect(new Set(ids).size).toBe(ids.length)
   })
+
+  it('propagates mode="reps" to expanded work intervals with duration=0', async () => {
+    const { expandCycle } = await import('../WorkoutBuilder')
+    const cycle: CycleTemplate = {
+      id: 'c-reps-mode', title: 'Reps Cycle', repeat: 2,
+      workDuration: 30, restDuration: 15, skipLastRest: true,
+      mode: 'reps', workReps: 10, workWeight: 20,
+    }
+    const result = expandCycle(cycle)
+    // skipLastRest=true: work, rest, work = 3 intervals
+    expect(result).toHaveLength(3)
+    // work intervals get mode='reps', duration=0, reps/weight from template
+    expect(result[0]!.mode).toBe('reps')
+    expect(result[0]!.duration).toBe(0)
+    expect(result[0]!.reps).toBe(10)
+    expect(result[0]!.weight).toBe(20)
+    // rest intervals keep timed behavior
+    expect(result[1]!.mode).toBeUndefined()
+    expect(result[1]!.duration).toBe(15)
+    // second work
+    expect(result[2]!.mode).toBe('reps')
+    expect(result[2]!.duration).toBe(0)
+    expect(result[2]!.reps).toBe(10)
+  })
+
+  it('does not set mode nor duration=0 when CycleTemplate has no mode (timed default)', async () => {
+    const { expandCycle } = await import('../WorkoutBuilder')
+    const cycle: CycleTemplate = {
+      id: 'c-timed', title: 'Timed Cycle', repeat: 2,
+      workDuration: 45, restDuration: 20, skipLastRest: true,
+    }
+    const result = expandCycle(cycle)
+    expect(result[0]!.mode).toBeUndefined()
+    expect(result[0]!.duration).toBe(45)
+    expect(result[1]!.duration).toBe(20)
+  })
 })
 
 // ===========================================================================
@@ -180,18 +216,21 @@ describe('WorkoutBuilder palette', () => {
 // Component: WorkoutBuilder save / expansion
 // ===========================================================================
 describe('WorkoutBuilder cycle reps', () => {
-  it('shows workReps and workWeight inputs in Cycle card', async () => {
+  it('shows workReps and workWeight inputs in Cycle card when toggled to Reps mode', async () => {
     const WorkoutBuilder = (await import('../WorkoutBuilder')).default
     render(<WorkoutBuilder onSave={vi.fn()} />)
     fireEvent.click(screen.getByRole('button', { name: 'Add Cycle' }))
+    // ponytail: cycle defaults to 'timed' — toggle to 'reps' to see reps fields
+    fireEvent.click(screen.getByRole('button', { name: 'Reps' }))
     expect(screen.getByLabelText('Work reps')).toBeInTheDocument()
     expect(screen.getByLabelText('Work weight (kg)')).toBeInTheDocument()
   })
 
-  it('workReps input updates cycle workReps value', async () => {
+  it('workReps input updates cycle workReps value in Reps mode', async () => {
     const WorkoutBuilder = (await import('../WorkoutBuilder')).default
     render(<WorkoutBuilder onSave={vi.fn()} />)
     fireEvent.click(screen.getByRole('button', { name: 'Add Cycle' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Reps' }))
     const repsInput = screen.getByLabelText('Work reps')
     fireEvent.change(repsInput, { target: { value: '12' } })
     expect(repsInput).toHaveValue('12')

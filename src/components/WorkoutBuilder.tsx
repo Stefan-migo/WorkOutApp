@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { SEGMENT_BG, SEGMENT_BORDER, SEGMENT_TEXT, TYPE_ICONS } from '@/lib/segment-styles'
-import type { Interval, CycleTemplate, IntervalType } from '@/types/workout'
+import type { Interval, CycleTemplate, IntervalType, WorkoutMode } from '@/types/workout'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -21,19 +21,22 @@ function isCycle(item: BuilderItem): item is CycleTemplate {
 export function expandCycle(cycle: CycleTemplate): Interval[] {
   const intervals: Interval[] = []
   for (let i = 0; i < cycle.repeat; i++) {
+    const isReps = cycle.mode === 'reps'
     // ponytail: spread reps/weight only when defined, keeps legacy intervals clean
-    const repFields = cycle.workReps != null ? { reps: cycle.workReps } : {}
-    const weightFields = cycle.workWeight != null ? { weight: cycle.workWeight } : {}
+    const repFields = isReps || cycle.workReps != null ? { reps: cycle.workReps ?? 0 } : {}
+    const weightFields = isReps || cycle.workWeight != null ? { weight: cycle.workWeight ?? 0 } : {}
+    const modeField = isReps ? { mode: 'reps' as const } : {}
     intervals.push({
       id: crypto.randomUUID(),
       type: 'work',
       title: 'Work',
-      duration: cycle.workDuration,
+      duration: isReps ? 0 : cycle.workDuration,
       cycleIndex: i,
       cycleId: cycle.id,
       cycleTitle: cycle.title,
       ...repFields,
       ...weightFields,
+      ...modeField,
     })
     const isLast = i === cycle.repeat - 1
     if (!isLast || !cycle.skipLastRest) {
@@ -82,6 +85,7 @@ function createCycleTemplate(): CycleTemplate {
     workDuration: 30,
     restDuration: 15,
     skipLastRest: true,
+    mode: 'timed',
   }
 }
 
@@ -93,7 +97,10 @@ function totalEstimate(items: BuilderItem[]): number {
   for (const item of items) {
     if (isCycle(item)) {
       const cycleRest = item.restDuration * (item.skipLastRest ? item.repeat - 1 : item.repeat)
-      total += item.workDuration * item.repeat + cycleRest
+      const workTotal = item.mode === 'reps' ? 0 : item.workDuration * item.repeat
+      total += workTotal + cycleRest
+    } else if (item.mode === 'reps') {
+      // reps mode work intervals don't count toward timer
     } else {
       total += item.duration
     }
@@ -201,12 +208,22 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
     })
   }
 
-  function updateCycleField(i: number, field: keyof CycleTemplate, value: string | number | boolean) {
+  function updateCycleField(i: number, field: keyof CycleTemplate, value: string | number | boolean | undefined) {
     setItems((prev) => {
       const next = [...prev]
       const item = next[i]
       if (!item || !isCycle(item)) return prev
       next[i] = { ...item, [field]: value }
+      return next
+    })
+  }
+
+  function updateIntervalMode(i: number, mode: WorkoutMode) {
+    setItems((prev) => {
+      const next = [...prev]
+      const item = next[i]
+      if (!item || isCycle(item)) return prev
+      next[i] = { ...item, mode, reps: mode === 'reps' ? (item.reps ?? 0) : undefined, weight: mode === 'reps' ? (item.weight ?? 0) : undefined }
       return next
     })
   }
@@ -325,106 +342,171 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                     </div>
                   </div>
 
-                  {/* Cycle controls grid */}
-                  <div className="grid grid-cols-4 gap-4">
-                    <div className="flex flex-col gap-1">
-                      <span className="font-label-caps text-label-caps text-on-surface-variant/50 text-[9px] uppercase tracking-wider">Repeat</span>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        value={String(item.repeat)}
-                        onChange={(e) => {
-                          const v = parseInt(e.target.value, 10)
-                          if (!isNaN(v)) updateCycleField(i, 'repeat', Math.min(10, Math.max(1, v)))
-                        }}
-                        className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-on-surface focus:border-secondary focus:ring-0 outline-none"
-                        aria-label="Cycle repeat count"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <span className="font-label-caps text-label-caps text-on-surface-variant/50 text-[9px] uppercase tracking-wider">Work</span>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        value={String(item.workDuration)}
-                        onChange={(e) => {
-                          const v = parseInt(e.target.value, 10)
-                          if (!isNaN(v)) updateCycleField(i, 'workDuration', Math.max(1, v))
-                        }}
-                        className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-on-surface focus:border-secondary focus:ring-0 outline-none"
-                        aria-label="Work duration seconds"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <span className="font-label-caps text-label-caps text-on-surface-variant/50 text-[9px] uppercase tracking-wider">Rest</span>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        value={String(item.restDuration)}
-                        onChange={(e) => {
-                          const v = parseInt(e.target.value, 10)
-                          if (!isNaN(v)) updateCycleField(i, 'restDuration', Math.max(1, v))
-                        }}
-                        className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-on-surface focus:border-secondary focus:ring-0 outline-none"
-                        aria-label="Rest duration seconds"
-                      />
-                    </div>
-                    <div className="flex items-center pt-4">
-                      <label className="flex items-center gap-2 text-body-sm text-on-surface-variant cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={item.skipLastRest}
-                          onChange={(e) => updateCycleField(i, 'skipLastRest', e.target.checked)}
-                          className="w-3 h-3 accent-primary rounded"
-                        />
-                        <span className="text-[8px] leading-tight text-on-surface-variant/70">Skip last rest</span>
-                      </label>
-                    </div>
+                  {/* Mode toggle */}
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="font-label-caps text-label-caps text-on-surface-variant/50 text-[9px] uppercase tracking-wider">Mode</span>
+                    <button
+                      onClick={() => updateCycleField(i, 'mode', 'timed')}
+                      className={`px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider transition-colors ${
+                        item.mode !== 'reps'
+                          ? 'bg-primary text-on-primary-btn'
+                          : 'bg-surface-dim text-on-surface-variant'
+                      }`}
+                    >
+                      Timed
+                    </button>
+                    <button
+                      onClick={() => updateCycleField(i, 'mode', 'reps')}
+                      className={`px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider transition-colors ${
+                        item.mode === 'reps'
+                          ? 'bg-primary text-on-primary-btn'
+                          : 'bg-surface-dim text-on-surface-variant'
+                      }`}
+                    >
+                      Reps
+                    </button>
                   </div>
 
-                  {/* Reps row */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex flex-col gap-1">
-                      <span className="font-label-caps text-label-caps text-on-surface-variant/50 text-[9px] uppercase tracking-wider">Work reps</span>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        value={item.workReps != null ? String(item.workReps) : ''}
-                        onChange={(e) => {
-                          const v = e.target.value ? parseInt(e.target.value, 10) : undefined
-                          updateCycleField(i, 'workReps', v != null && !isNaN(v) ? Math.max(1, v) : undefined)
-                        }}
-                        className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-on-surface focus:border-secondary focus:ring-0 outline-none"
-                        aria-label="Work reps"
-                        placeholder="—"
-                      />
+                  {/* Cycle controls grid */}
+                  {item.mode === 'reps' ? (
+                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-4">
+                      <div className="flex flex-col gap-1">
+                        <span className="font-label-caps text-label-caps text-on-surface-variant/50 text-[9px] uppercase tracking-wider">Repeat</span>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={String(item.repeat)}
+                          onChange={(e) => {
+                            const v = parseInt(e.target.value, 10)
+                            if (!isNaN(v)) updateCycleField(i, 'repeat', Math.min(10, Math.max(1, v)))
+                          }}
+                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-on-surface focus:border-secondary focus:ring-0 outline-none"
+                          aria-label="Cycle repeat count"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="font-label-caps text-label-caps text-on-surface-variant/50 text-[9px] uppercase tracking-wider">Reps</span>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={item.workReps != null ? String(item.workReps) : ''}
+                          onChange={(e) => {
+                            const v = e.target.value ? parseInt(e.target.value, 10) : undefined
+                            updateCycleField(i, 'workReps', v != null && !isNaN(v) ? Math.max(1, v) : undefined)
+                          }}
+                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-on-surface focus:border-secondary focus:ring-0 outline-none"
+                          placeholder="—"
+                          aria-label="Work reps"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="font-label-caps text-label-caps text-on-surface-variant/50 text-[9px] uppercase tracking-wider">Weight (kg)</span>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={item.workWeight != null ? String(item.workWeight) : ''}
+                          onChange={(e) => {
+                            const v = e.target.value ? parseInt(e.target.value, 10) : undefined
+                            updateCycleField(i, 'workWeight', v != null && !isNaN(v) ? Math.max(0, v) : undefined)
+                          }}
+                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-on-surface focus:border-secondary focus:ring-0 outline-none"
+                          placeholder="—"
+                          aria-label="Work weight (kg)"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="font-label-caps text-label-caps text-on-surface-variant/50 text-[9px] uppercase tracking-wider">Rest</span>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={String(item.restDuration)}
+                          onChange={(e) => {
+                            const v = parseInt(e.target.value, 10)
+                            if (!isNaN(v)) updateCycleField(i, 'restDuration', Math.max(1, v))
+                          }}
+                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-on-surface focus:border-secondary focus:ring-0 outline-none"
+                          aria-label="Rest duration seconds"
+                        />
+                      </div>
+                      <div className="flex items-center pt-4">
+                        <label className="flex items-center gap-2 text-body-sm text-on-surface-variant cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={item.skipLastRest}
+                            onChange={(e) => updateCycleField(i, 'skipLastRest', e.target.checked)}
+                            className="w-3 h-3 accent-primary rounded"
+                          />
+                          <span className="text-[8px] leading-tight text-on-surface-variant/70">Skip last rest</span>
+                        </label>
+                      </div>
                     </div>
-                    <div className="flex flex-col gap-1">
-                      <span className="font-label-caps text-label-caps text-on-surface-variant/50 text-[9px] uppercase tracking-wider">Work weight (kg)</span>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        value={item.workWeight != null ? String(item.workWeight) : ''}
-                        onChange={(e) => {
-                          const v = e.target.value ? parseInt(e.target.value, 10) : undefined
-                          updateCycleField(i, 'workWeight', v != null && !isNaN(v) ? Math.max(0, v) : undefined)
-                        }}
-                        className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-on-surface focus:border-secondary focus:ring-0 outline-none"
-                        aria-label="Work weight (kg)"
-                        placeholder="—"
-                      />
+                  ) : (
+                    <div className="grid grid-cols-4 gap-4">
+                      <div className="flex flex-col gap-1">
+                        <span className="font-label-caps text-label-caps text-on-surface-variant/50 text-[9px] uppercase tracking-wider">Repeat</span>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={String(item.repeat)}
+                          onChange={(e) => {
+                            const v = parseInt(e.target.value, 10)
+                            if (!isNaN(v)) updateCycleField(i, 'repeat', Math.min(10, Math.max(1, v)))
+                          }}
+                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-on-surface focus:border-secondary focus:ring-0 outline-none"
+                          aria-label="Cycle repeat count"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="font-label-caps text-label-caps text-on-surface-variant/50 text-[9px] uppercase tracking-wider">Work</span>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={String(item.workDuration)}
+                          onChange={(e) => {
+                            const v = parseInt(e.target.value, 10)
+                            if (!isNaN(v)) updateCycleField(i, 'workDuration', Math.max(1, v))
+                          }}
+                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-on-surface focus:border-secondary focus:ring-0 outline-none"
+                          aria-label="Work duration seconds"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="font-label-caps text-label-caps text-on-surface-variant/50 text-[9px] uppercase tracking-wider">Rest</span>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={String(item.restDuration)}
+                          onChange={(e) => {
+                            const v = parseInt(e.target.value, 10)
+                            if (!isNaN(v)) updateCycleField(i, 'restDuration', Math.max(1, v))
+                          }}
+                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-on-surface focus:border-secondary focus:ring-0 outline-none"
+                          aria-label="Rest duration seconds"
+                        />
+                      </div>
+                      <div className="flex items-center pt-4">
+                        <label className="flex items-center gap-2 text-body-sm text-on-surface-variant cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={item.skipLastRest}
+                            onChange={(e) => updateCycleField(i, 'skipLastRest', e.target.checked)}
+                            className="w-3 h-3 accent-primary rounded"
+                          />
+                          <span className="text-[8px] leading-tight text-on-surface-variant/70">Skip last rest</span>
+                        </label>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Estimated total */}
                   <div className="text-right">
                     <span className="text-data-sm text-primary font-mono">
                       ~{Math.floor(
-                        (item.workDuration * item.repeat +
+                        ((item.mode === 'reps' ? 0 : item.workDuration) * item.repeat +
                           item.restDuration * (item.skipLastRest ? item.repeat - 1 : item.repeat)) / 60,
                       )}:
                       {String(
-                        (item.workDuration * item.repeat +
+                        ((item.mode === 'reps' ? 0 : item.workDuration) * item.repeat +
                           item.restDuration * (item.skipLastRest ? item.repeat - 1 : item.repeat)) % 60,
                       ).padStart(2, '0')}
                     </span>
@@ -440,7 +522,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                     <span className="material-symbols-outlined text-[20px]">{TYPE_ICONS[item.type]}</span>
                   </div>
 
-                  {/* Title + Duration (inline editing) */}
+                  {/* Title + Duration / Reps (inline editing) */}
                   <div className="flex-1 py-8 flex flex-col justify-center gap-2">
                     <input
                       type="text"
@@ -449,27 +531,101 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                       className="bg-transparent border-none p-0 font-body-md font-semibold text-on-surface w-full focus:ring-0 focus:outline-none"
                       aria-label={`Interval ${i + 1} title`}
                     />
-                    <input
-                      type="text"
-                      value={`${String(Math.floor(item.duration / 60)).padStart(2, '0')}:${String(item.duration % 60).padStart(2, '0')}`}
-                      onChange={(e) => {
-                        const parts = e.target.value.split(':')
-                        if (parts.length === 2) {
-                          const m = parseInt(parts[0]!, 10) || 0
-                          const s = parseInt(parts[1]!, 10) || 0
-                          const clamped = Math.min(Math.max(m * 60 + s, 1), 3600)
-                          setItems((prev) => {
-                            const next = [...prev]
-                            const item = next[i]
-                            if (!item || isCycle(item)) return prev
-                            next[i] = { ...item, duration: clamped }
-                            return next
-                          })
-                        }
-                      }}
-                      className="bg-transparent border-none p-0 font-data-sm text-data-sm text-primary font-bold tracking-tight font-mono w-20 focus:ring-0 focus:outline-none focus:border-b focus:border-secondary"
-                      aria-label={`Interval ${i + 1} duration`}
-                    />
+                    {item.type === 'work' && (
+                      <div className="flex items-center gap-2">
+                        <span className="font-label-caps text-label-caps text-on-surface-variant/50 text-[9px] uppercase tracking-wider">Mode</span>
+                        <button
+                          onClick={() => updateIntervalMode(i, 'timed')}
+                          className={`px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider transition-colors ${
+                            item.mode !== 'reps'
+                              ? 'bg-primary text-on-primary-btn'
+                              : 'bg-surface-dim text-on-surface-variant'
+                          }`}
+                        >
+                          Timed
+                        </button>
+                        <button
+                          onClick={() => updateIntervalMode(i, 'reps')}
+                          className={`px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider transition-colors ${
+                            item.mode === 'reps'
+                              ? 'bg-primary text-on-primary-btn'
+                              : 'bg-surface-dim text-on-surface-variant'
+                          }`}
+                        >
+                          Reps
+                        </button>
+                      </div>
+                    )}
+                    {item.mode === 'reps' ? (
+                      <div className="flex gap-4">
+                        <div className="flex items-center gap-2">
+                          <span className="font-data-sm text-data-sm text-on-surface-variant/70 font-semibold">Reps</span>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            value={item.reps != null ? String(item.reps) : ''}
+                            onChange={(e) => {
+                              const v = e.target.value ? parseInt(e.target.value, 10) : undefined
+                              const clamped = v != null && !isNaN(v) ? Math.max(1, v) : undefined
+                              setItems((prev) => {
+                                const next = [...prev]
+                                const interval = next[i]
+                                if (!interval || isCycle(interval)) return prev
+                                next[i] = { ...interval, reps: clamped }
+                                return next
+                              })
+                            }}
+                            className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-16 font-data-sm text-data-sm text-primary font-bold font-mono focus:border-secondary focus:ring-0 outline-none"
+                            placeholder="—"
+                            aria-label={`Interval ${i + 1} reps`}
+                          />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-data-sm text-data-sm text-on-surface-variant/70 font-semibold">Weight (kg)</span>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            value={item.weight != null ? String(item.weight) : ''}
+                            onChange={(e) => {
+                              const v = e.target.value ? parseInt(e.target.value, 10) : undefined
+                              const clamped = v != null && !isNaN(v) ? Math.max(0, v) : undefined
+                              setItems((prev) => {
+                                const next = [...prev]
+                                const interval = next[i]
+                                if (!interval || isCycle(interval)) return prev
+                                next[i] = { ...interval, weight: clamped }
+                                return next
+                              })
+                            }}
+                            className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-16 font-data-sm text-data-sm text-primary font-bold font-mono focus:border-secondary focus:ring-0 outline-none"
+                            placeholder="—"
+                            aria-label={`Interval ${i + 1} weight`}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <input
+                        type="text"
+                        value={`${String(Math.floor(item.duration / 60)).padStart(2, '0')}:${String(item.duration % 60).padStart(2, '0')}`}
+                        onChange={(e) => {
+                          const parts = e.target.value.split(':')
+                          if (parts.length === 2) {
+                            const m = parseInt(parts[0]!, 10) || 0
+                            const s = parseInt(parts[1]!, 10) || 0
+                            const clamped = Math.min(Math.max(m * 60 + s, 1), 3600)
+                            setItems((prev) => {
+                              const next = [...prev]
+                              const item = next[i]
+                              if (!item || isCycle(item)) return prev
+                              next[i] = { ...item, duration: clamped }
+                              return next
+                            })
+                          }
+                        }}
+                        className="bg-transparent border-none p-0 font-data-sm text-data-sm text-primary font-bold tracking-tight font-mono w-20 focus:ring-0 focus:outline-none focus:border-b focus:border-secondary"
+                        aria-label={`Interval ${i + 1} duration`}
+                      />
+                    )}
                   </div>
 
                   {/* Actions */}
