@@ -165,7 +165,7 @@ describe('StatsDashboard', () => {
       expect(screen.getByText('Sun')).toBeInTheDocument()
     })
 
-    it('renders Personal Records section with coming soon message', () => {
+    it('renders Personal Records section with empty states when no rep data', () => {
       render(
         <StatsDashboard
           sessions={[
@@ -175,7 +175,35 @@ describe('StatsDashboard', () => {
       )
 
       expect(screen.getByText('Personal Records')).toBeInTheDocument()
-      expect(screen.getByText('PR tracking coming in a future update.')).toBeInTheDocument()
+      expect(screen.getByText(/No strength PRs yet/i)).toBeInTheDocument()
+      expect(screen.getByText(/No cardio PRs yet/i)).toBeInTheDocument()
+    })
+
+    it('shows strength PR rows from completed rep intervals', () => {
+      render(
+        <StatsDashboard
+          sessions={[
+            session({
+              startedAt: Date.now(),
+              intervals: [
+                {
+                  intervalId: 'r1',
+                  title: 'Bench Press',
+                  type: 'work',
+                  plannedDuration: 0,
+                  actualDuration: 0,
+                  completed: true,
+                  actualReps: 10,
+                  weight: 80,
+                },
+              ],
+            }),
+          ]}
+        />,
+      )
+
+      expect(screen.getByText('Bench Press')).toBeInTheDocument()
+      expect(screen.getByText('80 kg · × 10 · e1RM 107')).toBeInTheDocument()
     })
   })
 

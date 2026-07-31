@@ -87,6 +87,7 @@ export interface CompletedInterval {
   actualDuration: number
   completed: boolean
   notes?: string
+  exerciseId?: string // only for type='work'
   plannedReps?: number
   actualReps?: number
   weight?: number
@@ -125,4 +126,5 @@ export interface CycleTemplate {
   skipLastRest: boolean
   workReps?: number
   workWeight?: number
+  mode?: WorkoutMode
 }

@@ -6,6 +6,7 @@ import { useStats } from '@/hooks/useStats'
 import { useSessions } from '@/hooks/useSessions'
 import { exportAllData } from '@/lib/export-data'
 import { formatDuration } from '@/lib/format'
+import { computePRs, hasStrength, type PRRecord } from '@/lib/pr-engine'
 import type { Session } from '@/types/workout'
 import VolumeChart from '@/components/VolumeChart'
 import StrainGauge from '@/components/StrainGauge'
@@ -15,6 +16,14 @@ export { formatDuration, formatHours }
 
 function formatHours(totalSeconds: number) {
   return (totalSeconds / 3600).toFixed(1) + 'h'
+}
+
+function strengthValue(r: PRRecord): string {
+  const parts: string[] = []
+  if (r.bestWeight != null) parts.push(`${r.bestWeight} kg`)
+  if (r.bestReps != null) parts.push(`\u00d7 ${r.bestReps}`)
+  if (r.bestE1RM != null) parts.push(`e1RM ${Math.round(r.bestE1RM)}`)
+  return parts.join(' \u00b7 ')
 }
 
 interface HeatmapCell {
@@ -70,6 +79,9 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
   }, [sessions])
 
   const heatmap = useMemo(() => buildHeatmap(sessions), [sessions])
+  const prs = useMemo(() => computePRs(sessions), [sessions])
+  const strengthPRs = prs.filter(hasStrength)
+  const cardioPRs = prs.filter((r) => r.bestCardioSeconds != null)
   const recentVolume = stats.weeklyVolume.slice(-4)
   const maxVolume = Math.max(...recentVolume.map((w) => w.totalSeconds), 1)
 
@@ -130,10 +142,49 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
               Personal Records
             </h3>
           </div>
-          <div className="flex-1 flex items-center justify-center">
-            <p className="font-body-md text-body-md text-on-surface-variant text-center">
-              PR tracking coming in a future update.
-            </p>
+          <div className="flex-1 overflow-y-auto min-h-0 space-y-16 pr-8">
+            <section>
+              <h4 className="font-label-caps text-label-caps text-on-surface-variant mb-8">
+                Strength
+              </h4>
+              {strengthPRs.length === 0 ? (
+                <p className="font-body-sm text-body-sm text-on-surface-variant">
+                  No strength PRs yet — complete rep-based workouts to track them.
+                </p>
+              ) : (
+                <ul className="space-y-8">
+                  {strengthPRs.map((r) => (
+                    <li key={r.exercise} className="flex items-baseline justify-between gap-8">
+                      <span className="font-body-md text-body-md text-on-surface truncate">{r.exercise}</span>
+                      <span className="font-data-sm text-data-sm text-secondary whitespace-nowrap">
+                        {strengthValue(r)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+            <section>
+              <h4 className="font-label-caps text-label-caps text-on-surface-variant mb-8">
+                Cardio
+              </h4>
+              {cardioPRs.length === 0 ? (
+                <p className="font-body-sm text-body-sm text-on-surface-variant">
+                  No cardio PRs yet — complete timed run, bike or row intervals to track them.
+                </p>
+              ) : (
+                <ul className="space-y-8">
+                  {cardioPRs.map((r) => (
+                    <li key={r.exercise} className="flex items-baseline justify-between gap-8">
+                      <span className="font-body-md text-body-md text-on-surface truncate">{r.exercise}</span>
+                      <span className="font-data-sm text-data-sm text-secondary whitespace-nowrap">
+                        {formatDuration(r.bestCardioSeconds!)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
           </div>
         </div>
       </div>
