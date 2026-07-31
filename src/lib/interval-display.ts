@@ -1,4 +1,4 @@
-import type { Interval, Exercise } from '@/types/workout'
+import type { Exercise } from '@/types/workout'
 
 /**
  * Return the display name for a work interval:

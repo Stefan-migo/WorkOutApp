@@ -52,14 +52,14 @@ describe('totalDuration', () => {
 describe('getEffectiveMode', () => {
   it('returns timed when no mode is set on workout or interval', () => {
     const workout = makeWorkout([])
-    const interval = { id: 'a', type: 'work' as const, title: 'A', duration: 30 }
+    const interval = { id: 'a', type: 'work' as const, title: 'A', duration: 30, mode: undefined }
     expect(getEffectiveMode(workout, interval)).toBe('timed')
   })
 
   it('returns workout mode when interval has no mode', () => {
     const workout = makeWorkout([])
     workout.mode = 'reps'
-    const interval = { id: 'a', type: 'work' as const, title: 'A', duration: 30 }
+    const interval = { id: 'a', type: 'work' as const, title: 'A', duration: 30, mode: undefined }
     expect(getEffectiveMode(workout, interval)).toBe('reps')
   })
 
