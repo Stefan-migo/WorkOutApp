@@ -43,7 +43,7 @@ export function TimerRing({ timeLeft, duration, intervalType, label, nextLabel, 
           cy="50"
           r="45"
           fill="transparent"
-          style={{ stroke: 'var(--color-primary-container)' }}
+          style={{ stroke: 'var(--color-timer-track)' }}
           strokeWidth="4"
         />
         {/* Progress */}

@@ -18,7 +18,7 @@ describe('TimerRing', () => {
     const circles = document.querySelectorAll('circle')
     // First circle is the track; SVG presentation attrs don't resolve CSS vars → inline style
     const track = circles[0]!
-    expect(track.style.stroke).toBe('var(--color-primary-container)')
+    expect(track.style.stroke).toBe('var(--color-timer-track)')
     expect(track).toHaveAttribute('fill', 'transparent')
   })
 

@@ -145,6 +145,7 @@
   --color-timer-on: #ffffff;
   --color-timer-border: rgba(255, 255, 255, 0.2);
   --color-timer-muted: #9ca3af;
+  --color-timer-track: #1e293b;
 
   /* Elevation shadows */
   --shadow-card-hover: 0 8px 30px rgba(11, 28, 48, 0.04);
