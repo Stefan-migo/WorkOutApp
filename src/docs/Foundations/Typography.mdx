@@ -1,0 +1,51 @@
+import { Meta, Title, Subtitle, Typeset, Source } from '@storybook/addon-docs/blocks'
+
+<Meta title="Foundations/Typography" />
+
+<Title>Typography</Title>
+
+<Subtitle>
+  Font families and text-size utilities defined in `@theme` (`src/app/globals.css`). Sizes ship as
+  `text-*` utilities; a subset is showcased below.
+</Subtitle>
+
+## Font families
+
+| Token | Stack | Utilities |
+| --- | --- | --- |
+| `--font-headline` | Inter | `font-headline` |
+| `--font-body` | Inter | `font-body` |
+| `--font-label` | Inter | `font-label` |
+| `--font-mono` / `--font-timer` / `--font-data` | JetBrains Mono | `font-mono`, `font-timer`, `font-data` |
+
+## Text sizes
+
+<Typeset
+  fontSizes={['32px', '24px', '18px', '16px', '14px', '12px']}
+  sampleText="WorkOutApp — Inter, JetBrains Mono"
+/>
+
+| Utility | Size / Line-height | Weight | Usage |
+| --- | --- | --- | --- |
+| `text-headline-lg` | 32 / 40 | 700, -0.02em | Page titles |
+| `text-headline-md` | 24 / 32 | 600 | Section titles |
+| `text-body-lg` | 18 / 28 | 400 | Lead paragraphs |
+| `text-body-md` | 16 / 24 | 400 | Body copy |
+| `text-data-lg` | 20 / 24 | 500 | Numeric stats |
+| `text-data-sm` | 14 / 16 | 500 | Data captions |
+| `text-label-caps` | 12 / 16 | 700, +0.05em | Caps labels, buttons |
+| `text-display-timer` | 84 / 100 | 700, -0.04em | Timer, desktop |
+| `text-display-timer-mobile` | 64 / 72 | 700, -0.04em | Timer, mobile |
+
+## Usage
+
+<Source
+  language="tsx"
+  code={`<h1 className="font-headline text-headline-lg">My workouts</h1>
+
+<p className="font-data text-data-lg tabular-nums">02:05</p>
+
+<span className="font-label-caps text-label-caps tracking-widest uppercase text-timer-muted">
+  Up next: Rest
+</span>`}
+/>

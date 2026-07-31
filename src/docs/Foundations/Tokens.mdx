@@ -1,0 +1,54 @@
+import { Meta, Title, Subtitle, Source } from '@storybook/addon-docs/blocks'
+
+<Meta title="Foundations/Tokens" />
+
+<Title>Design tokens</Title>
+
+<Subtitle>
+  Single source of truth: every visible color and elevation shadow in this app comes from the
+  `@theme` block in `src/app/globals.css`. Utilities are generated automatically by Tailwind v4 —
+  never hardcode colors in components.
+</Subtitle>
+
+## Color tokens
+
+| Token | Value | Typical usage |
+| --- | --- | --- |
+| `--color-timer-bg` | `#091426` | Play screen background (`bg-timer-bg`) |
+| `--color-timer-surface` | `rgba(255,255,255,0.05)` | Glass panels on play screens (`bg-timer-surface`) |
+| `--color-timer-on` | `#ffffff` | Text on dark timer screens (`text-timer-on`) |
+| `--color-timer-border` | `rgba(255,255,255,0.2)` | Borders on dark surfaces (`border-timer-border`) |
+| `--color-timer-muted` | `#9ca3af` | Secondary text on dark surfaces (`text-timer-muted`) |
+| `--color-segment-prepare` | `#3b82f6` | Prepare segments (`text-segment-prepare`, `bg-segment-prepare/10`) |
+| `--color-segment-work` | `#10b981` | Work segments |
+| `--color-segment-rest` | `#ef4444` | Rest + rest-between-cycles segments |
+| `--color-segment-cooldown` | `#8b5cf6` | Cooldown segments |
+
+`SEGMENT_COLORS` in `src/lib/segment-styles.ts` mirrors the segment tokens; a drift test
+(`src/lib/__tests__/segment-styles.test.ts`) fails the build if they ever diverge.
+
+## Elevation shadows
+
+| Token | Value | Typical usage |
+| --- | --- | --- |
+| `--shadow-card-hover` | `0 8px 30px rgba(11,28,48,0.04)` | Card hover lift (`hover:shadow-card-hover`) |
+| `--shadow-fab` | `0 4px 20px rgba(30,41,59,0.2)` | Floating action buttons (`shadow-fab`) |
+
+## Usage
+
+Every `--color-*` token generates Tailwind utilities; every `--shadow-*` token generates a
+`shadow-*` utility:
+
+<Source language="tsx" code={`<div className="bg-timer-bg text-timer-on border border-timer-border/50 rounded-xl p-16">
+  Always-dark play surface
+</div>
+
+<button className="shadow-fab fixed bottom-24 right-24 rounded-full bg-primary-btn">
+  +
+</button>`} />
+
+## Dark mode
+
+Dark mode is OS-driven (`prefers-color-scheme`). The timer tokens and segment tokens are
+**always-dark** by design: play screens render dark regardless of the OS theme, so they ship a
+single unconditional value.

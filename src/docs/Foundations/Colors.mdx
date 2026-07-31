@@ -1,0 +1,98 @@
+import { Meta, Title, Subtitle, ColorPalette, ColorItem } from '@storybook/addon-docs/blocks'
+
+<Meta title="Foundations/Colors" />
+
+<Title>Colors</Title>
+
+<Subtitle>
+  The full `@theme` color palette. Use tokens only — never raw hex in components. Values below are
+  the canonical sources in `src/app/globals.css`.
+</Subtitle>
+
+## Interval segments
+
+Color never carries meaning alone — every segment is also labeled with text
+(`text-segment-*` + uppercase caps label).
+
+<ColorPalette>
+  <ColorItem
+    title="Segment — Prepare"
+    subtitle="--color-segment-prepare"
+    colors={{ blue: '#3b82f6' }}
+  />
+  <ColorItem
+    title="Segment — Work"
+    subtitle="--color-segment-work"
+    colors={{ green: '#10b981' }}
+  />
+  <ColorItem
+    title="Segment — Rest / Rest between cycles"
+    subtitle="--color-segment-rest"
+    colors={{ red: '#ef4444' }}
+  />
+  <ColorItem
+    title="Segment — Cooldown"
+    subtitle="--color-segment-cooldown"
+    colors={{ violet: '#8b5cf6' }}
+  />
+</ColorPalette>
+
+## Timer play screens (always dark)
+
+<ColorPalette>
+  <ColorItem title="Timer — Background" subtitle="--color-timer-bg" colors={{ ink: '#091426' }} />
+  <ColorItem
+    title="Timer — Surface"
+    subtitle="--color-timer-surface"
+    colors={{ 'glass white': 'rgba(255,255,255,0.05)' }}
+  />
+  <ColorItem title="Timer — On" subtitle="--color-timer-on" colors={{ white: '#ffffff' }} />
+  <ColorItem
+    title="Timer — Border"
+    subtitle="--color-timer-border"
+    colors={{ 'border white': 'rgba(255,255,255,0.2)' }}
+  />
+  <ColorItem title="Timer — Muted" subtitle="--color-timer-muted" colors={{ gray: '#9ca3af' }} />
+</ColorPalette>
+
+## Brand & surface core
+
+<ColorPalette>
+  <ColorItem title="Primary" subtitle="--color-primary" colors={{ nordic: '#091426' }} />
+  <ColorItem
+    title="Primary container"
+    subtitle="--color-primary-container"
+    colors={{ slate: '#1e293b' }}
+  />
+  <ColorItem title="Secondary" subtitle="--color-secondary" colors={{ ember: '#ac3400' }} />
+  <ColorItem
+    title="Secondary container"
+    subtitle="--color-secondary-container"
+    colors={{ flame: '#fd6b36' }}
+  />
+  <ColorItem title="Error" subtitle="--color-error" colors={{ danger: '#ba1a1a' }} />
+  <ColorItem title="Background" subtitle="--color-background" colors={{ cloud: '#f8f9ff' }} />
+  <ColorItem title="Surface" subtitle="--color-surface" colors={{ ice: '#f8f9ff' }} />
+</ColorPalette>
+
+## Sidebar & buttons (always dark)
+
+<ColorPalette>
+  <ColorItem title="Sidebar" subtitle="--color-sidebar" colors={{ slate: '#1e293b' }} />
+  <ColorItem title="Sidebar — on" subtitle="--color-on-sidebar" colors={{ mist: '#f1f5f9' }} />
+  <ColorItem
+    title="Primary button"
+    subtitle="--color-primary-btn"
+    colors={{ slate: '#1e293b' }}
+  />
+  <ColorItem
+    title="Primary button — on"
+    subtitle="--color-on-primary-btn"
+    colors={{ white: '#ffffff' }}
+  />
+  <ColorItem
+    title="Primary button — hover"
+    subtitle="--color-primary-btn-hover"
+    colors={{ ink: '#091426' }}
+  />
+</ColorPalette>
