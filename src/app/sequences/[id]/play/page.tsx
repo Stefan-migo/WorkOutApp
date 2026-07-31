@@ -54,6 +54,8 @@ export default function PlaySequencePage() {
   // ponytail: re-flatten at each workout boundary, stable within a workout
   const flat = useMemo(() => (workout ? flattenWorkout(workout) : []), [workout?.id])
   const currentInterval = flat[intervalIdx]
+  // ponytail: reps mode fallback to timed for sequences, add full reps support when needed
+  const isRepsFallback = workout?.mode === 'reps'
   const progress = sequence ? getProgress(sequence, roundIdx) : { current: 0, total: 0, percent: 0 }
 
   // ponytail: exercises already loaded — use find, not async getExercise
@@ -74,7 +76,12 @@ export default function PlaySequencePage() {
   const seqWorkCount = flat.slice(0, intervalIdx + 1).filter((i) => i.type === 'work').length
   const nextInterval = flat[intervalIdx + 1]
 
-  const timer = useTimer(currentInterval?.duration ?? 0, () => {
+  // ponytail: if a reps-mode interval has 0 duration (no timer needed in reps mode),
+  // fall back to a default timer so the sequence doesn't flash through intervals
+  const timerDuration = currentInterval?.duration && currentInterval.duration > 0
+    ? currentInterval.duration
+    : isRepsFallback ? 30 : 0
+  const timer = useTimer(timerDuration, () => {
     beep({ volume: 0.5, duration: 0.5, pitch: 1000 }) // louder transition
     notify(workout?.title ?? sequence?.title ?? 'Sequence', intervalIdx + 1, flat.length)
     if (skipRef.current) {

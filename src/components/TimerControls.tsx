@@ -9,10 +9,12 @@ interface TimerControlsProps {
   onSkip: () => void
   onRestart: () => void
   onPrevious?: () => void
+  onAddTime?: (seconds: number) => void
+  showAddTime?: boolean
 }
 
 // ponytail: 3-button layout, no restart UI — add dedicated restart button if users request it
-export function TimerControls({ status, onPause, onResume, onSkip, onPrevious }: TimerControlsProps) {
+export function TimerControls({ status, onPause, onResume, onSkip, onPrevious, onAddTime, showAddTime }: TimerControlsProps) {
   return (
     <div className="flex items-center justify-center gap-24">
       {/* Previous */}
@@ -48,6 +50,33 @@ export function TimerControls({ status, onPause, onResume, onSkip, onPrevious }:
         >
           <span className="material-symbols-outlined text-white text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>skip_next</span>
         </button>
+      )}
+
+      {/* Add time buttons — visible during rest intervals */}
+      {showAddTime && onAddTime && (
+        <div className="flex items-center gap-2 ml-4">
+          <button
+            onClick={() => onAddTime(10)}
+            className="px-4 py-2 rounded-full border border-white/20 text-white text-sm hover:bg-white/10 transition-colors"
+            aria-label="Add 10 seconds"
+          >
+            +10s
+          </button>
+          <button
+            onClick={() => onAddTime(20)}
+            className="px-4 py-2 rounded-full border border-white/20 text-white text-sm hover:bg-white/10 transition-colors"
+            aria-label="Add 20 seconds"
+          >
+            +20s
+          </button>
+          <button
+            onClick={() => onAddTime(30)}
+            className="px-4 py-2 rounded-full border border-white/20 text-white text-sm hover:bg-white/10 transition-colors"
+            aria-label="Add 30 seconds"
+          >
+            +30s
+          </button>
+        </div>
       )}
     </div>
   )

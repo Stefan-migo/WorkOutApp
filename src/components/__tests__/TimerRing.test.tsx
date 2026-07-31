@@ -101,4 +101,28 @@ describe('TimerRing', () => {
     render(<TimerRing timeLeft={30} duration={60} intervalType="work" label="WORK" />)
     expect(screen.queryByText(/^Next:/)).not.toBeInTheDocument()
   })
+
+  describe('isRepsMode', () => {
+    it('renders normally when isRepsMode is not provided (backward compat)', () => {
+      render(<TimerRing timeLeft={30} duration={60} intervalType="work" label="WORK" />)
+      expect(document.querySelector('svg')).toBeInTheDocument()
+      expect(screen.getByText('WORK')).toBeInTheDocument()
+    })
+
+    it('renders normally when isRepsMode is false', () => {
+      render(<TimerRing timeLeft={30} duration={60} intervalType="work" label="WORK" isRepsMode={false} />)
+      expect(document.querySelector('svg')).toBeInTheDocument()
+      expect(screen.getByText('WORK')).toBeInTheDocument()
+    })
+
+    it('shows label text without SVG ring when isRepsMode is true', () => {
+      render(<TimerRing timeLeft={30} duration={60} intervalType="work" label="SQUATS — 10 reps" isRepsMode />)
+      // Label still visible
+      expect(screen.getByText('SQUATS — 10 reps')).toBeInTheDocument()
+      // No SVG ring
+      expect(document.querySelector('svg')).not.toBeInTheDocument()
+      // No timer display
+      expect(screen.queryByText('00:30')).not.toBeInTheDocument()
+    })
+  })
 })

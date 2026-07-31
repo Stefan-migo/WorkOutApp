@@ -10,11 +10,26 @@ interface TimerRingProps {
   intervalType: IntervalType
   label: string
   nextLabel?: string
+  isRepsMode?: boolean
 }
 
 const CIRCUMFERENCE = 283
 
-export function TimerRing({ timeLeft, duration, intervalType, label, nextLabel }: TimerRingProps) {
+export function TimerRing({ timeLeft, duration, intervalType, label, nextLabel, isRepsMode }: TimerRingProps) {
+  // ponytail: reps mode shows label-only, no SVG ring or timer
+  if (isRepsMode) {
+    return (
+      <div className="flex flex-col items-center text-center">
+        <span className="font-label-caps text-label-caps tracking-widest uppercase mb-sm text-white">
+          {label}
+        </span>
+        {nextLabel && (
+          <span className="font-data-sm text-data-sm text-gray-400 mt-xs">{nextLabel}</span>
+        )}
+      </div>
+    )
+  }
+
   const ringColor = SEGMENT_COLORS[intervalType]
   const progress = duration > 0 ? timeLeft / duration : 0
   const offset = CIRCUMFERENCE * (1 - progress)

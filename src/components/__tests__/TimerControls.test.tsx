@@ -94,6 +94,54 @@ describe('TimerControls', () => {
     })
   })
 
+  describe('addTime buttons visible only during rest/reps mode', () => {
+    it('does not render addTime buttons when showAddTime is false', () => {
+      render(<TimerControls {...baseProps} status="running" showAddTime={false} onAddTime={vi.fn()} />)
+
+      expect(screen.queryByText('+10s')).not.toBeInTheDocument()
+      expect(screen.queryByText('+20s')).not.toBeInTheDocument()
+      expect(screen.queryByText('+30s')).not.toBeInTheDocument()
+    })
+
+    it('does not render addTime buttons when showAddTime is absent', () => {
+      render(<TimerControls {...baseProps} status="running" />)
+
+      expect(screen.queryByText('+10s')).not.toBeInTheDocument()
+    })
+
+    it('renders +10s, +20s, +30s buttons when showAddTime is true', () => {
+      render(<TimerControls {...baseProps} status="running" showAddTime onAddTime={vi.fn()} />)
+
+      expect(screen.getByText('+10s')).toBeInTheDocument()
+      expect(screen.getByText('+20s')).toBeInTheDocument()
+      expect(screen.getByText('+30s')).toBeInTheDocument()
+    })
+
+    it('clicking +20 calls onAddTime(20)', () => {
+      const onAddTime = vi.fn()
+      render(<TimerControls {...baseProps} status="running" showAddTime onAddTime={onAddTime} />)
+
+      fireEvent.click(screen.getByText('+20s'))
+      expect(onAddTime).toHaveBeenCalledWith(20)
+    })
+
+    it('clicking +10 calls onAddTime(10)', () => {
+      const onAddTime = vi.fn()
+      render(<TimerControls {...baseProps} status="running" showAddTime onAddTime={onAddTime} />)
+
+      fireEvent.click(screen.getByText('+10s'))
+      expect(onAddTime).toHaveBeenCalledWith(10)
+    })
+
+    it('clicking +30 calls onAddTime(30)', () => {
+      const onAddTime = vi.fn()
+      render(<TimerControls {...baseProps} status="running" showAddTime onAddTime={onAddTime} />)
+
+      fireEvent.click(screen.getByText('+30s'))
+      expect(onAddTime).toHaveBeenCalledWith(30)
+    })
+  })
+
   describe('conditional previous button', () => {
     it('renders previous button when onPrevious prop is provided', () => {
       render(<TimerControls {...baseProps} status="running" onPrevious={vi.fn()} />)

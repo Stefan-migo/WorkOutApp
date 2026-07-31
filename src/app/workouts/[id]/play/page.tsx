@@ -13,12 +13,15 @@ import { TimerControls } from '@/components/TimerControls'
 import { TimerRing } from '@/components/TimerRing'
 import { PlayHeader } from '@/components/PlayHeader'
 import { ExercisePanel } from '@/components/ExercisePanel'
+import { RepCounter } from '@/components/RepCounter'
+import { RepCompleteDialog } from '@/components/RepCompleteDialog'
 import { useExercises } from '@/hooks/useExercises'
-import { flattenWorkout } from '@/lib/interval-engine'
+import { flattenWorkout, getEffectiveMode } from '@/lib/interval-engine'
 import { formatTime } from '@/lib/format'
 import { getIntervalName } from '@/lib/interval-display'
 import type { CompletedInterval } from '@/types/workout'
 import type { Interval } from '@/types/workout'
+import type { Workout } from '@/types/workout'
 
 type Phase = 'idle' | 'active' | 'complete'
 
@@ -36,6 +39,7 @@ export default function PlayWorkoutPage() {
   const [phase, setPhase] = useState<Phase>('idle')
   const [currentIdx, setCurrentIdx] = useState(0)
   const [completedIntervals, setCompletedIntervals] = useState<CompletedInterval[]>([])
+  const [showRepDialog, setShowRepDialog] = useState(false)
   const skipRef = useRef(false)
   const startedAtRef = useRef(Date.now())
   const sessionSavedRef = useRef(false)
@@ -92,9 +96,13 @@ export default function PlayWorkoutPage() {
   }
 
   // Auto-start timer when phase activates or interval advances
+  // ponytail: reps work intervals don't use the timer — manual advance via RepCounter
   useEffect(() => {
     if (phase === 'active') {
-      timer.start()
+      const isRepsWork = interval && getEffectiveMode(workout as Workout, interval) === 'reps' && interval.type === 'work'
+      if (!isRepsWork) {
+        timer.start()
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, currentIdx])
@@ -140,6 +148,52 @@ export default function PlayWorkoutPage() {
     timer.start()
   }
 
+  function handleRepComplete(actualReps: number, weight?: number) {
+    if (!interval) return
+    setCompletedIntervals((prev) => [...prev, {
+      intervalId: interval.id,
+      title: interval.title,
+      type: interval.type,
+      plannedDuration: 0,
+      actualDuration: 0,
+      completed: true,
+      plannedReps: interval.reps,
+      actualReps,
+      weight,
+      exerciseId: interval.exerciseId,
+    }])
+    setShowRepDialog(false)
+    if (currentIdx < total - 1) {
+      setCurrentIdx((prev) => prev + 1)
+    } else {
+      setPhase('complete')
+    }
+  }
+
+  function handleRepSkip() {
+    if (!interval) return
+    // completed: false — a skipped set was never executed, so it must not
+    // count toward personal records. Planned values kept as reference.
+    setCompletedIntervals((prev) => [...prev, {
+      intervalId: interval.id,
+      title: interval.title,
+      type: interval.type,
+      plannedDuration: 0,
+      actualDuration: 0,
+      completed: false,
+      plannedReps: interval.reps,
+      actualReps: interval.reps,
+      weight: interval.weight,
+      exerciseId: interval.exerciseId,
+    }])
+    setShowRepDialog(false)
+    if (currentIdx < total - 1) {
+      setCurrentIdx((prev) => prev + 1)
+    } else {
+      setPhase('complete')
+    }
+  }
+
   // Save session on complete
   useEffect(() => {
     if (phase !== 'complete' || sessionSavedRef.current) return
@@ -183,11 +237,17 @@ export default function PlayWorkoutPage() {
     }
   }, [exercise?.id, getExerciseImages])
 
+  const isRepsWork = !!(interval && getEffectiveMode(workout as Workout, interval) === 'reps' && interval.type === 'work')
+  // ponytail: show addTime buttons on rest intervals when workout is reps mode
+  const isRestInRepsWorkout = !!(interval && workout?.mode === 'reps' && (interval.type === 'rest' || interval.type === 'rest_between_cycles'))
+
   const nextInterval = flat[currentIdx + 1]
   // Work count up to current interval (1-based, for display naming)
   const workCount = flat.slice(0, currentIdx + 1).filter((i) => i.type === 'work').length
-  const progressVal =
-    total > 0
+  // ponytail: reps mode progress is discrete — completed / total
+  const progressVal = isRepsWork
+    ? (completedIntervals.length / total)
+    : total > 0
       ? (currentIdx + (1 - timer.timeLeft / (interval?.duration || 1))) / total
       : 0
 
@@ -249,26 +309,50 @@ export default function PlayWorkoutPage() {
 
             {/* Right column — Timer + Controls + Progress */}
             <div className="w-full lg:w-1/2 flex flex-col items-center gap-12">
-              {/* Timer Ring */}
-              {interval && (
-                <TimerRing
-                  timeLeft={timer.timeLeft}
-                  duration={interval.duration}
-                  intervalType={interval.type}
-                  label={getIntervalName(interval, workCount, exercise)}
-                  nextLabel={nextInterval ? `Next: ${nextInterval.type === 'work' ? getIntervalName(nextInterval, workCount + 1) : nextInterval.title} (${formatTime(nextInterval.duration)})` : undefined}
+              {isRepsWork && interval ? (
+                /* Reps mode — show RepCounter, no timer ring */
+                <RepCounter
+                  exerciseName={exercise?.name ?? interval.title}
+                  reps={interval.reps ?? 0}
+                  weight={interval.weight}
+                  onComplete={() => setShowRepDialog(true)}
                 />
+              ) : (
+                <>
+                  {/* Timer Ring */}
+                  {interval && (
+                    <TimerRing
+                      timeLeft={timer.timeLeft}
+                      duration={interval.duration}
+                      intervalType={interval.type}
+                      label={getIntervalName(interval, workCount, exercise)}
+                      nextLabel={nextInterval ? `Next: ${nextInterval.type === 'work' ? getIntervalName(nextInterval, workCount + 1) : nextInterval.title} (${formatTime(nextInterval.duration)})` : undefined}
+                    />
+                  )}
+
+                  {/* Controls */}
+                  <TimerControls
+                    status={timer.status}
+                    onPause={timer.pause}
+                    onResume={timer.resume}
+                    onSkip={handleSkip}
+                    onRestart={handleRestart}
+                    onPrevious={handlePrevious}
+                    showAddTime={isRestInRepsWorkout}
+                    onAddTime={timer.addTime}
+                  />
+                </>
               )}
 
-              {/* Controls */}
-              <TimerControls
-                status={timer.status}
-                onPause={timer.pause}
-                onResume={timer.resume}
-                onSkip={handleSkip}
-                onRestart={handleRestart}
-                onPrevious={handlePrevious}
-              />
+              {/* Rep complete dialog */}
+              {showRepDialog && interval && (
+                <RepCompleteDialog
+                  plannedReps={interval.reps ?? 0}
+                  plannedWeight={interval.weight}
+                  onConfirm={handleRepComplete}
+                  onSkip={handleRepSkip}
+                />
+              )}
 
               {/* Progress */}
               <div className="w-full max-w-2xl">
