@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "test": "vitest",
-    "audit:tokens": "grep -r \"text-fg\\|bg-accent\\|border-border\\|text-muted\\|bg-surface-alt\\|bg-interval-\" src/ --include=\"*.tsx\" --include=\"*.ts\" || echo \"✅ No old tokens found\""
+    "audit:tokens": "grep -r \"text-fg\\|bg-accent\\|border-border\\|text-muted\\|bg-surface-alt\\|bg-interval-\" src/ --include=\"*.tsx\" --include=\"*.ts\" || echo \"✅ No old tokens found\"",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.3",
@@ -29,6 +31,9 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "vite-tsconfig-paths": "^6.1.1",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.9",
+    "storybook": "^10.5.5",
+    "@storybook/nextjs-vite": "^10.5.5",
+    "vite": "^8.2.0"
   }
 }
