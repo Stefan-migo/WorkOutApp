@@ -1,0 +1,1 @@
+{"nodes": [], "edges": [{"source": "exercise_picker_component", "target": "use_favorites", "relation": "calls", "confidence": "INFERRED", "confidence_score": 0.8, "source_file": "openspec/changes/archive/2026-07-04-exercise-integration-v2/specs/exercise-picker/spec.md", "source_location": null, "weight": 1.0}], "hyperedges": []}

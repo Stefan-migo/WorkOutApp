@@ -1,0 +1,1 @@
+{"nodes": [], "edges": [{"source": "supabase_auth_data_layer", "target": "local_persistence_spec", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "openspec/changes/archive/2026-07-26-supabase-auth-data-layer/delta-local-persistence.md", "source_location": null, "weight": 1.0}], "hyperedges": []}
