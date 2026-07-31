@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "test": "vitest",
-    "audit:tokens": "grep -r \"text-fg\\|bg-accent\\|border-border\\|text-muted\\|bg-surface-alt\\|bg-interval-\" src/ --include=\"*.tsx\" --include=\"*.ts\" || echo \"✅ No old tokens found\"",
+    "audit:tokens": "grep -r \"text-fg\\|bg-accent\\|border-border\\|text-muted\\|bg-surface-alt\\|bg-interval-\" src/ --include=\"*.tsx\" --include=\"*.ts\" || echo \"✅ No old tokens found\" & grep -rE \"#[0-9a-fA-F]{3,8}|rgba?\\([^)]*\\)\" src/components/ui src/app/workouts/page.tsx src/app/exercises/page.tsx src/components/ExerciseSearchHeader.tsx || echo \"✅ No hardcoded colors in touched paths\"",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
