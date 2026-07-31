@@ -13,12 +13,12 @@ describe('TimerRing', () => {
     expect(svg).toHaveAttribute('viewBox', '0 0 100 100')
   })
 
-  it('renders track circle with #1E293B stroke', () => {
+  it('renders track circle with primary-container token stroke', () => {
     render(<TimerRing timeLeft={30} duration={60} intervalType="work" label="WORK" />)
     const circles = document.querySelectorAll('circle')
-    // First circle is the track
+    // First circle is the track; SVG presentation attrs don't resolve CSS vars → inline style
     const track = circles[0]
-    expect(track).toHaveAttribute('stroke', '#1E293B')
+    expect(track.style.stroke).toBe('var(--color-primary-container)')
     expect(track).toHaveAttribute('fill', 'transparent')
   })
 
@@ -49,28 +49,28 @@ describe('TimerRing', () => {
   })
 
   describe('interval type colors', () => {
-    it('uses amber #F59E0B for prepare', () => {
+    it('uses blue #3b82f6 for prepare', () => {
       render(<TimerRing timeLeft={30} duration={60} intervalType="prepare" label="PREPARE" />)
       const circles = document.querySelectorAll('circle')
-      expect(circles[1]).toHaveAttribute('stroke', '#F59E0B')
+      expect(circles[1]).toHaveAttribute('stroke', '#3b82f6')
     })
 
-    it('uses lime #84cc16 for work', () => {
+    it('uses green #10b981 for work', () => {
       render(<TimerRing timeLeft={30} duration={60} intervalType="work" label="WORK" />)
       const circles = document.querySelectorAll('circle')
-      expect(circles[1]).toHaveAttribute('stroke', '#84cc16')
+      expect(circles[1]).toHaveAttribute('stroke', '#10b981')
     })
 
-    it('uses coral #fb7185 for rest', () => {
+    it('uses red #ef4444 for rest', () => {
       render(<TimerRing timeLeft={30} duration={60} intervalType="rest" label="REST" />)
       const circles = document.querySelectorAll('circle')
-      expect(circles[1]).toHaveAttribute('stroke', '#fb7185')
+      expect(circles[1]).toHaveAttribute('stroke', '#ef4444')
     })
 
-    it('uses indigo #818cf8 for cooldown', () => {
+    it('uses violet #8b5cf6 for cooldown', () => {
       render(<TimerRing timeLeft={30} duration={60} intervalType="cooldown" label="COOLDOWN" />)
       const circles = document.querySelectorAll('circle')
-      expect(circles[1]).toHaveAttribute('stroke', '#818cf8')
+      expect(circles[1]).toHaveAttribute('stroke', '#8b5cf6')
     })
   })
 
