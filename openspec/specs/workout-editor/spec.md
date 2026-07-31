@@ -31,11 +31,14 @@
 | WL-3 | Empty list SHALL show illustration + "Create your first workout" CTA button linking to /workouts/new | MUST |
 | WL-4 | Mobile viewport SHALL render FAB (primary-container bg, add icon, fixed bottom-right, w-14 h-14 rounded-full, hover scale-105) | MUST |
 | WL-5 | Top bar SHALL show search input (w-full md:w-96, search icon inside) + filter chip row (Type, Duration, Equipment) — placeholder UI only, no functional filtering | SHOULD |
-| IR-1 | IntervalRow SHALL be glass card with 4px left border accent (segment color), drag_indicator icon (text-outline-variant, cursor-grab), type icon in tinted circle bg, title input (font-body-md semibold), desc line (text-[11px]), duration input (font-data-lg, border-bottom, focus glow), group-hover action buttons (copy + delete). When `exerciseId` is set on a Work interval, the row SHALL also display an exercise preview section with: image thumbnail (32x32, rounded), exercise name (link to `/exercises/[id]`), and primary muscles chips (max 2 shown). | MUST |
+| IR-1 | IntervalRow SHALL be glass card with 4px left border accent (segment color), drag_indicator icon (text-outline-variant, cursor-grab), type icon in tinted circle bg, title input (font-body-md semibold), desc line (text-[11px]), duration input (font-data-lg, border-bottom, focus glow), group-hover action buttons (copy + delete). When `exerciseId` is set on a Work interval, the row SHALL also display an exercise preview section with: image thumbnail (32x32, rounded), exercise name (link to `/exercises/[id]`), and primary muscles chips (max 2 shown). When workout mode is `reps`, work intervals SHALL replace duration input with reps input (number min 1, font-data-lg bold primary color) | MUST |
 | TS-1 | TimelineStrip SHALL be h-4, rounded-full, bg-surface-dim, shadow-inner, segments as colored divs with proportional widths; legend row below with 5 items (w-3 h-3 rounded-sm colored square + label-caps text) | MUST |
 | IDS-1 | IntervalDetailSheet SHALL receive token-only migration: replace all old Burgundy tokens with Deep Nordic equivalents; no structural, behavioral, or animation changes | MUST |
 | EP-13 | The timer `ExercisePanel` component SHALL accept a full `Exercise` object (not just exerciseId). It SHALL render: image gallery (scroll-snap), numbered instructions list (collapsible sections), all metadata chips (primary muscles, secondary muscles, equipment, force, mechanic, difficulty, category), and a source badge. | MUST |
 | EP-14 | Both `/workouts/[id]/play` and `/sequences/[id]/play` SHALL look up the full `Exercise` object from the exercise library using the interval's `exerciseId` and pass it to `ExercisePanel`. If the exercise is not found, the panel SHALL show "Exercise not found" with the exerciseId. | MUST |
+| WE-26 | Editor header SHALL render a `timed`/`reps` toggle. Switching to `reps` mode SHALL replace the duration badge with "N exercises · M total reps". Non-work intervals retain duration input | MUST |
+| WE-27 | IntervalDetailSheet SHALL show "Reps" (number 1-999) and optional "Weight (kg)" fields for work intervals when workout mode is `reps`. Non-work intervals SHALL NOT show these fields regardless of mode | MUST |
+| WE-28 | CycleTemplate SHALL add optional `mode?: 'timed' | 'reps'`. Builder SHALL show a mode toggle per cycle for mixed-mode cycles | MUST |
 
 ## Scenarios
 
@@ -144,6 +147,41 @@
 ### Scenario: Interval row visual rendering (IR-1a)
 - GIVEN a Work interval with 04:00 duration
 - THEN row shows emerald-500 left border, directions_run icon in emerald/10 bg, editable title, 04:00 in JetBrains Mono data-lg input
+
+### Scenario: Toggle to reps mode
+- GIVEN a workout with 3 work intervals in the editor
+- WHEN user toggles mode to `'reps'`
+- THEN header shows "3 exercises · 0 total reps"
+- THEN work interval rows show reps input (span 1-999) instead of MM:SS duration
+- THEN rest/prepare/cooldown rows keep duration input
+
+### Scenario: Toggle back to timed
+- GIVEN a reps-mode workout with reps values set
+- WHEN user toggles to `'timed'`
+- THEN all intervals revert to duration display
+- THEN reps values are preserved in the interval but hidden
+
+### Scenario: Work interval sheet in reps mode
+- GIVEN a work interval in a reps-mode workout
+- WHEN IntervalDetailSheet opens
+- THEN "Reps" input appears with value from interval.reps (default empty)
+- THEN "Weight (kg)" optional input appears
+- THEN saving writes reps and weight to the interval
+
+### Scenario: Mixed-mode cycle in builder
+- GIVEN a CycleTemplate in the builder
+- WHEN user sets mode to `'reps'`
+- THEN the expanded intervals from the cycle inherit that mode
+
+### Scenario: Reps input on work row
+- GIVEN a work interval with `reps: 12` in reps-mode workout
+- WHEN IntervalRow renders
+- THEN duration field is replaced by "12" reps input, centered, bold, primary color
+
+### Scenario: Timed mode unchanged
+- GIVEN a work interval in timed-mode workout
+- WHEN IntervalRow renders
+- THEN MM:SS duration input shows unchanged
 
 ### Scenario: New vs Edit mode
 - GIVEN user navigates to /workouts/new

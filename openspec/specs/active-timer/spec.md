@@ -25,6 +25,11 @@
 | AT-19 | 3-button row centered: replay_10 | pause/play toggle | skip_next. Center button: 80px rounded-full, bg-white, text-primary, shadow. Side buttons: 14×14 rounded-full, border-white/20, hover:bg-white/10. gap-lg between buttons. All buttons Material Symbols Outlined with consistent font-variation-settings (FILL 1). | MUST |
 | AT-20 | Glass card (glass-panel, rounded-xl, p-md) centered below timer ring. Image area: w-full h-40, bg-primary-container (#1E293B), rounded-lg. Shows exercise name centered as placeholder text when no image available. Exercise name: headline-lg, white, mb-xs. Description: body-md, gray-300. Chips: rounded-full, bg-surface-tint/20, label-caps, text-white, border-white/10, gap-2. Chip section MUST NOT render empty containers when no tags. | MUST |
 | AT-21 | useTimer MUST expose addTime(n: number). Clips timeLeft to [0, duration]. MUST apply same Date.now delta-correction contract as the tick. If n > remaining, clips to 0 (triggers auto-advance). If |n| > timeLeft, clips to 0. | MUST |
+| AT-22 | Play page SHALL detect `workout.mode` at load. If `'reps'` OR any interval has `mode: 'reps'`, timer SHALL handle work intervals as manual-advance with no countdown. Non-rep intervals keep existing timer behavior | MUST |
+| AT-23 | Rep-mode work intervals SHALL NOT run the timer. UI SHALL show exercise name + target reps prominently. A "Complete" button SHALL skip the timer and advance to the next interval | MUST |
+| AT-24 | On "Complete", system SHALL show a dialog: "How many reps?" (default: plannedReps) and "Weight (kg)?" (optional number). "Save" stores actualReps/weight and advances. "Cancel" advances without actual data | MUST |
+| AT-25 | Rest and rest_between_cycles intervals in reps-mode workouts SHALL render three buttons: "+10s", "+20s", "+30s" below the 3-button controls. Each SHALL call `useTimer.addTime(n)` | MUST |
+| AT-26 | Play page SHALL check `interval.mode` on each interval. If set, it overrides `workout.mode` for that interval. Switching between timed and rep mode per interval SHALL update the UI (timer ring ↔ exercise + reps) dynamically | MUST |
 
 ## Scenarios
 
@@ -122,7 +127,43 @@
 - WHEN addTime(-10) called
 - THEN timeLeft is 00:00:00, interval auto-advances to next
 
+### Scenario: Detect reps workout
+- GIVEN a workout with `mode: 'reps'`
+- WHEN play page loads
+- THEN first work interval renders exercise + reps, no timer ring, "Complete" button visible
+- THEN rest intervals render timer ring normally
+
+### Scenario: Complete advances
+- GIVEN play on a rep-mode work interval
+- WHEN user taps "Complete"
+- THEN interval is marked completed in session
+- THEN play advances to next interval (rest or next work)
+
+### Scenario: Save actual reps/weight
+- GIVEN a work interval with plannedReps=12
+- WHEN "Complete" → enter 10 reps + 20kg → "Save"
+- THEN CompletedInterval stores plannedReps=12, actualReps=10, weight=20
+
+### Scenario: Cancel skips recording
+- GIVEN a work interval with plannedReps=12
+- WHEN "Complete" → "Cancel"
+- THEN CompletedInterval stores plannedReps only, actualReps and weight absent
+
+### Scenario: Add time to rest
+- GIVEN rest interval at 00:30 in reps-mode workout
+- WHEN user taps "+10s"
+- THEN timeLeft becomes 00:40
+
+### Scenario: Add time clips at max
+- GIVEN rest interval at 00:55 (duration 60s)
+- WHEN user taps "+10s"
+- THEN timeLeft clips to 01:00 (duration cap)
+
+### Scenario: Mixed cycle switching
+- GIVEN intervals [Work(12 reps, mode='reps'), Work(30s, mode='timed')]
+- WHEN playing first interval
+- THEN UI shows reps mode (exercise + reps + "Complete")
+- WHEN advancing to second
+- THEN UI shows timed mode (timer ring + countdown)
+
 ### Scenario: Clip at duration
-- GIVEN timer at 00:00:45 on Work(60s)
-- WHEN addTime(20) called
-- THEN timeLeft clips to 00:00:60 (duration cap)
