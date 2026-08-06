@@ -66,7 +66,7 @@ export default function DashboardPage() {
             Stay focused. Stay disciplined.
           </p>
         </div>
-        <p className="font-mono text-data-lg text-primary tracking-tight">{formatDate()}</p>
+        <p className="font-mono text-data-lg text-accent tracking-tight">{formatDate()}</p>
       </div>
 
       {/* Bento Grid */}

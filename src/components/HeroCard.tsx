@@ -16,14 +16,14 @@ export default function HeroCard({ todayWorkout, workoutCount, totalSessions }: 
       <div className="relative z-10 w-full flex flex-col md:flex-row items-start md:items-end justify-between gap-24">
         <div>
           <div className="flex gap-8 mb-8">
-            <span className="bg-surface-tint/10 text-on-primary-fixed px-8 py-1 rounded-full font-label text-label-caps tracking-wider border border-outline-variant/20 backdrop-blur-md">
+            <span className="bg-surface-tint/10 text-fg-2 px-8 py-1 rounded-full font-label text-label-caps tracking-wider border border-outline-variant/20 backdrop-blur-md">
               {todayWorkout ? 'TODAY' : 'WELCOME'}
             </span>
-            <span className="bg-surface-tint/10 text-on-primary-fixed px-8 py-1 rounded-full font-label text-label-caps tracking-wider border border-outline-variant/20 backdrop-blur-md">
+            <span className="bg-surface-tint/10 text-fg-2 px-8 py-1 rounded-full font-label text-label-caps tracking-wider border border-outline-variant/20 backdrop-blur-md">
               {workoutCount} WORKOUT{workoutCount !== 1 && 'S'}
             </span>
           </div>
-          <h3 className="font-headline text-headline-lg text-primary mb-xs tracking-tight">
+          <h3 className="font-headline text-headline-lg text-accent mb-xs tracking-tight">
             {todayWorkout?.title ?? 'Ready to train?'}
           </h3>
           <p className="font-body text-body-md text-muted max-w-md">
@@ -39,7 +39,7 @@ export default function HeroCard({ todayWorkout, workoutCount, totalSessions }: 
         {todayWorkout && (
           <Link
             href={`/workouts/${todayWorkout.id}/play`}
-            className="shrink-0 bg-primary-btn text-on-primary-btn rounded-full w-20 h-20 flex items-center justify-center ambient-shadow hover:bg-primary-btn-hover transition-all duration-300 hover:scale-105 active:scale-95 group/btn focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="shrink-0 bg-accent text-accent-on rounded-full w-20 h-20 flex items-center justify-center ambient-shadow hover:bg-accent-hover transition-all duration-300 hover:scale-105 active:scale-95 group/btn focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
           >
             <span className="font-label text-label-caps font-bold tracking-widest group-hover/btn:hidden">START</span>
             <span className="material-symbols-outlined text-[32px] hidden group-hover/btn:block">play_arrow</span>

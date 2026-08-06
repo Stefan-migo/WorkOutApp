@@ -125,7 +125,7 @@ export default function HistoryPage() {
         </p>
         <Link
           href="/workouts"
-          className="px-24 py-16 bg-primary text-on-primary rounded-lg font-label-caps text-label-caps hover:bg-primary/90 transition-colors ambient-shadow"
+          className="px-24 py-16 bg-accent text-accent-on rounded-lg font-label-caps text-label-caps hover:bg-accent/90 transition-colors ambient-shadow"
         >
           Browse Workouts
         </Link>
@@ -203,7 +203,7 @@ export default function HistoryPage() {
                     </span>
                   </div>
                   <div>
-                    <h3 className="font-body-md text-body-md font-bold text-fg-2 leading-tight group-hover:text-primary transition-colors">
+                    <h3 className="font-body-md text-body-md font-bold text-fg-2 leading-tight group-hover:text-accent transition-colors">
                       {name}
                     </h3>
                     <div className="flex gap-xs mt-xs">

@@ -18,7 +18,7 @@ export default function PreviewWorkoutPage() {
     return (
       <div className="flex flex-col items-center justify-center flex-1 gap-4 p-32 text-center">
         <h1 className="text-2xl font-bold text-fg-2">Workout not found</h1>
-        <Link href="/workouts" className="text-secondary hover:underline">&larr; Back to workouts</Link>
+        <Link href="/workouts" className="text-accent hover:underline">&larr; Back to workouts</Link>
       </div>
     )
   }
@@ -37,7 +37,7 @@ export default function PreviewWorkoutPage() {
         </div>
         <div className="text-right">
           <span className="block font-label-caps text-label-caps text-muted uppercase tracking-wider">Duration</span>
-          <span className="font-mono text-display-timer-mobile text-primary tracking-tighter">{formatDuration(total)}</span>
+          <span className="font-mono text-display-timer-mobile text-accent tracking-tighter">{formatDuration(total)}</span>
         </div>
       </div>
 
@@ -69,7 +69,7 @@ export default function PreviewWorkoutPage() {
                     <p className="text-[11px] text-muted font-body-md mt-2">{interval.description}</p>
                   )}
                 </div>
-                <div className="px-16 font-data-lg text-data-lg text-primary font-bold tracking-tight font-mono">
+                <div className="px-16 font-data-lg text-data-lg text-accent font-bold tracking-tight font-mono">
                   {formatDuration(interval.duration)}
                 </div>
               </div>
@@ -88,7 +88,7 @@ export default function PreviewWorkoutPage() {
         </button>
         <button
           onClick={() => router.push(`/workouts/${workout.id}/edit`)}
-          className="flex-1 py-3 bg-primary-btn hover:bg-primary-btn-hover text-on-primary-btn rounded-lg font-medium transition-colors"
+          className="flex-1 py-3 bg-accent hover:bg-accent-hover text-accent-on rounded-lg font-medium transition-colors"
         >
           Edit Workout
         </button>

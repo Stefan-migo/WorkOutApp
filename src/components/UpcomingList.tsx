@@ -46,7 +46,7 @@ export function UpcomingList({
           : 0
         return (
           <div key={index} className="flex gap-8 items-start">
-            <div className="w-12 h-12 bg-surface rounded-lg flex items-center justify-center flex-shrink-0 text-secondary-container font-data-lg text-data-lg font-bold">
+            <div className="w-12 h-12 bg-surface rounded-lg flex items-center justify-center flex-shrink-0 text-accent-container font-data-lg text-data-lg font-bold">
               {d.getDate()}
             </div>
             <div className="min-w-0">

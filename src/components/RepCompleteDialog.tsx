@@ -62,7 +62,7 @@ export function RepCompleteDialog({ plannedReps, plannedWeight, onConfirm, onSki
           </button>
           <button
             onClick={() => onConfirm(reps, plannedWeight !== undefined ? weight : undefined)}
-            className="flex-1 px-6 py-3 rounded-full bg-white text-primary font-bold hover:bg-gray-200 transition-colors"
+            className="flex-1 px-6 py-3 rounded-full bg-white text-accent font-bold hover:bg-gray-200 transition-colors"
             aria-label="Confirm"
           >
             Confirm

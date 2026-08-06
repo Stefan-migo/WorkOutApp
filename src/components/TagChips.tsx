@@ -76,13 +76,13 @@ export function TagChips({
         {tags.map((tag) => (
           <span
             key={tag}
-            className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/10 text-primary rounded text-sm"
+            className="inline-flex items-center gap-1 px-2 py-0.5 bg-accent/10 text-accent rounded text-sm"
           >
             {tag}
             <button
               type="button"
               onClick={() => onRemove(tag)}
-              className="text-primary/60 hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none rounded"
+              className="text-accent/60 hover:text-accent transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none rounded"
               aria-label={`Remove ${tag}`}
             >
               ✕
@@ -112,7 +112,7 @@ export function TagChips({
                   aria-selected={idx === focusedIdx}
                   className={`px-3 py-1.5 cursor-pointer text-body-md text-fg-2 transition-colors ${
                     idx === focusedIdx
-                      ? 'bg-primary/10 text-primary'
+                      ? 'bg-accent/10 text-accent'
                       : 'hover:bg-surface-warm'
                   }`}
                   onMouseDown={(e) => {

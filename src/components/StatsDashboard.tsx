@@ -99,7 +99,7 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
         </p>
         <Link
           href="/workouts"
-          className="px-24 py-16 bg-primary text-on-primary rounded-lg font-label-caps text-label-caps hover:bg-primary/90 transition-colors ambient-shadow"
+          className="px-24 py-16 bg-accent text-accent-on rounded-lg font-label-caps text-label-caps hover:bg-accent/90 transition-colors ambient-shadow"
         >
           Browse Workouts
         </Link>
@@ -156,7 +156,7 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
                   {strengthPRs.map((r) => (
                     <li key={r.exercise} className="flex items-baseline justify-between gap-8">
                       <span className="font-body-md text-body-md text-fg-2 truncate">{r.exercise}</span>
-                      <span className="font-data-sm text-data-sm text-secondary whitespace-nowrap">
+                      <span className="font-data-sm text-data-sm text-accent whitespace-nowrap">
                         {strengthValue(r)}
                       </span>
                     </li>
@@ -177,7 +177,7 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
                   {cardioPRs.map((r) => (
                     <li key={r.exercise} className="flex items-baseline justify-between gap-8">
                       <span className="font-body-md text-body-md text-fg-2 truncate">{r.exercise}</span>
-                      <span className="font-data-sm text-data-sm text-secondary whitespace-nowrap">
+                      <span className="font-data-sm text-data-sm text-accent whitespace-nowrap">
                         {formatDuration(r.bestCardioSeconds!)}
                       </span>
                     </li>

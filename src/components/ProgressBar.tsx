@@ -22,7 +22,7 @@ export function ProgressBar({ progress, label, dark }: ProgressBarProps) {
         aria-label={label ?? 'Progress'}
       >
         <div
-          className={`rounded-full transition-all duration-500 ease-out ${dark ? 'h-2 bg-white' : 'h-3 bg-primary-container'}`}
+          className={`rounded-full transition-all duration-500 ease-out ${dark ? 'h-2 bg-white' : 'h-3 bg-accent'}`}
           style={{ width: `${pct}%` }}
         />
       </div>

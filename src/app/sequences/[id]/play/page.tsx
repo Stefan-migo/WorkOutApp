@@ -267,7 +267,7 @@ export default function PlaySequencePage() {
         <h1 className="font-headline-lg text-headline-lg">Workout not found</h1>
         <p className="font-body-md text-body-md text-gray-400">A workout in this sequence may have been deleted.</p>
         <div className="flex gap-4">
-          <button onClick={handleSkipWorkout} className="px-6 py-3 rounded-full bg-primary text-on-primary font-medium hover:opacity-90 transition-colors">
+          <button onClick={handleSkipWorkout} className="px-6 py-3 rounded-full bg-accent text-accent-on font-medium hover:opacity-90 transition-colors">
             Skip to next
           </button>
           <Link href="/sequences" className="px-6 py-3 rounded-full border border-white/20 text-white font-medium hover:bg-white/10 transition-colors">
@@ -315,7 +315,7 @@ export default function PlaySequencePage() {
             </p>
             <button
               onClick={handleStart}
-              className="px-12 py-4 rounded-full text-xl font-bold transition-colors bg-primary text-on-primary hover:opacity-90"
+              className="px-12 py-4 rounded-full text-xl font-bold transition-colors bg-accent text-accent-on hover:opacity-90"
             >
               Start Sequence
             </button>
@@ -415,7 +415,7 @@ export default function PlaySequencePage() {
                 <p className="font-body-lg text-body-lg text-white">Next workout in {countdown}s</p>
                 <button
                   onClick={goToNextRound}
-                  className="px-6 py-3 rounded-full bg-primary text-on-primary font-medium hover:opacity-90 transition-colors"
+                  className="px-6 py-3 rounded-full bg-accent text-accent-on font-medium hover:opacity-90 transition-colors"
                 >
                   Next Workout
                 </button>

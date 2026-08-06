@@ -22,9 +22,9 @@ export function ExerciseDeleteDialog({
       onClose={onClose}
     >
       <div className="flex flex-col gap-4">
-        <h3 className="font-headline text-headline-md font-semibold text-primary">Delete {exerciseName}?</h3>
+        <h3 className="font-headline text-headline-md font-semibold text-accent">Delete {exerciseName}?</h3>
         {workoutRefCount > 0 ? (
-          <p className="font-body text-body-md text-secondary">
+          <p className="font-body text-body-md text-accent">
             This exercise is used in {workoutRefCount} workout
             {workoutRefCount !== 1 && 's'}. Deleting it will not remove existing
             references, but the exercise name will no longer be shown.
@@ -38,7 +38,7 @@ export function ExerciseDeleteDialog({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-lg font-label text-label-caps text-muted hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="px-4 py-2 rounded-lg font-label text-label-caps text-muted hover:text-accent transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
           >
             Cancel
           </button>

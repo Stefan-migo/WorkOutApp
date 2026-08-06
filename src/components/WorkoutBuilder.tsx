@@ -257,7 +257,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
             type="text"
             value={title}
             placeholder="Name your workout..."
-            className="w-full bg-transparent border-0 border-b-2 border-outline-variant pb-xs font-headline text-headline-lg text-fg-2 focus:border-secondary focus:ring-0 transition-colors px-0 outline-none placeholder:text-outline/50 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="w-full bg-transparent border-0 border-b-2 border-outline-variant pb-xs font-headline text-headline-lg text-fg-2 focus:border-accent focus:ring-0 transition-colors px-0 outline-none placeholder:text-outline/50 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
@@ -265,7 +265,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
           <span className="block font-label text-label-caps text-muted mb-xs uppercase tracking-wider">
             Est. Duration
           </span>
-          <div className="font-mono text-display-timer-mobile text-primary tracking-tighter">
+          <div className="font-mono text-display-timer-mobile text-accent tracking-tighter">
             {totalMin}:{String(remainSec).padStart(2, '0')}
           </div>
         </div>
@@ -313,12 +313,12 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                   {/* Top row: title + actions */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-8">
-                      <span className="material-symbols-outlined text-secondary text-[22px]">repeat</span>
+                      <span className="material-symbols-outlined text-accent text-[22px]">repeat</span>
                       <input
                         type="text"
                         value={item.title}
                         onChange={(e) => updateCycleField(i, 'title', e.target.value)}
-                        className="bg-transparent border-0 border-b border-outline-variant/30 p-0 font-body-md font-semibold text-fg-2 w-32 focus:border-secondary focus:ring-0 outline-none"
+                        className="bg-transparent border-0 border-b border-outline-variant/30 p-0 font-body-md font-semibold text-fg-2 w-32 focus:border-accent focus:ring-0 outline-none"
                         aria-label="Cycle name"
                       />
                     </div>
@@ -326,7 +326,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                       {/* Duplicate */}
                       <button
                         onClick={() => duplicateCycle(i)}
-                        className="text-outline-variant hover:text-secondary transition-colors p-4 rounded-lg hover:bg-surface"
+                        className="text-outline-variant hover:text-accent transition-colors p-4 rounded-lg hover:bg-surface"
                         aria-label="Duplicate cycle"
                       >
                         <span className="material-symbols-outlined text-[18px]">content_copy</span>
@@ -349,7 +349,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                       onClick={() => updateCycleField(i, 'mode', 'timed')}
                       className={`px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider transition-colors ${
                         item.mode !== 'reps'
-                          ? 'bg-primary text-on-primary-btn'
+                          ? 'bg-accent text-accent-on'
                           : 'bg-surface text-muted'
                       }`}
                     >
@@ -359,7 +359,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                       onClick={() => updateCycleField(i, 'mode', 'reps')}
                       className={`px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider transition-colors ${
                         item.mode === 'reps'
-                          ? 'bg-primary text-on-primary-btn'
+                          ? 'bg-accent text-accent-on'
                           : 'bg-surface text-muted'
                       }`}
                     >
@@ -380,7 +380,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                             const v = parseInt(e.target.value, 10)
                             if (!isNaN(v)) updateCycleField(i, 'repeat', Math.min(10, Math.max(1, v)))
                           }}
-                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-fg-2 focus:border-secondary focus:ring-0 outline-none"
+                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-fg-2 focus:border-accent focus:ring-0 outline-none"
                           aria-label="Cycle repeat count"
                         />
                       </div>
@@ -394,7 +394,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                             const v = e.target.value ? parseInt(e.target.value, 10) : undefined
                             updateCycleField(i, 'workReps', v != null && !isNaN(v) ? Math.max(1, v) : undefined)
                           }}
-                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-fg-2 focus:border-secondary focus:ring-0 outline-none"
+                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-fg-2 focus:border-accent focus:ring-0 outline-none"
                           placeholder="—"
                           aria-label="Work reps"
                         />
@@ -409,7 +409,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                             const v = e.target.value ? parseInt(e.target.value, 10) : undefined
                             updateCycleField(i, 'workWeight', v != null && !isNaN(v) ? Math.max(0, v) : undefined)
                           }}
-                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-fg-2 focus:border-secondary focus:ring-0 outline-none"
+                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-fg-2 focus:border-accent focus:ring-0 outline-none"
                           placeholder="—"
                           aria-label="Work weight (kg)"
                         />
@@ -424,7 +424,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                             const v = parseInt(e.target.value, 10)
                             if (!isNaN(v)) updateCycleField(i, 'restDuration', Math.max(1, v))
                           }}
-                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-fg-2 focus:border-secondary focus:ring-0 outline-none"
+                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-fg-2 focus:border-accent focus:ring-0 outline-none"
                           aria-label="Rest duration seconds"
                         />
                       </div>
@@ -434,7 +434,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                             type="checkbox"
                             checked={item.skipLastRest}
                             onChange={(e) => updateCycleField(i, 'skipLastRest', e.target.checked)}
-                            className="w-3 h-3 accent-primary rounded"
+                            className="w-3 h-3 accent-accent rounded"
                           />
                           <span className="text-[8px] leading-tight text-muted/70">Skip last rest</span>
                         </label>
@@ -452,7 +452,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                             const v = parseInt(e.target.value, 10)
                             if (!isNaN(v)) updateCycleField(i, 'repeat', Math.min(10, Math.max(1, v)))
                           }}
-                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-fg-2 focus:border-secondary focus:ring-0 outline-none"
+                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-fg-2 focus:border-accent focus:ring-0 outline-none"
                           aria-label="Cycle repeat count"
                         />
                       </div>
@@ -466,7 +466,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                             const v = parseInt(e.target.value, 10)
                             if (!isNaN(v)) updateCycleField(i, 'workDuration', Math.max(1, v))
                           }}
-                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-fg-2 focus:border-secondary focus:ring-0 outline-none"
+                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-fg-2 focus:border-accent focus:ring-0 outline-none"
                           aria-label="Work duration seconds"
                         />
                       </div>
@@ -480,7 +480,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                             const v = parseInt(e.target.value, 10)
                             if (!isNaN(v)) updateCycleField(i, 'restDuration', Math.max(1, v))
                           }}
-                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-fg-2 focus:border-secondary focus:ring-0 outline-none"
+                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-fg-2 focus:border-accent focus:ring-0 outline-none"
                           aria-label="Rest duration seconds"
                         />
                       </div>
@@ -490,7 +490,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                             type="checkbox"
                             checked={item.skipLastRest}
                             onChange={(e) => updateCycleField(i, 'skipLastRest', e.target.checked)}
-                            className="w-3 h-3 accent-primary rounded"
+                            className="w-3 h-3 accent-accent rounded"
                           />
                           <span className="text-[8px] leading-tight text-muted/70">Skip last rest</span>
                         </label>
@@ -500,7 +500,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
 
                   {/* Estimated total */}
                   <div className="text-right">
-                    <span className="text-data-sm text-primary font-mono">
+                    <span className="text-data-sm text-accent font-mono">
                       ~{Math.floor(
                         ((item.mode === 'reps' ? 0 : item.workDuration) * item.repeat +
                           item.restDuration * (item.skipLastRest ? item.repeat - 1 : item.repeat)) / 60,
@@ -538,7 +538,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                           onClick={() => updateIntervalMode(i, 'timed')}
                           className={`px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider transition-colors ${
                             item.mode !== 'reps'
-                              ? 'bg-primary text-on-primary-btn'
+                              ? 'bg-accent text-accent-on'
                               : 'bg-surface text-muted'
                           }`}
                         >
@@ -548,7 +548,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                           onClick={() => updateIntervalMode(i, 'reps')}
                           className={`px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider transition-colors ${
                             item.mode === 'reps'
-                              ? 'bg-primary text-on-primary-btn'
+                              ? 'bg-accent text-accent-on'
                               : 'bg-surface text-muted'
                           }`}
                         >
@@ -575,7 +575,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                                 return next
                               })
                             }}
-                            className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-16 font-data-sm text-data-sm text-primary font-bold font-mono focus:border-secondary focus:ring-0 outline-none"
+                            className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-16 font-data-sm text-data-sm text-accent font-bold font-mono focus:border-accent focus:ring-0 outline-none"
                             placeholder="—"
                             aria-label={`Interval ${i + 1} reps`}
                           />
@@ -597,7 +597,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                                 return next
                               })
                             }}
-                            className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-16 font-data-sm text-data-sm text-primary font-bold font-mono focus:border-secondary focus:ring-0 outline-none"
+                            className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-16 font-data-sm text-data-sm text-accent font-bold font-mono focus:border-accent focus:ring-0 outline-none"
                             placeholder="—"
                             aria-label={`Interval ${i + 1} weight`}
                           />
@@ -622,7 +622,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                             })
                           }
                         }}
-                        className="bg-transparent border-none p-0 font-data-sm text-data-sm text-primary font-bold tracking-tight font-mono w-20 focus:ring-0 focus:outline-none focus:border-b focus:border-secondary"
+                        className="bg-transparent border-none p-0 font-data-sm text-data-sm text-accent font-bold tracking-tight font-mono w-20 focus:ring-0 focus:outline-none focus:border-b focus:border-accent"
                         aria-label={`Interval ${i + 1} duration`}
                       />
                     )}
@@ -641,7 +641,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                           return next
                         })
                       }}
-                      className="text-outline-variant hover:text-secondary transition-colors p-4 rounded-lg hover:bg-surface"
+                      className="text-outline-variant hover:text-accent transition-colors p-4 rounded-lg hover:bg-surface"
                       aria-label={`Duplicate interval ${i + 1}`}
                     >
                       <span className="material-symbols-outlined text-[18px]">content_copy</span>
@@ -676,7 +676,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                   aria-label="Add Cycle"
                   className="glass-card p-8 rounded-xl flex flex-col items-center justify-center gap-4 hover:-translate-y-1 hover:shadow-md transition-all duration-200 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none group border-t-2 border-t-secondary/50"
                 >
-                  <div className="w-9 h-9 rounded-full bg-secondary/10 text-secondary flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <div className="w-9 h-9 rounded-full bg-accent/10 text-accent flex items-center justify-center group-hover:scale-110 transition-transform">
                     <span className="material-symbols-outlined text-[20px]">repeat</span>
                   </div>
                   <span className="font-label text-label-caps uppercase text-fg-2 font-semibold text-[10px] leading-tight text-center">
@@ -720,7 +720,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
         <button
           onClick={handleSave}
           disabled={!canSave}
-          className="flex-1 py-3 bg-primary-btn hover:bg-primary-btn-hover disabled:bg-surface disabled:text-muted text-on-primary-btn rounded-lg font-medium transition-colors font-label text-label-caps uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="flex-1 py-3 bg-accent hover:bg-accent-hover disabled:bg-surface disabled:text-muted text-accent-on rounded-lg font-medium transition-colors font-label text-label-caps uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
         >
           Build Workout
         </button>

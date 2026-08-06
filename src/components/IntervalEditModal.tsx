@@ -115,7 +115,7 @@ export function IntervalEditModal({ interval, title, typeLabel, onSave, onClose 
               type="checkbox"
               checked={completed}
               onChange={(e) => setCompleted(e.target.checked)}
-              className="w-4 h-4 accent-secondary"
+              className="w-4 h-4 accent-accent"
             />
             <span className="text-sm text-fg-2">Completed</span>
           </label>
@@ -176,7 +176,7 @@ export function IntervalEditModal({ interval, title, typeLabel, onSave, onClose 
             </button>
             <button
               onClick={handleSave}
-              className="flex-1 py-3 bg-primary text-on-primary rounded-lg font-label-caps text-label-caps hover:bg-primary/90 transition-colors text-sm focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+              className="flex-1 py-3 bg-accent text-accent-on rounded-lg font-label-caps text-label-caps hover:bg-accent/90 transition-colors text-sm focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
             >
               Save
             </button>

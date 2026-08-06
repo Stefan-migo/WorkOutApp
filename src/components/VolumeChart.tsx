@@ -27,12 +27,12 @@ export default function VolumeChart({ recentVolume, maxVolume, formatHours }: Vo
             >
               <div
                 className={`w-full rounded-t transition-all duration-300 ${
-                  isTop ? 'bg-primary' : 'bg-primary-fixed-dim'
+                  isTop ? 'bg-accent' : 'bg-accent-fixed-dim'
                 }`}
                 style={{ height: `${Math.max(pct, 1)}%` }}
               >
                 {/* ponytail: CSS-only tooltip, no library */}
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-tertiary text-on-tertiary font-data-sm text-data-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-accent text-accent-on font-data-sm text-data-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
                   {formatHours(w.totalSeconds)}
                 </div>
               </div>

@@ -32,11 +32,11 @@ export default function StrainGauge({ avgRpe }: StrainGaugeProps) {
               strokeLinecap="round"
               strokeDasharray={gaugeCirc}
               strokeDashoffset={gaugeOffset}
-              className="text-secondary-container transition-all duration-700 ease-out"
+              className="text-accent-container transition-all duration-700 ease-out"
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="font-display-timer-mobile text-display-timer-mobile text-primary leading-none">
+            <span className="font-display-timer-mobile text-display-timer-mobile text-accent leading-none">
               {avgRpe}
             </span>
             <span className="font-label-caps text-label-caps text-muted mt-1">

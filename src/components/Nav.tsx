@@ -75,7 +75,7 @@ export default function Nav() {
 
       {/* Top App Bar — hidden on mobile, visible on desktop */}
       <header className="hidden md:flex fixed top-0 left-64 right-0 h-20 bg-surface border-b border-outline-variant/30 items-center px-margin-desktop z-[60]">
-        <span className="font-headline text-headline-md font-bold text-primary tracking-tight">WorkOutApp</span>
+        <span className="font-headline text-headline-md font-bold text-accent tracking-tight">WorkOutApp</span>
       </header>
 
       {/* Bottom Nav — Mobile only */}
@@ -87,7 +87,7 @@ export default function Nav() {
               key={href}
               href={href}
               className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg min-w-0 transition-colors ${
-                active ? 'text-primary' : 'text-muted'
+                active ? 'text-accent' : 'text-muted'
               }`}
             >
               <span

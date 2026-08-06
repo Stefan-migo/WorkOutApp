@@ -16,8 +16,8 @@ export default function ConsistencyHeatmap({ heatmap }: ConsistencyHeatmapProps)
       <div className="flex-1 grid grid-cols-7 gap-1 auto-rows-fr">
         {heatmap.flat().map((cell) => {
           let bgClass = 'bg-surface'
-          if (cell.count > 1) bgClass = 'bg-primary'
-          else if (cell.count === 1) bgClass = 'bg-primary/50'
+          if (cell.count > 1) bgClass = 'bg-accent'
+          else if (cell.count === 1) bgClass = 'bg-accent/50'
           return (
             <div
               key={cell.date}

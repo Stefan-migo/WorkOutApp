@@ -14,7 +14,7 @@ export default function EditWorkoutPage() {
     return (
       <div className="flex flex-col items-center justify-center flex-1 gap-4 p-32 text-center">
         <h1 className="text-2xl font-bold text-fg-2">Workout not found</h1>
-        <Link href="/workouts" className="text-secondary hover:underline">&larr; Back to workouts</Link>
+        <Link href="/workouts" className="text-accent hover:underline">&larr; Back to workouts</Link>
       </div>
     )
   }

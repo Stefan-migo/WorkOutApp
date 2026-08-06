@@ -277,7 +277,7 @@ export default function PlayWorkoutPage() {
             )}
             <button
               onClick={handleStart}
-              className="px-12 py-4 bg-white text-primary rounded-full text-xl font-bold hover:bg-gray-200 transition-colors"
+              className="px-12 py-4 bg-white text-accent rounded-full text-xl font-bold hover:bg-gray-200 transition-colors"
             >
               Start
             </button>

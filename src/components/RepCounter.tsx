@@ -32,7 +32,7 @@ export function RepCounter({ exerciseName, reps, weight, onComplete }: RepCounte
       {/* Complete button large and centered */}
       <button
         onClick={onComplete}
-        className="px-16 py-6 bg-white text-primary rounded-full text-xl font-bold hover:bg-gray-200 transition-colors mt-4"
+        className="px-16 py-6 bg-white text-accent rounded-full text-xl font-bold hover:bg-gray-200 transition-colors mt-4"
         aria-label="Complete set"
       >
         Complete

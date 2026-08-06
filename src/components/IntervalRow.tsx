@@ -78,7 +78,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
             )}
             <Link
               href={`/exercises/${interval.exerciseId}`}
-              className="text-[11px] font-body-md text-secondary hover:underline"
+              className="text-[11px] font-body-md text-accent hover:underline"
               onClick={(e) => e.stopPropagation()}
             >
               {exercise.name}
@@ -88,7 +88,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
                 {exercise.primaryMuscles.slice(0, 2).map((muscle) => (
                   <span
                     key={muscle}
-                    className="text-[9px] px-4 py-1 rounded-full bg-primary/10 text-primary font-medium whitespace-nowrap"
+                    className="text-[9px] px-4 py-1 rounded-full bg-accent/10 text-accent font-medium whitespace-nowrap"
                   >
                     {muscle}
                   </span>
@@ -102,7 +102,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
       {/* Duration + Reps + Actions */}
       <div className="px-16 flex items-center gap-8 border-l border-outline-variant/30 py-16">
         {interval.reps != null ? (
-          <div className="font-data-lg text-data-lg text-primary font-bold tracking-tight whitespace-nowrap">
+          <div className="font-data-lg text-data-lg text-accent font-bold tracking-tight whitespace-nowrap">
             {interval.weight != null ? `${interval.reps} reps @ ${interval.weight}kg` : `${interval.reps} reps`}
           </div>
         ) : (
@@ -118,7 +118,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
                 onChange(index, { ...interval, duration: m * 60 + s })
               }
             }}
-            className="bg-transparent border-none p-0 font-data-lg text-data-lg text-primary focus:ring-0 focus:outline-none w-20 text-center font-bold tracking-tight"
+            className="bg-transparent border-none p-0 font-data-lg text-data-lg text-accent focus:ring-0 focus:outline-none w-20 text-center font-bold tracking-tight"
             aria-label={`Interval ${index + 1} duration`}
           />
         )}
@@ -127,7 +127,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
           <button
             onClick={() => onMoveUp?.(index)}
             disabled={isFirst}
-            className="text-outline-variant hover:text-secondary transition-colors disabled:opacity-20 disabled:pointer-events-none"
+            className="text-outline-variant hover:text-accent transition-colors disabled:opacity-20 disabled:pointer-events-none"
             aria-label={`Move interval ${index + 1} up`}
           >
             <span className="material-symbols-outlined text-[18px]">keyboard_arrow_up</span>
@@ -136,7 +136,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
           <button
             onClick={() => onMoveDown?.(index)}
             disabled={isLast}
-            className="text-outline-variant hover:text-secondary transition-colors disabled:opacity-20 disabled:pointer-events-none"
+            className="text-outline-variant hover:text-accent transition-colors disabled:opacity-20 disabled:pointer-events-none"
             aria-label={`Move interval ${index + 1} down`}
           >
             <span className="material-symbols-outlined text-[18px]">keyboard_arrow_down</span>

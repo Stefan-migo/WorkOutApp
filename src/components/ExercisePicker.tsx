@@ -130,7 +130,7 @@ export function ExercisePicker({ open, onClose, onSelect, exercises, selectedId 
       <div className="p-9 flex flex-col gap-3">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h2 className="font-headline-md font-semibold text-primary text-lg">Select Exercise</h2>
+          <h2 className="font-headline-md font-semibold text-accent text-lg">Select Exercise</h2>
           <button
             type="button"
             onClick={onClose}
@@ -153,7 +153,7 @@ export function ExercisePicker({ open, onClose, onSelect, exercises, selectedId 
 
         {/* Mini preview card for selected exercise */}
         {selectedExercise && (
-          <div className="bg-surface rounded-lg p-3 flex items-center gap-3 border border-secondary/30">
+          <div className="bg-surface rounded-lg p-3 flex items-center gap-3 border border-accent/30">
             <div className="w-10 h-10 rounded bg-surface flex items-center justify-center shrink-0 overflow-hidden">
               {selectedExercise.images?.[0] ? (
                 <img
@@ -179,7 +179,7 @@ export function ExercisePicker({ open, onClose, onSelect, exercises, selectedId 
                   <span key={m} className="bg-surface px-1 py-0.5 rounded text-[10px] text-muted">{m}</span>
                 ))}
                 {selectedExercise.difficulty && (
-                  <span className="bg-primary/10 text-primary px-1 py-0.5 rounded text-[10px] font-medium">
+                  <span className="bg-accent/10 text-accent px-1 py-0.5 rounded text-[10px] font-medium">
                     {selectedExercise.difficulty.charAt(0).toUpperCase() + selectedExercise.difficulty.slice(1)}
                   </span>
                 )}
@@ -187,7 +187,7 @@ export function ExercisePicker({ open, onClose, onSelect, exercises, selectedId 
             </div>
             <Link
               href={`/exercises/${selectedExercise.id}`}
-              className="shrink-0 text-xs text-secondary hover:text-primary transition-colors font-medium"
+              className="shrink-0 text-xs text-accent hover:text-accent transition-colors font-medium"
               onClick={(e) => e.stopPropagation()}
             >
               View Full Details →
@@ -206,7 +206,7 @@ export function ExercisePicker({ open, onClose, onSelect, exercises, selectedId 
             onClick={() => setFavoritesOnly(!favoritesOnly)}
             className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ${
               favoritesOnly
-                ? 'bg-primary text-on-primary'
+                ? 'bg-accent text-accent-on'
                 : 'bg-surface text-muted border border-outline-variant/30 hover:bg-surface-warm-high'
             }`}
           >
@@ -234,7 +234,7 @@ export function ExercisePicker({ open, onClose, onSelect, exercises, selectedId 
                   onKeyDown={(e) => handleKeyDown(e, ex)}
                   className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ${
                     isSelected
-                      ? 'bg-secondary/10 border border-secondary/30'
+                      ? 'bg-accent/10 border border-accent/30'
                       : 'hover:bg-surface-warm-low border border-transparent'
                   }`}
                 >
@@ -265,7 +265,7 @@ export function ExercisePicker({ open, onClose, onSelect, exercises, selectedId 
                         <span className="bg-surface px-1 py-0.5 rounded text-[10px] text-muted font-semibold">+{overflow}</span>
                       )}
                       {ex.difficulty && (
-                        <span className="bg-primary/10 text-primary px-1 py-0.5 rounded text-[10px] font-medium">
+                        <span className="bg-accent/10 text-accent px-1 py-0.5 rounded text-[10px] font-medium">
                           {ex.difficulty.charAt(0).toUpperCase() + ex.difficulty.slice(1)}
                         </span>
                       )}
@@ -276,7 +276,7 @@ export function ExercisePicker({ open, onClose, onSelect, exercises, selectedId 
                   <Link
                     href={`/exercises/${ex.id}`}
                     onClick={(e) => e.stopPropagation()}
-                    className="shrink-0 text-xs text-secondary hover:text-primary transition-colors font-medium"
+                    className="shrink-0 text-xs text-accent hover:text-accent transition-colors font-medium"
                   >
                     Details →
                   </Link>

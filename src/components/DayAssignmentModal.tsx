@@ -77,7 +77,7 @@ export default function DayAssignmentModal({
               value="workout"
               checked={mode === 'workout'}
               onChange={() => { setMode('workout'); setSelectedId(''); setSearch('') }}
-              className="accent-secondary"
+              className="accent-accent"
             />
             Workout
           </label>
@@ -88,7 +88,7 @@ export default function DayAssignmentModal({
               value="sequence"
               checked={mode === 'sequence'}
               onChange={() => { setMode('sequence'); setSelectedId(''); setSearch('') }}
-              className="accent-secondary"
+              className="accent-accent"
             />
             Sequence
           </label>
@@ -115,7 +115,7 @@ export default function DayAssignmentModal({
               key={item.id}
               className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
                 selectedId === item.id
-                  ? 'bg-secondary-container/20 border border-secondary'
+                  ? 'bg-accent/20 border border-accent'
                   : 'hover:bg-surface-warm-low border border-transparent'
               }`}
             >
@@ -125,7 +125,7 @@ export default function DayAssignmentModal({
                 value={item.id}
                 checked={selectedId === item.id}
                 onChange={() => setSelectedId(item.id)}
-                className="accent-secondary"
+                className="accent-accent"
               />
               <div className="min-w-0">
                 <div className="text-body-md text-sm font-medium text-fg-2 truncate">
@@ -181,7 +181,7 @@ export default function DayAssignmentModal({
             <button
               type="submit"
               disabled={!selectedId}
-              className="px-4 py-2 rounded-lg text-sm bg-primary text-on-primary font-label-caps text-label-caps hover:bg-primary/90 disabled:opacity-40 transition-colors ambient-shadow"
+              className="px-4 py-2 rounded-lg text-sm bg-accent text-accent-on font-label-caps text-label-caps hover:bg-accent/90 disabled:opacity-40 transition-colors ambient-shadow"
             >
               Assign
             </button>

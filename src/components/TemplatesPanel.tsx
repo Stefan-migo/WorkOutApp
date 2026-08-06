@@ -55,7 +55,7 @@ export function TemplatesPanel({
 
   return (
     <div className="glass-card rounded-lg p-16 flex flex-col gap-16">
-      <h2 className="font-label-caps text-label-caps text-primary tracking-wider">
+      <h2 className="font-label-caps text-label-caps text-accent tracking-wider">
         Templates
       </h2>
       <div className="flex flex-col gap-8">
@@ -75,7 +75,7 @@ export function TemplatesPanel({
         <button
           onClick={handleSaveTemplate}
           disabled={!templateName.trim()}
-          className="w-full px-3 py-2 rounded-lg bg-primary text-on-primary font-label-caps text-label-caps hover:bg-primary/90 disabled:opacity-40 transition-colors ambient-shadow"
+          className="w-full px-3 py-2 rounded-lg bg-accent text-accent-on font-label-caps text-label-caps hover:bg-accent/90 disabled:opacity-40 transition-colors ambient-shadow"
         >
           Save current week
         </button>
@@ -97,7 +97,7 @@ export function TemplatesPanel({
             <div className="flex gap-1 shrink-0">
               <button
                 onClick={() => handleApplyTemplate(t)}
-                className="px-2 py-1 rounded bg-primary-container text-on-primary-container font-label-caps text-[10px] hover:bg-primary hover:text-on-primary transition-colors"
+                className="px-2 py-1 rounded bg-accent text-accent-on font-label-caps text-[10px] hover:bg-accent-hover transition-colors"
               >
                 Apply
               </button>

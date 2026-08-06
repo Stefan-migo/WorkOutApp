@@ -70,7 +70,7 @@ export function AddToWorkoutModal({ exercise, onClose }: Props) {
       className="fixed inset-0 z-50 w-full h-full max-w-[520px] max-h-[80vh] m-auto rounded-2xl bg-surface text-fg-2 shadow-xl backdrop:bg-black/50 open:flex open:flex-col"
     >
       <div className="flex items-center justify-between p-6 pb-0">
-        <h2 className="font-headline text-headline-sm font-semibold text-primary">
+        <h2 className="font-headline text-headline-sm font-semibold text-accent">
           Assign &quot;{exercise.name}&quot;
         </h2>
         <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-warm transition-colors" aria-label="Close">✕</button>
@@ -80,7 +80,7 @@ export function AddToWorkoutModal({ exercise, onClose }: Props) {
         {assignable.length === 0 ? (
           <p className="text-muted font-body text-body-md text-center py-8">
             No workouts with work intervals yet.{' '}
-            <a href={`/workouts/new?exerciseId=${exercise.id}`} className="text-primary underline">Create one</a>
+            <a href={`/workouts/new?exerciseId=${exercise.id}`} className="text-accent underline">Create one</a>
           </p>
         ) : (
           <>
@@ -128,7 +128,7 @@ export function AddToWorkoutModal({ exercise, onClose }: Props) {
                                   {already && already !== exercise.id && ' · currently assigned'}
                                 </span>
                               </div>
-                              <span className="font-body text-body-xs text-primary font-medium shrink-0 ml-2">
+                              <span className="font-body text-body-xs text-accent font-medium shrink-0 ml-2">
                                 {already === exercise.id ? 'Assigned ✓' : saving ? 'Saving…' : 'Assign'}
                               </span>
                             </button>

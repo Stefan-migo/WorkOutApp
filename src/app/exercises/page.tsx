@@ -194,7 +194,7 @@ export default function ExercisesPage() {
           <p className="font-body text-body-md text-muted">No exercises yet. Create your first one!</p>
           <button
             onClick={openCreate}
-            className="px-6 py-3 bg-primary text-on-primary font-label text-label-caps rounded-lg hover:bg-primary-container transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="px-6 py-3 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
           >
             Create Exercise
           </button>
@@ -220,13 +220,13 @@ export default function ExercisesPage() {
             return (
               <section key={cat} className="flex flex-col gap-16">
                 <div className="flex items-center justify-between border-b border-outline-variant/20 pb-8">
-                  <h2 className="font-headline text-headline-md font-semibold text-primary">
+                  <h2 className="font-headline text-headline-md font-semibold text-accent">
                     {CATEGORY_LABELS[cat]} ({items.length})
                   </h2>
                   {items.length > 20 && (
                     <button
                       onClick={() => {}}
-                      className="font-label text-label-caps text-secondary hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                      className="font-label text-label-caps text-accent hover:text-accent transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
                     >
                       {/* ponytail: show all/show less — add real toggle when >20 exercises in any category */}
                     </button>
@@ -267,7 +267,7 @@ export default function ExercisesPage() {
                           {/* Quick assign bottom-right */}
                           <button
                             onClick={(e) => { e.stopPropagation(); setAssigningExercise(ex) }}
-                            className="absolute bottom-2 right-2 w-10 h-10 flex items-center justify-center rounded-full bg-surface/90 backdrop-blur shadow-md hover:bg-primary-btn hover:text-on-primary-btn hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none z-10"
+                            className="absolute bottom-2 right-2 w-10 h-10 flex items-center justify-center rounded-full bg-surface/90 backdrop-blur shadow-md hover:bg-accent hover:text-accent-on hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none z-10"
                             aria-label="Assign to workout"
                           >
                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -293,14 +293,14 @@ export default function ExercisesPage() {
                           </div>
                           {/* Difficulty badge bottom-left of image */}
                           {ex.difficulty && (
-                            <span className="absolute bottom-2 left-2 bg-primary/80 backdrop-blur px-2 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-on-primary font-semibold shadow-sm">
+                            <span className="absolute bottom-2 left-2 bg-accent/80 backdrop-blur px-2 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-accent-on font-semibold shadow-sm">
                               {ex.difficulty.charAt(0).toUpperCase() + ex.difficulty.slice(1)}
                             </span>
                           )}
                         </div>
                         {/* Compact content area — p-12 */}
                         <div className="p-12 flex flex-col gap-2">
-                          <h3 className="font-body text-body-md font-bold text-primary line-clamp-1">{ex.name}</h3>
+                          <h3 className="font-body text-body-md font-bold text-accent line-clamp-1">{ex.name}</h3>
                           <div className="flex flex-wrap gap-1.5">
                             {muscles.slice(0, maxMuscles).map((mg) => (
                               <span key={mg} className="bg-surface px-1.5 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-muted tracking-wider">

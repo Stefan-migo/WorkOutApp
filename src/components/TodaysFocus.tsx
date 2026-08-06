@@ -28,7 +28,7 @@ export function TodaysFocus({
   if (!isCurrentWeek || !assignment || !title) {
     return (
       <div className="w-full lg:w-96 bg-surface rounded-lg p-24 flex flex-col gap-24 border border-outline-variant/20 self-start">
-        <span className="font-label-caps text-label-caps text-primary font-bold">
+        <span className="font-label-caps text-label-caps text-accent font-bold">
           Today&apos;s Focus
         </span>
         <div className="flex flex-col items-center gap-8 py-24 text-center">
@@ -49,14 +49,14 @@ export function TodaysFocus({
     <div className="w-full lg:w-96 bg-surface rounded-lg p-24 flex flex-col gap-24 border border-outline-variant/20 self-start">
       <div className="flex justify-between items-start">
         <div>
-          <span className="font-label-caps text-label-caps text-primary font-bold">
+          <span className="font-label-caps text-label-caps text-accent font-bold">
             Today&apos;s Focus
           </span>
           <h3 className="font-headline-md text-headline-md font-bold text-fg-2 mt-xs">
             {title}
           </h3>
         </div>
-        <span className="px-16 py-xs bg-secondary-container text-on-secondary-container font-label-caps text-label-caps rounded-full">
+        <span className="px-16 py-xs bg-accent text-accent-on font-label-caps text-label-caps rounded-full">
           {typeLabel}
         </span>
       </div>
@@ -90,7 +90,7 @@ export function TodaysFocus({
       </div>
       <button
         onClick={onStartWorkout}
-        className="mt-auto w-full py-16 bg-primary text-on-primary rounded-lg font-label-caps text-label-caps font-bold hover:bg-primary/90 transition-colors ambient-shadow flex items-center justify-center gap-8"
+        className="mt-auto w-full py-16 bg-accent text-accent-on rounded-lg font-label-caps text-label-caps font-bold hover:bg-accent/90 transition-colors ambient-shadow flex items-center justify-center gap-8"
       >
         <span className="material-symbols-outlined">play_arrow</span>
         Start Workout

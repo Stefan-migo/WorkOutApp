@@ -84,7 +84,7 @@ export default function SessionDetailPage() {
         </h1>
         <Link
           href="/history"
-          className="font-body-md text-body-md text-secondary-container hover:underline"
+          className="font-body-md text-body-md text-accent-container hover:underline"
         >
           &larr; Back to history
         </Link>
@@ -139,7 +139,7 @@ export default function SessionDetailPage() {
             </h2>
             <button
               onClick={handleRepeat}
-              className="shrink-0 px-24 py-16 bg-primary text-on-primary rounded-lg font-label-caps text-label-caps hover:bg-primary/90 transition-colors ambient-shadow flex items-center gap-8 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+              className="shrink-0 px-24 py-16 bg-accent text-accent-on rounded-lg font-label-caps text-label-caps hover:bg-accent/90 transition-colors ambient-shadow flex items-center gap-8 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
             >
               <span className="material-symbols-outlined text-sm">repeat</span>
               Repeat

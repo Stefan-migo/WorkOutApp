@@ -33,7 +33,7 @@ export default function LoginPage() {
     <div className="flex min-h-[80vh] items-center justify-center">
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-6">
         <div className="space-y-2 text-center">
-          <h1 className="text-headline-md font-bold text-primary">
+          <h1 className="text-headline-md font-bold text-accent">
             {isSignUp ? 'Create Account' : 'Sign In'}
           </h1>
           <p className="text-body-md text-muted">
@@ -70,7 +70,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-md bg-primary px-6 py-3 text-body-md font-semibold text-on-primary transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="w-full rounded-md bg-accent px-6 py-3 text-body-md font-semibold text-accent-on transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           {loading ? 'Loading...' : isSignUp ? 'Create Account' : 'Sign In'}
         </button>
@@ -80,7 +80,7 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={() => { setIsSignUp(!isSignUp); setError(null) }}
-            className="font-semibold text-primary underline"
+            className="font-semibold text-accent underline"
           >
             {isSignUp ? 'Sign In' : 'Sign Up'}
           </button>

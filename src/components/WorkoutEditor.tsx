@@ -66,8 +66,8 @@ function BulkApplyDialog({
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-start gap-12 mb-16">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-2">
-              <span className="material-symbols-outlined text-primary text-[22px]">sync_alt</span>
+            <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-2">
+              <span className="material-symbols-outlined text-accent text-[22px]">sync_alt</span>
             </div>
             <div>
               <h3 className="font-headline-md text-headline-md text-fg-2 font-bold mb-4">
@@ -87,7 +87,7 @@ function BulkApplyDialog({
             </button>
             <button
               onClick={onApplyAll}
-              className="flex-1 py-10 bg-primary-btn hover:bg-primary-btn-hover text-on-primary-btn rounded-xl font-medium transition-colors"
+              className="flex-1 py-10 bg-accent hover:bg-accent-hover text-accent-on rounded-xl font-medium transition-colors"
             >
               Apply to all
             </button>
@@ -284,13 +284,13 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
               type="text"
               value={title}
               placeholder="Name your workout..."
-              className="w-full bg-transparent border-0 border-b-2 border-outline-variant pb-xs font-headline text-headline-lg text-fg-2 focus:border-secondary focus:ring-0 transition-colors px-0 outline-none placeholder:text-outline/50 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+              className="w-full bg-transparent border-0 border-b-2 border-outline-variant pb-xs font-headline text-headline-lg text-fg-2 focus:border-accent focus:ring-0 transition-colors px-0 outline-none placeholder:text-outline/50 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
               onChange={(e) => { markDirty(); setTitle(e.target.value) }}
             />
           </div>
           <div className="text-right w-full md:w-auto">
             <span className="block font-label text-label-caps text-muted mb-xs uppercase tracking-wider">Est. Duration</span>
-            <div className="font-mono text-display-timer-mobile text-primary tracking-tighter">
+            <div className="font-mono text-display-timer-mobile text-accent tracking-tighter">
               {totalMin}:{String(totalSec).padStart(2, '0')}
             </div>
           </div>
@@ -319,7 +319,7 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
                 {/* Cycle bracket indicator */}
                 {cycle && (
                   <div
-                    className={`absolute left-0 top-0 w-1 rounded-full bg-primary/40 ${isFirstInCycle ? 'h-full' : 'h-full'}`}
+                    className={`absolute left-0 top-0 w-1 rounded-full bg-accent/40 ${isFirstInCycle ? 'h-full' : 'h-full'}`}
                     style={{ minHeight: isFirstInCycle ? '100%' : undefined }}
                   />
                 )}
@@ -327,10 +327,10 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
                 {/* Cycle label at start */}
                 {isFirstInCycle && (
                   <div className="flex items-center gap-2 mb-2 ml-4">
-                    <span className="text-body-xs text-primary font-medium uppercase tracking-wider">
+                    <span className="text-body-xs text-accent font-medium uppercase tracking-wider">
                       {cycle!.label}
                     </span>
-                    <div className="h-px flex-1 bg-primary/20" />
+                    <div className="h-px flex-1 bg-accent/20" />
                   </div>
                 )}
 
@@ -414,7 +414,7 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
         <button
           onClick={handleSave}
           disabled={!canSave}
-          className="flex-1 py-3 bg-primary-btn hover:bg-primary-btn-hover disabled:bg-surface disabled:text-muted text-on-primary-btn rounded-lg font-medium transition-colors font-label text-label-caps uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="flex-1 py-3 bg-accent hover:bg-accent-hover disabled:bg-surface disabled:text-muted text-accent-on rounded-lg font-medium transition-colors font-label text-label-caps uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
         >
           {existingWorkout ? 'Update Workout' : 'Save Workout'}
         </button>

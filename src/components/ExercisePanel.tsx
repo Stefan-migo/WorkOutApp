@@ -49,7 +49,7 @@ export function ExercisePanel({
   if (!name) {
     return (
       <div className="glass-panel-dark rounded-xl p-16 w-full max-w-lg flex flex-col items-center text-center">
-        <svg className="w-12 h-12 text-on-primary-container/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <svg className="w-12 h-12 text-muted/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 6.75a.75.75 0 0 0-.75.75v9a.75.75 0 0 0 1.5 0v-9a.75.75 0 0 0-.75-.75Zm-9 0a.75.75 0 0 0-.75.75v9a.75.75 0 0 0 1.5 0v-9a.75.75 0 0 0-.75-.75Zm10.5 0a2.25 2.25 0 0 1 2.25 2.25v4.5a2.25 2.25 0 0 1-2.25 2.25h-9A2.25 2.25 0 0 1 6 13.5v-4.5A2.25 2.25 0 0 1 8.25 6.75h9Z" />
         </svg>
         <p className="font-body-md text-body-md text-gray-300 mt-8">
@@ -62,11 +62,11 @@ export function ExercisePanel({
   return (
     <div className="glass-panel-dark rounded-xl p-16 w-full max-w-lg flex flex-col">
       {/* Image Gallery */}
-      <div className="w-full h-64 bg-primary-container rounded-lg mb-16 overflow-hidden relative border border-white/5 flex items-center justify-center">
+      <div className="w-full h-64 bg-accent rounded-lg mb-16 overflow-hidden relative border border-white/5 flex items-center justify-center">
         {displayImage ? (
           <img src={displayImage} alt={name} className="w-full h-full object-contain" />
         ) : (
-          <svg className="w-12 h-12 text-on-primary-container/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg className="w-12 h-12 text-muted/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 6.75a.75.75 0 0 0-.75.75v9a.75.75 0 0 0 1.5 0v-9a.75.75 0 0 0-.75-.75Zm-9 0a.75.75 0 0 0-.75.75v9a.75.75 0 0 0 1.5 0v-9a.75.75 0 0 0-.75-.75Zm10.5 0a2.25 2.25 0 0 1 2.25 2.25v4.5a2.25 2.25 0 0 1-2.25 2.25h-9A2.25 2.25 0 0 1 6 13.5v-4.5A2.25 2.25 0 0 1 8.25 6.75h9Z" />
           </svg>
         )}

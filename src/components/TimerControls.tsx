@@ -32,7 +32,7 @@ export function TimerControls({ status, onPause, onResume, onSkip, onPrevious, o
       {(status === 'running' || status === 'paused') && (
         <button
           onClick={status === 'running' ? onPause : onResume}
-          className="w-20 h-20 rounded-full bg-primary text-on-primary flex items-center justify-center hover:opacity-90 transition-colors shadow-[0_4px_20px_rgba(255,255,255,0.15)]"
+          className="w-20 h-20 rounded-full bg-accent text-accent-on flex items-center justify-center hover:opacity-90 transition-colors shadow-[0_4px_20px_rgba(255,255,255,0.15)]"
           aria-label={status === 'running' ? 'Pause' : 'Resume'}
         >
           <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>

@@ -46,7 +46,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
             )}
             <button
               onClick={this.handleReset}
-              className="px-24 py-8 bg-primary text-on-primary rounded-full font-label text-label-caps hover:bg-primary/90 transition-colors ambient-shadow focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+              className="px-24 py-8 bg-accent text-accent-on rounded-full font-label text-label-caps hover:bg-accent/90 transition-colors ambient-shadow focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
             >
               Try Again
             </button>

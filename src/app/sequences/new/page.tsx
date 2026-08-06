@@ -168,13 +168,13 @@ export default function NewSequencePage() {
                   type="text"
                   value={title}
                   placeholder="e.g. Friday Full Body Burn"
-                  className="w-full bg-transparent border-0 border-b-2 border-outline-variant focus:border-secondary focus:ring-0 px-0 font-headline text-headline-lg text-fg-2 transition-colors pb-8 placeholder:text-outline/50 outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                  className="w-full bg-transparent border-0 border-b-2 border-outline-variant focus:border-accent focus:ring-0 px-0 font-headline text-headline-lg text-fg-2 transition-colors pb-8 placeholder:text-outline/50 outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
                   onChange={(e) => setTitle(e.target.value)}
                 />
               </div>
               <div className="shrink-0 text-right">
                 <div className="font-label text-label-caps text-muted mb-xs uppercase tracking-wider">Total Duration</div>
-                <div className="font-mono text-display-timer-mobile md:text-display-timer tracking-tighter text-primary leading-none">
+                <div className="font-mono text-display-timer-mobile md:text-display-timer tracking-tighter text-accent leading-none">
                   {formatDuration(totalDurationSec * repeatCount)}
                 </div>
               </div>
@@ -194,11 +194,11 @@ export default function NewSequencePage() {
             {/* Meta chips */}
             <div className="flex gap-24 flex-wrap items-center">
               <span className="inline-flex items-center gap-8 rounded-full bg-surface px-16 py-8 font-data text-data-sm text-muted">
-                <span className="w-2 h-2 rounded-full bg-primary-container" />
+                <span className="w-2 h-2 rounded-full bg-accent" />
                 {selectedIds.length} Workout{selectedIds.length !== 1 && 's'}
               </span>
               <span className="inline-flex items-center gap-8 rounded-full bg-surface px-16 py-8 font-data text-data-sm text-muted">
-                <span className="w-2 h-2 rounded-full bg-secondary-container" />
+                <span className="w-2 h-2 rounded-full bg-accent" />
                 {repeatCount} cycle{repeatCount !== 1 && 's'}
               </span>
               <label className="inline-flex items-center gap-8 font-data text-data-sm text-muted bg-surface/40 rounded-full px-16 py-8 border border-outline-variant/20">
@@ -233,7 +233,7 @@ export default function NewSequencePage() {
                   className={`group glass-card rounded-lg p-24 flex items-center gap-16 transition-all hover:border-primary-fixed relative border-l-4 border-l-surface-tint ${isDragging ? 'opacity-40 ring-2 ring-secondary' : ''}`}
                 >
                   {/* Drag handle */}
-                  <div className="text-outline-variant/40 group-hover:text-primary transition-colors cursor-grab shrink-0">
+                  <div className="text-outline-variant/40 group-hover:text-accent transition-colors cursor-grab shrink-0">
                     <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
                     </svg>
@@ -314,7 +314,7 @@ export default function NewSequencePage() {
                           type="checkbox"
                           checked={selectedSet.has(w.id)}
                           onChange={() => toggleWorkout(w.id)}
-                          className="accent-secondary w-4 h-4 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                          className="accent-accent w-4 h-4 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
                         />
                         <span className="flex-1 font-body text-body-md text-fg-2 truncate">{w.title}</span>
                         <span className="font-data text-data-sm text-muted shrink-0">
@@ -351,7 +351,7 @@ export default function NewSequencePage() {
                       style={{ height: `${height}%` }}
                       title={w.title}
                     >
-                      <div className={`h-full rounded-t-sm ${i % 2 === 0 ? 'bg-primary-container' : 'bg-secondary-container'}`} />
+                      <div className={`h-full rounded-t-sm ${i % 2 === 0 ? 'bg-accent' : 'bg-accent'}`} />
                     </div>
                   )
                 })}
@@ -366,11 +366,11 @@ export default function NewSequencePage() {
               <div className="grid grid-cols-2 gap-16">
                 <div className="bg-surface p-16 rounded-lg">
                   <div className="font-label text-label-caps text-muted uppercase tracking-wider mb-xs">Work Ratio</div>
-                  <div className="font-data text-data-lg text-primary">{workRatio}%</div>
+                  <div className="font-data text-data-lg text-accent">{workRatio}%</div>
                 </div>
                 <div className="bg-surface p-16 rounded-lg">
                   <div className="font-label text-label-caps text-muted uppercase tracking-wider mb-xs">Rest Ratio</div>
-                  <div className="font-data text-data-lg text-primary">{restRatio}%</div>
+                  <div className="font-data text-data-lg text-accent">{restRatio}%</div>
                 </div>
               </div>
 
@@ -378,13 +378,13 @@ export default function NewSequencePage() {
               <div className="pt-8 border-t border-outline-variant/20 mt-8">
                 <div className="flex justify-between items-center mb-xs">
                   <span className="font-label text-label-caps text-muted uppercase">Estimated Strain</span>
-                  <span className="font-data text-data-sm font-bold text-secondary-container">
+                  <span className="font-data text-data-sm font-bold text-accent-container">
                     {workRatio > 70 ? 'High' : workRatio > 40 ? 'Moderate' : 'Low'}
                   </span>
                 </div>
                 <div className="w-full bg-surface rounded-full h-1.5 overflow-hidden">
                   <div
-                    className="bg-secondary-container h-1.5 rounded-full transition-all"
+                    className="bg-accent h-1.5 rounded-full transition-all"
                     style={{ width: `${Math.min(100, workRatio)}%` }}
                   />
                 </div>
@@ -405,7 +405,7 @@ export default function NewSequencePage() {
         <button
           onClick={handleSave}
           disabled={!canSave}
-          className="bg-primary text-on-primary font-label text-label-caps px-32 py-16 rounded-full hover:bg-primary-container disabled:bg-surface disabled:text-muted transition-colors shadow-sm ambient-shadow uppercase tracking-wider flex items-center gap-8 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="bg-accent text-accent-on font-label text-label-caps px-32 py-16 rounded-full hover:bg-accent-hover disabled:bg-surface disabled:text-muted transition-colors shadow-sm ambient-shadow uppercase tracking-wider flex items-center gap-8 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />

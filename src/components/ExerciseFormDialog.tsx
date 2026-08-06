@@ -85,7 +85,7 @@ export function ExerciseFormDialog({
       onClose={onClose}
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4" data-testid="exercise-form">
-        <h3 className="font-headline text-headline-md font-semibold text-primary">
+        <h3 className="font-headline text-headline-md font-semibold text-accent">
           {editingId ? 'Edit Exercise' : 'New Exercise'}
         </h3>
 
@@ -133,7 +133,7 @@ export function ExerciseFormDialog({
                   value={opt}
                   checked={form.force === opt}
                   onChange={() => update({ force: opt })}
-                  className="accent-primary"
+                  className="accent-accent"
                 />
                 <span className="font-body text-body-md capitalize text-fg-2">{opt}</span>
               </label>
@@ -153,7 +153,7 @@ export function ExerciseFormDialog({
                   value={opt}
                   checked={form.mechanic === opt}
                   onChange={() => update({ mechanic: opt })}
-                  className="accent-primary"
+                  className="accent-accent"
                 />
                 <span className="font-body text-body-md capitalize text-fg-2">{opt}</span>
               </label>
@@ -249,7 +249,7 @@ export function ExerciseFormDialog({
                   }
                 }}
                 disabled={idx === 0}
-                className="p-1 text-muted hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none rounded"
+                className="p-1 text-muted hover:text-accent transition-colors disabled:opacity-30 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none rounded"
                 aria-label="Move up"
               >
                 ↑
@@ -264,7 +264,7 @@ export function ExerciseFormDialog({
                   }
                 }}
                 disabled={idx === form.instructions.length - 1}
-                className="p-1 text-muted hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none rounded"
+                className="p-1 text-muted hover:text-accent transition-colors disabled:opacity-30 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none rounded"
                 aria-label="Move down"
               >
                 ↓
@@ -284,7 +284,7 @@ export function ExerciseFormDialog({
           <button
             type="button"
             onClick={() => update({ instructions: [...form.instructions, ''] })}
-            className="self-start px-3 py-1 rounded-lg font-label text-label-caps text-secondary hover:bg-surface-warm transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="self-start px-3 py-1 rounded-lg font-label text-label-caps text-accent hover:bg-surface-warm transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
           >
             + Add Step
           </button>
@@ -350,7 +350,7 @@ export function ExerciseFormDialog({
               {form.images.map((url) => (
                 <span
                   key={url}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/10 text-primary rounded text-sm max-w-full"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-accent/10 text-accent rounded text-sm max-w-full"
                 >
                   {url.startsWith('blob:') ? (
                     <img src={url} alt="" className="w-8 h-8 rounded object-cover" />
@@ -361,7 +361,7 @@ export function ExerciseFormDialog({
                   <button
                     type="button"
                     onClick={() => removeImage(url)}
-                    className="text-primary/60 hover:text-primary transition-colors shrink-0 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none rounded"
+                    className="text-accent/60 hover:text-accent transition-colors shrink-0 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none rounded"
                     aria-label={`Remove image`}
                   >
                     ✕
@@ -391,7 +391,7 @@ export function ExerciseFormDialog({
             )}
             <div className="p-12 flex flex-col gap-6">
               <div className="flex items-center gap-2">
-                <h4 className="font-body text-body-lg font-bold text-primary">
+                <h4 className="font-body text-body-lg font-bold text-accent">
                   {form.name || 'Exercise Name'}
                 </h4>
                 <span className="font-data text-data-sm text-muted">◎{form.category}</span>
@@ -415,13 +415,13 @@ export function ExerciseFormDialog({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-lg font-label text-label-caps text-muted hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="px-4 py-2 rounded-lg font-label text-label-caps text-muted hover:text-accent transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-4 py-2 rounded-lg font-label text-label-caps bg-primary text-on-primary hover:bg-primary-container transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="px-4 py-2 rounded-lg font-label text-label-caps bg-accent text-accent-on hover:bg-accent-hover transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
           >
             {editingId ? 'Save' : 'Create'}
           </button>

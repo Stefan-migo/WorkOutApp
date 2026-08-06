@@ -135,7 +135,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
                 onClick={() => setEditMode('timed')}
                 className={`px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider transition-colors ${
                   editMode !== 'reps'
-                    ? 'bg-primary text-on-primary-btn'
+                    ? 'bg-accent text-accent-on'
                     : 'bg-surface text-muted'
                 }`}
               >
@@ -146,7 +146,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
                 onClick={() => setEditMode('reps')}
                 className={`px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider transition-colors ${
                   editMode === 'reps'
-                    ? 'bg-primary text-on-primary-btn'
+                    ? 'bg-accent text-accent-on'
                     : 'bg-surface text-muted'
                 }`}
               >
@@ -300,7 +300,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
             </button>
             <button
               onClick={handleSave}
-              className="flex-1 py-3 bg-primary-btn text-on-primary-btn rounded-lg font-medium hover:opacity-90 transition-colors text-sm"
+              className="flex-1 py-3 bg-accent text-accent-on rounded-lg font-medium hover:opacity-90 transition-colors text-sm"
             >
               Save
             </button>
