@@ -10,13 +10,10 @@ const preview: Preview = {
       },
     },
     // ponytail: app dark mode is OS-driven (prefers-color-scheme), no manual toggle
+    // DD-6: single Happy Hues theme — bg from token, no stale Material/raw hexes
     backgrounds: {
       default: 'app',
-      values: [
-        { name: 'app', value: 'var(--color-background)' },
-        { name: 'dark', value: '#0a0e1a' },
-        { name: 'light', value: '#f8f9ff' },
-      ],
+      values: [{ name: 'app', value: 'var(--color-bg)' }],
     },
   },
 }

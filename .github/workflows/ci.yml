@@ -23,8 +23,14 @@ jobs:
       - name: TypeScript check
         run: npx tsc --noEmit
 
+      - name: Install Playwright chromium (storybook browser project)
+        run: npx playwright install --with-deps chromium
+
       - name: Tests
         run: npm test
+
+      - name: A11y tests (storybook browser project)
+        run: npm run test:a11y
 
       - name: Build
         run: npm run build
