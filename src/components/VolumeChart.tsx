@@ -27,7 +27,7 @@ export default function VolumeChart({ recentVolume, maxVolume, formatHours }: Vo
             >
               <div
                 className={`w-full rounded-t transition-all duration-300 ${
-                  isTop ? 'bg-accent' : 'bg-accent-fixed-dim'
+                  isTop ? 'bg-accent' : 'bg-accent/30'
                 }`}
                 style={{ height: `${Math.max(pct, 1)}%` }}
               >

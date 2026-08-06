@@ -9,7 +9,7 @@ export default function UpNextCard({ totalSessions, thisWeekSessions }: UpNextCa
   return (
     <div className="md:col-span-12">
       <h4 className="font-headline text-headline-md text-accent mb-16">Up Next</h4>
-      <div className="glass-card rounded-xl p-16 flex flex-col md:flex-row items-center justify-between gap-16 border-l-4 border-l-primary-fixed-dim hover:bg-surface/30 transition-colors">
+      <div className="glass-card rounded-xl p-16 flex flex-col md:flex-row items-center justify-between gap-16 border-l-4 border-l-accent hover:bg-surface/30 transition-colors">
         {totalSessions > 0 ? (
           <>
             <div className="flex items-center gap-24 w-full md:w-auto">

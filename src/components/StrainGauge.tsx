@@ -24,7 +24,7 @@ export default function StrainGauge({ avgRpe }: StrainGaugeProps) {
             <circle
               cx="92" cy="92" r={gaugeR}
               fill="none" stroke="currentColor" strokeWidth="16"
-              className="text-surface-variant"
+              className="text-border-soft"
             />
             <circle
               cx="92" cy="92" r={gaugeR}
@@ -32,7 +32,7 @@ export default function StrainGauge({ avgRpe }: StrainGaugeProps) {
               strokeLinecap="round"
               strokeDasharray={gaugeCirc}
               strokeDashoffset={gaugeOffset}
-              className="text-accent-container transition-all duration-700 ease-out"
+              className="text-accent transition-all duration-700 ease-out"
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">

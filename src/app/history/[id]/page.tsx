@@ -84,7 +84,7 @@ export default function SessionDetailPage() {
         </h1>
         <Link
           href="/history"
-          className="font-body-md text-body-md text-accent-container hover:underline"
+          className="font-body-md text-body-md text-accent hover:underline"
         >
           &larr; Back to history
         </Link>

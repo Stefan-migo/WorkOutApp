@@ -49,8 +49,8 @@ export default function MiniCalendar({
           <p className="font-mono text-data-lg text-accent">{assignedDays} / 5</p>
           <p className="font-label text-label-caps text-muted">DAYS PLANNED</p>
         </div>
-        <div className="w-16 h-16 rounded-full border-4 border-surface-container relative flex items-center justify-center">
-          <svg className="absolute inset-0 w-full h-full -rotate-90 text-accent-container" viewBox="0 0 36 36">
+        <div className="w-16 h-16 rounded-full border-4 border-border relative flex items-center justify-center">
+          <svg className="absolute inset-0 w-full h-full -rotate-90 text-accent" viewBox="0 0 36 36">
             <path
               className="stroke-current"
               d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"

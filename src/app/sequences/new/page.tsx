@@ -292,7 +292,7 @@ export default function NewSequencePage() {
                 </div>
 
                 {/* Results list: show all workouts when no search, filtered when typing */}
-                <div className="max-h-48 overflow-y-auto bg-surface rounded-lg border border-border-soft divide-y divide-outline-variant/10 text-left">
+                <div className="max-h-48 overflow-y-auto bg-surface rounded-lg border border-border-soft divide-y divide-border-soft text-left">
                   {workouts.length === 0 ? (
                     <div className="px-3 py-8 text-center">
                       <svg className="w-10 h-10 mx-auto text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -378,7 +378,7 @@ export default function NewSequencePage() {
               <div className="pt-8 border-t border-border-soft mt-8">
                 <div className="flex justify-between items-center mb-xs">
                   <span className="font-label text-label-caps text-muted uppercase">Estimated Strain</span>
-                  <span className="font-data text-data-sm font-bold text-accent-container">
+                  <span className="font-data text-data-sm font-bold text-accent">
                     {workRatio > 70 ? 'High' : workRatio > 40 ? 'Moderate' : 'Low'}
                   </span>
                 </div>

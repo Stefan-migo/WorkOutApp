@@ -97,7 +97,7 @@ export function DayRow({
           {title}
         </h4>
         <div className="flex gap-xs mt-xs items-center">
-          <span className="px-8 py-0.5 bg-accent-fixed-dim text-fg-2-variant text-[10px] font-bold rounded-full uppercase tracking-wider">
+          <span className="px-8 py-0.5 bg-accent/15 text-accent text-[10px] font-bold rounded-full uppercase tracking-wider">
             {typeLabel}
           </span>
           <span className="font-data-sm text-data-sm text-muted">
