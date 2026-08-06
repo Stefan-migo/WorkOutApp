@@ -82,7 +82,7 @@ export default function PreviewWorkoutPage() {
       <div className="flex gap-3 pt-4">
         <button
           onClick={() => router.back()}
-          className="flex-1 py-3 bg-surface border border-outline-variant text-fg-2 rounded-lg font-medium hover:bg-surface transition-colors"
+          className="flex-1 py-3 bg-surface border border-border text-fg-2 rounded-lg font-medium hover:bg-surface transition-colors"
         >
           &larr; Back
         </button>

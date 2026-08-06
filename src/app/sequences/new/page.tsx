@@ -137,7 +137,7 @@ export default function NewSequencePage() {
     const work = flat.filter((i) => i.type === 'work').length
     const rest = flat.filter((i) => i.type === 'rest' || i.type === 'rest_between_cycles').length
     return (
-      <span className="hidden sm:inline-flex items-center gap-8 font-data text-data-sm text-muted shrink-0 bg-surface/60 rounded-full px-12 py-4 border border-outline-variant/20">
+      <span className="hidden sm:inline-flex items-center gap-8 font-data text-data-sm text-muted shrink-0 bg-surface/60 rounded-full px-12 py-4 border border-border-soft">
         <span>{count} int</span>
         <span className="flex items-center gap-4">
           <span className="w-2 h-2 rounded-full bg-segment-work" />
@@ -158,7 +158,7 @@ export default function NewSequencePage() {
         <div className="flex-1 flex flex-col gap-32">
           {/* Glass Header Panel */}
           <div className="glass-card rounded-xl p-32 space-y-24">
-            <div className="flex flex-col md:flex-row justify-between md:items-end gap-md border-b border-outline-variant/20 pb-md">
+            <div className="flex flex-col md:flex-row justify-between md:items-end gap-md border-b border-border-soft pb-md">
               <div className="flex-1 w-full">
                 <label className="block font-label text-label-caps text-muted mb-xs uppercase tracking-wider" htmlFor="sequence-title">
                   Sequence Title
@@ -168,7 +168,7 @@ export default function NewSequencePage() {
                   type="text"
                   value={title}
                   placeholder="e.g. Friday Full Body Burn"
-                  className="w-full bg-transparent border-0 border-b-2 border-outline-variant focus:border-accent focus:ring-0 px-0 font-headline text-headline-lg text-fg-2 transition-colors pb-8 placeholder:text-outline/50 outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                  className="w-full bg-transparent border-0 border-b-2 border-border focus:border-accent focus:ring-0 px-0 font-headline text-headline-lg text-fg-2 transition-colors pb-8 placeholder:text-muted/50 outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
                   onChange={(e) => setTitle(e.target.value)}
                 />
               </div>
@@ -201,7 +201,7 @@ export default function NewSequencePage() {
                 <span className="w-2 h-2 rounded-full bg-accent" />
                 {repeatCount} cycle{repeatCount !== 1 && 's'}
               </span>
-              <label className="inline-flex items-center gap-8 font-data text-data-sm text-muted bg-surface/40 rounded-full px-16 py-8 border border-outline-variant/20">
+              <label className="inline-flex items-center gap-8 font-data text-data-sm text-muted bg-surface/40 rounded-full px-16 py-8 border border-border-soft">
                 <span className="w-2 h-2 rounded-full bg-segment-work" />
                 <input
                   type="number"
@@ -230,17 +230,17 @@ export default function NewSequencePage() {
                   onDragOver={handleDragOver}
                   onDrop={() => handleDrop(i)}
                   onDragEnd={handleDragEnd}
-                  className={`group glass-card rounded-lg p-24 flex items-center gap-16 transition-all hover:border-primary-fixed relative border-l-4 border-l-surface-tint ${isDragging ? 'opacity-40 ring-2 ring-secondary' : ''}`}
+                  className={`group glass-card rounded-lg p-24 flex items-center gap-16 transition-all hover:border-accent relative border-l-4 border-l-border ${isDragging ? 'opacity-40 ring-2 ring-secondary' : ''}`}
                 >
                   {/* Drag handle */}
-                  <div className="text-outline-variant/40 group-hover:text-accent transition-colors cursor-grab shrink-0">
+                  <div className="text-muted/40 group-hover:text-accent transition-colors cursor-grab shrink-0">
                     <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
                     </svg>
                   </div>
 
                   {/* Workout icon placeholder */}
-                  <div className="w-12 h-10 rounded bg-surface border border-outline-variant/30 flex items-center justify-center shrink-0 overflow-hidden relative">
+                  <div className="w-12 h-10 rounded bg-surface border border-border-soft flex items-center justify-center shrink-0 overflow-hidden relative">
                     <div className="w-full h-full opacity-20" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 5px, #1e293b 5px, #1e293b 10px)' }} />
                     <svg className="w-5 h-5 absolute text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
@@ -263,7 +263,7 @@ export default function NewSequencePage() {
                   {/* Remove */}
                   <button
                     onClick={() => setSelectedIds((prev) => prev.filter((x) => x !== id))}
-                    className="p-8 rounded-lg text-outline-variant hover:text-error hover:bg-error/5 transition-colors shrink-0 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                    className="p-8 rounded-lg text-muted hover:text-error hover:bg-error/5 transition-colors shrink-0 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
                     title="Remove workout"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -275,11 +275,11 @@ export default function NewSequencePage() {
             })}
 
             {/* Add Workout Area */}
-            <div className="mt-16 border-2 border-dashed border-outline-variant/50 rounded-lg p-24 text-center hover:bg-surface/30 hover:border-primary transition-colors group">
+            <div className="mt-16 border-2 border-dashed border-border/50 rounded-lg p-24 text-center hover:bg-surface/30 hover:border-accent transition-colors group">
               <div className="flex flex-col gap-16">
                 {/* Search bar */}
                 <div className="relative max-w-md mx-auto w-full">
-                  <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-outline-variant" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
                   </svg>
                   <input
@@ -292,10 +292,10 @@ export default function NewSequencePage() {
                 </div>
 
                 {/* Results list: show all workouts when no search, filtered when typing */}
-                <div className="max-h-48 overflow-y-auto bg-surface rounded-lg border border-outline-variant/30 divide-y divide-outline-variant/10 text-left">
+                <div className="max-h-48 overflow-y-auto bg-surface rounded-lg border border-border-soft divide-y divide-outline-variant/10 text-left">
                   {workouts.length === 0 ? (
                     <div className="px-3 py-8 text-center">
-                      <svg className="w-10 h-10 mx-auto text-outline-variant" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <svg className="w-10 h-10 mx-auto text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                       </svg>
                       <span className="font-label text-label-caps text-muted uppercase tracking-wider block mt-8">
@@ -335,10 +335,10 @@ export default function NewSequencePage() {
             <h2 className="font-headline text-headline-md font-bold text-fg-2 mb-24">Sequence Profile</h2>
             <div className="space-y-16">
               {/* Mini Chart */}
-              <div className="h-32 rounded-lg bg-surface border border-outline-variant/30 relative overflow-hidden flex items-end px-8 pb-8 gap-xs">
+              <div className="h-32 rounded-lg bg-surface border border-border-soft relative overflow-hidden flex items-end px-8 pb-8 gap-xs">
                 {selectedIds.slice(0, 8).map((id, i) => {
                   const w = workouts.find((x) => x.id === id)
-                  if (!w) return <div key={id} className="w-full h-1/4 bg-surface-tint rounded-t-sm opacity-60" />
+                  if (!w) return <div key={id} className="w-full h-1/4 bg-surface rounded-t-sm opacity-60" />
                   const flat = flattenWorkout(w)
                   const total = flat.reduce((s, x) => s + x.duration, 0)
                   const workPct = total > 0 ? flat.filter((x) => x.type === 'work').reduce((s, x) => s + x.duration, 0) / total : 0.5
@@ -375,7 +375,7 @@ export default function NewSequencePage() {
               </div>
 
               {/* Estimated Strain */}
-              <div className="pt-8 border-t border-outline-variant/20 mt-8">
+              <div className="pt-8 border-t border-border-soft mt-8">
                 <div className="flex justify-between items-center mb-xs">
                   <span className="font-label text-label-caps text-muted uppercase">Estimated Strain</span>
                   <span className="font-data text-data-sm font-bold text-accent-container">
@@ -395,7 +395,7 @@ export default function NewSequencePage() {
       </div>
 
       {/* Fixed Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-md border-t border-outline-variant/30 p-margin-mobile md:p-margin-desktop flex justify-between items-center z-40">
+      <div className="fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-md border-t border-border-soft p-margin-mobile md:p-margin-desktop flex justify-between items-center z-40">
         <button
           onClick={() => router.push('/sequences')}
           className="font-label text-label-caps text-muted hover:text-error transition-colors px-24 py-8 uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"

@@ -27,7 +27,7 @@ export function TodaysFocus({
 
   if (!isCurrentWeek || !assignment || !title) {
     return (
-      <div className="w-full lg:w-96 bg-surface rounded-lg p-24 flex flex-col gap-24 border border-outline-variant/20 self-start">
+      <div className="w-full lg:w-96 bg-surface rounded-lg p-24 flex flex-col gap-24 border border-border-soft self-start">
         <span className="font-label-caps text-label-caps text-accent font-bold">
           Today&apos;s Focus
         </span>
@@ -46,7 +46,7 @@ export function TodaysFocus({
   const intervals = workout?.intervals ?? []
 
   return (
-    <div className="w-full lg:w-96 bg-surface rounded-lg p-24 flex flex-col gap-24 border border-outline-variant/20 self-start">
+    <div className="w-full lg:w-96 bg-surface rounded-lg p-24 flex flex-col gap-24 border border-border-soft self-start">
       <div className="flex justify-between items-start">
         <div>
           <span className="font-label-caps text-label-caps text-accent font-bold">
@@ -69,7 +69,7 @@ export function TodaysFocus({
         </div>
         {intervals.length > 0 && (
           <div className="flex flex-col gap-8">
-            <h5 className="font-label-caps text-label-caps text-muted border-b border-outline-variant/30 pb-xs">
+            <h5 className="font-label-caps text-label-caps text-muted border-b border-border-soft pb-xs">
               Exercise List
             </h5>
             <ul className="flex flex-col gap-xs">

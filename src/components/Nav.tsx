@@ -74,12 +74,12 @@ export default function Nav() {
       </aside>
 
       {/* Top App Bar — hidden on mobile, visible on desktop */}
-      <header className="hidden md:flex fixed top-0 left-64 right-0 h-20 bg-surface border-b border-outline-variant/30 items-center px-margin-desktop z-[60]">
+      <header className="hidden md:flex fixed top-0 left-64 right-0 h-20 bg-surface border-b border-border-soft items-center px-margin-desktop z-[60]">
         <span className="font-headline text-headline-md font-bold text-accent tracking-tight">WorkOutApp</span>
       </header>
 
       {/* Bottom Nav — Mobile only */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-md border-t border-outline-variant/30 flex justify-around items-center px-2 py-1 z-40 ">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-md border-t border-border-soft flex justify-around items-center px-2 py-1 z-40 ">
         {navItems.slice(0, 5).map(({ href, label, icon }) => {
           const active = isActive(href)
           return (
@@ -104,7 +104,7 @@ export default function Nav() {
 
       {/* Mobile hamburger */}
       <button
-        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-full bg-surface/80 backdrop-blur-md border border-outline-variant/30 shadow-sm"
+        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-full bg-surface/80 backdrop-blur-md border border-border-soft shadow-sm"
         onClick={() => setSidebarOpen(!sidebarOpen)}
         aria-label="Toggle menu"
       >

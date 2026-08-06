@@ -81,7 +81,7 @@ export function ExerciseFormDialog({
   return (
     <dialog
       ref={dialogRef}
-      className="rounded-xl bg-surface border border-outline-variant/50 text-fg-2 p-24 max-w-lg w-full m-auto backdrop:bg-black/10 max-h-[85vh] overflow-y-auto"
+      className="rounded-xl bg-surface border border-border/50 text-fg-2 p-24 max-w-lg w-full m-auto backdrop:bg-black/10 max-h-[85vh] overflow-y-auto"
       onClose={onClose}
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4" data-testid="exercise-form">
@@ -304,7 +304,7 @@ export function ExerciseFormDialog({
             <button
               type="button"
               onClick={addImageUrl}
-              className="px-3 py-2 rounded-lg font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm-high transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+              className="px-3 py-2 rounded-lg font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
             >
               +
             </button>
@@ -312,7 +312,7 @@ export function ExerciseFormDialog({
               type="button"
               disabled={uploading || !onImageUpload}
               onClick={() => fileInputRef.current?.click()}
-              className="px-3 py-2 rounded-lg font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm-high transition-colors disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+              className="px-3 py-2 rounded-lg font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm transition-colors disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
               title={!onImageUpload ? 'Image upload not available' : 'Upload image file'}
             >
               {uploading ? '...' : '📁'}
@@ -374,7 +374,7 @@ export function ExerciseFormDialog({
 
         {/* Preview Card */}
         {(form.name || form.primaryMuscles.length > 0 || form.images.length > 0) && (
-          <div className="border border-outline-variant/30 rounded-xl overflow-hidden bg-surface">
+          <div className="border border-border-soft rounded-xl overflow-hidden bg-surface">
             {form.images[0] && (
               <div className="aspect-[4/3] bg-surface relative overflow-hidden">
                 {/* ponytail: native img with loading lazy, no next/image complexity for dialog */}

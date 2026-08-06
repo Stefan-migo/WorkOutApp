@@ -54,7 +54,7 @@ export default function LoginPage() {
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
-            className="w-full rounded-md border border-outline-variant bg-surface p-3 text-body-md text-fg-2 placeholder:text-muted focus:border-primary focus:outline-none"
+            className="w-full rounded-md border border-border bg-surface p-3 text-body-md text-fg-2 placeholder:text-muted focus:border-accent focus:outline-none"
           />
           <input
             type="password"
@@ -63,7 +63,7 @@ export default function LoginPage() {
             onChange={e => setPassword(e.target.value)}
             required
             minLength={6}
-            className="w-full rounded-md border border-outline-variant bg-surface p-3 text-body-md text-fg-2 placeholder:text-muted focus:border-primary focus:outline-none"
+            className="w-full rounded-md border border-border bg-surface p-3 text-body-md text-fg-2 placeholder:text-muted focus:border-accent focus:outline-none"
           />
         </div>
 

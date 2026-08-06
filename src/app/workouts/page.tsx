@@ -76,7 +76,7 @@ export default function WorkoutListPage() {
         <div className="relative w-full md:w-96">
           <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted">search</span>
           <input
-            className="w-full bg-surface border border-outline-variant/50 rounded-lg pl-12 pr-4 py-3 font-body-md focus:border-accent focus:ring-1 focus:ring-secondary transition-all outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="w-full bg-surface border border-border/50 rounded-lg pl-12 pr-4 py-3 font-body-md focus:border-accent focus:ring-1 focus:ring-secondary transition-all outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
             placeholder="Search workouts..."
             type="text"
             value={search}
@@ -95,8 +95,8 @@ export default function WorkoutListPage() {
             onClick={() => setTypeFilter(typeFilter === null ? 'all' : null)}
             className={`px-4 py-2 rounded-full transition-colors border font-label-caps text-label-caps flex items-center gap-2 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ${
               typeFilter !== null
-                ? 'bg-accent text-accent-on border-primary'
-                : 'bg-surface text-fg-2 border-transparent hover:bg-surface-warm-high'
+                ? 'bg-accent text-accent-on border-accent'
+                : 'bg-surface text-fg-2 border-transparent hover:bg-surface-warm'
             }`}
           >
             <span className="material-symbols-outlined text-[16px]">filter_list</span> Type
@@ -115,7 +115,7 @@ export default function WorkoutListPage() {
               tabIndex={0}
               onClick={() => router.push(`/workouts/${w.id}/edit`)}
               onKeyDown={(e) => { if (e.key === 'Enter') router.push(`/workouts/${w.id}/edit`) }}
-              className="bg-surface rounded-xl border border-outline-variant/30 p-16 flex flex-col gap-4 hover:shadow-[0_8px_30px_rgba(11,28,48,0.04)] transition-shadow duration-300 relative group cursor-pointer"
+              className="bg-surface rounded-xl border border-border-soft p-16 flex flex-col gap-4 hover:shadow-[0_8px_30px_rgba(11,28,48,0.04)] transition-shadow duration-300 relative group cursor-pointer"
             >
               {/* Three-dot menu */}
               <div className="absolute top-4 right-4 z-40">
@@ -130,7 +130,7 @@ export default function WorkoutListPage() {
                   <>
                     {/* Backdrop to close */}
                     <div className="fixed inset-0 z-10" onClick={(e) => { e.stopPropagation(); setMenuOpen(null) }} />
-                    <div className="absolute right-0 top-8 z-20 bg-surface border border-outline-variant/30 rounded-xl shadow-lg py-4 min-w-[180px] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                    <div className="absolute right-0 top-8 z-20 bg-surface border border-border-soft rounded-xl shadow-lg py-4 min-w-[180px] overflow-hidden" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => { router.push(`/workouts/${w.id}/play`); setMenuOpen(null) }}
                         className="w-full flex items-center gap-8 px-16 py-8 text-body-md text-accent hover:bg-accent/5 transition-colors text-left font-semibold"
@@ -138,7 +138,7 @@ export default function WorkoutListPage() {
                         <span className="material-symbols-outlined text-[18px] text-accent">play_arrow</span>
                         Play
                       </button>
-                      <div className="border-t border-outline-variant/20 my-4" />
+                      <div className="border-t border-border-soft my-4" />
                       <button
                         onClick={() => { router.push(`/workouts/${w.id}/edit`); setMenuOpen(null) }}
                         className="w-full flex items-center gap-8 px-16 py-8 text-body-md text-fg-2 hover:bg-surface transition-colors text-left"
@@ -153,7 +153,7 @@ export default function WorkoutListPage() {
                         <span className="material-symbols-outlined text-[18px] text-muted">visibility</span>
                         Preview
                       </button>
-                      <div className="border-t border-outline-variant/20 my-4" />
+                      <div className="border-t border-border-soft my-4" />
                       <button
                         onClick={() => { if (confirm('Delete this workout?')) { deleteWorkout(w.id); setMenuOpen(null) } }}
                         className="w-full flex items-center gap-8 px-16 py-8 text-body-md text-error hover:bg-error/5 transition-colors text-left"

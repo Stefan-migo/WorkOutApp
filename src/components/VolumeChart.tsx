@@ -16,7 +16,7 @@ export default function VolumeChart({ recentVolume, maxVolume, formatHours }: Vo
         Volume per Week
       </h3>
       {/* ponytail: CSS div bars, no chart library */}
-      <div className="flex-1 w-full bg-surface rounded-lg border border-outline-variant/30 flex items-end p-8 gap-2 relative overflow-hidden">
+      <div className="flex-1 w-full bg-surface rounded-lg border border-border-soft flex items-end p-8 gap-2 relative overflow-hidden">
         {recentVolume.map((w) => {
           const pct = (w.totalSeconds / maxVolume) * 100
           const isTop = w.totalSeconds === maxVolume

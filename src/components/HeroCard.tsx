@@ -16,10 +16,10 @@ export default function HeroCard({ todayWorkout, workoutCount, totalSessions }: 
       <div className="relative z-10 w-full flex flex-col md:flex-row items-start md:items-end justify-between gap-24">
         <div>
           <div className="flex gap-8 mb-8">
-            <span className="bg-surface-tint/10 text-fg-2 px-8 py-1 rounded-full font-label text-label-caps tracking-wider border border-outline-variant/20 backdrop-blur-md">
+            <span className="bg-surface/10 text-fg-2 px-8 py-1 rounded-full font-label text-label-caps tracking-wider border border-border-soft backdrop-blur-md">
               {todayWorkout ? 'TODAY' : 'WELCOME'}
             </span>
-            <span className="bg-surface-tint/10 text-fg-2 px-8 py-1 rounded-full font-label text-label-caps tracking-wider border border-outline-variant/20 backdrop-blur-md">
+            <span className="bg-surface/10 text-fg-2 px-8 py-1 rounded-full font-label text-label-caps tracking-wider border border-border-soft backdrop-blur-md">
               {workoutCount} WORKOUT{workoutCount !== 1 && 'S'}
             </span>
           </div>

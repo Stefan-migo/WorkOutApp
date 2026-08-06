@@ -72,7 +72,7 @@ export function TagChips({
           {label}
         </span>
       )}
-      <div className="flex flex-wrap gap-1.5 p-2 bg-surface rounded-lg border border-outline-variant/30 focus-within:ring-2 focus-within:ring-secondary">
+      <div className="flex flex-wrap gap-1.5 p-2 bg-surface rounded-lg border border-border-soft focus-within:ring-2 focus-within:ring-secondary">
         {tags.map((tag) => (
           <span
             key={tag}
@@ -102,7 +102,7 @@ export function TagChips({
           {filtered.length > 0 && (
             <ul
               ref={listRef}
-              className="absolute top-full left-0 right-0 mt-1 bg-surface border border-outline-variant/30 rounded-lg shadow-lg z-50 max-h-40 overflow-y-auto"
+              className="absolute top-full left-0 right-0 mt-1 bg-surface border border-border-soft rounded-lg shadow-lg z-50 max-h-40 overflow-y-auto"
               role="listbox"
             >
               {filtered.map((suggestion, idx) => (

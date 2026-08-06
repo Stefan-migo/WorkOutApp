@@ -147,13 +147,13 @@ export default function HistoryPage() {
         </div>
         <div className="flex flex-wrap gap-8 items-center w-full md:w-auto">
           <div className="relative flex-1 md:flex-none">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm">
               search
             </span>
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full md:w-64 pl-10 pr-16 py-8 rounded-lg bg-surface border border-outline-variant/30 font-body-md text-body-md text-fg-2 focus:ring-1 focus:ring-primary focus:border-primary transition-all shadow-sm"
+              className="w-full md:w-64 pl-10 pr-16 py-8 rounded-lg bg-surface border border-border-soft font-body-md text-body-md text-fg-2 focus:ring-1 focus:ring-primary focus:border-accent transition-all shadow-sm"
               placeholder="Search sessions..."
               type="text"
             />
@@ -194,7 +194,7 @@ export default function HistoryPage() {
               <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
                 {/* Date & Title */}
                 <div className="col-span-1 md:col-span-4 flex gap-16 items-center">
-                  <div className="bg-surface w-12 h-12 rounded-lg flex flex-col items-center justify-center border border-outline-variant/20 flex-shrink-0">
+                  <div className="bg-surface w-12 h-12 rounded-lg flex flex-col items-center justify-center border border-border-soft flex-shrink-0">
                     <span className="font-label-caps text-label-caps text-muted leading-none">
                       {month}
                     </span>
@@ -219,7 +219,7 @@ export default function HistoryPage() {
                   </div>
                 </div>
                 {/* Metrics */}
-                <div className="col-span-1 md:col-span-4 flex justify-between md:justify-around px-0 md:px-16 border-y md:border-y-0 md:border-x border-outline-variant/20 py-16 md:py-0">
+                <div className="col-span-1 md:col-span-4 flex justify-between md:justify-around px-0 md:px-16 border-y md:border-y-0 md:border-x border-border-soft py-16 md:py-0">
                   <div className="text-center">
                     <p className="font-label-caps text-[10px] text-muted mb-1">
                       DURATION
@@ -243,7 +243,7 @@ export default function HistoryPage() {
                     <span className="font-label-caps text-[10px] text-muted">
                       ZONE DISTRIBUTION
                     </span>
-                    <span className="material-symbols-outlined text-outline text-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="material-symbols-outlined text-muted text-sm opacity-0 group-hover:opacity-100 transition-opacity">
                       arrow_forward
                     </span>
                   </div>

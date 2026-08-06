@@ -13,7 +13,7 @@ export default function UpNextCard({ totalSessions, thisWeekSessions }: UpNextCa
         {totalSessions > 0 ? (
           <>
             <div className="flex items-center gap-24 w-full md:w-auto">
-              <div className="flex flex-col items-center justify-center bg-surface w-16 h-16 rounded-lg border border-outline-variant/30 shrink-0">
+              <div className="flex flex-col items-center justify-center bg-surface w-16 h-16 rounded-lg border border-border-soft shrink-0">
                 <span className="font-mono text-data-sm text-muted">
                   {new Date().toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()}
                 </span>
@@ -37,7 +37,7 @@ export default function UpNextCard({ totalSessions, thisWeekSessions }: UpNextCa
             </div>
             <Link
               href={totalSessions > 0 ? '/history' : '/workouts/new'}
-              className="w-full md:w-auto px-24 py-8 rounded-full border border-outline-variant text-accent font-label text-label-caps hover:bg-accent hover:text-accent-on transition-colors text-center focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+              className="w-full md:w-auto px-24 py-8 rounded-full border border-border text-accent font-label text-label-caps hover:bg-accent hover:text-accent-on transition-colors text-center focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
             >
               {totalSessions > 0 ? 'VIEW HISTORY' : 'CREATE FIRST'}
             </Link>
@@ -45,7 +45,7 @@ export default function UpNextCard({ totalSessions, thisWeekSessions }: UpNextCa
         ) : (
           <>
             <div className="flex items-center gap-24 w-full md:w-auto">
-              <div className="flex flex-col items-center justify-center bg-surface w-16 h-16 rounded-lg border border-outline-variant/30 shrink-0">
+              <div className="flex flex-col items-center justify-center bg-surface w-16 h-16 rounded-lg border border-border-soft shrink-0">
                 <span className="material-symbols-outlined text-[28px] text-muted">fitness_center</span>
               </div>
               <div>

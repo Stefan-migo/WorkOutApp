@@ -67,7 +67,7 @@ export function TemplatesPanel({
             setTemplateName(e.target.value)
             setSaveError('')
           }}
-          className="w-full px-3 py-2 rounded-lg bg-surface border border-outline-variant/50 text-body-md text-sm focus:outline-none focus:ring-2 focus:ring-secondary transition-all"
+          className="w-full px-3 py-2 rounded-lg bg-surface border border-border/50 text-body-md text-sm focus:outline-none focus:ring-2 focus:ring-secondary transition-all"
         />
         {saveError && (
           <p className="text-label-caps text-error">{saveError}</p>
@@ -89,7 +89,7 @@ export function TemplatesPanel({
         {templates.map((t) => (
           <div
             key={t.id}
-            className="flex items-center justify-between p-8 rounded-lg bg-surface border border-outline-variant/20"
+            className="flex items-center justify-between p-8 rounded-lg bg-surface border border-border-soft"
           >
             <span className="text-body-md text-sm font-medium truncate text-fg-2">
               {t.title}

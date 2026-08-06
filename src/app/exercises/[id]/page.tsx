@@ -99,7 +99,7 @@ export default function ExerciseDetailPage() {
   if (!exercise) {
     return (
       <div className="max-w-[1440px] mx-auto w-full p-margin-mobile md:p-margin-desktop flex flex-col items-center justify-center gap-4 py-[64px] text-center">
-        <svg className="w-16 h-16 text-outline-variant/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <svg className="w-16 h-16 text-muted/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
         </svg>
         <p className="font-headline text-headline-md font-semibold text-accent">Exercise not found</p>
@@ -224,7 +224,7 @@ export default function ExerciseDetailPage() {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="px-3 py-1.5 rounded-lg font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm-high transition-colors disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                className="px-3 py-1.5 rounded-lg font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm transition-colors disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
               >
                 {uploading ? 'Uploading...' : '+ Upload Image'}
               </button>
@@ -233,7 +233,7 @@ export default function ExerciseDetailPage() {
         ) : (
           <div>
             <div className="aspect-[4/3] bg-surface rounded-xl flex items-center justify-center max-w-[600px]">
-              <svg className="w-16 h-16 text-outline-variant/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <svg className="w-16 h-16 text-muted/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
               </svg>
             </div>
@@ -251,7 +251,7 @@ export default function ExerciseDetailPage() {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="px-3 py-1.5 rounded-lg font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm-high transition-colors disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                className="px-3 py-1.5 rounded-lg font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm transition-colors disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
               >
                 {uploading ? 'Uploading...' : '+ Upload Image'}
               </button>
@@ -265,7 +265,7 @@ export default function ExerciseDetailPage() {
         <h1 className="font-headline text-headline-lg font-bold text-accent">{ex.name}</h1>
         <button
           onClick={() => toggleFavorite(ex.id)}
-          className="w-10 h-10 flex items-center justify-center rounded-full bg-surface text-lg hover:bg-surface-warm-high transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="w-10 h-10 flex items-center justify-center rounded-full bg-surface text-lg hover:bg-surface-warm transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
           aria-label={isFavorite(ex.id) ? 'Remove from favorites' : 'Add to favorites'}
         >
           {isFavorite(ex.id) ? '★' : '☆'}
@@ -366,7 +366,7 @@ export default function ExerciseDetailPage() {
       )}
 
       {/* Action buttons */}
-      <div className="flex flex-wrap gap-4 pt-8 border-t border-outline-variant/20">
+      <div className="flex flex-wrap gap-4 pt-8 border-t border-border-soft">
         <button
           onClick={openEdit}
           className="px-6 py-3 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
@@ -384,7 +384,7 @@ export default function ExerciseDetailPage() {
         </button>
         <button
           onClick={() => setShowAssignModal(true)}
-          className="px-6 py-3 border border-outline text-accent font-label text-label-caps rounded-lg hover:bg-surface-warm transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="px-6 py-3 border border-border text-accent font-label text-label-caps rounded-lg hover:bg-surface-warm transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
         >
           Assign to Workout
         </button>

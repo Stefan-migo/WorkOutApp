@@ -122,7 +122,7 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
         <div className="flex gap-8">
           <button
             onClick={exportAllData}
-            className="px-4 py-2 border border-outline rounded font-label-caps text-label-caps text-fg-2 hover:bg-surface transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="px-4 py-2 border border-border rounded font-label-caps text-label-caps text-fg-2 hover:bg-surface transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
           >
             Export JSON
           </button>
@@ -137,7 +137,7 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
 
         {/* Personal Records — 5 cols */}
         <div className="md:col-span-5 glass-card rounded-xl p-16 ambient-shadow flex flex-col">
-          <div className="flex items-center mb-16 border-b border-outline-variant/30 pb-8">
+          <div className="flex items-center mb-16 border-b border-border-soft pb-8">
             <h3 className="font-headline-md text-headline-md text-fg-2">
               Personal Records
             </h3>

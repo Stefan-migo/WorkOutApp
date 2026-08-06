@@ -43,7 +43,7 @@ export function ExercisePanel({
   const displayImage = galleryImages[selectedImage]
 
   const chipClass =
-    'px-3 py-1 rounded-full bg-surface-tint/20 text-white font-label-caps text-label-caps border border-white/10'
+    'px-3 py-1 rounded-full bg-surface/20 text-white font-label-caps text-label-caps border border-white/10'
 
   // Not-found fallback
   if (!name) {

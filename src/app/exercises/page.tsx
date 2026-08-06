@@ -219,7 +219,7 @@ export default function ExercisesPage() {
             if (!items || items.length === 0) return null
             return (
               <section key={cat} className="flex flex-col gap-16">
-                <div className="flex items-center justify-between border-b border-outline-variant/20 pb-8">
+                <div className="flex items-center justify-between border-b border-border-soft pb-8">
                   <h2 className="font-headline text-headline-md font-semibold text-accent">
                     {CATEGORY_LABELS[cat]} ({items.length})
                   </h2>
@@ -241,7 +241,7 @@ export default function ExercisesPage() {
                       <div
                         key={ex.id}
                         onClick={() => router.push(`/exercises/${ex.id}`)}
-                        className="bg-surface rounded-xl border border-outline-variant/30 overflow-hidden hover:shadow-[0_4px_20px_rgba(30,41,59,0.05)] transition-all duration-300 group flex flex-col cursor-pointer"
+                        className="bg-surface rounded-xl border border-border-soft overflow-hidden hover:shadow-[0_4px_20px_rgba(30,41,59,0.05)] transition-all duration-300 group flex flex-col cursor-pointer"
                       >
                         {/* ponytail: 2:1 image — background-image for static display (no GIF animation) */}
                         <div className="relative aspect-[2/1] bg-surface overflow-hidden flex items-center justify-center"
@@ -252,7 +252,7 @@ export default function ExercisesPage() {
                           }
                         >
                           {!(ex.images?.[0] ?? idbImageMap[ex.id]) && (
-                            <svg className="w-10 h-10 text-outline-variant/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <svg className="w-10 h-10 text-muted/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                             </svg>
                           )}

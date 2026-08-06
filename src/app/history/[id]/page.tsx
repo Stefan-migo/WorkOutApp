@@ -161,7 +161,7 @@ export default function SessionDetailPage() {
       {/* Metrics */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-16">
         {/* Total Duration */}
-        <div className="bg-surface border border-outline-variant/30 rounded-xl p-16 flex flex-col justify-between min-h-[8rem] shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
+        <div className="bg-surface border border-border-soft rounded-xl p-16 flex flex-col justify-between min-h-[8rem] shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
           <div className="absolute -right-4 -top-4 w-20 h-20 bg-surface rounded-full opacity-30 group-hover:scale-110 transition-transform" />
           <span className="font-label-caps text-label-caps text-muted flex items-center gap-8">
             <span className="material-symbols-outlined text-sm">timer</span>
@@ -200,14 +200,14 @@ export default function SessionDetailPage() {
                     }
                   }}
                   aria-label={editable ? `Edit interval ${idx + 1}` : undefined}
-                  className={`bg-surface border-l-4 ${SEGMENT_BORDER[intv.type]} border-y border-r border-outline-variant/30 rounded-r-lg p-16 flex justify-between items-center group transition-colors ${
+                  className={`bg-surface border-l-4 ${SEGMENT_BORDER[intv.type]} border-y border-r border-border-soft rounded-r-lg p-16 flex justify-between items-center group transition-colors ${
                     editable
-                      ? 'cursor-pointer hover:bg-surface-warm-low focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none'
+                      ? 'cursor-pointer hover:bg-surface-warm focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none'
                       : 'cursor-default'
                   }`}
                 >
                   <div className="flex items-center gap-16">
-                    <div className="w-12 h-12 bg-surface flex items-center justify-center rounded font-data-sm text-data-sm text-muted border border-outline-variant/20">
+                    <div className="w-12 h-12 bg-surface flex items-center justify-center rounded font-data-sm text-data-sm text-muted border border-border-soft">
                       {idx + 1}
                     </div>
                     <div className="flex flex-col">
@@ -238,7 +238,7 @@ export default function SessionDetailPage() {
                       </span>
                     </div>
                     {editable && (
-                      <span className="material-symbols-outlined text-sm text-outline-variant">
+                      <span className="material-symbols-outlined text-sm text-muted">
                         chevron_right
                       </span>
                     )}

@@ -122,7 +122,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
+              className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-border focus:outline-none focus:ring-1 focus:ring-secondary"
             />
           </label>
 
@@ -166,7 +166,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
                   onChange={(e) => setReps(Math.max(1, Math.min(999, Number(e.target.value))))}
                   min={1}
                   max={999}
-                  className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-28 border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
+                  className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-28 border border-border focus:outline-none focus:ring-1 focus:ring-secondary"
                 />
               </label>
               <label className="flex flex-col gap-1.5">
@@ -178,7 +178,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
                   min={0}
                   max={9999}
                   placeholder="0"
-                  className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-28 border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
+                  className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-28 border border-border focus:outline-none focus:ring-1 focus:ring-secondary"
                 />
               </label>
             </>
@@ -191,7 +191,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
                 onChange={(e) => setDuration(Math.max(1, Math.min(3600, Number(e.target.value))))}
                 min={1}
                 max={3600}
-                className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-28 border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
+                className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-28 border border-border focus:outline-none focus:ring-1 focus:ring-secondary"
               />
             </label>
           )}
@@ -203,7 +203,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
               <button
                 type="button"
                 onClick={() => setPickerOpen(true)}
-                className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-outline-variant hover:bg-surface-warm transition-colors text-left w-full flex items-center gap-3 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-border hover:bg-surface-warm transition-colors text-left w-full flex items-center gap-3 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
               >
                 {selectedExercise ? (
                   <>
@@ -211,7 +211,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
                       {selectedExercise.images?.[0] ? (
                         <img src={selectedExercise.images[0]} alt="" className="w-full h-full object-cover" />
                       ) : (
-                        <svg className="w-4 h-4 text-outline-variant/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <svg className="w-4 h-4 text-muted/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                         </svg>
                       )}
@@ -245,7 +245,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-outline-variant resize-none focus:outline-none focus:ring-1 focus:ring-secondary"
+              className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-border resize-none focus:outline-none focus:ring-1 focus:ring-secondary"
             />
           </label>
 
@@ -258,13 +258,13 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
                 placeholder="https://example.com/image.jpg"
-                className="flex-1 bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
+                className="flex-1 bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-border focus:outline-none focus:ring-1 focus:ring-secondary"
               />
               <button
                 type="button"
                 disabled={uploading || !onImageUpload}
                 onClick={() => fileInputRef.current?.click()}
-                className="px-3 py-2.5 rounded-lg bg-surface text-sm border border-outline-variant hover:bg-surface-warm transition-colors disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                className="px-3 py-2.5 rounded-lg bg-surface text-sm border border-border hover:bg-surface-warm transition-colors disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
                 title="Upload image file"
               >
                 {uploading ? '...' : '📁'}

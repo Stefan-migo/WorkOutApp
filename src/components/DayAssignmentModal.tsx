@@ -61,7 +61,7 @@ export default function DayAssignmentModal({
     <dialog
       ref={ref}
       onClose={onClose}
-      className="rounded-xl bg-surface border border-outline-variant/50 text-fg-2 p-24 w-full max-w-md m-auto backdrop:bg-black/10 max-h-[85vh] overflow-y-auto"
+      className="rounded-xl bg-surface border border-border/50 text-fg-2 p-24 w-full max-w-md m-auto backdrop:bg-black/10 max-h-[85vh] overflow-y-auto"
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <h2 className="font-headline-md text-headline-md text-fg-2">
@@ -100,7 +100,7 @@ export default function DayAssignmentModal({
           placeholder={`Search ${mode}s\u2026`}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg bg-surface border border-outline-variant/50 text-body-md text-sm text-fg-2 focus:outline-none focus:ring-2 focus:ring-secondary transition-all"
+          className="w-full px-3 py-2 rounded-lg bg-surface border border-border/50 text-body-md text-sm text-fg-2 focus:outline-none focus:ring-2 focus:ring-secondary transition-all"
         />
 
         {/* Items list */}
@@ -116,7 +116,7 @@ export default function DayAssignmentModal({
               className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
                 selectedId === item.id
                   ? 'bg-accent/20 border border-accent'
-                  : 'hover:bg-surface-warm-low border border-transparent'
+                  : 'hover:bg-surface-warm border border-transparent'
               }`}
             >
               <input
@@ -157,7 +157,7 @@ export default function DayAssignmentModal({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
-            className="w-full px-3 py-2 rounded-lg bg-surface border border-outline-variant/50 text-body-md text-sm text-fg-2 resize-none focus:outline-none focus:ring-2 focus:ring-secondary transition-all"
+            className="w-full px-3 py-2 rounded-lg bg-surface border border-border/50 text-body-md text-sm text-fg-2 resize-none focus:outline-none focus:ring-2 focus:ring-secondary transition-all"
           />
         </div>
 

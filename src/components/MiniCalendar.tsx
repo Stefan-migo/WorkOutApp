@@ -44,7 +44,7 @@ export default function MiniCalendar({
           )
         })}
       </div>
-      <div className="mt-16 pt-16 border-t border-outline-variant/30 flex justify-between items-center">
+      <div className="mt-16 pt-16 border-t border-border-soft flex justify-between items-center">
         <div>
           <p className="font-mono text-data-lg text-accent">{assignedDays} / 5</p>
           <p className="font-label text-label-caps text-muted">DAYS PLANNED</p>

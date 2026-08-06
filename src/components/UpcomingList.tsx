@@ -21,8 +21,8 @@ export function UpcomingList({
   const getSequence = (id: string) => sequences.find((s) => s.id === id)
 
   return (
-    <div className="bg-surface border border-outline-variant/20 rounded-lg p-16 flex flex-col gap-16">
-      <h4 className="font-label-caps text-label-caps text-muted border-b border-outline-variant/20 pb-8">
+    <div className="bg-surface border border-border-soft rounded-lg p-16 flex flex-col gap-16">
+      <h4 className="font-label-caps text-label-caps text-muted border-b border-border-soft pb-8">
         Upcoming
       </h4>
       {upcomingDays.length === 0 && (

@@ -96,11 +96,11 @@ export function AddToWorkoutModal({ exercise, onClose }: Props) {
                     className="w-full flex items-center justify-between px-4 py-3 hover:bg-surface-warm transition-colors text-left"
                   >
                     <span className="font-label text-label-lg font-medium text-fg-2">{w.title}</span>
-                    <span className="text-outline text-sm">{selectedId === w.id ? '▾' : '▸'}</span>
+                    <span className="text-muted text-sm">{selectedId === w.id ? '▾' : '▸'}</span>
                   </button>
 
                   {selectedId === w.id && (
-                    <div className="flex flex-col border-t border-outline-variant/20">
+                    <div className="flex flex-col border-t border-border-soft">
                       {workIntervals.length === 0 ? (
                         <p className="px-4 py-3 text-body-sm text-muted">No work intervals.</p>
                       ) : (
@@ -112,7 +112,7 @@ export function AddToWorkoutModal({ exercise, onClose }: Props) {
                               key={interval.id}
                               onClick={() => handleAssign(interval.id)}
                               disabled={saving || already === exercise.id}
-                              className="flex items-center justify-between px-4 py-2.5 hover:bg-surface-warm-high transition-colors disabled:opacity-50 text-left border-b border-outline-variant/10 last:border-b-0"
+                              className="flex items-center justify-between px-4 py-2.5 hover:bg-surface-warm transition-colors disabled:opacity-50 text-left border-b border-border-soft last:border-b-0"
                             >
                               <div className="flex flex-col gap-0.5">
                                 <span className="font-body text-body-sm text-fg-2">

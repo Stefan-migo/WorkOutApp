@@ -45,7 +45,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
       className={`glass-card rounded-lg flex items-center group transition-all duration-200 border-l-4 ${SEGMENT_BORDER[interval.type] ?? 'border-l-segment-work'} pl-0 hover:shadow-md relative overflow-hidden ${isDragging ? 'opacity-40 ring-2 ring-secondary' : ''}`}
     >
       {/* Drag handle */}
-      <div className="px-8 py-16 text-outline-variant cursor-grab flex items-center justify-center active:cursor-grabbing" role="button" aria-label="Drag to reorder">
+      <div className="px-8 py-16 text-muted cursor-grab flex items-center justify-center active:cursor-grabbing" role="button" aria-label="Drag to reorder">
         <span className="material-symbols-outlined text-[20px]">drag_indicator</span>
       </div>
 
@@ -60,7 +60,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
           type="text"
           value={interval.title}
           onChange={(e) => onChange(index, { ...interval, title: e.target.value })}
-          className="bg-transparent border-none p-0 font-body-md font-semibold text-fg-2 w-full focus:ring-0 focus:outline-none placeholder-on-surface-variant/50"
+          className="bg-transparent border-none p-0 font-body-md font-semibold text-fg-2 w-full focus:ring-0 focus:outline-none placeholder:text-muted/50"
           aria-label={`Interval ${index + 1} title`}
         />
         {exercise && (
@@ -100,7 +100,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
       </div>
 
       {/* Duration + Reps + Actions */}
-      <div className="px-16 flex items-center gap-8 border-l border-outline-variant/30 py-16">
+      <div className="px-16 flex items-center gap-8 border-l border-border-soft py-16">
         {interval.reps != null ? (
           <div className="font-data-lg text-data-lg text-accent font-bold tracking-tight whitespace-nowrap">
             {interval.weight != null ? `${interval.reps} reps @ ${interval.weight}kg` : `${interval.reps} reps`}
@@ -127,7 +127,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
           <button
             onClick={() => onMoveUp?.(index)}
             disabled={isFirst}
-            className="text-outline-variant hover:text-accent transition-colors disabled:opacity-20 disabled:pointer-events-none"
+            className="text-muted hover:text-accent transition-colors disabled:opacity-20 disabled:pointer-events-none"
             aria-label={`Move interval ${index + 1} up`}
           >
             <span className="material-symbols-outlined text-[18px]">keyboard_arrow_up</span>
@@ -136,7 +136,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
           <button
             onClick={() => onMoveDown?.(index)}
             disabled={isLast}
-            className="text-outline-variant hover:text-accent transition-colors disabled:opacity-20 disabled:pointer-events-none"
+            className="text-muted hover:text-accent transition-colors disabled:opacity-20 disabled:pointer-events-none"
             aria-label={`Move interval ${index + 1} down`}
           >
             <span className="material-symbols-outlined text-[18px]">keyboard_arrow_down</span>
@@ -144,7 +144,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
           {/* Remove */}
           <button
             onClick={() => onRemove(index)}
-            className="text-outline-variant hover:text-error transition-colors"
+            className="text-muted hover:text-error transition-colors"
             aria-label={`Remove interval ${index + 1}`}
           >
             <span className="material-symbols-outlined text-[18px]">delete</span>

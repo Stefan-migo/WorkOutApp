@@ -62,7 +62,7 @@ function BulkApplyDialog({
       <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40" onClick={onApplyOne} />
       <div className="fixed inset-0 z-50 flex items-end justify-center pb-24">
         <div
-          className="bulk-sheet bg-surface rounded-2xl shadow-xl border border-outline-variant/30 p-24 w-full max-w-md mx-8"
+          className="bulk-sheet bg-surface rounded-2xl shadow-xl border border-border-soft p-24 w-full max-w-md mx-8"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-start gap-12 mb-16">
@@ -81,7 +81,7 @@ function BulkApplyDialog({
           <div className="flex gap-8">
             <button
               onClick={onApplyOne}
-              className="flex-1 py-10 bg-surface border border-outline-variant text-fg-2 rounded-xl font-medium hover:bg-surface transition-colors"
+              className="flex-1 py-10 bg-surface border border-border text-fg-2 rounded-xl font-medium hover:bg-surface transition-colors"
             >
               Just this one
             </button>
@@ -284,7 +284,7 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
               type="text"
               value={title}
               placeholder="Name your workout..."
-              className="w-full bg-transparent border-0 border-b-2 border-outline-variant pb-xs font-headline text-headline-lg text-fg-2 focus:border-accent focus:ring-0 transition-colors px-0 outline-none placeholder:text-outline/50 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+              className="w-full bg-transparent border-0 border-b-2 border-border pb-xs font-headline text-headline-lg text-fg-2 focus:border-accent focus:ring-0 transition-colors px-0 outline-none placeholder:text-muted/50 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
               onChange={(e) => { markDirty(); setTitle(e.target.value) }}
             />
           </div>
@@ -302,7 +302,7 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
       )}
 
       {intervals.length === 0 ? (
-        <div className="glass-card rounded-xl p-24 flex flex-col items-center justify-center gap-16 text-center py-[64px] border-dashed border-2 border-outline-variant/30">
+        <div className="glass-card rounded-xl p-24 flex flex-col items-center justify-center gap-16 text-center py-[64px] border-dashed border-2 border-border-soft">
           <span className="material-symbols-outlined text-[40px] text-muted/40">playlist_add</span>
           <div>
             <p className="font-headline-md text-headline-md text-fg-2 font-bold">No intervals yet</p>
@@ -364,7 +364,7 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
       )}
 
       {/* Add Block grid — 5 types, no Cycle */}
-      <div className="pt-24 border-t border-outline-variant/30 mt-32">
+      <div className="pt-24 border-t border-border-soft mt-32">
         <h3 className="font-label text-label-caps uppercase text-muted mb-16 text-center tracking-widest">Add Block</h3>
         <div className="grid grid-cols-3 md:grid-cols-5 gap-12">
           {ADD_BLOCK_TYPES.map((type) => (
@@ -406,7 +406,7 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
         {onCancel && (
           <button
             onClick={onCancel}
-            className="flex-1 py-3 bg-surface border border-outline-variant text-fg-2 rounded-lg font-medium transition-colors hover:bg-surface font-label text-label-caps uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="flex-1 py-3 bg-surface border border-border text-fg-2 rounded-lg font-medium transition-colors hover:bg-surface font-label text-label-caps uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
           >
             Discard
           </button>

@@ -257,7 +257,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
             type="text"
             value={title}
             placeholder="Name your workout..."
-            className="w-full bg-transparent border-0 border-b-2 border-outline-variant pb-xs font-headline text-headline-lg text-fg-2 focus:border-accent focus:ring-0 transition-colors px-0 outline-none placeholder:text-outline/50 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="w-full bg-transparent border-0 border-b-2 border-border pb-xs font-headline text-headline-lg text-fg-2 focus:border-accent focus:ring-0 transition-colors px-0 outline-none placeholder:text-muted/50 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
@@ -273,7 +273,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
 
       {/* Empty state */}
       {items.length === 0 ? (
-        <div className="glass-card rounded-xl p-24 flex flex-col items-center justify-center gap-16 text-center py-[64px] border-dashed border-2 border-outline-variant/30">
+        <div className="glass-card rounded-xl p-24 flex flex-col items-center justify-center gap-16 text-center py-[64px] border-dashed border-2 border-border-soft">
           <span className="material-symbols-outlined text-[40px] text-muted/40">playlist_add</span>
           <div>
             <p className="font-headline-md text-headline-md text-fg-2 font-bold">No blocks yet</p>
@@ -300,7 +300,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
             >
               {/* Drag handle */}
               <div
-                className="px-5 py-10 text-outline-variant cursor-grab flex items-center justify-center active:cursor-grabbing self-stretch"
+                className="px-5 py-10 text-muted cursor-grab flex items-center justify-center active:cursor-grabbing self-stretch"
                 aria-label="Drag to reorder"
                 role="button"
               >
@@ -318,7 +318,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                         type="text"
                         value={item.title}
                         onChange={(e) => updateCycleField(i, 'title', e.target.value)}
-                        className="bg-transparent border-0 border-b border-outline-variant/30 p-0 font-body-md font-semibold text-fg-2 w-32 focus:border-accent focus:ring-0 outline-none"
+                        className="bg-transparent border-0 border-b border-border-soft p-0 font-body-md font-semibold text-fg-2 w-32 focus:border-accent focus:ring-0 outline-none"
                         aria-label="Cycle name"
                       />
                     </div>
@@ -326,7 +326,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                       {/* Duplicate */}
                       <button
                         onClick={() => duplicateCycle(i)}
-                        className="text-outline-variant hover:text-accent transition-colors p-4 rounded-lg hover:bg-surface"
+                        className="text-muted hover:text-accent transition-colors p-4 rounded-lg hover:bg-surface"
                         aria-label="Duplicate cycle"
                       >
                         <span className="material-symbols-outlined text-[18px]">content_copy</span>
@@ -334,7 +334,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                       {/* Delete */}
                       <button
                         onClick={() => removeItem(i)}
-                        className="text-outline-variant hover:text-error transition-colors p-4 rounded-lg hover:bg-surface"
+                        className="text-muted hover:text-error transition-colors p-4 rounded-lg hover:bg-surface"
                         aria-label="Remove cycle"
                       >
                         <span className="material-symbols-outlined text-[18px]">delete</span>
@@ -380,7 +380,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                             const v = parseInt(e.target.value, 10)
                             if (!isNaN(v)) updateCycleField(i, 'repeat', Math.min(10, Math.max(1, v)))
                           }}
-                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-fg-2 focus:border-accent focus:ring-0 outline-none"
+                          className="bg-transparent border-0 border-b border-border-soft p-0 w-full font-data-md text-data-md text-fg-2 focus:border-accent focus:ring-0 outline-none"
                           aria-label="Cycle repeat count"
                         />
                       </div>
@@ -394,7 +394,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                             const v = e.target.value ? parseInt(e.target.value, 10) : undefined
                             updateCycleField(i, 'workReps', v != null && !isNaN(v) ? Math.max(1, v) : undefined)
                           }}
-                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-fg-2 focus:border-accent focus:ring-0 outline-none"
+                          className="bg-transparent border-0 border-b border-border-soft p-0 w-full font-data-md text-data-md text-fg-2 focus:border-accent focus:ring-0 outline-none"
                           placeholder="—"
                           aria-label="Work reps"
                         />
@@ -409,7 +409,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                             const v = e.target.value ? parseInt(e.target.value, 10) : undefined
                             updateCycleField(i, 'workWeight', v != null && !isNaN(v) ? Math.max(0, v) : undefined)
                           }}
-                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-fg-2 focus:border-accent focus:ring-0 outline-none"
+                          className="bg-transparent border-0 border-b border-border-soft p-0 w-full font-data-md text-data-md text-fg-2 focus:border-accent focus:ring-0 outline-none"
                           placeholder="—"
                           aria-label="Work weight (kg)"
                         />
@@ -424,7 +424,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                             const v = parseInt(e.target.value, 10)
                             if (!isNaN(v)) updateCycleField(i, 'restDuration', Math.max(1, v))
                           }}
-                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-fg-2 focus:border-accent focus:ring-0 outline-none"
+                          className="bg-transparent border-0 border-b border-border-soft p-0 w-full font-data-md text-data-md text-fg-2 focus:border-accent focus:ring-0 outline-none"
                           aria-label="Rest duration seconds"
                         />
                       </div>
@@ -452,7 +452,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                             const v = parseInt(e.target.value, 10)
                             if (!isNaN(v)) updateCycleField(i, 'repeat', Math.min(10, Math.max(1, v)))
                           }}
-                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-fg-2 focus:border-accent focus:ring-0 outline-none"
+                          className="bg-transparent border-0 border-b border-border-soft p-0 w-full font-data-md text-data-md text-fg-2 focus:border-accent focus:ring-0 outline-none"
                           aria-label="Cycle repeat count"
                         />
                       </div>
@@ -466,7 +466,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                             const v = parseInt(e.target.value, 10)
                             if (!isNaN(v)) updateCycleField(i, 'workDuration', Math.max(1, v))
                           }}
-                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-fg-2 focus:border-accent focus:ring-0 outline-none"
+                          className="bg-transparent border-0 border-b border-border-soft p-0 w-full font-data-md text-data-md text-fg-2 focus:border-accent focus:ring-0 outline-none"
                           aria-label="Work duration seconds"
                         />
                       </div>
@@ -480,7 +480,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                             const v = parseInt(e.target.value, 10)
                             if (!isNaN(v)) updateCycleField(i, 'restDuration', Math.max(1, v))
                           }}
-                          className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-full font-data-md text-data-md text-fg-2 focus:border-accent focus:ring-0 outline-none"
+                          className="bg-transparent border-0 border-b border-border-soft p-0 w-full font-data-md text-data-md text-fg-2 focus:border-accent focus:ring-0 outline-none"
                           aria-label="Rest duration seconds"
                         />
                       </div>
@@ -575,7 +575,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                                 return next
                               })
                             }}
-                            className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-16 font-data-sm text-data-sm text-accent font-bold font-mono focus:border-accent focus:ring-0 outline-none"
+                            className="bg-transparent border-0 border-b border-border-soft p-0 w-16 font-data-sm text-data-sm text-accent font-bold font-mono focus:border-accent focus:ring-0 outline-none"
                             placeholder="—"
                             aria-label={`Interval ${i + 1} reps`}
                           />
@@ -597,7 +597,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                                 return next
                               })
                             }}
-                            className="bg-transparent border-0 border-b border-outline-variant/30 p-0 w-16 font-data-sm text-data-sm text-accent font-bold font-mono focus:border-accent focus:ring-0 outline-none"
+                            className="bg-transparent border-0 border-b border-border-soft p-0 w-16 font-data-sm text-data-sm text-accent font-bold font-mono focus:border-accent focus:ring-0 outline-none"
                             placeholder="—"
                             aria-label={`Interval ${i + 1} weight`}
                           />
@@ -641,14 +641,14 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                           return next
                         })
                       }}
-                      className="text-outline-variant hover:text-accent transition-colors p-4 rounded-lg hover:bg-surface"
+                      className="text-muted hover:text-accent transition-colors p-4 rounded-lg hover:bg-surface"
                       aria-label={`Duplicate interval ${i + 1}`}
                     >
                       <span className="material-symbols-outlined text-[18px]">content_copy</span>
                     </button>
                     <button
                       onClick={() => removeItem(i)}
-                      className="text-outline-variant hover:text-error transition-colors p-4 rounded-lg hover:bg-surface"
+                      className="text-muted hover:text-error transition-colors p-4 rounded-lg hover:bg-surface"
                       aria-label={`Remove interval ${i + 1}`}
                     >
                       <span className="material-symbols-outlined text-[18px]">delete</span>
@@ -662,7 +662,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
       )}
 
       {/* Block palette */}
-      <div className="pt-20 border-t border-outline-variant/30 mt-8">
+      <div className="pt-20 border-t border-border-soft mt-8">
         <h3 className="font-label text-label-caps uppercase text-muted mb-16 text-center tracking-widest">
           Add Block
         </h3>
@@ -712,7 +712,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
         {onCancel && (
           <button
             onClick={onCancel}
-            className="flex-1 py-3 bg-surface border border-outline-variant text-fg-2 rounded-lg font-medium transition-colors hover:bg-surface font-label text-label-caps uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="flex-1 py-3 bg-surface border border-border text-fg-2 rounded-lg font-medium transition-colors hover:bg-surface font-label text-label-caps uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
           >
             Discard
           </button>

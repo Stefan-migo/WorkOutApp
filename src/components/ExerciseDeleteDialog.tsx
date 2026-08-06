@@ -18,7 +18,7 @@ export function ExerciseDeleteDialog({
   return (
     <dialog
       ref={dialogRef}
-      className="rounded-xl bg-surface border border-outline-variant/50 text-fg-2 p-24 max-w-sm w-full m-auto backdrop:bg-black/10"
+      className="rounded-xl bg-surface border border-border/50 text-fg-2 p-24 max-w-sm w-full m-auto backdrop:bg-black/10"
       onClose={onClose}
     >
       <div className="flex flex-col gap-4">

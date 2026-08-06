@@ -29,7 +29,7 @@ export function DayRow({
     return (
       <button
         onClick={onClick}
-        className="flex items-center gap-16 p-16 bg-accent border-2 border-primary rounded-lg shadow-lg"
+        className="flex items-center gap-16 p-16 bg-accent border-2 border-accent rounded-lg shadow-lg"
       >
         <div className="flex flex-col items-center justify-center w-16 h-16 bg-accent text-accent-on rounded-lg shrink-0">
           <span className="font-label-caps text-label-caps opacity-80">{dayName}</span>
@@ -57,7 +57,7 @@ export function DayRow({
     return (
       <button
         onClick={onClick}
-        className="flex items-center gap-16 p-16 bg-surface/50 border border-dashed border-outline-variant/30 rounded-lg hover:border-primary transition-colors cursor-pointer group"
+        className="flex items-center gap-16 p-16 bg-surface/50 border border-dashed border-border-soft rounded-lg hover:border-accent transition-colors cursor-pointer group"
       >
         <div className="flex flex-col items-center justify-center w-16 h-16 bg-surface/50 rounded-lg shrink-0">
           <span className="font-label-caps text-label-caps text-muted">{dayName}</span>
@@ -76,7 +76,7 @@ export function DayRow({
             </span>
           )}
         </div>
-        <span className="material-symbols-outlined text-outline-variant group-hover:text-accent">
+        <span className="material-symbols-outlined text-muted group-hover:text-accent">
           add_circle
         </span>
       </button>
@@ -86,7 +86,7 @@ export function DayRow({
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-16 p-16 bg-surface border border-outline-variant/20 rounded-lg hover:border-primary transition-colors cursor-pointer group"
+      className="flex items-center gap-16 p-16 bg-surface border border-border-soft rounded-lg hover:border-accent transition-colors cursor-pointer group"
     >
       <div className="flex flex-col items-center justify-center w-16 h-16 bg-surface rounded-lg shrink-0">
         <span className="font-label-caps text-label-caps text-muted">{dayName}</span>
@@ -105,7 +105,7 @@ export function DayRow({
           </span>
         </div>
       </div>
-      <span className="material-symbols-outlined text-outline-variant group-hover:text-accent">
+      <span className="material-symbols-outlined text-muted group-hover:text-accent">
         chevron_right
       </span>
     </button>

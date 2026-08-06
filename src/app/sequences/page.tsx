@@ -97,7 +97,7 @@ export default function SequenceListPage() {
                   onClick={() => {
                     if (confirm('Delete this sequence?')) deleteSequence(seq.id)
                   }}
-                  className="px-3 py-1.5 border border-outline-variant/30 text-outline-variant hover:text-error font-label text-label-caps rounded-lg hover:bg-error-container/10 transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                  className="px-3 py-1.5 border border-border-soft text-muted hover:text-error font-label text-label-caps rounded-lg hover:bg-error-container/10 transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
                 >
                   Delete
                 </button>
