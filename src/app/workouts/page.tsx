@@ -61,7 +61,7 @@ export default function WorkoutListPage() {
         </p>
         <button
           onClick={() => router.push('/workouts/new')}
-          className="px-6 py-3 bg-accent hover:bg-accent-hover disabled:bg-surface disabled:text-muted text-accent-on rounded-lg font-medium transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="px-6 py-3 bg-accent hover:bg-accent-hover disabled:bg-surface disabled:text-muted text-accent-on rounded-lg font-medium transition-colors focus-visible:focus-ring"
         >
           Create Workout
         </button>
@@ -76,7 +76,7 @@ export default function WorkoutListPage() {
         <div className="relative w-full md:w-96">
           <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted">search</span>
           <input
-            className="w-full bg-surface border border-border/50 rounded-lg pl-12 pr-4 py-3 font-body-md focus:border-accent focus:ring-1 focus:ring-secondary transition-all outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="w-full bg-surface border border-border/50 rounded-lg pl-12 pr-4 py-3 font-body-md focus:border-accent focus:ring-1 focus:ring-accent transition-all outline-none focus-visible:focus-ring"
             placeholder="Search workouts..."
             type="text"
             value={search}
@@ -86,14 +86,14 @@ export default function WorkoutListPage() {
         <div className="flex flex-wrap gap-2 items-center">
           <button
             onClick={() => router.push('/workouts/new')}
-            className="px-4 py-2 rounded-lg bg-accent text-accent-on font-label-caps text-label-caps hover:opacity-90 transition-opacity flex items-center gap-2 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="px-4 py-2 rounded-lg bg-accent text-accent-on font-label-caps text-label-caps hover:opacity-90 transition-opacity flex items-center gap-2 focus-visible:focus-ring"
           >
             <span className="material-symbols-outlined text-[16px]">add</span>
             New Workout
           </button>
           <button
             onClick={() => setTypeFilter(typeFilter === null ? 'all' : null)}
-            className={`px-4 py-2 rounded-full transition-colors border font-label-caps text-label-caps flex items-center gap-2 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ${
+            className={`px-4 py-2 rounded-full transition-colors border font-label-caps text-label-caps flex items-center gap-2 focus-visible:focus-ring ${
               typeFilter !== null
                 ? 'bg-accent text-accent-on border-accent'
                 : 'bg-surface text-fg-2 border-transparent hover:bg-surface-warm'
@@ -120,7 +120,7 @@ export default function WorkoutListPage() {
               {/* Three-dot menu */}
               <div className="absolute top-4 right-4 z-40">
                 <button
-                  className="text-muted hover:text-accent p-1 rounded-full hover:bg-surface transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                  className="text-muted hover:text-accent p-1 rounded-full hover:bg-surface transition-colors focus-visible:focus-ring"
                   onClick={(e) => { e.stopPropagation(); setMenuOpen(menuOpen === w.id ? null : w.id) }}
                   aria-label="Workout options"
                 >
@@ -156,7 +156,7 @@ export default function WorkoutListPage() {
                       <div className="border-t border-border-soft my-4" />
                       <button
                         onClick={() => { if (confirm('Delete this workout?')) { deleteWorkout(w.id); setMenuOpen(null) } }}
-                        className="w-full flex items-center gap-8 px-16 py-8 text-body-md text-error hover:bg-error/5 transition-colors text-left"
+                        className="w-full flex items-center gap-8 px-16 py-8 text-body-md text-danger hover:bg-danger/5 transition-colors text-left"
                       >
                         <span className="material-symbols-outlined text-[18px]">delete</span>
                         Delete
@@ -169,7 +169,7 @@ export default function WorkoutListPage() {
               {/* Play button — always visible on card */}
               <button
                 onClick={(e) => { e.stopPropagation(); router.push(`/workouts/${w.id}/play`) }}
-                className="absolute bottom-4 right-4 w-9 h-9 rounded-full bg-accent text-accent-on flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-transform focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                className="absolute bottom-4 right-4 w-9 h-9 rounded-full bg-accent text-accent-on flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-transform focus-visible:focus-ring"
                 aria-label={`Play ${w.title}`}
               >
                 <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
@@ -181,7 +181,7 @@ export default function WorkoutListPage() {
                   <p className="font-data-sm text-data-sm text-muted flex items-center gap-2">
                     <span className="material-symbols-outlined text-[16px]">timer</span>
                     {formatDuration(total)}
-                    <span className="w-1 h-1 rounded-full bg-outline-variant/50" />
+                    <span className="w-1 h-1 rounded-full bg-border-soft/50" />
                     {w.intervals.length} interval{w.intervals.length !== 1 && 's'}
                   </p>
                 </div>

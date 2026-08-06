@@ -38,7 +38,7 @@ function FilterSelect({
     <select
       value={value ?? ''}
       onChange={(e) => onChange(e.target.value || null)}
-      className="bg-surface text-fg-2 rounded-lg px-2 py-1.5 text-xs border border-border-soft outline-none focus:ring-2 focus:ring-secondary cursor-pointer"
+      className="bg-surface text-fg-2 rounded-lg px-2 py-1.5 text-xs border border-border-soft outline-none focus:ring-2 focus:ring-accent cursor-pointer"
       aria-label={label}
     >
       <option value="">{allLabel}</option>
@@ -134,7 +134,7 @@ export function ExercisePicker({ open, onClose, onSelect, exercises, selectedId 
           <button
             type="button"
             onClick={onClose}
-            className="text-muted hover:text-fg-2 p-1 rounded focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="text-muted hover:text-fg-2 p-1 rounded focus-visible:focus-ring"
             aria-label="Close"
           >
             <span className="material-symbols-outlined text-[20px]">close</span>
@@ -148,7 +148,7 @@ export function ExercisePicker({ open, onClose, onSelect, exercises, selectedId 
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search exercises..."
-          className="w-full bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-border focus:outline-none focus:ring-1 focus:ring-secondary"
+          className="w-full bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-border focus:outline-none focus:ring-1 focus:ring-accent"
         />
 
         {/* Mini preview card for selected exercise */}
@@ -204,7 +204,7 @@ export function ExercisePicker({ open, onClose, onSelect, exercises, selectedId 
           <button
             type="button"
             onClick={() => setFavoritesOnly(!favoritesOnly)}
-            className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ${
+            className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-colors focus-visible:focus-ring ${
               favoritesOnly
                 ? 'bg-accent text-accent-on'
                 : 'bg-surface text-muted border border-border-soft hover:bg-surface-warm'
@@ -232,7 +232,7 @@ export function ExercisePicker({ open, onClose, onSelect, exercises, selectedId 
                   tabIndex={0}
                   onClick={() => handleSelect(ex)}
                   onKeyDown={(e) => handleKeyDown(e, ex)}
-                  className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ${
+                  className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors focus-visible:focus-ring ${
                     isSelected
                       ? 'bg-accent/10 border border-accent/30'
                       : 'hover:bg-surface-warm border border-transparent'
@@ -285,7 +285,7 @@ export function ExercisePicker({ open, onClose, onSelect, exercises, selectedId 
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); toggleFavorite(ex.id) }}
-                    className="shrink-0 w-7 h-7 flex items-center justify-center rounded hover:bg-surface-warm transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                    className="shrink-0 w-7 h-7 flex items-center justify-center rounded hover:bg-surface-warm transition-colors focus-visible:focus-ring"
                     aria-label={isFavorite(ex.id) ? 'Remove from favorites' : 'Add to favorites'}
                   >
                     {isFavorite(ex.id) ? '★' : '☆'}

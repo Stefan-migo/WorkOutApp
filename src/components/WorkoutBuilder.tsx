@@ -257,7 +257,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
             type="text"
             value={title}
             placeholder="Name your workout..."
-            className="w-full bg-transparent border-0 border-b-2 border-border pb-xs font-headline text-headline-lg text-fg-2 focus:border-accent focus:ring-0 transition-colors px-0 outline-none placeholder:text-muted/50 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="w-full bg-transparent border-0 border-b-2 border-border pb-xs font-headline text-headline-lg text-fg-2 focus:border-accent focus:ring-0 transition-colors px-0 outline-none placeholder:text-muted/50 focus-visible:focus-ring"
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
@@ -295,7 +295,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
               onDragEnd={handleDragEnd}
               role="listitem"
               className={`glass-card rounded-xl flex items-center group transition-all duration-200 pl-0 hover:shadow-md relative overflow-visible ${
-                dragIndex === i ? 'opacity-40 ring-2 ring-secondary' : ''
+                dragIndex === i ? 'opacity-40 ring-2 ring-accent' : ''
               } ${!isCycle(item) ? `border-l-4 ${SEGMENT_BORDER[item.type]}` : 'border-l-4 border-l-secondary/60'}`}
             >
               {/* Drag handle */}
@@ -334,7 +334,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                       {/* Delete */}
                       <button
                         onClick={() => removeItem(i)}
-                        className="text-muted hover:text-error transition-colors p-4 rounded-lg hover:bg-surface"
+                        className="text-muted hover:text-danger transition-colors p-4 rounded-lg hover:bg-surface"
                         aria-label="Remove cycle"
                       >
                         <span className="material-symbols-outlined text-[18px]">delete</span>
@@ -648,7 +648,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                     </button>
                     <button
                       onClick={() => removeItem(i)}
-                      className="text-muted hover:text-error transition-colors p-4 rounded-lg hover:bg-surface"
+                      className="text-muted hover:text-danger transition-colors p-4 rounded-lg hover:bg-surface"
                       aria-label={`Remove interval ${i + 1}`}
                     >
                       <span className="material-symbols-outlined text-[18px]">delete</span>
@@ -674,7 +674,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                   key="cycle"
                   onClick={() => handlePaletteClick(block)}
                   aria-label="Add Cycle"
-                  className="glass-card p-8 rounded-xl flex flex-col items-center justify-center gap-4 hover:-translate-y-1 hover:shadow-md transition-all duration-200 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none group border-t-2 border-t-secondary/50"
+                  className="glass-card p-8 rounded-xl flex flex-col items-center justify-center gap-4 hover:-translate-y-1 hover:shadow-md transition-all duration-200 focus-visible:focus-ring group border-t-2 border-t-secondary/50"
                 >
                   <div className="w-9 h-9 rounded-full bg-accent/10 text-accent flex items-center justify-center group-hover:scale-110 transition-transform">
                     <span className="material-symbols-outlined text-[20px]">repeat</span>
@@ -691,7 +691,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                 key={type}
                 onClick={() => handlePaletteClick(block)}
                 aria-label={`Add ${label}`}
-                className={`glass-card p-8 rounded-xl flex flex-col items-center justify-center gap-4 hover:-translate-y-1 hover:shadow-md transition-all duration-200 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none group border-t-2 ${SEGMENT_BORDER[type].replace('border-l-', 'border-t-')}`}
+                className={`glass-card p-8 rounded-xl flex flex-col items-center justify-center gap-4 hover:-translate-y-1 hover:shadow-md transition-all duration-200 focus-visible:focus-ring group border-t-2 ${SEGMENT_BORDER[type].replace('border-l-', 'border-t-')}`}
               >
                 <div
                   className={`w-9 h-9 rounded-full ${SEGMENT_BG[type]} ${SEGMENT_TEXT[type]} flex items-center justify-center group-hover:scale-110 transition-transform`}
@@ -712,7 +712,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
         {onCancel && (
           <button
             onClick={onCancel}
-            className="flex-1 py-3 bg-surface border border-border text-fg-2 rounded-lg font-medium transition-colors hover:bg-surface font-label text-label-caps uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="flex-1 py-3 bg-surface border border-border text-fg-2 rounded-lg font-medium transition-colors hover:bg-surface font-label text-label-caps uppercase tracking-wider focus-visible:focus-ring"
           >
             Discard
           </button>
@@ -720,7 +720,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
         <button
           onClick={handleSave}
           disabled={!canSave}
-          className="flex-1 py-3 bg-accent hover:bg-accent-hover disabled:bg-surface disabled:text-muted text-accent-on rounded-lg font-medium transition-colors font-label text-label-caps uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="flex-1 py-3 bg-accent hover:bg-accent-hover disabled:bg-surface disabled:text-muted text-accent-on rounded-lg font-medium transition-colors font-label text-label-caps uppercase tracking-wider focus-visible:focus-ring"
         >
           Build Workout
         </button>

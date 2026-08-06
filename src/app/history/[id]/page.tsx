@@ -139,7 +139,7 @@ export default function SessionDetailPage() {
             </h2>
             <button
               onClick={handleRepeat}
-              className="shrink-0 px-24 py-16 bg-accent text-accent-on rounded-lg font-label-caps text-label-caps hover:bg-accent/90 transition-colors ambient-shadow flex items-center gap-8 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+              className="shrink-0 px-24 py-16 bg-accent text-accent-on rounded-lg font-label-caps text-label-caps hover:bg-accent/90 transition-colors ambient-shadow flex items-center gap-8 focus-visible:focus-ring"
             >
               <span className="material-symbols-outlined text-sm">repeat</span>
               Repeat
@@ -202,7 +202,7 @@ export default function SessionDetailPage() {
                   aria-label={editable ? `Edit interval ${idx + 1}` : undefined}
                   className={`bg-surface border-l-4 ${SEGMENT_BORDER[intv.type]} border-y border-r border-border-soft rounded-r-lg p-16 flex justify-between items-center group transition-colors ${
                     editable
-                      ? 'cursor-pointer hover:bg-surface-warm focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none'
+                      ? 'cursor-pointer hover:bg-surface-warm focus-visible:focus-ring'
                       : 'cursor-default'
                   }`}
                 >

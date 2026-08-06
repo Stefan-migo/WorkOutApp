@@ -85,10 +85,10 @@ export default function ExerciseDetailPage() {
   if (error) {
     return (
       <div className="max-w-[1440px] mx-auto w-full p-margin-mobile md:p-margin-desktop flex flex-col items-center justify-center gap-4 py-[64px] text-center">
-        <p className="font-headline text-headline-md font-semibold text-error">{error}</p>
+        <p className="font-headline text-headline-md font-semibold text-danger">{error}</p>
         <Link
           href="/exercises"
-          className="px-6 py-3 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="px-6 py-3 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:focus-ring"
         >
           ← Back to exercises
         </Link>
@@ -105,7 +105,7 @@ export default function ExerciseDetailPage() {
         <p className="font-headline text-headline-md font-semibold text-accent">Exercise not found</p>
         <Link
           href="/exercises"
-          className="px-6 py-3 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="px-6 py-3 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:focus-ring"
         >
           ← Back to exercises
         </Link>
@@ -224,7 +224,7 @@ export default function ExerciseDetailPage() {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="px-3 py-1.5 rounded-lg font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm transition-colors disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                className="px-3 py-1.5 rounded-lg font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm transition-colors disabled:opacity-50 focus-visible:focus-ring"
               >
                 {uploading ? 'Uploading...' : '+ Upload Image'}
               </button>
@@ -251,7 +251,7 @@ export default function ExerciseDetailPage() {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="px-3 py-1.5 rounded-lg font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm transition-colors disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                className="px-3 py-1.5 rounded-lg font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm transition-colors disabled:opacity-50 focus-visible:focus-ring"
               >
                 {uploading ? 'Uploading...' : '+ Upload Image'}
               </button>
@@ -265,7 +265,7 @@ export default function ExerciseDetailPage() {
         <h1 className="font-headline text-headline-lg font-bold text-accent">{ex.name}</h1>
         <button
           onClick={() => toggleFavorite(ex.id)}
-          className="w-10 h-10 flex items-center justify-center rounded-full bg-surface text-lg hover:bg-surface-warm transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="w-10 h-10 flex items-center justify-center rounded-full bg-surface text-lg hover:bg-surface-warm transition-colors focus-visible:focus-ring"
           aria-label={isFavorite(ex.id) ? 'Remove from favorites' : 'Add to favorites'}
         >
           {isFavorite(ex.id) ? '★' : '☆'}
@@ -369,7 +369,7 @@ export default function ExerciseDetailPage() {
       <div className="flex flex-wrap gap-4 pt-8 border-t border-border-soft">
         <button
           onClick={openEdit}
-          className="px-6 py-3 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="px-6 py-3 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:focus-ring"
         >
           Edit
         </button>
@@ -378,13 +378,13 @@ export default function ExerciseDetailPage() {
             setDeleteTarget(ex.id)
             deleteDialogRef.current?.showModal()
           }}
-          className="px-6 py-3 bg-error text-on-error font-label text-label-caps rounded-lg hover:bg-error-container hover:text-on-error-container transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="px-6 py-3 bg-danger text-accent-on font-label text-label-caps rounded-lg hover:bg-danger/15 hover:text-danger transition-colors focus-visible:focus-ring"
         >
           Delete
         </button>
         <button
           onClick={() => setShowAssignModal(true)}
-          className="px-6 py-3 border border-border text-accent font-label text-label-caps rounded-lg hover:bg-surface-warm transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="px-6 py-3 border border-border text-accent font-label text-label-caps rounded-lg hover:bg-surface-warm transition-colors focus-visible:focus-ring"
         >
           Assign to Workout
         </button>

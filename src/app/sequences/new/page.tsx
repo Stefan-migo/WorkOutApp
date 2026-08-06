@@ -168,7 +168,7 @@ export default function NewSequencePage() {
                   type="text"
                   value={title}
                   placeholder="e.g. Friday Full Body Burn"
-                  className="w-full bg-transparent border-0 border-b-2 border-border focus:border-accent focus:ring-0 px-0 font-headline text-headline-lg text-fg-2 transition-colors pb-8 placeholder:text-muted/50 outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                  className="w-full bg-transparent border-0 border-b-2 border-border focus:border-accent focus:ring-0 px-0 font-headline text-headline-lg text-fg-2 transition-colors pb-8 placeholder:text-muted/50 outline-none focus-visible:focus-ring"
                   onChange={(e) => setTitle(e.target.value)}
                 />
               </div>
@@ -186,7 +186,7 @@ export default function NewSequencePage() {
                 value={description}
                 placeholder="Optional description"
                 rows={2}
-                className="w-full bg-surface rounded-lg p-3 font-body text-body-md text-fg-2 placeholder:text-muted outline-none focus:ring-2 focus:ring-secondary resize-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                className="w-full bg-surface rounded-lg p-3 font-body text-body-md text-fg-2 placeholder:text-muted outline-none focus:ring-2 focus:ring-accent resize-none focus-visible:focus-ring"
                 onChange={(e) => setDescription(e.target.value)}
               />
             </div>
@@ -208,7 +208,7 @@ export default function NewSequencePage() {
                   min={1}
                   max={99}
                   value={repeatCount}
-                  className="w-[36px] bg-surface rounded text-center text-data-sm leading-none text-fg-2 outline-none focus:ring-1 focus:ring-secondary focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                  className="w-[36px] bg-surface rounded text-center text-data-sm leading-none text-fg-2 outline-none focus:ring-1 focus:ring-accent focus-visible:focus-ring [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   onChange={(e) => setRepeatCount(Math.max(1, Math.min(99, parseInt(e.target.value) || 1)))}
                 />
                 <span>cycles ({selectedIds.length * repeatCount} total workouts)</span>
@@ -230,7 +230,7 @@ export default function NewSequencePage() {
                   onDragOver={handleDragOver}
                   onDrop={() => handleDrop(i)}
                   onDragEnd={handleDragEnd}
-                  className={`group glass-card rounded-lg p-24 flex items-center gap-16 transition-all hover:border-accent relative border-l-4 border-l-border ${isDragging ? 'opacity-40 ring-2 ring-secondary' : ''}`}
+                  className={`group glass-card rounded-lg p-24 flex items-center gap-16 transition-all hover:border-accent relative border-l-4 border-l-border ${isDragging ? 'opacity-40 ring-2 ring-accent' : ''}`}
                 >
                   {/* Drag handle */}
                   <div className="text-muted/40 group-hover:text-accent transition-colors cursor-grab shrink-0">
@@ -263,7 +263,7 @@ export default function NewSequencePage() {
                   {/* Remove */}
                   <button
                     onClick={() => setSelectedIds((prev) => prev.filter((x) => x !== id))}
-                    className="p-8 rounded-lg text-muted hover:text-error hover:bg-error/5 transition-colors shrink-0 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                    className="p-8 rounded-lg text-muted hover:text-danger hover:bg-danger/5 transition-colors shrink-0 focus-visible:focus-ring"
                     title="Remove workout"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -286,7 +286,7 @@ export default function NewSequencePage() {
                     type="text"
                     value={search}
                     placeholder="Browse & Add Workouts..."
-                    className="w-full pl-10 pr-4 py-2.5 bg-surface text-fg-2 rounded-lg font-body text-body-md placeholder:text-muted outline-none focus:ring-2 focus:ring-secondary focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                    className="w-full pl-10 pr-4 py-2.5 bg-surface text-fg-2 rounded-lg font-body text-body-md placeholder:text-muted outline-none focus:ring-2 focus:ring-accent focus-visible:focus-ring"
                     onChange={(e) => setSearch(e.target.value)}
                   />
                 </div>
@@ -314,7 +314,7 @@ export default function NewSequencePage() {
                           type="checkbox"
                           checked={selectedSet.has(w.id)}
                           onChange={() => toggleWorkout(w.id)}
-                          className="accent-accent w-4 h-4 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                          className="accent-accent w-4 h-4 focus-visible:focus-ring"
                         />
                         <span className="flex-1 font-body text-body-md text-fg-2 truncate">{w.title}</span>
                         <span className="font-data text-data-sm text-muted shrink-0">
@@ -398,14 +398,14 @@ export default function NewSequencePage() {
       <div className="fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-md border-t border-border-soft p-margin-mobile md:p-margin-desktop flex justify-between items-center z-40">
         <button
           onClick={() => router.push('/sequences')}
-          className="font-label text-label-caps text-muted hover:text-error transition-colors px-24 py-8 uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="font-label text-label-caps text-muted hover:text-danger transition-colors px-24 py-8 uppercase tracking-wider focus-visible:focus-ring"
         >
           Discard
         </button>
         <button
           onClick={handleSave}
           disabled={!canSave}
-          className="bg-accent text-accent-on font-label text-label-caps px-32 py-16 rounded-full hover:bg-accent-hover disabled:bg-surface disabled:text-muted transition-colors shadow-sm ambient-shadow uppercase tracking-wider flex items-center gap-8 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="bg-accent text-accent-on font-label text-label-caps px-32 py-16 rounded-full hover:bg-accent-hover disabled:bg-surface disabled:text-muted transition-colors shadow-sm ambient-shadow uppercase tracking-wider flex items-center gap-8 focus-visible:focus-ring"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />

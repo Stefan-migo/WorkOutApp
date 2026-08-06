@@ -122,7 +122,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-border focus:outline-none focus:ring-1 focus:ring-secondary"
+              className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-border focus:outline-none focus:ring-1 focus:ring-accent"
             />
           </label>
 
@@ -166,7 +166,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
                   onChange={(e) => setReps(Math.max(1, Math.min(999, Number(e.target.value))))}
                   min={1}
                   max={999}
-                  className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-28 border border-border focus:outline-none focus:ring-1 focus:ring-secondary"
+                  className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-28 border border-border focus:outline-none focus:ring-1 focus:ring-accent"
                 />
               </label>
               <label className="flex flex-col gap-1.5">
@@ -178,7 +178,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
                   min={0}
                   max={9999}
                   placeholder="0"
-                  className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-28 border border-border focus:outline-none focus:ring-1 focus:ring-secondary"
+                  className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-28 border border-border focus:outline-none focus:ring-1 focus:ring-accent"
                 />
               </label>
             </>
@@ -191,7 +191,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
                 onChange={(e) => setDuration(Math.max(1, Math.min(3600, Number(e.target.value))))}
                 min={1}
                 max={3600}
-                className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-28 border border-border focus:outline-none focus:ring-1 focus:ring-secondary"
+                className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-28 border border-border focus:outline-none focus:ring-1 focus:ring-accent"
               />
             </label>
           )}
@@ -203,7 +203,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
               <button
                 type="button"
                 onClick={() => setPickerOpen(true)}
-                className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-border hover:bg-surface-warm transition-colors text-left w-full flex items-center gap-3 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-border hover:bg-surface-warm transition-colors text-left w-full flex items-center gap-3 focus-visible:focus-ring"
               >
                 {selectedExercise ? (
                   <>
@@ -245,7 +245,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-border resize-none focus:outline-none focus:ring-1 focus:ring-secondary"
+              className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-border resize-none focus:outline-none focus:ring-1 focus:ring-accent"
             />
           </label>
 
@@ -258,13 +258,13 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
                 placeholder="https://example.com/image.jpg"
-                className="flex-1 bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-border focus:outline-none focus:ring-1 focus:ring-secondary"
+                className="flex-1 bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-border focus:outline-none focus:ring-1 focus:ring-accent"
               />
               <button
                 type="button"
                 disabled={uploading || !onImageUpload}
                 onClick={() => fileInputRef.current?.click()}
-                className="px-3 py-2.5 rounded-lg bg-surface text-sm border border-border hover:bg-surface-warm transition-colors disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                className="px-3 py-2.5 rounded-lg bg-surface text-sm border border-border hover:bg-surface-warm transition-colors disabled:opacity-30 focus-visible:focus-ring"
                 title="Upload image file"
               >
                 {uploading ? '...' : '📁'}

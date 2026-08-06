@@ -44,7 +44,7 @@ function FilterSelect({
     <select
       value={value ?? ''}
       onChange={(e) => onChange(e.target.value || null)}
-      className="bg-surface text-fg-2 rounded-lg px-3 py-2 font-label text-label-caps border border-border-soft outline-none focus:ring-2 focus:ring-secondary min-w-[100px] cursor-pointer"
+      className="bg-surface text-fg-2 rounded-lg px-3 py-2 font-label text-label-caps border border-border-soft outline-none focus:ring-2 focus:ring-accent min-w-[100px] cursor-pointer"
       aria-label={label}
     >
       <option value="">{allLabel}</option>
@@ -92,7 +92,7 @@ export function ExerciseSearchHeader({
           <div className="flex gap-2 items-center shrink-0 pb-1">
             <button
               onClick={() => onFavoritesFilterChange(false)}
-              className={`px-3 py-1.5 rounded-lg font-label text-label-caps transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ${
+              className={`px-3 py-1.5 rounded-lg font-label text-label-caps transition-colors focus-visible:focus-ring ${
                 !favoritesFilter ? 'bg-accent text-accent-on' : 'bg-surface text-fg-2 hover:bg-surface-warm'
               }`}
             >
@@ -100,7 +100,7 @@ export function ExerciseSearchHeader({
             </button>
             <button
               onClick={() => onFavoritesFilterChange(true)}
-              className={`px-3 py-1.5 rounded-lg font-label text-label-caps transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ${
+              className={`px-3 py-1.5 rounded-lg font-label text-label-caps transition-colors focus-visible:focus-ring ${
                 favoritesFilter ? 'bg-accent text-accent-on' : 'bg-surface text-fg-2 hover:bg-surface-warm'
               }`}
             >
@@ -132,7 +132,7 @@ export function ExerciseSearchHeader({
       <div className="z-10">
         <button
           onClick={onCreate}
-          className="px-4 py-2 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="px-4 py-2 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:focus-ring"
         >
           + New Exercise
         </button>

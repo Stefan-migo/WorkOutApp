@@ -42,7 +42,7 @@ export default function LoginPage() {
         </div>
 
         {error && (
-          <div className="rounded-md bg-error-container p-4 text-sm text-on-error-container">
+          <div className="rounded-md bg-danger/15 p-4 text-sm text-danger">
             {error}
           </div>
         )}

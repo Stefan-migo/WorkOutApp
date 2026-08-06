@@ -100,7 +100,7 @@ export default function DayAssignmentModal({
           placeholder={`Search ${mode}s\u2026`}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg bg-surface border border-border/50 text-body-md text-sm text-fg-2 focus:outline-none focus:ring-2 focus:ring-secondary transition-all"
+          className="w-full px-3 py-2 rounded-lg bg-surface border border-border/50 text-body-md text-sm text-fg-2 focus:outline-none focus:ring-2 focus:ring-accent transition-all"
         />
 
         {/* Items list */}
@@ -157,7 +157,7 @@ export default function DayAssignmentModal({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
-            className="w-full px-3 py-2 rounded-lg bg-surface border border-border/50 text-body-md text-sm text-fg-2 resize-none focus:outline-none focus:ring-2 focus:ring-secondary transition-all"
+            className="w-full px-3 py-2 rounded-lg bg-surface border border-border/50 text-body-md text-sm text-fg-2 resize-none focus:outline-none focus:ring-2 focus:ring-accent transition-all"
           />
         </div>
 
@@ -166,7 +166,7 @@ export default function DayAssignmentModal({
           <button
             type="button"
             onClick={handleClear}
-            className="px-4 py-2 rounded-lg text-sm bg-error-container text-on-error-container font-label-caps text-label-caps hover:bg-error hover:text-on-error transition-colors"
+            className="px-4 py-2 rounded-lg text-sm bg-danger/15 text-danger font-label-caps text-label-caps hover:bg-danger hover:text-accent-on transition-colors"
           >
             Clear
           </button>

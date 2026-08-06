@@ -284,7 +284,7 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
               type="text"
               value={title}
               placeholder="Name your workout..."
-              className="w-full bg-transparent border-0 border-b-2 border-border pb-xs font-headline text-headline-lg text-fg-2 focus:border-accent focus:ring-0 transition-colors px-0 outline-none placeholder:text-muted/50 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+              className="w-full bg-transparent border-0 border-b-2 border-border pb-xs font-headline text-headline-lg text-fg-2 focus:border-accent focus:ring-0 transition-colors px-0 outline-none placeholder:text-muted/50 focus-visible:focus-ring"
               onChange={(e) => { markDirty(); setTitle(e.target.value) }}
             />
           </div>
@@ -371,7 +371,7 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
             <button
               key={type}
               onClick={() => handleAdd(type)}
-              className={`glass-card p-12 rounded-xl flex flex-col items-center justify-center gap-6 hover:-translate-y-1 hover:shadow-md transition-all duration-200 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ${SEGMENT_CLASSES[type].border} group`}
+              className={`glass-card p-12 rounded-xl flex flex-col items-center justify-center gap-6 hover:-translate-y-1 hover:shadow-md transition-all duration-200 focus-visible:focus-ring ${SEGMENT_CLASSES[type].border} group`}
             >
               <div className={`w-10 h-10 rounded-full ${SEGMENT_CLASSES[type].bg10} ${SEGMENT_CLASSES[type].text} flex items-center justify-center group-hover:scale-110 transition-transform`}>
                 <span className="material-symbols-outlined">{TYPE_ICONS[type]}</span>
@@ -406,7 +406,7 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
         {onCancel && (
           <button
             onClick={onCancel}
-            className="flex-1 py-3 bg-surface border border-border text-fg-2 rounded-lg font-medium transition-colors hover:bg-surface font-label text-label-caps uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="flex-1 py-3 bg-surface border border-border text-fg-2 rounded-lg font-medium transition-colors hover:bg-surface font-label text-label-caps uppercase tracking-wider focus-visible:focus-ring"
           >
             Discard
           </button>
@@ -414,7 +414,7 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
         <button
           onClick={handleSave}
           disabled={!canSave}
-          className="flex-1 py-3 bg-accent hover:bg-accent-hover disabled:bg-surface disabled:text-muted text-accent-on rounded-lg font-medium transition-colors font-label text-label-caps uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="flex-1 py-3 bg-accent hover:bg-accent-hover disabled:bg-surface disabled:text-muted text-accent-on rounded-lg font-medium transition-colors font-label text-label-caps uppercase tracking-wider focus-visible:focus-ring"
         >
           {existingWorkout ? 'Update Workout' : 'Save Workout'}
         </button>

@@ -37,7 +37,7 @@ export default function UpNextCard({ totalSessions, thisWeekSessions }: UpNextCa
             </div>
             <Link
               href={totalSessions > 0 ? '/history' : '/workouts/new'}
-              className="w-full md:w-auto px-24 py-8 rounded-full border border-border text-accent font-label text-label-caps hover:bg-accent hover:text-accent-on transition-colors text-center focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+              className="w-full md:w-auto px-24 py-8 rounded-full border border-border text-accent font-label text-label-caps hover:bg-accent hover:text-accent-on transition-colors text-center focus-visible:focus-ring"
             >
               {totalSessions > 0 ? 'VIEW HISTORY' : 'CREATE FIRST'}
             </Link>
@@ -57,7 +57,7 @@ export default function UpNextCard({ totalSessions, thisWeekSessions }: UpNextCa
             </div>
             <Link
               href="/workouts/new"
-              className="w-full md:w-auto px-24 py-8 rounded-full bg-accent text-accent-on font-label text-label-caps hover:bg-accent-hover transition-colors text-center focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+              className="w-full md:w-auto px-24 py-8 rounded-full bg-accent text-accent-on font-label text-label-caps hover:bg-accent-hover transition-colors text-center focus-visible:focus-ring"
             >
               CREATE WORKOUT
             </Link>

@@ -105,7 +105,7 @@ export function IntervalEditModal({ interval, title, typeLabel, onSave, onClose 
               onChange={(e) => setDurationStr(e.target.value)}
               placeholder="MM:SS"
               inputMode="numeric"
-              className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-32 border border-border focus:outline-none focus:ring-1 focus:ring-secondary"
+              className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-32 border border-border focus:outline-none focus:ring-1 focus:ring-accent"
             />
           </label>
 
@@ -134,7 +134,7 @@ export function IntervalEditModal({ interval, title, typeLabel, onSave, onClose 
                   min={0}
                   max={999}
                   placeholder="0"
-                  className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-full border border-border focus:outline-none focus:ring-1 focus:ring-secondary"
+                  className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-full border border-border focus:outline-none focus:ring-1 focus:ring-accent"
                 />
               </label>
               <label className="flex flex-col gap-1.5 flex-1">
@@ -148,7 +148,7 @@ export function IntervalEditModal({ interval, title, typeLabel, onSave, onClose 
                   min={0}
                   max={9999}
                   placeholder="0"
-                  className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-full border border-border focus:outline-none focus:ring-1 focus:ring-secondary"
+                  className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-full border border-border focus:outline-none focus:ring-1 focus:ring-accent"
                 />
               </label>
             </div>
@@ -162,7 +162,7 @@ export function IntervalEditModal({ interval, title, typeLabel, onSave, onClose 
               onChange={(e) => setNote(e.target.value)}
               rows={3}
               placeholder="Add notes about this interval (weight, fatigue, etc.)"
-              className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-border resize-none focus:outline-none focus:ring-1 focus:ring-secondary placeholder:text-muted/50"
+              className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-border resize-none focus:outline-none focus:ring-1 focus:ring-accent placeholder:text-muted/50"
             />
           </label>
 
@@ -170,13 +170,13 @@ export function IntervalEditModal({ interval, title, typeLabel, onSave, onClose 
           <div className="flex gap-3 pt-2">
             <button
               onClick={handleCancel}
-              className="flex-1 py-3 bg-surface text-fg-2 rounded-lg font-medium hover:bg-surface-warm transition-colors text-sm focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+              className="flex-1 py-3 bg-surface text-fg-2 rounded-lg font-medium hover:bg-surface-warm transition-colors text-sm focus-visible:focus-ring"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
-              className="flex-1 py-3 bg-accent text-accent-on rounded-lg font-label-caps text-label-caps hover:bg-accent/90 transition-colors text-sm focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+              className="flex-1 py-3 bg-accent text-accent-on rounded-lg font-label-caps text-label-caps hover:bg-accent/90 transition-colors text-sm focus-visible:focus-ring"
             >
               Save
             </button>

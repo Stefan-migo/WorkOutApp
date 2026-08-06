@@ -5,7 +5,7 @@ export default function QuickActions() {
     <div className="md:col-span-12 grid grid-cols-1 sm:grid-cols-3 gap-24">
       <Link
         href="/workouts/new"
-        className="glass-card p-16 rounded-xl flex items-center gap-16 hover:bg-surface/50 transition-colors duration-200 group border-l-4 border-l-transparent hover:border-l-primary focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+        className="glass-card p-16 rounded-xl flex items-center gap-16 hover:bg-surface/50 transition-colors duration-200 group border-l-4 border-l-transparent hover:border-l-primary focus-visible:focus-ring"
       >
         <div className="w-12 h-12 rounded-lg bg-surface flex items-center justify-center text-accent group-hover:scale-110 transition-transform">
           <span className="material-symbols-outlined text-[24px]">add_circle</span>
@@ -17,7 +17,7 @@ export default function QuickActions() {
       </Link>
       <Link
         href="/exercises"
-        className="glass-card p-16 rounded-xl flex items-center gap-16 hover:bg-surface/50 transition-colors duration-200 group border-l-4 border-l-transparent hover:border-l-primary focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+        className="glass-card p-16 rounded-xl flex items-center gap-16 hover:bg-surface/50 transition-colors duration-200 group border-l-4 border-l-transparent hover:border-l-primary focus-visible:focus-ring"
       >
         <div className="w-12 h-12 rounded-lg bg-surface flex items-center justify-center text-accent group-hover:scale-110 transition-transform">
           <span className="material-symbols-outlined text-[24px]">search</span>
@@ -29,7 +29,7 @@ export default function QuickActions() {
       </Link>
       <Link
         href="/calendar"
-        className="glass-card p-16 rounded-xl flex items-center gap-16 hover:bg-surface/50 transition-colors duration-200 group border-l-4 border-l-transparent hover:border-l-primary focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+        className="glass-card p-16 rounded-xl flex items-center gap-16 hover:bg-surface/50 transition-colors duration-200 group border-l-4 border-l-transparent hover:border-l-primary focus-visible:focus-ring"
       >
         <div className="w-12 h-12 rounded-lg bg-surface flex items-center justify-center text-accent group-hover:scale-110 transition-transform">
           <span className="material-symbols-outlined text-[24px]">calendar_month</span>

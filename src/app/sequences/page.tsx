@@ -25,7 +25,7 @@ export default function SequenceListPage() {
           </div>
           <button
             onClick={() => router.push('/sequences/new')}
-            className="px-6 py-3 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ambient-shadow"
+            className="px-6 py-3 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:focus-ring ambient-shadow"
           >
             + New Sequence
           </button>
@@ -40,7 +40,7 @@ export default function SequenceListPage() {
         <h1 className="font-headline text-headline-lg font-bold text-accent">Sequences</h1>
         <button
           onClick={() => router.push('/sequences/new')}
-          className="px-4 py-2 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="px-4 py-2 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:focus-ring"
         >
           + New Sequence
         </button>
@@ -89,7 +89,7 @@ export default function SequenceListPage() {
               <div className="flex gap-2 shrink-0">
                 <button
                   onClick={() => router.push(`/sequences/${seq.id}/play`)}
-                  className="px-3 py-1.5 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                  className="px-3 py-1.5 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:focus-ring"
                 >
                   Play
                 </button>
@@ -97,7 +97,7 @@ export default function SequenceListPage() {
                   onClick={() => {
                     if (confirm('Delete this sequence?')) deleteSequence(seq.id)
                   }}
-                  className="px-3 py-1.5 border border-border-soft text-muted hover:text-error font-label text-label-caps rounded-lg hover:bg-error-container/10 transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                  className="px-3 py-1.5 border border-border-soft text-muted hover:text-danger font-label text-label-caps rounded-lg hover:bg-danger/10 transition-colors focus-visible:focus-ring"
                 >
                   Delete
                 </button>

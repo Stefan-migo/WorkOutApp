@@ -122,7 +122,7 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
         <div className="flex gap-8">
           <button
             onClick={exportAllData}
-            className="px-4 py-2 border border-border rounded font-label-caps text-label-caps text-fg-2 hover:bg-surface transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="px-4 py-2 border border-border rounded font-label-caps text-label-caps text-fg-2 hover:bg-surface transition-colors focus-visible:focus-ring"
           >
             Export JSON
           </button>

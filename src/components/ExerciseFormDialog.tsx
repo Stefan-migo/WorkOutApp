@@ -97,11 +97,11 @@ export function ExerciseFormDialog({
             value={form.name}
             onChange={(e) => update({ name: e.target.value })}
             required
-            className="bg-surface text-fg-2 rounded-lg px-3 py-2 font-body text-body-md placeholder:text-muted outline-none focus:ring-2 focus:ring-secondary"
+            className="bg-surface text-fg-2 rounded-lg px-3 py-2 font-body text-body-md placeholder:text-muted outline-none focus:ring-2 focus:ring-accent"
             placeholder="Exercise name"
           />
           {validationError && (
-            <span className="text-error text-sm font-label text-label-caps">{validationError}</span>
+            <span className="text-danger text-sm font-label text-label-caps">{validationError}</span>
           )}
         </label>
 
@@ -111,7 +111,7 @@ export function ExerciseFormDialog({
           <select
             value={form.category}
             onChange={(e) => update({ category: e.target.value as ExerciseCategory })}
-            className="bg-surface text-fg-2 rounded-lg px-3 py-2 font-body text-body-md outline-none focus:ring-2 focus:ring-secondary"
+            className="bg-surface text-fg-2 rounded-lg px-3 py-2 font-body text-body-md outline-none focus:ring-2 focus:ring-accent"
           >
             {CATEGORIES.map((cat) => (
               <option key={cat} value={cat} className="capitalize">
@@ -167,7 +167,7 @@ export function ExerciseFormDialog({
           <select
             value={form.difficulty ?? ''}
             onChange={(e) => update({ difficulty: (e.target.value || undefined) as ExerciseFormData['difficulty'] })}
-            className="bg-surface text-fg-2 rounded-lg px-3 py-2 font-body text-body-md outline-none focus:ring-2 focus:ring-secondary"
+            className="bg-surface text-fg-2 rounded-lg px-3 py-2 font-body text-body-md outline-none focus:ring-2 focus:ring-accent"
           >
             <option value="">Any</option>
             {DIFFICULTIES.map((d) => (
@@ -215,7 +215,7 @@ export function ExerciseFormDialog({
             value={form.description ?? ''}
             onChange={(e) => update({ description: e.target.value })}
             rows={3}
-            className="bg-surface text-fg-2 rounded-lg px-3 py-2 font-body text-body-md placeholder:text-muted resize-none outline-none focus:ring-2 focus:ring-secondary"
+            className="bg-surface text-fg-2 rounded-lg px-3 py-2 font-body text-body-md placeholder:text-muted resize-none outline-none focus:ring-2 focus:ring-accent"
             placeholder="Optional description"
           />
         </label>
@@ -236,7 +236,7 @@ export function ExerciseFormDialog({
                   next[idx] = e.target.value
                   update({ instructions: next })
                 }}
-                className="flex-1 bg-surface text-fg-2 rounded-lg px-3 py-1.5 font-body text-body-md placeholder:text-muted outline-none focus:ring-2 focus:ring-secondary"
+                className="flex-1 bg-surface text-fg-2 rounded-lg px-3 py-1.5 font-body text-body-md placeholder:text-muted outline-none focus:ring-2 focus:ring-accent"
                 placeholder={`Step ${idx + 1} description`}
               />
               <button
@@ -249,7 +249,7 @@ export function ExerciseFormDialog({
                   }
                 }}
                 disabled={idx === 0}
-                className="p-1 text-muted hover:text-accent transition-colors disabled:opacity-30 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none rounded"
+                className="p-1 text-muted hover:text-accent transition-colors disabled:opacity-30 disabled:cursor-not-allowed focus-visible:focus-ring rounded"
                 aria-label="Move up"
               >
                 ↑
@@ -264,7 +264,7 @@ export function ExerciseFormDialog({
                   }
                 }}
                 disabled={idx === form.instructions.length - 1}
-                className="p-1 text-muted hover:text-accent transition-colors disabled:opacity-30 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none rounded"
+                className="p-1 text-muted hover:text-accent transition-colors disabled:opacity-30 disabled:cursor-not-allowed focus-visible:focus-ring rounded"
                 aria-label="Move down"
               >
                 ↓
@@ -274,7 +274,7 @@ export function ExerciseFormDialog({
                 onClick={() => {
                   update({ instructions: form.instructions.filter((_, i) => i !== idx) })
                 }}
-                className="p-1 text-muted hover:text-error transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none rounded"
+                className="p-1 text-muted hover:text-danger transition-colors focus-visible:focus-ring rounded"
                 aria-label={`Remove step ${idx + 1}`}
               >
                 ✕
@@ -284,7 +284,7 @@ export function ExerciseFormDialog({
           <button
             type="button"
             onClick={() => update({ instructions: [...form.instructions, ''] })}
-            className="self-start px-3 py-1 rounded-lg font-label text-label-caps text-accent hover:bg-surface-warm transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="self-start px-3 py-1 rounded-lg font-label text-label-caps text-accent hover:bg-surface-warm transition-colors focus-visible:focus-ring"
           >
             + Add Step
           </button>
@@ -299,12 +299,12 @@ export function ExerciseFormDialog({
               value={imageUrlInput}
               onChange={(e) => setImageUrlInput(e.target.value)}
               placeholder="https://example.com/image.jpg"
-              className="flex-1 bg-surface text-fg-2 rounded-lg px-3 py-2 font-body text-body-md placeholder:text-muted outline-none focus:ring-2 focus:ring-secondary"
+              className="flex-1 bg-surface text-fg-2 rounded-lg px-3 py-2 font-body text-body-md placeholder:text-muted outline-none focus:ring-2 focus:ring-accent"
             />
             <button
               type="button"
               onClick={addImageUrl}
-              className="px-3 py-2 rounded-lg font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+              className="px-3 py-2 rounded-lg font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm transition-colors focus-visible:focus-ring"
             >
               +
             </button>
@@ -312,7 +312,7 @@ export function ExerciseFormDialog({
               type="button"
               disabled={uploading || !onImageUpload}
               onClick={() => fileInputRef.current?.click()}
-              className="px-3 py-2 rounded-lg font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm transition-colors disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+              className="px-3 py-2 rounded-lg font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm transition-colors disabled:opacity-30 focus-visible:focus-ring"
               title={!onImageUpload ? 'Image upload not available' : 'Upload image file'}
             >
               {uploading ? '...' : '📁'}
@@ -343,7 +343,7 @@ export function ExerciseFormDialog({
             />
           </div>
           {uploadError && (
-            <p className="font-body text-body-md text-error">{uploadError}</p>
+            <p className="font-body text-body-md text-danger">{uploadError}</p>
           )}
           {form.images.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
@@ -361,7 +361,7 @@ export function ExerciseFormDialog({
                   <button
                     type="button"
                     onClick={() => removeImage(url)}
-                    className="text-accent/60 hover:text-accent transition-colors shrink-0 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none rounded"
+                    className="text-accent/60 hover:text-accent transition-colors shrink-0 focus-visible:focus-ring rounded"
                     aria-label={`Remove image`}
                   >
                     ✕
@@ -415,13 +415,13 @@ export function ExerciseFormDialog({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-lg font-label text-label-caps text-muted hover:text-accent transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="px-4 py-2 rounded-lg font-label text-label-caps text-muted hover:text-accent transition-colors focus-visible:focus-ring"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-4 py-2 rounded-lg font-label text-label-caps bg-accent text-accent-on hover:bg-accent-hover transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="px-4 py-2 rounded-lg font-label text-label-caps bg-accent text-accent-on hover:bg-accent-hover transition-colors focus-visible:focus-ring"
           >
             {editingId ? 'Save' : 'Create'}
           </button>

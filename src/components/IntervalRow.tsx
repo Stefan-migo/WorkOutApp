@@ -42,7 +42,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
       onDragOver={(e) => onDragOver?.(e, index)}
       onDrop={() => onDrop?.(index)}
       onDragEnd={() => onDragEnd?.()}
-      className={`glass-card rounded-lg flex items-center group transition-all duration-200 border-l-4 ${SEGMENT_BORDER[interval.type] ?? 'border-l-segment-work'} pl-0 hover:shadow-md relative overflow-hidden ${isDragging ? 'opacity-40 ring-2 ring-secondary' : ''}`}
+      className={`glass-card rounded-lg flex items-center group transition-all duration-200 border-l-4 ${SEGMENT_BORDER[interval.type] ?? 'border-l-segment-work'} pl-0 hover:shadow-md relative overflow-hidden ${isDragging ? 'opacity-40 ring-2 ring-accent' : ''}`}
     >
       {/* Drag handle */}
       <div className="px-8 py-16 text-muted cursor-grab flex items-center justify-center active:cursor-grabbing" role="button" aria-label="Drag to reorder">
@@ -144,7 +144,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
           {/* Remove */}
           <button
             onClick={() => onRemove(index)}
-            className="text-muted hover:text-error transition-colors"
+            className="text-muted hover:text-danger transition-colors"
             aria-label={`Remove interval ${index + 1}`}
           >
             <span className="material-symbols-outlined text-[18px]">delete</span>

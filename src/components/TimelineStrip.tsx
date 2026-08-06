@@ -27,7 +27,7 @@ export function TimelineStrip({ intervals, onIntervalClick }: TimelineStripProps
               key={`${interval.id}-${idx}`}
               onClick={() => onIntervalClick?.(idx)}
               style={{ width: `${Math.max(widthPct, 0.5)}%` }}
-              className={`h-full ${SEGMENT_BG_80[interval.type] ?? 'bg-segment-work/80'} transition-opacity cursor-pointer hover:opacity-90 focus-visible:outline-2 focus-visible:outline-secondary focus-visible:outline-offset-1`}
+              className={`h-full ${SEGMENT_BG_80[interval.type] ?? 'bg-segment-work/80'} transition-opacity cursor-pointer hover:opacity-90 focus-visible:focus-ring`}
               aria-label={`${interval.title} ${interval.duration}s`}
             />
           )

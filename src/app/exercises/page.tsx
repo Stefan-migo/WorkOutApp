@@ -194,7 +194,7 @@ export default function ExercisesPage() {
           <p className="font-body text-body-md text-muted">No exercises yet. Create your first one!</p>
           <button
             onClick={openCreate}
-            className="px-6 py-3 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="px-6 py-3 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:focus-ring"
           >
             Create Exercise
           </button>
@@ -226,7 +226,7 @@ export default function ExercisesPage() {
                   {items.length > 20 && (
                     <button
                       onClick={() => {}}
-                      className="font-label text-label-caps text-accent hover:text-accent transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                      className="font-label text-label-caps text-accent hover:text-accent transition-colors focus-visible:focus-ring"
                     >
                       {/* ponytail: show all/show less — add real toggle when >20 exercises in any category */}
                     </button>
@@ -259,7 +259,7 @@ export default function ExercisesPage() {
                           {/* Star toggle top-left */}
                           <button
                             onClick={(e) => { e.stopPropagation(); toggleFavorite(ex.id) }}
-                            className="absolute top-2 left-2 w-8 h-8 flex items-center justify-center rounded-full bg-surface/80 backdrop-blur text-lg shadow-sm hover:bg-surface transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                            className="absolute top-2 left-2 w-8 h-8 flex items-center justify-center rounded-full bg-surface/80 backdrop-blur text-lg shadow-sm hover:bg-surface transition-colors focus-visible:focus-ring"
                             aria-label={isFavorite(ex.id) ? 'Remove from favorites' : 'Add to favorites'}
                           >
                             {isFavorite(ex.id) ? '★' : '☆'}
@@ -267,7 +267,7 @@ export default function ExercisesPage() {
                           {/* Quick assign bottom-right */}
                           <button
                             onClick={(e) => { e.stopPropagation(); setAssigningExercise(ex) }}
-                            className="absolute bottom-2 right-2 w-10 h-10 flex items-center justify-center rounded-full bg-surface/90 backdrop-blur shadow-md hover:bg-accent hover:text-accent-on hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none z-10"
+                            className="absolute bottom-2 right-2 w-10 h-10 flex items-center justify-center rounded-full bg-surface/90 backdrop-blur shadow-md hover:bg-accent hover:text-accent-on hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer focus-visible:focus-ring z-10"
                             aria-label="Assign to workout"
                           >
                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

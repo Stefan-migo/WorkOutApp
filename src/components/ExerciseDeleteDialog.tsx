@@ -38,14 +38,14 @@ export function ExerciseDeleteDialog({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-lg font-label text-label-caps text-muted hover:text-accent transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="px-4 py-2 rounded-lg font-label text-label-caps text-muted hover:text-accent transition-colors focus-visible:focus-ring"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={onDelete}
-            className="px-4 py-2 rounded-lg font-label text-label-caps bg-error text-on-error hover:bg-error-container hover:text-on-error-container transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="px-4 py-2 rounded-lg font-label text-label-caps bg-danger text-accent-on hover:bg-danger/15 hover:text-danger transition-colors focus-visible:focus-ring"
           >
             Delete
           </button>

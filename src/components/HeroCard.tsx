@@ -39,7 +39,7 @@ export default function HeroCard({ todayWorkout, workoutCount, totalSessions }: 
         {todayWorkout && (
           <Link
             href={`/workouts/${todayWorkout.id}/play`}
-            className="shrink-0 bg-accent text-accent-on rounded-full w-20 h-20 flex items-center justify-center ambient-shadow hover:bg-accent-hover transition-all duration-300 hover:scale-105 active:scale-95 group/btn focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="shrink-0 bg-accent text-accent-on rounded-full w-20 h-20 flex items-center justify-center ambient-shadow hover:bg-accent-hover transition-all duration-300 hover:scale-105 active:scale-95 group/btn focus-visible:focus-ring"
           >
             <span className="font-label text-label-caps font-bold tracking-widest group-hover/btn:hidden">START</span>
             <span className="material-symbols-outlined text-[32px] hidden group-hover/btn:block">play_arrow</span>

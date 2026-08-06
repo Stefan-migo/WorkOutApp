@@ -67,10 +67,10 @@ export function TemplatesPanel({
             setTemplateName(e.target.value)
             setSaveError('')
           }}
-          className="w-full px-3 py-2 rounded-lg bg-surface border border-border/50 text-body-md text-sm focus:outline-none focus:ring-2 focus:ring-secondary transition-all"
+          className="w-full px-3 py-2 rounded-lg bg-surface border border-border/50 text-body-md text-sm focus:outline-none focus:ring-2 focus:ring-accent transition-all"
         />
         {saveError && (
-          <p className="text-label-caps text-error">{saveError}</p>
+          <p className="text-label-caps text-danger">{saveError}</p>
         )}
         <button
           onClick={handleSaveTemplate}
@@ -103,7 +103,7 @@ export function TemplatesPanel({
               </button>
               <button
                 onClick={() => deleteTemplate(t.id)}
-                className="px-2 py-1 rounded bg-error-container text-on-error-container font-label-caps text-[10px] hover:bg-error hover:text-on-error transition-colors"
+                className="px-2 py-1 rounded bg-danger/15 text-danger font-label-caps text-[10px] hover:bg-danger hover:text-accent-on transition-colors"
               >
                 Del
               </button>

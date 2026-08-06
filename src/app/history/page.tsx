@@ -153,7 +153,7 @@ export default function HistoryPage() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full md:w-64 pl-10 pr-16 py-8 rounded-lg bg-surface border border-border-soft font-body-md text-body-md text-fg-2 focus:ring-1 focus:ring-primary focus:border-accent transition-all shadow-sm"
+              className="w-full md:w-64 pl-10 pr-16 py-8 rounded-lg bg-surface border border-border-soft font-body-md text-body-md text-fg-2 focus:ring-1 focus:ring-accent focus:border-accent transition-all shadow-sm"
               placeholder="Search sessions..."
               type="text"
             />

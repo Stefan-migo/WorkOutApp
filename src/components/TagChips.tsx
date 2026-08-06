@@ -72,7 +72,7 @@ export function TagChips({
           {label}
         </span>
       )}
-      <div className="flex flex-wrap gap-1.5 p-2 bg-surface rounded-lg border border-border-soft focus-within:ring-2 focus-within:ring-secondary">
+      <div className="flex flex-wrap gap-1.5 p-2 bg-surface rounded-lg border border-border-soft focus-within:focus-ring">
         {tags.map((tag) => (
           <span
             key={tag}
@@ -82,7 +82,7 @@ export function TagChips({
             <button
               type="button"
               onClick={() => onRemove(tag)}
-              className="text-accent/60 hover:text-accent transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none rounded"
+              className="text-accent/60 hover:text-accent transition-colors focus-visible:focus-ring rounded"
               aria-label={`Remove ${tag}`}
             >
               ✕
