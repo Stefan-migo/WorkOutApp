@@ -78,7 +78,7 @@ export function IntervalEditModal({ interval, title, typeLabel, onSave, onClose 
           overflow-y: auto;
         }
         .interval-edit-sheet::backdrop {
-          background: rgba(0, 0, 0, 0.4);
+          background: color-mix(in srgb, var(--color-surface) 80%, transparent);
         }
       `}</style>
       <dialog

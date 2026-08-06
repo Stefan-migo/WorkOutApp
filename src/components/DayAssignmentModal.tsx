@@ -61,7 +61,7 @@ export default function DayAssignmentModal({
     <dialog
       ref={ref}
       onClose={onClose}
-      className="rounded-xl bg-surface border border-border/50 text-fg-2 p-24 w-full max-w-md m-auto backdrop:bg-black/10 max-h-[85vh] overflow-y-auto"
+      className="rounded-xl bg-surface border border-border/50 text-fg-2 p-24 w-full max-w-md m-auto backdrop:bg-surface/80 max-h-[85vh] overflow-y-auto"
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <h2 className="font-headline-md text-headline-md text-fg-2">

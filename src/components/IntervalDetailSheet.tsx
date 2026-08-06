@@ -97,12 +97,12 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
           border: none;
           padding: 0;
           border-radius: 12px 12px 0 0;
-          background: var(--color-surface, #fff);
+          background: var(--color-surface);
           max-height: 85vh;
           overflow-y: auto;
         }
         .interval-sheet::backdrop {
-          background: rgba(0, 0, 0, 0.1);
+          background: color-mix(in srgb, var(--color-surface) 80%, transparent);
         }
       `}</style>
       <dialog

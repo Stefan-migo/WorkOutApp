@@ -67,7 +67,7 @@ export function AddToWorkoutModal({ exercise, onClose }: Props) {
       ref={dialogRef}
       onClick={handleBackdrop}
       onClose={onClose}
-      className="fixed inset-0 z-50 w-full h-full max-w-[520px] max-h-[80vh] m-auto rounded-2xl bg-surface text-fg-2 shadow-xl backdrop:bg-black/50 open:flex open:flex-col"
+      className="fixed inset-0 z-50 w-full h-full max-w-[520px] max-h-[80vh] m-auto rounded-2xl bg-surface text-fg-2 shadow-xl backdrop:bg-surface/80 open:flex open:flex-col"
     >
       <div className="flex items-center justify-between p-6 pb-0">
         <h2 className="font-headline text-headline-sm font-semibold text-accent">

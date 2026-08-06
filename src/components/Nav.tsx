@@ -28,21 +28,21 @@ export default function Nav() {
       {/* Mobile menu overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/40 z-40 md:hidden"
+          className="fixed inset-0 bg-surface/80 z-40 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar — Desktop (fixed) + Mobile (overlay) */}
       <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-sidebar z-50 flex flex-col py-24 px-16 transition-transform duration-300 ${
+        className={`fixed top-0 left-0 h-full w-64 bg-surface z-50 flex flex-col py-24 px-16 transition-transform duration-300 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } md:translate-x-0`}
       >
         {/* Brand */}
         <div className="mb-32 px-8">
-          <h1 className="font-headline text-[24px] font-bold text-on-sidebar leading-tight tracking-tight">WorkOutApp</h1>
-          <p className="font-mono text-sm text-on-sidebar-muted mt-1">Nordic Athletic</p>
+          <h1 className="font-headline text-[24px] font-bold text-fg-2 leading-tight tracking-tight">WorkOutApp</h1>
+          <p className="font-mono text-sm text-muted mt-1">Nordic Athletic</p>
         </div>
 
         {/* Nav items */}
@@ -56,8 +56,8 @@ export default function Nav() {
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-16 px-8 py-2.5 rounded-lg transition-all duration-200 ${
                   active
-                    ? 'text-on-sidebar font-bold bg-sidebar-active'
-                    : 'text-on-sidebar-muted hover:bg-sidebar-hover hover:text-on-sidebar transition-colors'
+                    ? 'text-fg-2 font-bold bg-surface-warm'
+                    : 'text-muted hover:bg-surface-warm hover:text-fg-2 transition-colors'
                 }`}
               >
                 <span

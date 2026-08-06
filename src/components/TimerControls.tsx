@@ -21,10 +21,10 @@ export function TimerControls({ status, onPause, onResume, onSkip, onPrevious, o
       {onPrevious && (
         <button
           onClick={onPrevious}
-          className="w-14 h-14 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors"
+          className="w-14 h-14 rounded-full border border-timer-border flex items-center justify-center hover:bg-timer-on/10 transition-colors"
           aria-label="Previous interval"
         >
-          <span className="material-symbols-outlined text-white text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>skip_previous</span>
+          <span className="material-symbols-outlined text-timer-on text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>skip_previous</span>
         </button>
       )}
 
@@ -32,7 +32,7 @@ export function TimerControls({ status, onPause, onResume, onSkip, onPrevious, o
       {(status === 'running' || status === 'paused') && (
         <button
           onClick={status === 'running' ? onPause : onResume}
-          className="w-20 h-20 rounded-full bg-accent text-accent-on flex items-center justify-center hover:opacity-90 transition-colors shadow-[0_4px_20px_rgba(255,255,255,0.15)]"
+          className="w-20 h-20 rounded-full bg-accent text-accent-on flex items-center justify-center hover:opacity-90 transition-colors shadow-fab"
           aria-label={status === 'running' ? 'Pause' : 'Resume'}
         >
           <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>
@@ -45,10 +45,10 @@ export function TimerControls({ status, onPause, onResume, onSkip, onPrevious, o
       {(status === 'running' || status === 'paused') && (
         <button
           onClick={onSkip}
-          className="w-14 h-14 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors"
+          className="w-14 h-14 rounded-full border border-timer-border flex items-center justify-center hover:bg-timer-on/10 transition-colors"
           aria-label="Skip interval"
         >
-          <span className="material-symbols-outlined text-white text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>skip_next</span>
+          <span className="material-symbols-outlined text-timer-on text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>skip_next</span>
         </button>
       )}
 
@@ -57,21 +57,21 @@ export function TimerControls({ status, onPause, onResume, onSkip, onPrevious, o
         <div className="flex items-center gap-2 ml-4">
           <button
             onClick={() => onAddTime(10)}
-            className="px-4 py-2 rounded-full border border-white/20 text-white text-sm hover:bg-white/10 transition-colors"
+            className="px-4 py-2 rounded-full border border-timer-border text-timer-on text-sm hover:bg-timer-on/10 transition-colors"
             aria-label="Add 10 seconds"
           >
             +10s
           </button>
           <button
             onClick={() => onAddTime(20)}
-            className="px-4 py-2 rounded-full border border-white/20 text-white text-sm hover:bg-white/10 transition-colors"
+            className="px-4 py-2 rounded-full border border-timer-border text-timer-on text-sm hover:bg-timer-on/10 transition-colors"
             aria-label="Add 20 seconds"
           >
             +20s
           </button>
           <button
             onClick={() => onAddTime(30)}
-            className="px-4 py-2 rounded-full border border-white/20 text-white text-sm hover:bg-white/10 transition-colors"
+            className="px-4 py-2 rounded-full border border-timer-border text-timer-on text-sm hover:bg-timer-on/10 transition-colors"
             aria-label="Add 30 seconds"
           >
             +30s

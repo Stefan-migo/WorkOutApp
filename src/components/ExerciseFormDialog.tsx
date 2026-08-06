@@ -81,7 +81,7 @@ export function ExerciseFormDialog({
   return (
     <dialog
       ref={dialogRef}
-      className="rounded-xl bg-surface border border-border/50 text-fg-2 p-24 max-w-lg w-full m-auto backdrop:bg-black/10 max-h-[85vh] overflow-y-auto"
+      className="rounded-xl bg-surface border border-border/50 text-fg-2 p-24 max-w-lg w-full m-auto backdrop:bg-surface/80 max-h-[85vh] overflow-y-auto"
       onClose={onClose}
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4" data-testid="exercise-form">

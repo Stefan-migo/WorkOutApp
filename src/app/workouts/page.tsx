@@ -115,7 +115,7 @@ export default function WorkoutListPage() {
               tabIndex={0}
               onClick={() => router.push(`/workouts/${w.id}/edit`)}
               onKeyDown={(e) => { if (e.key === 'Enter') router.push(`/workouts/${w.id}/edit`) }}
-              className="bg-surface rounded-xl border border-border-soft p-16 flex flex-col gap-4 hover:shadow-[0_8px_30px_rgba(11,28,48,0.04)] transition-shadow duration-300 relative group cursor-pointer"
+              className="bg-surface rounded-xl border border-border-soft p-16 flex flex-col gap-4 hover:shadow-card-hover transition-shadow duration-300 relative group cursor-pointer"
             >
               {/* Three-dot menu */}
               <div className="absolute top-4 right-4 z-40">
@@ -199,7 +199,7 @@ export default function WorkoutListPage() {
       <button
         aria-label="Create workout"
         onClick={() => router.push('/workouts/new')}
-        className="fixed bottom-24 right-24 w-14 h-14 bg-accent text-accent-on rounded-full shadow-[0_4px_20px_rgba(30,41,59,0.2)] flex items-center justify-center hover:scale-105 active:scale-95 transition-transform md:hidden z-50 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+        className="fixed bottom-24 right-24 w-14 h-14 bg-accent text-accent-on rounded-full shadow-fab flex items-center justify-center hover:scale-105 active:scale-95 transition-transform md:hidden z-50 focus-visible:focus-ring"
       >
         <span className="material-symbols-outlined text-[24px]">add</span>
       </button>

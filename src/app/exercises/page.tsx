@@ -241,7 +241,7 @@ export default function ExercisesPage() {
                       <div
                         key={ex.id}
                         onClick={() => router.push(`/exercises/${ex.id}`)}
-                        className="bg-surface rounded-xl border border-border-soft overflow-hidden hover:shadow-[0_4px_20px_rgba(30,41,59,0.05)] transition-all duration-300 group flex flex-col cursor-pointer"
+                        className="bg-surface rounded-xl border border-border-soft overflow-hidden hover:shadow-card-hover transition-all duration-300 group flex flex-col cursor-pointer"
                       >
                         {/* ponytail: 2:1 image — background-image for static display (no GIF animation) */}
                         <div className="relative aspect-[2/1] bg-surface overflow-hidden flex items-center justify-center"

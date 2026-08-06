@@ -213,9 +213,9 @@ export default function PlayWorkoutPage() {
 
   if (!workout) {
     return (
-      <div className="timer-dark-bg text-white min-h-screen flex flex-col items-center justify-center gap-4 px-margin-mobile">
+      <div className="timer-dark-bg text-timer-on min-h-screen flex flex-col items-center justify-center gap-4 px-margin-mobile">
         <h1 className="font-headline-lg text-headline-lg">Workout not found</h1>
-        <Link href="/workouts" className="text-gray-400 hover:text-white transition-colors">
+        <Link href="/workouts" className="text-timer-muted hover:text-timer-on transition-colors">
           &larr; Back to workouts
         </Link>
       </div>
@@ -256,19 +256,19 @@ export default function PlayWorkoutPage() {
   const invalidLast = workout.intervals[workout.intervals.length - 1]?.type !== 'cooldown'
 
   return (
-    <div className="timer-dark-bg text-white min-h-screen flex flex-col">
+    <div className="timer-dark-bg text-timer-on min-h-screen flex flex-col">
       <PlayHeader title={workout.title} onClose={() => router.push('/workouts')} />
 
       <main className="flex-grow flex flex-col items-center justify-center px-margin-mobile py-24 w-full max-w-4xl mx-auto">
         {phase === 'idle' && (
           <>
-            <h1 className="font-headline-lg text-headline-lg text-white mb-8 mt-24">{workout.title}</h1>
-            <p className="font-body-md text-body-md text-gray-400 mb-24">
+            <h1 className="font-headline-lg text-headline-lg text-timer-on mb-8 mt-24">{workout.title}</h1>
+            <p className="font-body-md text-body-md text-timer-muted mb-24">
               {total} interval{total !== 1 && 's'} &middot;{' '}
               {Math.floor(flat.reduce((s, i) => s + i.duration, 0) / 60)} min
             </p>
             {(invalidFirst || invalidLast) && (
-              <div className="w-full max-w-md p-3 rounded-lg bg-white/5 border border-yellow-700/50 mb-24">
+              <div className="w-full max-w-md p-3 rounded-lg bg-timer-on/5 border border-warn/50 mb-24">
                 <p className="text-sm text-center text-yellow-400">
                   {invalidFirst && 'First interval should be "Prepare". '}
                   {invalidLast && 'Last interval should be "Cooldown".'}
@@ -277,7 +277,7 @@ export default function PlayWorkoutPage() {
             )}
             <button
               onClick={handleStart}
-              className="px-12 py-4 bg-white text-accent rounded-full text-xl font-bold hover:bg-gray-200 transition-colors"
+              className="px-12 py-4 bg-timer-on text-accent rounded-full text-xl font-bold hover:bg-timer-on/80 transition-colors"
             >
               Start
             </button>
@@ -357,11 +357,11 @@ export default function PlayWorkoutPage() {
               {/* Progress */}
               <div className="w-full max-w-2xl">
                 <div className="flex justify-between items-center mb-8">
-                  <span className="font-data-sm text-data-sm text-gray-400">Total Progress</span>
-                  <span className="font-data-sm text-data-sm text-white">{Math.round(progressVal * 100)}%</span>
+                  <span className="font-data-sm text-data-sm text-timer-muted">Total Progress</span>
+                  <span className="font-data-sm text-data-sm text-timer-on">{Math.round(progressVal * 100)}%</span>
                 </div>
                 <ProgressBar progress={progressVal} label="Workout progress" dark />
-                <div className="flex justify-between w-full font-label-caps text-label-caps text-gray-400 mt-8">
+                <div className="flex justify-between w-full font-label-caps text-label-caps text-timer-muted mt-8">
                   <span>Set {currentIdx + 1} of {total}</span>
                 </div>
               </div>
@@ -371,11 +371,11 @@ export default function PlayWorkoutPage() {
 
         {phase === 'complete' && (
           <div className="flex flex-col items-center gap-4 mt-12 text-center">
-            <h1 className="font-headline-lg text-headline-lg text-white">Workout Complete!</h1>
-            <p className="font-body-md text-body-md text-gray-400">
+            <h1 className="font-headline-lg text-headline-lg text-timer-on">Workout Complete!</h1>
+            <p className="font-body-md text-body-md text-timer-muted">
               {total} interval{total !== 1 && 's'} completed
             </p>
-            <p className="font-body-md text-body-md text-gray-400">
+            <p className="font-body-md text-body-md text-timer-muted">
               Total time:{' '}
               {Math.floor(flat.reduce((s, i) => s + i.duration, 0) / 60)} min
             </p>

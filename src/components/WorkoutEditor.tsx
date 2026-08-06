@@ -59,7 +59,7 @@ function BulkApplyDialog({
           animation: bulk-slide-up 0.25s ease-out;
         }
       `}</style>
-      <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40" onClick={onApplyOne} />
+      <div className="fixed inset-0 bg-surface/80 backdrop-blur-sm z-40" onClick={onApplyOne} />
       <div className="fixed inset-0 z-50 flex items-end justify-center pb-24">
         <div
           className="bulk-sheet bg-surface rounded-2xl shadow-xl border border-border-soft p-24 w-full max-w-md mx-8"
