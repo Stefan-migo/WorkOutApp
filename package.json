@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "test": "vitest",
+    "test:a11y": "vitest run --config vitest.browser.config.ts",
     "audit:tokens": "vitest run src/lib/__tests__/token-audit.test.ts",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
@@ -20,6 +21,7 @@
   "devDependencies": {
     "@storybook/addon-a11y": "^10.5.6",
     "@storybook/addon-docs": "^10.5.6",
+    "@storybook/addon-vitest": "^10.5.7",
     "@storybook/nextjs-vite": "^10.5.6",
     "@storybook/react-vite": "^10.5.6",
     "@tailwindcss/postcss": "^4",
@@ -30,8 +32,11 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.0.3",
+    "@vitest/browser": "^4.1.10",
+    "@vitest/browser-playwright": "^4.1.10",
     "fake-indexeddb": "^6.2.5",
     "jsdom": "^29.1.1",
+    "playwright": "^1.62.1",
     "storybook": "^10.5.5",
     "tailwindcss": "^4",
     "typescript": "^5",
