@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#091426',
+  themeColor: '#55423d',
 }
 
 export default function RootLayout({
@@ -44,7 +44,7 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         />
       </head>
-      <body className="min-h-full bg-background text-on-background" suppressHydrationWarning>
+      <body className="min-h-full bg-bg text-fg-2" suppressHydrationWarning>
         <ErrorBoundary>
         <AuthProvider>
         <WorkoutProvider>
