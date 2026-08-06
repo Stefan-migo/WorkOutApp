@@ -29,44 +29,16 @@ describe('token audit contract (D6)', () => {
   it('rule 1: no Material utility classes in production src', () => {
     // ponytail: __tests__ excluded — the contract-lock test itself must
     // reference these names to assert against them.
-    const MATERIAL_UTILITIES = [
-      'text-on-surface',
-      'text-on-background',
-      'text-on-surface-variant',
-      'bg-surface-container',
-      'bg-surface-dim',
-      'bg-surface-bright',
-      'bg-surface-variant',
-      'border-outline-variant',
-      'border-outline',
-      'bg-primary',
-      'text-primary',
-      'bg-secondary',
-      'text-secondary',
-      'bg-primary-btn',
-      'text-on-primary',
-      'bg-error',
-      'text-error',
-      'ring-primary',
-      'ring-secondary',
-      'bg-sidebar',
-      'text-on-sidebar',
-      'bg-background',
-      'text-outline',
-      'bg-surface-tint',
-      'text-on-primary-container',
-      'bg-primary-container',
-      'bg-secondary-container',
-      'bg-error-container',
-      'text-on-error',
-      'text-on-error-container',
-      'text-on-primary-fixed',
-    ]
+    // Regex (not a literal list) so every utility variant is caught:
+    // bg-* / text-* / border-* / from-* / via-* / to-* / ring-* / fill-* / stroke-* / shadow-* / hover:*
+    const MATERIAL_UTILITY_RE =
+      /(?:^|[\s:`/])(?:[a-z-]*?)(?:bg|text|border|border-[tlbr]|from|via|to|ring|fill|stroke|shadow|decoration|placeholder|divide|outline|accent)-(?:primary|secondary|tertiary|error|outline|sidebar|surface-container|surface-dim|surface-bright|surface-variant|surface-tint|background|on-background|on-surface|on-primary|primary-btn|inverse)\b/
     const offenders: string[] = []
     for (const file of PRODUCTION_FILES) {
       const text = CONTENTS.get(file)!
-      for (const util of MATERIAL_UTILITIES) {
-        if (text.includes(util)) offenders.push(`${path.relative(SRC, file)}: ${util}`)
+      if (MATERIAL_UTILITY_RE.test(text)) {
+        const m = text.match(MATERIAL_UTILITY_RE)
+        offenders.push(`${path.relative(SRC, file)}: ${m?.[0] ?? 'match'}`)
       }
     }
     expect(offenders).toEqual([])

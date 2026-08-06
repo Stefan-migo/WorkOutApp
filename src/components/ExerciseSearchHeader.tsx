@@ -70,7 +70,7 @@ export function ExerciseSearchHeader({
 }: ExerciseSearchHeaderProps) {
   return (
     <section className="sticky top-0 z-30 bg-surface rounded-xl p-9 border border-border-soft flex flex-col gap-12 relative overflow-hidden shadow-sm">
-      <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary via-transparent to-transparent" />
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-accent via-transparent to-transparent" />
       <div className="flex flex-col gap-4 z-10">
         <h1 className="font-headline text-headline-lg font-bold text-accent">Exercise Library</h1>
         <p className="font-body text-body-md text-muted">What exercises are you looking for?</p>

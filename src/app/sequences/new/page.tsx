@@ -336,7 +336,7 @@ export default function NewSequencePage() {
             <div className="space-y-16">
               {/* Mini Chart */}
               <div className="h-32 rounded-lg bg-surface border border-border-soft relative overflow-hidden flex items-end px-8 pb-8 gap-xs">
-                {selectedIds.slice(0, 8).map((id, i) => {
+                {selectedIds.slice(0, 8).map((id) => {
                   const w = workouts.find((x) => x.id === id)
                   if (!w) return <div key={id} className="w-full h-1/4 bg-surface rounded-t-sm opacity-60" />
                   const flat = flattenWorkout(w)
@@ -351,7 +351,7 @@ export default function NewSequencePage() {
                       style={{ height: `${height}%` }}
                       title={w.title}
                     >
-                      <div className={`h-full rounded-t-sm ${i % 2 === 0 ? 'bg-accent' : 'bg-accent'}`} />
+                      <div className={`h-full rounded-t-sm bg-accent`} />
                     </div>
                   )
                 })}

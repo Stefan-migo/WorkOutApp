@@ -55,7 +55,7 @@ describe('RootLayout', () => {
     expect(screen.getByText('hello world')).toBeInTheDocument()
   })
 
-  it('applies Inter and JetBrains Mono CSS variable names to documentElement className', () => {
+  it('applies Inter CSS variable name to documentElement className', () => {
     render(
       <RootLayout>
         <div>content</div>
@@ -63,11 +63,12 @@ describe('RootLayout', () => {
     )
 
     // The layout applies font CSS variables via className on <html>:
-    // `${inter.variable} ${jetbrainsMono.variable} h-full antialiased`
+    // `${inter.variable} h-full antialiased`
+    // JetBrains Mono was removed (SF Mono chain now handles mono font).
     // In jsdom, React merges this with the document's root <html>.
     const classes = document.documentElement.className
     expect(classes).toContain('--font-inter')
-    expect(classes).toContain('--font-jetbrains-mono')
+    expect(classes).not.toContain('--font-jetbrains-mono')
     expect(classes).toContain('h-full')
     expect(classes).toContain('antialiased')
   })

@@ -296,7 +296,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
               role="listitem"
               className={`glass-card rounded-xl flex items-center group transition-all duration-200 pl-0 hover:shadow-md relative overflow-visible ${
                 dragIndex === i ? 'opacity-40 ring-2 ring-accent' : ''
-              } ${!isCycle(item) ? `border-l-4 ${SEGMENT_BORDER[item.type]}` : 'border-l-4 border-l-secondary/60'}`}
+              } ${!isCycle(item) ? `border-l-4 ${SEGMENT_BORDER[item.type]}` : 'border-l-4 border-l-accent/60'}`}
             >
               {/* Drag handle */}
               <div
@@ -674,7 +674,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                   key="cycle"
                   onClick={() => handlePaletteClick(block)}
                   aria-label="Add Cycle"
-                  className="glass-card p-8 rounded-xl flex flex-col items-center justify-center gap-4 hover:-translate-y-1 hover:shadow-md transition-all duration-200 focus-visible:focus-ring group border-t-2 border-t-secondary/50"
+                  className="glass-card p-8 rounded-xl flex flex-col items-center justify-center gap-4 hover:-translate-y-1 hover:shadow-md transition-all duration-200 focus-visible:focus-ring group border-t-2 border-t-accent/50"
                 >
                   <div className="w-9 h-9 rounded-full bg-accent/10 text-accent flex items-center justify-center group-hover:scale-110 transition-transform">
                     <span className="material-symbols-outlined text-[20px]">repeat</span>

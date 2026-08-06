@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, JetBrains_Mono } from 'next/font/google'
+import { Inter } from 'next/font/google'
 import { AuthProvider } from '@/context/AuthContext'
 import { WorkoutProvider } from '@/context/WorkoutContext'
 import Nav from '@/components/Nav'
@@ -10,11 +10,6 @@ const inter = Inter({
   subsets: ['latin'],
   weight: ['400', '600', '700'],
   variable: '--font-inter',
-})
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  weight: ['500', '700'],
-  variable: '--font-jetbrains-mono',
 })
 // ponytail: Material Symbols CDN kept because next/font/google doesn't
 // export it in this Next.js version. Self-host via next/font/local when
@@ -37,7 +32,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <link
           rel="stylesheet"
