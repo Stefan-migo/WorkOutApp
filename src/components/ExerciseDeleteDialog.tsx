@@ -18,7 +18,7 @@ export function ExerciseDeleteDialog({
   return (
     <dialog
       ref={dialogRef}
-      className="rounded-xl bg-surface border border-outline-variant/50 text-on-surface p-24 max-w-sm w-full m-auto backdrop:bg-black/10"
+      className="rounded-xl bg-surface border border-outline-variant/50 text-fg-2 p-24 max-w-sm w-full m-auto backdrop:bg-black/10"
       onClose={onClose}
     >
       <div className="flex flex-col gap-4">
@@ -30,7 +30,7 @@ export function ExerciseDeleteDialog({
             references, but the exercise name will no longer be shown.
           </p>
         ) : (
-          <p className="font-body text-body-md text-on-surface-variant">
+          <p className="font-body text-body-md text-muted">
             This exercise is not referenced by any workout. Are you sure?
           </p>
         )}
@@ -38,7 +38,7 @@ export function ExerciseDeleteDialog({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-lg font-label text-label-caps text-on-surface-variant hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="px-4 py-2 rounded-lg font-label text-label-caps text-muted hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
           >
             Cancel
           </button>

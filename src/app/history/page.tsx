@@ -114,13 +114,13 @@ export default function HistoryPage() {
   if (sessions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center flex-1 gap-24 p-margin-mobile md:p-margin-desktop text-center">
-        <span className="material-symbols-outlined text-[64px] text-on-surface-variant">
+        <span className="material-symbols-outlined text-[64px] text-muted">
           fitness_center
         </span>
-        <h1 className="font-headline-lg text-headline-lg text-on-background">
+        <h1 className="font-headline-lg text-headline-lg text-fg-2">
           No sessions yet
         </h1>
-        <p className="font-body-md text-body-md text-on-surface-variant max-w-sm">
+        <p className="font-body-md text-body-md text-muted max-w-sm">
           Complete a workout to see it here
         </p>
         <Link
@@ -138,10 +138,10 @@ export default function HistoryPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-16 mb-24">
         <div>
-          <h2 className="font-headline-lg text-headline-lg text-on-background mb-8">
+          <h2 className="font-headline-lg text-headline-lg text-fg-2 mb-8">
             History
           </h2>
-          <p className="font-body-md text-body-md text-on-surface-variant">
+          <p className="font-body-md text-body-md text-muted">
             Review your past performance and metrics.
           </p>
         </div>
@@ -153,7 +153,7 @@ export default function HistoryPage() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full md:w-64 pl-10 pr-16 py-8 rounded-lg bg-surface-container-lowest border border-outline-variant/30 font-body-md text-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-all shadow-sm"
+              className="w-full md:w-64 pl-10 pr-16 py-8 rounded-lg bg-surface border border-outline-variant/30 font-body-md text-body-md text-fg-2 focus:ring-1 focus:ring-primary focus:border-primary transition-all shadow-sm"
               placeholder="Search sessions..."
               type="text"
             />
@@ -166,7 +166,7 @@ export default function HistoryPage() {
       <div className="flex flex-col gap-16">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-[64px] text-center">
-            <p className="font-body-md text-body-md text-on-surface-variant">No sessions match your search.</p>
+            <p className="font-body-md text-body-md text-muted">No sessions match your search.</p>
           </div>
         ) : filtered.map((s) => {
           const name =
@@ -194,23 +194,23 @@ export default function HistoryPage() {
               <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
                 {/* Date & Title */}
                 <div className="col-span-1 md:col-span-4 flex gap-16 items-center">
-                  <div className="bg-surface-container w-12 h-12 rounded-lg flex flex-col items-center justify-center border border-outline-variant/20 flex-shrink-0">
-                    <span className="font-label-caps text-label-caps text-on-surface-variant leading-none">
+                  <div className="bg-surface w-12 h-12 rounded-lg flex flex-col items-center justify-center border border-outline-variant/20 flex-shrink-0">
+                    <span className="font-label-caps text-label-caps text-muted leading-none">
                       {month}
                     </span>
-                    <span className="font-data-lg text-data-lg text-on-surface leading-none mt-1">
+                    <span className="font-data-lg text-data-lg text-fg-2 leading-none mt-1">
                       {day}
                     </span>
                   </div>
                   <div>
-                    <h3 className="font-body-md text-body-md font-bold text-on-surface leading-tight group-hover:text-primary transition-colors">
+                    <h3 className="font-body-md text-body-md font-bold text-fg-2 leading-tight group-hover:text-primary transition-colors">
                       {name}
                     </h3>
                     <div className="flex gap-xs mt-xs">
                       {tags.map((t) => (
                         <span
                           key={t}
-                          className="px-8 py-0.5 bg-surface-container-high rounded-full font-label-caps text-[10px] text-on-surface-variant"
+                          className="px-8 py-0.5 bg-surface rounded-full font-label-caps text-[10px] text-muted"
                         >
                           {t}
                         </span>
@@ -221,18 +221,18 @@ export default function HistoryPage() {
                 {/* Metrics */}
                 <div className="col-span-1 md:col-span-4 flex justify-between md:justify-around px-0 md:px-16 border-y md:border-y-0 md:border-x border-outline-variant/20 py-16 md:py-0">
                   <div className="text-center">
-                    <p className="font-label-caps text-[10px] text-on-surface-variant mb-1">
+                    <p className="font-label-caps text-[10px] text-muted mb-1">
                       DURATION
                     </p>
-                    <p className="font-data-lg text-data-lg text-on-surface">
+                    <p className="font-data-lg text-data-lg text-fg-2">
                       {formatDuration(totalDuration)}
                     </p>
                   </div>
                   <div className="text-center">
-                    <p className="font-label-caps text-[10px] text-on-surface-variant mb-1">
+                    <p className="font-label-caps text-[10px] text-muted mb-1">
                       LOAD
                     </p>
-                    <p className="font-data-lg text-data-lg text-on-surface">
+                    <p className="font-data-lg text-data-lg text-fg-2">
                       {deriveLoad(s.intervals)}
                     </p>
                   </div>
@@ -240,14 +240,14 @@ export default function HistoryPage() {
                 {/* Timeline Preview */}
                 <div className="col-span-1 md:col-span-4 flex flex-col justify-center">
                   <div className="flex justify-between items-center mb-1">
-                    <span className="font-label-caps text-[10px] text-on-surface-variant">
+                    <span className="font-label-caps text-[10px] text-muted">
                       ZONE DISTRIBUTION
                     </span>
                     <span className="material-symbols-outlined text-outline text-sm opacity-0 group-hover:opacity-100 transition-opacity">
                       arrow_forward
                     </span>
                   </div>
-                  <div className="h-2 w-full rounded-full bg-surface-container-high overflow-hidden flex">
+                  <div className="h-2 w-full rounded-full bg-surface overflow-hidden flex">
                     {zones.prepare > 0 && (
                       <div
                         className="h-full bg-segment-prepare"

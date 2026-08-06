@@ -87,7 +87,7 @@ export default function Nav() {
               key={href}
               href={href}
               className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg min-w-0 transition-colors ${
-                active ? 'text-primary' : 'text-on-surface-variant'
+                active ? 'text-primary' : 'text-muted'
               }`}
             >
               <span
@@ -108,7 +108,7 @@ export default function Nav() {
         onClick={() => setSidebarOpen(!sidebarOpen)}
         aria-label="Toggle menu"
       >
-        <span className="material-symbols-outlined text-[24px] text-on-surface">
+        <span className="material-symbols-outlined text-[24px] text-fg-2">
           {sidebarOpen ? 'close' : 'menu'}
         </span>
       </button>

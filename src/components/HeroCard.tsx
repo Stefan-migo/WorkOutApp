@@ -26,7 +26,7 @@ export default function HeroCard({ todayWorkout, workoutCount, totalSessions }: 
           <h3 className="font-headline text-headline-lg text-primary mb-xs tracking-tight">
             {todayWorkout?.title ?? 'Ready to train?'}
           </h3>
-          <p className="font-body text-body-md text-on-surface-variant max-w-md">
+          <p className="font-body text-body-md text-muted max-w-md">
             {todayWorkout
               ? `${todayWorkout.intervals.length} intervals · ${Math.floor(
                   todayWorkout.intervals.reduce((s, i) => s + i.duration, 0) / 60

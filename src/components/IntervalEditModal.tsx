@@ -83,29 +83,29 @@ export function IntervalEditModal({ interval, title, typeLabel, onSave, onClose 
       `}</style>
       <dialog
         ref={dialogRef}
-        className="interval-edit-sheet bg-surface-container-lowest text-on-surface"
+        className="interval-edit-sheet bg-surface text-fg-2"
         onClose={onClose}
         onClick={handleBackdropClick}
       >
         <div className="p-6 flex flex-col gap-5">
           {/* Header — read-only title + type */}
           <div className="flex flex-col gap-1">
-            <span className="text-xs text-on-surface-variant font-medium uppercase tracking-wider">
+            <span className="text-xs text-muted font-medium uppercase tracking-wider">
               {typeLabel}
             </span>
-            <h3 className="font-headline-md text-headline-md text-on-surface">{title}</h3>
+            <h3 className="font-headline-md text-headline-md text-fg-2">{title}</h3>
           </div>
 
           {/* Actual duration (MM:SS) */}
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs text-on-surface-variant">Actual duration (MM:SS)</span>
+            <span className="text-xs text-muted">Actual duration (MM:SS)</span>
             <input
               type="text"
               value={durationStr}
               onChange={(e) => setDurationStr(e.target.value)}
               placeholder="MM:SS"
               inputMode="numeric"
-              className="bg-surface-container-low text-on-surface rounded-lg px-3 py-2.5 text-sm w-32 border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
+              className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-32 border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
             />
           </label>
 
@@ -117,14 +117,14 @@ export function IntervalEditModal({ interval, title, typeLabel, onSave, onClose 
               onChange={(e) => setCompleted(e.target.checked)}
               className="w-4 h-4 accent-secondary"
             />
-            <span className="text-sm text-on-surface">Completed</span>
+            <span className="text-sm text-fg-2">Completed</span>
           </label>
 
           {/* Reps + weight — only for work intervals with rep data */}
           {showRepInputs && (
             <div className="flex gap-3">
               <label className="flex flex-col gap-1.5 flex-1">
-                <span className="text-xs text-on-surface-variant">Actual reps</span>
+                <span className="text-xs text-muted">Actual reps</span>
                 <input
                   type="number"
                   value={actualReps || ''}
@@ -134,11 +134,11 @@ export function IntervalEditModal({ interval, title, typeLabel, onSave, onClose 
                   min={0}
                   max={999}
                   placeholder="0"
-                  className="bg-surface-container-low text-on-surface rounded-lg px-3 py-2.5 text-sm w-full border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
+                  className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-full border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
                 />
               </label>
               <label className="flex flex-col gap-1.5 flex-1">
-                <span className="text-xs text-on-surface-variant">Weight (kg)</span>
+                <span className="text-xs text-muted">Weight (kg)</span>
                 <input
                   type="number"
                   value={weight || ''}
@@ -148,7 +148,7 @@ export function IntervalEditModal({ interval, title, typeLabel, onSave, onClose 
                   min={0}
                   max={9999}
                   placeholder="0"
-                  className="bg-surface-container-low text-on-surface rounded-lg px-3 py-2.5 text-sm w-full border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
+                  className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-full border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
                 />
               </label>
             </div>
@@ -156,13 +156,13 @@ export function IntervalEditModal({ interval, title, typeLabel, onSave, onClose 
 
           {/* Note */}
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs text-on-surface-variant">Notes</span>
+            <span className="text-xs text-muted">Notes</span>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
               rows={3}
               placeholder="Add notes about this interval (weight, fatigue, etc.)"
-              className="bg-surface-container-low text-on-surface rounded-lg px-3 py-2.5 text-sm border border-outline-variant resize-none focus:outline-none focus:ring-1 focus:ring-secondary placeholder-on-surface-variant/50"
+              className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-outline-variant resize-none focus:outline-none focus:ring-1 focus:ring-secondary placeholder-on-surface-variant/50"
             />
           </label>
 
@@ -170,7 +170,7 @@ export function IntervalEditModal({ interval, title, typeLabel, onSave, onClose 
           <div className="flex gap-3 pt-2">
             <button
               onClick={handleCancel}
-              className="flex-1 py-3 bg-surface-container-low text-on-surface rounded-lg font-medium hover:bg-surface-container transition-colors text-sm focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+              className="flex-1 py-3 bg-surface text-fg-2 rounded-lg font-medium hover:bg-surface-warm transition-colors text-sm focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
             >
               Cancel
             </button>

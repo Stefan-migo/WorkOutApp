@@ -191,7 +191,7 @@ export default function ExercisesPage() {
       {/* Empty states */}
       {hasNoExercises && (
         <div className="flex flex-col items-center justify-center gap-4 py-[64px] text-center">
-          <p className="font-body text-body-md text-on-surface-variant">No exercises yet. Create your first one!</p>
+          <p className="font-body text-body-md text-muted">No exercises yet. Create your first one!</p>
           <button
             onClick={openCreate}
             className="px-6 py-3 bg-primary text-on-primary font-label text-label-caps rounded-lg hover:bg-primary-container transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
@@ -203,7 +203,7 @@ export default function ExercisesPage() {
 
       {hasNoResults && !hasNoExercises && (
         <div className="flex flex-col items-center justify-center gap-4 py-[64px] text-center">
-          <p className="font-body text-body-md text-on-surface-variant">
+          <p className="font-body text-body-md text-muted">
             {isFavoritesEmpty
               ? 'No favorites yet — star exercises to add them'
               : 'No exercises match your filters.'}
@@ -244,7 +244,7 @@ export default function ExercisesPage() {
                         className="bg-surface rounded-xl border border-outline-variant/30 overflow-hidden hover:shadow-[0_4px_20px_rgba(30,41,59,0.05)] transition-all duration-300 group flex flex-col cursor-pointer"
                       >
                         {/* ponytail: 2:1 image — background-image for static display (no GIF animation) */}
-                        <div className="relative aspect-[2/1] bg-surface-container-lowest overflow-hidden flex items-center justify-center"
+                        <div className="relative aspect-[2/1] bg-surface overflow-hidden flex items-center justify-center"
                           style={
                             (ex.images?.[0] ?? idbImageMap[ex.id])
                               ? { backgroundImage: `url(${ex.images?.[0] ?? idbImageMap[ex.id]})`, backgroundSize: 'cover', backgroundPosition: 'center' }
@@ -275,18 +275,18 @@ export default function ExercisesPage() {
                             </svg>
                           </button>
                           {/* Category badge top-right */}
-                          <span className="absolute top-2 right-2 bg-surface/80 backdrop-blur px-2 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-on-surface-variant font-semibold shadow-sm uppercase tracking-wider">
+                          <span className="absolute top-2 right-2 bg-surface/80 backdrop-blur px-2 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-muted font-semibold shadow-sm uppercase tracking-wider">
                             {ex.category}
                           </span>
                           {/* Force/mechanic badges on hover — overlay bottom-center of image */}
                           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                             {ex.force && (
-                              <span className="px-2 py-0.5 rounded bg-surface/90 backdrop-blur text-on-surface font-label-caps text-[10px] shadow-sm">
+                              <span className="px-2 py-0.5 rounded bg-surface/90 backdrop-blur text-fg-2 font-label-caps text-[10px] shadow-sm">
                                 {ex.force}
                               </span>
                             )}
                             {ex.mechanic && (
-                              <span className="px-2 py-0.5 rounded bg-surface/90 backdrop-blur text-on-surface font-label-caps text-[10px] shadow-sm">
+                              <span className="px-2 py-0.5 rounded bg-surface/90 backdrop-blur text-fg-2 font-label-caps text-[10px] shadow-sm">
                                 {ex.mechanic}
                               </span>
                             )}
@@ -303,12 +303,12 @@ export default function ExercisesPage() {
                           <h3 className="font-body text-body-md font-bold text-primary line-clamp-1">{ex.name}</h3>
                           <div className="flex flex-wrap gap-1.5">
                             {muscles.slice(0, maxMuscles).map((mg) => (
-                              <span key={mg} className="bg-surface-container px-1.5 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-on-surface-variant tracking-wider">
+                              <span key={mg} className="bg-surface px-1.5 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-muted tracking-wider">
                                 {mg.toUpperCase()}
                               </span>
                             ))}
                             {overflow > 0 && (
-                              <span className="bg-surface-container-high px-1.5 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-on-surface-variant font-semibold">
+                              <span className="bg-surface px-1.5 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-muted font-semibold">
                                 +{overflow}
                               </span>
                             )}

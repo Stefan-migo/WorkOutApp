@@ -17,7 +17,7 @@ export default function PreviewWorkoutPage() {
   if (!workout) {
     return (
       <div className="flex flex-col items-center justify-center flex-1 gap-4 p-32 text-center">
-        <h1 className="text-2xl font-bold text-on-surface">Workout not found</h1>
+        <h1 className="text-2xl font-bold text-fg-2">Workout not found</h1>
         <Link href="/workouts" className="text-secondary hover:underline">&larr; Back to workouts</Link>
       </div>
     )
@@ -30,20 +30,20 @@ export default function PreviewWorkoutPage() {
       {/* Header */}
       <div className="glass-card rounded-xl p-16 flex flex-col md:flex-row justify-between items-start md:items-end gap-12">
         <div>
-          <h1 className="font-headline text-headline-lg text-on-surface font-bold">{workout.title}</h1>
+          <h1 className="font-headline text-headline-lg text-fg-2 font-bold">{workout.title}</h1>
           {workout.description && (
-            <p className="font-body-md text-body-md text-on-surface-variant mt-4">{workout.description}</p>
+            <p className="font-body-md text-body-md text-muted mt-4">{workout.description}</p>
           )}
         </div>
         <div className="text-right">
-          <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Duration</span>
+          <span className="block font-label-caps text-label-caps text-muted uppercase tracking-wider">Duration</span>
           <span className="font-mono text-display-timer-mobile text-primary tracking-tighter">{formatDuration(total)}</span>
         </div>
       </div>
 
       {/* Intervals list (read-only) */}
       <div className="flex flex-col gap-8">
-        <span className="font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider px-4">
+        <span className="font-label-caps text-label-caps uppercase text-muted tracking-wider px-4">
           {workout.intervals.length} interval{workout.intervals.length !== 1 && 's'}
         </span>
         {(() => {
@@ -62,11 +62,11 @@ export default function PreviewWorkoutPage() {
                   <span className="material-symbols-outlined text-[20px]">{TYPE_ICONS[interval.type]}</span>
                 </div>
                 <div className="flex-1 py-md">
-                  <span className="font-body-md font-semibold text-on-surface">
+                  <span className="font-body-md font-semibold text-fg-2">
                     {getIntervalName(interval, workCount, exercise)}
                   </span>
                   {interval.description && (
-                    <p className="text-[11px] text-on-surface-variant font-body-md mt-2">{interval.description}</p>
+                    <p className="text-[11px] text-muted font-body-md mt-2">{interval.description}</p>
                   )}
                 </div>
                 <div className="px-16 font-data-lg text-data-lg text-primary font-bold tracking-tight font-mono">
@@ -82,7 +82,7 @@ export default function PreviewWorkoutPage() {
       <div className="flex gap-3 pt-4">
         <button
           onClick={() => router.back()}
-          className="flex-1 py-3 bg-surface border border-outline-variant text-on-surface rounded-lg font-medium hover:bg-surface-dim transition-colors"
+          className="flex-1 py-3 bg-surface border border-outline-variant text-fg-2 rounded-lg font-medium hover:bg-surface transition-colors"
         >
           &larr; Back
         </button>

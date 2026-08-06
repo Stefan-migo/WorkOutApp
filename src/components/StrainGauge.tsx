@@ -10,10 +10,10 @@ export default function StrainGauge({ avgRpe }: StrainGaugeProps) {
   return (
     <div className="md:col-span-4 glass-card rounded-xl p-16 flex flex-col h-96 ambient-shadow justify-between">
       <div className="pb-3">
-        <h3 className="font-headline-md text-headline-md text-on-surface">
+        <h3 className="font-headline-md text-headline-md text-fg-2">
           Average Strain
         </h3>
-        <p className="font-body-md text-body-md text-on-surface-variant">
+        <p className="font-body-md text-body-md text-muted">
           RPE Focus
         </p>
       </div>
@@ -39,7 +39,7 @@ export default function StrainGauge({ avgRpe }: StrainGaugeProps) {
             <span className="font-display-timer-mobile text-display-timer-mobile text-primary leading-none">
               {avgRpe}
             </span>
-            <span className="font-label-caps text-label-caps text-on-surface-variant mt-1">
+            <span className="font-label-caps text-label-caps text-muted mt-1">
               Avg RPE
             </span>
           </div>

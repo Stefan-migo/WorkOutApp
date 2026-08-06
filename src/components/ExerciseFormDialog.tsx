@@ -81,7 +81,7 @@ export function ExerciseFormDialog({
   return (
     <dialog
       ref={dialogRef}
-      className="rounded-xl bg-surface border border-outline-variant/50 text-on-surface p-24 max-w-lg w-full m-auto backdrop:bg-black/10 max-h-[85vh] overflow-y-auto"
+      className="rounded-xl bg-surface border border-outline-variant/50 text-fg-2 p-24 max-w-lg w-full m-auto backdrop:bg-black/10 max-h-[85vh] overflow-y-auto"
       onClose={onClose}
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4" data-testid="exercise-form">
@@ -91,13 +91,13 @@ export function ExerciseFormDialog({
 
         {/* Name */}
         <label className="flex flex-col gap-1">
-          <span className="font-label text-label-caps text-on-surface-variant">Name</span>
+          <span className="font-label text-label-caps text-muted">Name</span>
           <input
             type="text"
             value={form.name}
             onChange={(e) => update({ name: e.target.value })}
             required
-            className="bg-surface-container text-on-surface rounded-lg px-3 py-2 font-body text-body-md placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-secondary"
+            className="bg-surface text-fg-2 rounded-lg px-3 py-2 font-body text-body-md placeholder:text-muted outline-none focus:ring-2 focus:ring-secondary"
             placeholder="Exercise name"
           />
           {validationError && (
@@ -107,11 +107,11 @@ export function ExerciseFormDialog({
 
         {/* Category */}
         <label className="flex flex-col gap-1">
-          <span className="font-label text-label-caps text-on-surface-variant">Category</span>
+          <span className="font-label text-label-caps text-muted">Category</span>
           <select
             value={form.category}
             onChange={(e) => update({ category: e.target.value as ExerciseCategory })}
-            className="bg-surface-container text-on-surface rounded-lg px-3 py-2 font-body text-body-md outline-none focus:ring-2 focus:ring-secondary"
+            className="bg-surface text-fg-2 rounded-lg px-3 py-2 font-body text-body-md outline-none focus:ring-2 focus:ring-secondary"
           >
             {CATEGORIES.map((cat) => (
               <option key={cat} value={cat} className="capitalize">
@@ -123,7 +123,7 @@ export function ExerciseFormDialog({
 
         {/* Force */}
         <fieldset className="flex flex-col gap-1 border-none p-0 m-0">
-          <legend className="font-label text-label-caps text-on-surface-variant mb-1">Force</legend>
+          <legend className="font-label text-label-caps text-muted mb-1">Force</legend>
           <div className="flex gap-3">
             {FORCE_OPTIONS.map((opt) => (
               <label key={opt} className="flex items-center gap-1.5 cursor-pointer">
@@ -135,7 +135,7 @@ export function ExerciseFormDialog({
                   onChange={() => update({ force: opt })}
                   className="accent-primary"
                 />
-                <span className="font-body text-body-md capitalize text-on-surface">{opt}</span>
+                <span className="font-body text-body-md capitalize text-fg-2">{opt}</span>
               </label>
             ))}
           </div>
@@ -143,7 +143,7 @@ export function ExerciseFormDialog({
 
         {/* Mechanic */}
         <fieldset className="flex flex-col gap-1 border-none p-0 m-0">
-          <legend className="font-label text-label-caps text-on-surface-variant mb-1">Mechanic</legend>
+          <legend className="font-label text-label-caps text-muted mb-1">Mechanic</legend>
           <div className="flex gap-3">
             {MECHANIC_OPTIONS.map((opt) => (
               <label key={opt} className="flex items-center gap-1.5 cursor-pointer">
@@ -155,7 +155,7 @@ export function ExerciseFormDialog({
                   onChange={() => update({ mechanic: opt })}
                   className="accent-primary"
                 />
-                <span className="font-body text-body-md capitalize text-on-surface">{opt}</span>
+                <span className="font-body text-body-md capitalize text-fg-2">{opt}</span>
               </label>
             ))}
           </div>
@@ -163,11 +163,11 @@ export function ExerciseFormDialog({
 
         {/* Difficulty */}
         <label className="flex flex-col gap-1">
-          <span className="font-label text-label-caps text-on-surface-variant">Difficulty</span>
+          <span className="font-label text-label-caps text-muted">Difficulty</span>
           <select
             value={form.difficulty ?? ''}
             onChange={(e) => update({ difficulty: (e.target.value || undefined) as ExerciseFormData['difficulty'] })}
-            className="bg-surface-container text-on-surface rounded-lg px-3 py-2 font-body text-body-md outline-none focus:ring-2 focus:ring-secondary"
+            className="bg-surface text-fg-2 rounded-lg px-3 py-2 font-body text-body-md outline-none focus:ring-2 focus:ring-secondary"
           >
             <option value="">Any</option>
             {DIFFICULTIES.map((d) => (
@@ -210,22 +210,22 @@ export function ExerciseFormDialog({
 
         {/* Description */}
         <label className="flex flex-col gap-1">
-          <span className="font-label text-label-caps text-on-surface-variant">Description</span>
+          <span className="font-label text-label-caps text-muted">Description</span>
           <textarea
             value={form.description ?? ''}
             onChange={(e) => update({ description: e.target.value })}
             rows={3}
-            className="bg-surface-container text-on-surface rounded-lg px-3 py-2 font-body text-body-md placeholder:text-on-surface-variant resize-none outline-none focus:ring-2 focus:ring-secondary"
+            className="bg-surface text-fg-2 rounded-lg px-3 py-2 font-body text-body-md placeholder:text-muted resize-none outline-none focus:ring-2 focus:ring-secondary"
             placeholder="Optional description"
           />
         </label>
 
         {/* Instructions — Step Editor */}
         <div data-testid="instructions-section" className="flex flex-col gap-2">
-          <span className="font-label text-label-caps text-on-surface-variant">Instructions</span>
+          <span className="font-label text-label-caps text-muted">Instructions</span>
           {form.instructions.map((step, idx) => (
             <div key={idx} className="flex items-center gap-2">
-              <span className="text-on-surface-variant font-body text-body-md w-5 shrink-0 text-right">
+              <span className="text-muted font-body text-body-md w-5 shrink-0 text-right">
                 {idx + 1}.
               </span>
               <input
@@ -236,7 +236,7 @@ export function ExerciseFormDialog({
                   next[idx] = e.target.value
                   update({ instructions: next })
                 }}
-                className="flex-1 bg-surface-container text-on-surface rounded-lg px-3 py-1.5 font-body text-body-md placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-secondary"
+                className="flex-1 bg-surface text-fg-2 rounded-lg px-3 py-1.5 font-body text-body-md placeholder:text-muted outline-none focus:ring-2 focus:ring-secondary"
                 placeholder={`Step ${idx + 1} description`}
               />
               <button
@@ -249,7 +249,7 @@ export function ExerciseFormDialog({
                   }
                 }}
                 disabled={idx === 0}
-                className="p-1 text-on-surface-variant hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none rounded"
+                className="p-1 text-muted hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none rounded"
                 aria-label="Move up"
               >
                 ↑
@@ -264,7 +264,7 @@ export function ExerciseFormDialog({
                   }
                 }}
                 disabled={idx === form.instructions.length - 1}
-                className="p-1 text-on-surface-variant hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none rounded"
+                className="p-1 text-muted hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none rounded"
                 aria-label="Move down"
               >
                 ↓
@@ -274,7 +274,7 @@ export function ExerciseFormDialog({
                 onClick={() => {
                   update({ instructions: form.instructions.filter((_, i) => i !== idx) })
                 }}
-                className="p-1 text-on-surface-variant hover:text-error transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none rounded"
+                className="p-1 text-muted hover:text-error transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none rounded"
                 aria-label={`Remove step ${idx + 1}`}
               >
                 ✕
@@ -284,7 +284,7 @@ export function ExerciseFormDialog({
           <button
             type="button"
             onClick={() => update({ instructions: [...form.instructions, ''] })}
-            className="self-start px-3 py-1 rounded-lg font-label text-label-caps text-secondary hover:bg-surface-container transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="self-start px-3 py-1 rounded-lg font-label text-label-caps text-secondary hover:bg-surface-warm transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
           >
             + Add Step
           </button>
@@ -292,19 +292,19 @@ export function ExerciseFormDialog({
 
         {/* Image URLs */}
         <div className="flex flex-col gap-2">
-          <span className="font-label text-label-caps text-on-surface-variant">Image URLs</span>
+          <span className="font-label text-label-caps text-muted">Image URLs</span>
           <div className="flex gap-2">
             <input
               type="text"
               value={imageUrlInput}
               onChange={(e) => setImageUrlInput(e.target.value)}
               placeholder="https://example.com/image.jpg"
-              className="flex-1 bg-surface-container text-on-surface rounded-lg px-3 py-2 font-body text-body-md placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-secondary"
+              className="flex-1 bg-surface text-fg-2 rounded-lg px-3 py-2 font-body text-body-md placeholder:text-muted outline-none focus:ring-2 focus:ring-secondary"
             />
             <button
               type="button"
               onClick={addImageUrl}
-              className="px-3 py-2 rounded-lg font-label text-label-caps bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+              className="px-3 py-2 rounded-lg font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm-high transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
             >
               +
             </button>
@@ -312,7 +312,7 @@ export function ExerciseFormDialog({
               type="button"
               disabled={uploading || !onImageUpload}
               onClick={() => fileInputRef.current?.click()}
-              className="px-3 py-2 rounded-lg font-label text-label-caps bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+              className="px-3 py-2 rounded-lg font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm-high transition-colors disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
               title={!onImageUpload ? 'Image upload not available' : 'Upload image file'}
             >
               {uploading ? '...' : '📁'}
@@ -374,9 +374,9 @@ export function ExerciseFormDialog({
 
         {/* Preview Card */}
         {(form.name || form.primaryMuscles.length > 0 || form.images.length > 0) && (
-          <div className="border border-outline-variant/30 rounded-xl overflow-hidden bg-surface-container-low">
+          <div className="border border-outline-variant/30 rounded-xl overflow-hidden bg-surface">
             {form.images[0] && (
-              <div className="aspect-[4/3] bg-surface-container-lowest relative overflow-hidden">
+              <div className="aspect-[4/3] bg-surface relative overflow-hidden">
                 {/* ponytail: native img with loading lazy, no next/image complexity for dialog */}
                 <img
                   src={form.images[0]}
@@ -394,13 +394,13 @@ export function ExerciseFormDialog({
                 <h4 className="font-body text-body-lg font-bold text-primary">
                   {form.name || 'Exercise Name'}
                 </h4>
-                <span className="font-data text-data-sm text-on-surface-variant">◎{form.category}</span>
+                <span className="font-data text-data-sm text-muted">◎{form.category}</span>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {[...form.primaryMuscles, ...form.secondaryMuscles].map((m) => (
                   <span
                     key={m}
-                    className="bg-surface-container px-2 py-0.5 rounded font-label-caps text-label-caps text-on-surface-variant tracking-wider"
+                    className="bg-surface px-2 py-0.5 rounded font-label-caps text-label-caps text-muted tracking-wider"
                   >
                     {m.toUpperCase()}
                   </span>
@@ -415,7 +415,7 @@ export function ExerciseFormDialog({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-lg font-label text-label-caps text-on-surface-variant hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="px-4 py-2 rounded-lg font-label text-label-caps text-muted hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
           >
             Cancel
           </button>

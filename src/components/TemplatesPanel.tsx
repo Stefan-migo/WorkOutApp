@@ -82,16 +82,16 @@ export function TemplatesPanel({
       </div>
       <div className="flex flex-col gap-8 max-h-48 overflow-y-auto no-scrollbar">
         {templates.length === 0 && (
-          <p className="text-body-md text-sm text-on-surface-variant">
+          <p className="text-body-md text-sm text-muted">
             No templates saved yet.
           </p>
         )}
         {templates.map((t) => (
           <div
             key={t.id}
-            className="flex items-center justify-between p-8 rounded-lg bg-surface-container-lowest border border-outline-variant/20"
+            className="flex items-center justify-between p-8 rounded-lg bg-surface border border-outline-variant/20"
           >
-            <span className="text-body-md text-sm font-medium truncate text-on-surface">
+            <span className="text-body-md text-sm font-medium truncate text-fg-2">
               {t.title}
             </span>
             <div className="flex gap-1 shrink-0">

@@ -79,7 +79,7 @@ export default function SessionDetailPage() {
   if (!session) {
     return (
       <div className="flex flex-col items-center justify-center flex-1 gap-16 p-margin-mobile md:p-margin-desktop text-center">
-        <h1 className="font-headline-lg text-headline-lg text-on-background">
+        <h1 className="font-headline-lg text-headline-lg text-fg-2">
           Session not found
         </h1>
         <Link
@@ -118,14 +118,14 @@ export default function SessionDetailPage() {
       <section className="flex flex-col gap-16 mb-16">
         <Link
           href="/history"
-          className="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors inline-flex items-center gap-xs w-fit"
+          className="font-body-md text-body-md text-muted hover:text-fg-2 transition-colors inline-flex items-center gap-xs w-fit"
         >
           <span className="material-symbols-outlined text-sm">arrow_back</span>
           Back to history
         </Link>
 
         <div className="flex flex-col gap-xs">
-          <div className="flex items-center gap-8 text-on-surface-variant">
+          <div className="flex items-center gap-8 text-muted">
             <span className="material-symbols-outlined text-sm">
               calendar_today
             </span>
@@ -134,7 +134,7 @@ export default function SessionDetailPage() {
             </span>
           </div>
           <div className="flex items-center justify-between gap-16">
-            <h2 className="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">
+            <h2 className="font-headline-lg text-headline-lg text-fg-2 tracking-tight font-bold">
               {name}
             </h2>
             <button
@@ -149,7 +149,7 @@ export default function SessionDetailPage() {
             {chips.map((c) => (
               <span
                 key={c}
-                className="bg-surface-variant text-on-surface-variant font-label-caps text-label-caps px-8 py-1 rounded-full"
+                className="bg-surface text-muted font-label-caps text-label-caps px-8 py-1 rounded-full"
               >
                 {c}
               </span>
@@ -161,13 +161,13 @@ export default function SessionDetailPage() {
       {/* Metrics */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-16">
         {/* Total Duration */}
-        <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-16 flex flex-col justify-between min-h-[8rem] shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
-          <div className="absolute -right-4 -top-4 w-20 h-20 bg-surface-variant rounded-full opacity-30 group-hover:scale-110 transition-transform" />
-          <span className="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-8">
+        <div className="bg-surface border border-outline-variant/30 rounded-xl p-16 flex flex-col justify-between min-h-[8rem] shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
+          <div className="absolute -right-4 -top-4 w-20 h-20 bg-surface rounded-full opacity-30 group-hover:scale-110 transition-transform" />
+          <span className="font-label-caps text-label-caps text-muted flex items-center gap-8">
             <span className="material-symbols-outlined text-sm">timer</span>
             Total Duration
           </span>
-          <span className="font-data-lg text-data-lg text-on-surface">
+          <span className="font-data-lg text-data-lg text-fg-2">
             {formatDuration(totalDuration)}
           </span>
         </div>
@@ -176,7 +176,7 @@ export default function SessionDetailPage() {
       {/* Interval Breakdown */}
       <section className="flex flex-col gap-16 mb-32">
         <div className="flex items-center justify-between">
-          <h3 className="font-headline-md text-headline-md text-on-surface">
+          <h3 className="font-headline-md text-headline-md text-fg-2">
             Interval Breakdown
           </h3>
         </div>
@@ -200,21 +200,21 @@ export default function SessionDetailPage() {
                     }
                   }}
                   aria-label={editable ? `Edit interval ${idx + 1}` : undefined}
-                  className={`bg-surface-container-lowest border-l-4 ${SEGMENT_BORDER[intv.type]} border-y border-r border-outline-variant/30 rounded-r-lg p-16 flex justify-between items-center group transition-colors ${
+                  className={`bg-surface border-l-4 ${SEGMENT_BORDER[intv.type]} border-y border-r border-outline-variant/30 rounded-r-lg p-16 flex justify-between items-center group transition-colors ${
                     editable
-                      ? 'cursor-pointer hover:bg-surface-container-low focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none'
+                      ? 'cursor-pointer hover:bg-surface-warm-low focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none'
                       : 'cursor-default'
                   }`}
                 >
                   <div className="flex items-center gap-16">
-                    <div className="w-12 h-12 bg-surface flex items-center justify-center rounded font-data-sm text-data-sm text-on-surface-variant border border-outline-variant/20">
+                    <div className="w-12 h-12 bg-surface flex items-center justify-center rounded font-data-sm text-data-sm text-muted border border-outline-variant/20">
                       {idx + 1}
                     </div>
                     <div className="flex flex-col">
-                      <span className="font-body-md text-body-md font-bold text-on-surface">
+                      <span className="font-body-md text-body-md font-bold text-fg-2">
                         {getIntervalName(intv, workCount)}
                       </span>
-                      <span className="font-label-caps text-label-caps text-on-surface-variant mt-1">
+                      <span className="font-label-caps text-label-caps text-muted mt-1">
                         {TYPE_LABELS[intv.type]}
                         {intv.completed ? '' : ' \u2022 Incomplete'}
                       </span>
@@ -222,18 +222,18 @@ export default function SessionDetailPage() {
                   </div>
                   <div className="flex gap-24 items-center">
                     <div className="flex flex-col items-end">
-                      <span className="font-label-caps text-label-caps text-on-surface-variant">
+                      <span className="font-label-caps text-label-caps text-muted">
                         Target
                       </span>
-                      <span className="font-data-sm text-data-sm text-on-surface">
+                      <span className="font-data-sm text-data-sm text-fg-2">
                         {formatDuration(intv.plannedDuration)}
                       </span>
                     </div>
                     <div className="flex flex-col items-end w-16">
-                      <span className="font-label-caps text-label-caps text-on-surface-variant">
+                      <span className="font-label-caps text-label-caps text-muted">
                         Actual
                       </span>
-                      <span className="font-data-sm text-data-sm text-on-surface font-bold">
+                      <span className="font-data-sm text-data-sm text-fg-2 font-bold">
                         {formatDuration(intv.actualDuration)}
                       </span>
                     </div>

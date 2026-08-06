@@ -44,7 +44,7 @@ function FilterSelect({
     <select
       value={value ?? ''}
       onChange={(e) => onChange(e.target.value || null)}
-      className="bg-surface-container text-on-surface rounded-lg px-3 py-2 font-label text-label-caps border border-outline-variant/30 outline-none focus:ring-2 focus:ring-secondary min-w-[100px] cursor-pointer"
+      className="bg-surface text-fg-2 rounded-lg px-3 py-2 font-label text-label-caps border border-outline-variant/30 outline-none focus:ring-2 focus:ring-secondary min-w-[100px] cursor-pointer"
       aria-label={label}
     >
       <option value="">{allLabel}</option>
@@ -73,18 +73,18 @@ export function ExerciseSearchHeader({
       <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary via-transparent to-transparent" />
       <div className="flex flex-col gap-4 z-10">
         <h1 className="font-headline text-headline-lg font-bold text-primary">Exercise Library</h1>
-        <p className="font-body text-body-md text-on-surface-variant">What exercises are you looking for?</p>
+        <p className="font-body text-body-md text-muted">What exercises are you looking for?</p>
       </div>
 
       {/* Search + Favorites row */}
       <div className="flex flex-col sm:flex-row sm:items-end gap-4 z-10">
         <div className="relative w-full sm:flex-1">
-          <span className="material-symbols-outlined absolute left-0 bottom-3 text-[48px] text-on-surface-variant">search</span>
+          <span className="material-symbols-outlined absolute left-0 bottom-3 text-[48px] text-muted">search</span>
           <input
             type="text"
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full bg-transparent border-0 border-b-2 border-outline-variant/50 pl-10 py-3 font-data text-data-lg text-primary placeholder:text-on-surface-variant focus:ring-0 focus:border-secondary transition-colors outline-none"
+            className="w-full bg-transparent border-0 border-b-2 border-outline-variant/50 pl-10 py-3 font-data text-data-lg text-primary placeholder:text-muted focus:ring-0 focus:border-secondary transition-colors outline-none"
             placeholder="Search by name, muscle, or equipment..."
           />
         </div>
@@ -93,7 +93,7 @@ export function ExerciseSearchHeader({
             <button
               onClick={() => onFavoritesFilterChange(false)}
               className={`px-3 py-1.5 rounded-lg font-label text-label-caps transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ${
-                !favoritesFilter ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface hover:bg-surface-container-high'
+                !favoritesFilter ? 'bg-primary text-on-primary' : 'bg-surface text-fg-2 hover:bg-surface-warm-high'
               }`}
             >
               All
@@ -101,7 +101,7 @@ export function ExerciseSearchHeader({
             <button
               onClick={() => onFavoritesFilterChange(true)}
               className={`px-3 py-1.5 rounded-lg font-label text-label-caps transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ${
-                favoritesFilter ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface hover:bg-surface-container-high'
+                favoritesFilter ? 'bg-primary text-on-primary' : 'bg-surface text-fg-2 hover:bg-surface-warm-high'
               }`}
             >
               {favoritesFilter ? '★' : '☆'} Favorites

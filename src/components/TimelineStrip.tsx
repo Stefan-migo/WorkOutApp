@@ -18,7 +18,7 @@ export function TimelineStrip({ intervals, onIntervalClick }: TimelineStripProps
 
   return (
     <div className="space-y-8">
-      <div className="h-4 w-full bg-surface-dim rounded-full overflow-hidden flex shadow-inner">
+      <div className="h-4 w-full bg-surface rounded-full overflow-hidden flex shadow-inner">
         {intervals.map((interval, idx) => {
           const widthPct = (interval.duration / totalDuration) * 100
 
@@ -39,7 +39,7 @@ export function TimelineStrip({ intervals, onIntervalClick }: TimelineStripProps
         {LEGEND_ITEMS.map((type) => (
           <div key={type} className="flex items-center gap-xs">
             <div className={`w-3 h-3 rounded-sm ${SEGMENT_DOT[type]}`} />
-            <span className="text-[10px] font-label-caps uppercase text-on-surface-variant">
+            <span className="text-[10px] font-label-caps uppercase text-muted">
               {type.charAt(0).toUpperCase() + type.slice(1)}
             </span>
           </div>

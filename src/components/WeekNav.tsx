@@ -14,20 +14,20 @@ export function WeekNav({ weekStart, onPrev, onNext }: WeekNavProps) {
       <div className="flex items-center gap-16">
         <button
           onClick={onPrev}
-          className="p-xs rounded-full hover:bg-surface-container transition-colors"
+          className="p-xs rounded-full hover:bg-surface-warm transition-colors"
           aria-label="Previous week"
         >
-          <span className="material-symbols-outlined text-on-surface-variant">chevron_left</span>
+          <span className="material-symbols-outlined text-muted">chevron_left</span>
         </button>
-        <h1 className="font-headline-md text-headline-md font-bold text-on-surface">
+        <h1 className="font-headline-md text-headline-md font-bold text-fg-2">
           {formatWeekRange(weekStart)}
         </h1>
         <button
           onClick={onNext}
-          className="p-xs rounded-full hover:bg-surface-container transition-colors"
+          className="p-xs rounded-full hover:bg-surface-warm transition-colors"
           aria-label="Next week"
         >
-          <span className="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+          <span className="material-symbols-outlined text-muted">chevron_right</span>
         </button>
       </div>
     </div>

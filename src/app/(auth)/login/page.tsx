@@ -36,7 +36,7 @@ export default function LoginPage() {
           <h1 className="text-headline-md font-bold text-primary">
             {isSignUp ? 'Create Account' : 'Sign In'}
           </h1>
-          <p className="text-body-md text-on-surface-variant">
+          <p className="text-body-md text-muted">
             {isSignUp ? 'Start tracking your workouts' : 'Welcome back'}
           </p>
         </div>
@@ -54,7 +54,7 @@ export default function LoginPage() {
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
-            className="w-full rounded-md border border-outline-variant bg-surface-container-low p-3 text-body-md text-on-surface placeholder:text-on-surface-variant focus:border-primary focus:outline-none"
+            className="w-full rounded-md border border-outline-variant bg-surface p-3 text-body-md text-fg-2 placeholder:text-muted focus:border-primary focus:outline-none"
           />
           <input
             type="password"
@@ -63,7 +63,7 @@ export default function LoginPage() {
             onChange={e => setPassword(e.target.value)}
             required
             minLength={6}
-            className="w-full rounded-md border border-outline-variant bg-surface-container-low p-3 text-body-md text-on-surface placeholder:text-on-surface-variant focus:border-primary focus:outline-none"
+            className="w-full rounded-md border border-outline-variant bg-surface p-3 text-body-md text-fg-2 placeholder:text-muted focus:border-primary focus:outline-none"
           />
         </div>
 
@@ -75,7 +75,7 @@ export default function LoginPage() {
           {loading ? 'Loading...' : isSignUp ? 'Create Account' : 'Sign In'}
         </button>
 
-        <p className="text-center text-sm text-on-surface-variant">
+        <p className="text-center text-sm text-muted">
           {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
           <button
             type="button"

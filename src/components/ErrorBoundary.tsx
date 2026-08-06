@@ -38,9 +38,9 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
         <div className="flex items-center justify-center min-h-[60vh] p-margin-mobile md:p-margin-desktop">
           <div className="glass-card rounded-xl p-24 max-w-md w-full text-center flex flex-col items-center gap-16 ambient-shadow">
             <span className="material-symbols-outlined text-[48px] text-error">error</span>
-            <h2 className="font-headline text-headline-lg text-on-surface font-bold">Something went wrong</h2>
+            <h2 className="font-headline text-headline-lg text-fg-2 font-bold">Something went wrong</h2>
             {this.state.error && (
-              <p className="font-body text-body-md text-on-surface-variant bg-surface-container-low p-16 rounded-lg w-full text-left overflow-auto">
+              <p className="font-body text-body-md text-muted bg-surface p-16 rounded-lg w-full text-left overflow-auto">
                 {this.state.error.message}
               </p>
             )}

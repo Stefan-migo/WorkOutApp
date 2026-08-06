@@ -67,42 +67,42 @@ export function AddToWorkoutModal({ exercise, onClose }: Props) {
       ref={dialogRef}
       onClick={handleBackdrop}
       onClose={onClose}
-      className="fixed inset-0 z-50 w-full h-full max-w-[520px] max-h-[80vh] m-auto rounded-2xl bg-surface text-on-surface shadow-xl backdrop:bg-black/50 open:flex open:flex-col"
+      className="fixed inset-0 z-50 w-full h-full max-w-[520px] max-h-[80vh] m-auto rounded-2xl bg-surface text-fg-2 shadow-xl backdrop:bg-black/50 open:flex open:flex-col"
     >
       <div className="flex items-center justify-between p-6 pb-0">
         <h2 className="font-headline text-headline-sm font-semibold text-primary">
           Assign &quot;{exercise.name}&quot;
         </h2>
-        <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors" aria-label="Close">✕</button>
+        <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-warm transition-colors" aria-label="Close">✕</button>
       </div>
 
       <div className="flex flex-col gap-4 p-6 overflow-y-auto">
         {assignable.length === 0 ? (
-          <p className="text-on-surface-variant font-body text-body-md text-center py-8">
+          <p className="text-muted font-body text-body-md text-center py-8">
             No workouts with work intervals yet.{' '}
             <a href={`/workouts/new?exerciseId=${exercise.id}`} className="text-primary underline">Create one</a>
           </p>
         ) : (
           <>
-            <p className="font-body text-body-sm text-on-surface-variant">
+            <p className="font-body text-body-sm text-muted">
               Select a workout and pick a work interval to assign this exercise.
             </p>
 
             <div className="flex flex-col gap-2">
               {assignable.map((w) => (
-                <div key={w.id} className="rounded-xl bg-surface-container-low overflow-hidden">
+                <div key={w.id} className="rounded-xl bg-surface overflow-hidden">
                   <button
                     onClick={() => setSelectedId((prev) => (prev === w.id ? null : w.id))}
-                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-surface-container transition-colors text-left"
+                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-surface-warm transition-colors text-left"
                   >
-                    <span className="font-label text-label-lg font-medium text-on-surface">{w.title}</span>
+                    <span className="font-label text-label-lg font-medium text-fg-2">{w.title}</span>
                     <span className="text-outline text-sm">{selectedId === w.id ? '▾' : '▸'}</span>
                   </button>
 
                   {selectedId === w.id && (
                     <div className="flex flex-col border-t border-outline-variant/20">
                       {workIntervals.length === 0 ? (
-                        <p className="px-4 py-3 text-body-sm text-on-surface-variant">No work intervals.</p>
+                        <p className="px-4 py-3 text-body-sm text-muted">No work intervals.</p>
                       ) : (
                         workIntervals.map(({ interval, globalIdx }, wi) => {
                           const cycle = isInCycle(globalIdx, cycles)
@@ -112,18 +112,18 @@ export function AddToWorkoutModal({ exercise, onClose }: Props) {
                               key={interval.id}
                               onClick={() => handleAssign(interval.id)}
                               disabled={saving || already === exercise.id}
-                              className="flex items-center justify-between px-4 py-2.5 hover:bg-surface-container-high transition-colors disabled:opacity-50 text-left border-b border-outline-variant/10 last:border-b-0"
+                              className="flex items-center justify-between px-4 py-2.5 hover:bg-surface-warm-high transition-colors disabled:opacity-50 text-left border-b border-outline-variant/10 last:border-b-0"
                             >
                               <div className="flex flex-col gap-0.5">
-                                <span className="font-body text-body-sm text-on-surface">
+                                <span className="font-body text-body-sm text-fg-2">
                                   {getIntervalName(interval, wi + 1)}
                                   {cycle && (
-                                    <span className="text-body-xs text-on-surface-variant ml-2">
+                                    <span className="text-body-xs text-muted ml-2">
                                       · {cycle.label}
                                     </span>
                                   )}
                                 </span>
-                                <span className="font-body text-body-xs text-on-surface-variant">
+                                <span className="font-body text-body-xs text-muted">
                                   {formatDuration(interval.duration)}
                                   {already && already !== exercise.id && ' · currently assigned'}
                                 </span>

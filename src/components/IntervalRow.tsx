@@ -60,7 +60,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
           type="text"
           value={interval.title}
           onChange={(e) => onChange(index, { ...interval, title: e.target.value })}
-          className="bg-transparent border-none p-0 font-body-md font-semibold text-on-surface w-full focus:ring-0 focus:outline-none placeholder-on-surface-variant/50"
+          className="bg-transparent border-none p-0 font-body-md font-semibold text-fg-2 w-full focus:ring-0 focus:outline-none placeholder-on-surface-variant/50"
           aria-label={`Interval ${index + 1} title`}
         />
         {exercise && (
@@ -72,8 +72,8 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
                 className="w-8 h-8 rounded object-cover shrink-0"
               />
             ) : (
-              <div className="w-8 h-8 rounded bg-surface-dim flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-[14px] text-on-surface-variant">fitness_center</span>
+              <div className="w-8 h-8 rounded bg-surface flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[14px] text-muted">fitness_center</span>
               </div>
             )}
             <Link

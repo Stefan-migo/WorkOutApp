@@ -20,7 +20,7 @@ export default function MiniCalendar({
       </div>
       <div className="grid grid-cols-7 gap-xs mb-auto">
         {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => (
-          <div key={i} className="text-center font-label text-label-caps text-on-surface-variant mb-xs">
+          <div key={i} className="text-center font-label text-label-caps text-muted mb-xs">
             {d}
           </div>
         ))}
@@ -37,7 +37,7 @@ export default function MiniCalendar({
                   <span className="font-mono text-data-sm text-on-primary font-bold">{dayNum}</span>
                 </div>
               ) : (
-                <span className="font-mono text-data-sm text-on-surface-variant">{dayNum}</span>
+                <span className="font-mono text-data-sm text-muted">{dayNum}</span>
               )}
               <div className={`w-1.5 h-1.5 rounded-full ${hasAssignment ? 'bg-secondary-container' : 'bg-transparent'}`} />
             </div>
@@ -47,7 +47,7 @@ export default function MiniCalendar({
       <div className="mt-16 pt-16 border-t border-outline-variant/30 flex justify-between items-center">
         <div>
           <p className="font-mono text-data-lg text-primary">{assignedDays} / 5</p>
-          <p className="font-label text-label-caps text-on-surface-variant">DAYS PLANNED</p>
+          <p className="font-label text-label-caps text-muted">DAYS PLANNED</p>
         </div>
         <div className="w-16 h-16 rounded-full border-4 border-surface-container relative flex items-center justify-center">
           <svg className="absolute inset-0 w-full h-full -rotate-90 text-secondary-container" viewBox="0 0 36 36">

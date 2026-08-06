@@ -15,7 +15,7 @@ function TimelinePreview({ intervals }: { intervals: { type: IntervalType; durat
   const total = totalSeconds(intervals)
   if (total === 0) return null
   return (
-    <div className="h-2 w-full bg-surface-variant rounded-full overflow-hidden flex">
+    <div className="h-2 w-full bg-surface rounded-full overflow-hidden flex">
       {intervals.map((i, idx) => (
         <div
           key={idx}
@@ -54,14 +54,14 @@ export default function WorkoutListPage() {
   if (workouts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center flex-1 gap-6 p-32 text-center">
-        <span className="material-symbols-outlined text-[48px] text-on-surface-variant">fitness_center</span>
-        <h1 className="font-headline-md text-[24px] font-bold text-on-surface">No workouts yet</h1>
-        <p className="font-body-md text-on-surface-variant max-w-sm">
+        <span className="material-symbols-outlined text-[48px] text-muted">fitness_center</span>
+        <h1 className="font-headline-md text-[24px] font-bold text-fg-2">No workouts yet</h1>
+        <p className="font-body-md text-muted max-w-sm">
           Create your first workout to start tracking your training sessions and progress.
         </p>
         <button
           onClick={() => router.push('/workouts/new')}
-          className="px-6 py-3 bg-primary-btn hover:bg-primary-btn-hover disabled:bg-surface-container-low disabled:text-on-surface-variant text-on-primary-btn rounded-lg font-medium transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="px-6 py-3 bg-primary-btn hover:bg-primary-btn-hover disabled:bg-surface disabled:text-muted text-on-primary-btn rounded-lg font-medium transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
         >
           Create Workout
         </button>
@@ -74,7 +74,7 @@ export default function WorkoutListPage() {
       {/* Search & Filters + New Workout */}
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
         <div className="relative w-full md:w-96">
-          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted">search</span>
           <input
             className="w-full bg-surface border border-outline-variant/50 rounded-lg pl-12 pr-4 py-3 font-body-md focus:border-secondary focus:ring-1 focus:ring-secondary transition-all outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
             placeholder="Search workouts..."
@@ -96,7 +96,7 @@ export default function WorkoutListPage() {
             className={`px-4 py-2 rounded-full transition-colors border font-label-caps text-label-caps flex items-center gap-2 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ${
               typeFilter !== null
                 ? 'bg-primary-btn text-on-primary-btn border-primary'
-                : 'bg-surface-dim text-on-surface border-transparent hover:bg-surface-container-high'
+                : 'bg-surface text-fg-2 border-transparent hover:bg-surface-warm-high'
             }`}
           >
             <span className="material-symbols-outlined text-[16px]">filter_list</span> Type
@@ -120,7 +120,7 @@ export default function WorkoutListPage() {
               {/* Three-dot menu */}
               <div className="absolute top-4 right-4 z-40">
                 <button
-                  className="text-on-surface-variant hover:text-primary p-1 rounded-full hover:bg-surface-variant transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                  className="text-muted hover:text-primary p-1 rounded-full hover:bg-surface transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
                   onClick={(e) => { e.stopPropagation(); setMenuOpen(menuOpen === w.id ? null : w.id) }}
                   aria-label="Workout options"
                 >
@@ -141,16 +141,16 @@ export default function WorkoutListPage() {
                       <div className="border-t border-outline-variant/20 my-4" />
                       <button
                         onClick={() => { router.push(`/workouts/${w.id}/edit`); setMenuOpen(null) }}
-                        className="w-full flex items-center gap-8 px-16 py-8 text-body-md text-on-surface hover:bg-surface-dim transition-colors text-left"
+                        className="w-full flex items-center gap-8 px-16 py-8 text-body-md text-fg-2 hover:bg-surface transition-colors text-left"
                       >
-                        <span className="material-symbols-outlined text-[18px] text-on-surface-variant">edit</span>
+                        <span className="material-symbols-outlined text-[18px] text-muted">edit</span>
                         Edit
                       </button>
                       <button
                         onClick={() => { router.push(`/workouts/${w.id}/preview`); setMenuOpen(null) }}
-                        className="w-full flex items-center gap-8 px-16 py-8 text-body-md text-on-surface hover:bg-surface-dim transition-colors text-left"
+                        className="w-full flex items-center gap-8 px-16 py-8 text-body-md text-fg-2 hover:bg-surface transition-colors text-left"
                       >
-                        <span className="material-symbols-outlined text-[18px] text-on-surface-variant">visibility</span>
+                        <span className="material-symbols-outlined text-[18px] text-muted">visibility</span>
                         Preview
                       </button>
                       <div className="border-t border-outline-variant/20 my-4" />
@@ -177,8 +177,8 @@ export default function WorkoutListPage() {
 
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-headline-md text-[20px] leading-tight font-bold text-on-surface mb-1">{w.title}</h3>
-                  <p className="font-data-sm text-data-sm text-on-surface-variant flex items-center gap-2">
+                  <h3 className="font-headline-md text-[20px] leading-tight font-bold text-fg-2 mb-1">{w.title}</h3>
+                  <p className="font-data-sm text-data-sm text-muted flex items-center gap-2">
                     <span className="material-symbols-outlined text-[16px]">timer</span>
                     {formatDuration(total)}
                     <span className="w-1 h-1 rounded-full bg-outline-variant/50" />

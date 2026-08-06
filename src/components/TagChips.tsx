@@ -68,11 +68,11 @@ export function TagChips({
   return (
     <div className="flex flex-col gap-1">
       {label && (
-        <span className="font-label text-label-caps text-on-surface-variant">
+        <span className="font-label text-label-caps text-muted">
           {label}
         </span>
       )}
-      <div className="flex flex-wrap gap-1.5 p-2 bg-surface-container rounded-lg border border-outline-variant/30 focus-within:ring-2 focus-within:ring-secondary">
+      <div className="flex flex-wrap gap-1.5 p-2 bg-surface rounded-lg border border-outline-variant/30 focus-within:ring-2 focus-within:ring-secondary">
         {tags.map((tag) => (
           <span
             key={tag}
@@ -97,12 +97,12 @@ export function TagChips({
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className="w-full bg-transparent text-on-surface font-body text-body-md placeholder:text-on-surface-variant outline-none py-0.5"
+            className="w-full bg-transparent text-fg-2 font-body text-body-md placeholder:text-muted outline-none py-0.5"
           />
           {filtered.length > 0 && (
             <ul
               ref={listRef}
-              className="absolute top-full left-0 right-0 mt-1 bg-surface-container-high border border-outline-variant/30 rounded-lg shadow-lg z-50 max-h-40 overflow-y-auto"
+              className="absolute top-full left-0 right-0 mt-1 bg-surface border border-outline-variant/30 rounded-lg shadow-lg z-50 max-h-40 overflow-y-auto"
               role="listbox"
             >
               {filtered.map((suggestion, idx) => (
@@ -110,10 +110,10 @@ export function TagChips({
                   key={suggestion}
                   role="option"
                   aria-selected={idx === focusedIdx}
-                  className={`px-3 py-1.5 cursor-pointer text-body-md text-on-surface transition-colors ${
+                  className={`px-3 py-1.5 cursor-pointer text-body-md text-fg-2 transition-colors ${
                     idx === focusedIdx
                       ? 'bg-primary/10 text-primary'
-                      : 'hover:bg-surface-container'
+                      : 'hover:bg-surface-warm'
                   }`}
                   onMouseDown={(e) => {
                     // Use onMouseDown to fire before input blur

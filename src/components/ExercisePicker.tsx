@@ -38,7 +38,7 @@ function FilterSelect({
     <select
       value={value ?? ''}
       onChange={(e) => onChange(e.target.value || null)}
-      className="bg-surface-container-low text-on-surface rounded-lg px-2 py-1.5 text-xs border border-outline-variant/30 outline-none focus:ring-2 focus:ring-secondary cursor-pointer"
+      className="bg-surface text-fg-2 rounded-lg px-2 py-1.5 text-xs border border-outline-variant/30 outline-none focus:ring-2 focus:ring-secondary cursor-pointer"
       aria-label={label}
     >
       <option value="">{allLabel}</option>
@@ -134,7 +134,7 @@ export function ExercisePicker({ open, onClose, onSelect, exercises, selectedId 
           <button
             type="button"
             onClick={onClose}
-            className="text-on-surface-variant hover:text-on-surface p-1 rounded focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="text-muted hover:text-fg-2 p-1 rounded focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
             aria-label="Close"
           >
             <span className="material-symbols-outlined text-[20px]">close</span>
@@ -148,13 +148,13 @@ export function ExercisePicker({ open, onClose, onSelect, exercises, selectedId 
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search exercises..."
-          className="w-full bg-surface-container-low text-on-surface rounded-lg px-3 py-2.5 text-sm border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
+          className="w-full bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
         />
 
         {/* Mini preview card for selected exercise */}
         {selectedExercise && (
-          <div className="bg-surface-container-low rounded-lg p-3 flex items-center gap-3 border border-secondary/30">
-            <div className="w-10 h-10 rounded bg-surface-container-lowest flex items-center justify-center shrink-0 overflow-hidden">
+          <div className="bg-surface rounded-lg p-3 flex items-center gap-3 border border-secondary/30">
+            <div className="w-10 h-10 rounded bg-surface flex items-center justify-center shrink-0 overflow-hidden">
               {selectedExercise.images?.[0] ? (
                 <img
                   src={selectedExercise.images[0]}
@@ -169,14 +169,14 @@ export function ExercisePicker({ open, onClose, onSelect, exercises, selectedId 
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span className="font-medium text-sm text-on-surface truncate">{selectedExercise.name}</span>
-                <span className="shrink-0 px-1.5 py-0.5 rounded bg-surface-container-high text-[10px] text-on-surface-variant font-medium uppercase tracking-wider">
+                <span className="font-medium text-sm text-fg-2 truncate">{selectedExercise.name}</span>
+                <span className="shrink-0 px-1.5 py-0.5 rounded bg-surface text-[10px] text-muted font-medium uppercase tracking-wider">
                   {selectedExercise.category}
                 </span>
               </div>
               <div className="flex flex-wrap gap-1 mt-1">
                 {(selectedExercise.primaryMuscles ?? selectedExercise.muscleGroups ?? []).slice(0, 2).map((m) => (
-                  <span key={m} className="bg-surface-container-high px-1 py-0.5 rounded text-[10px] text-on-surface-variant">{m}</span>
+                  <span key={m} className="bg-surface px-1 py-0.5 rounded text-[10px] text-muted">{m}</span>
                 ))}
                 {selectedExercise.difficulty && (
                   <span className="bg-primary/10 text-primary px-1 py-0.5 rounded text-[10px] font-medium">
@@ -207,7 +207,7 @@ export function ExercisePicker({ open, onClose, onSelect, exercises, selectedId 
             className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ${
               favoritesOnly
                 ? 'bg-primary text-on-primary'
-                : 'bg-surface-container-low text-on-surface-variant border border-outline-variant/30 hover:bg-surface-container-high'
+                : 'bg-surface text-muted border border-outline-variant/30 hover:bg-surface-warm-high'
             }`}
           >
             {favoritesOnly ? '★' : '☆'} Favorites
@@ -217,7 +217,7 @@ export function ExercisePicker({ open, onClose, onSelect, exercises, selectedId 
         {/* Exercise list */}
         <div className="flex flex-col gap-1 max-h-64 overflow-y-auto border-t border-outline-variant/20 pt-3">
           {filtered.length === 0 ? (
-            <p className="text-sm text-on-surface-variant text-center py-8">No exercises match your filters</p>
+            <p className="text-sm text-muted text-center py-8">No exercises match your filters</p>
           ) : (
             filtered.map((ex) => {
               const muscles = ex.primaryMuscles ?? ex.muscleGroups ?? []
@@ -235,11 +235,11 @@ export function ExercisePicker({ open, onClose, onSelect, exercises, selectedId 
                   className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ${
                     isSelected
                       ? 'bg-secondary/10 border border-secondary/30'
-                      : 'hover:bg-surface-container-low border border-transparent'
+                      : 'hover:bg-surface-warm-low border border-transparent'
                   }`}
                 >
                   {/* Thumbnail */}
-                  <div className="w-10 h-10 rounded bg-surface-container-lowest flex items-center justify-center shrink-0 overflow-hidden">
+                  <div className="w-10 h-10 rounded bg-surface flex items-center justify-center shrink-0 overflow-hidden">
                     {ex.images?.[0] ? (
                       <img src={ex.images[0]} alt={ex.name} className="w-full h-full object-cover" />
                     ) : (
@@ -252,17 +252,17 @@ export function ExercisePicker({ open, onClose, onSelect, exercises, selectedId 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm text-on-surface truncate">{ex.name}</span>
-                      <span className="shrink-0 px-1.5 py-0.5 rounded bg-surface-container-high text-[10px] text-on-surface-variant font-medium uppercase tracking-wider">
+                      <span className="font-medium text-sm text-fg-2 truncate">{ex.name}</span>
+                      <span className="shrink-0 px-1.5 py-0.5 rounded bg-surface text-[10px] text-muted font-medium uppercase tracking-wider">
                         {ex.category}
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-1 mt-0.5">
                       {muscles.slice(0, maxMuscles).map((m) => (
-                        <span key={m} className="bg-surface-container-high px-1 py-0.5 rounded text-[10px] text-on-surface-variant">{m}</span>
+                        <span key={m} className="bg-surface px-1 py-0.5 rounded text-[10px] text-muted">{m}</span>
                       ))}
                       {overflow > 0 && (
-                        <span className="bg-surface-container-high px-1 py-0.5 rounded text-[10px] text-on-surface-variant font-semibold">+{overflow}</span>
+                        <span className="bg-surface px-1 py-0.5 rounded text-[10px] text-muted font-semibold">+{overflow}</span>
                       )}
                       {ex.difficulty && (
                         <span className="bg-primary/10 text-primary px-1 py-0.5 rounded text-[10px] font-medium">
@@ -285,7 +285,7 @@ export function ExercisePicker({ open, onClose, onSelect, exercises, selectedId 
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); toggleFavorite(ex.id) }}
-                    className="shrink-0 w-7 h-7 flex items-center justify-center rounded hover:bg-surface-container transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                    className="shrink-0 w-7 h-7 flex items-center justify-center rounded hover:bg-surface-warm transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
                     aria-label={isFavorite(ex.id) ? 'Remove from favorites' : 'Add to favorites'}
                   >
                     {isFavorite(ex.id) ? '★' : '☆'}

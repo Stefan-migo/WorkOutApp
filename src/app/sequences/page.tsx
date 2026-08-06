@@ -16,10 +16,10 @@ export default function SequenceListPage() {
     return (
       <div className="max-w-2xl mx-auto w-full p-margin-mobile md:p-margin-desktop flex flex-col items-center justify-center flex-1 gap-24 text-center">
         <div className="glass-card rounded-xl p-32 flex flex-col items-center gap-24 py-[64px] w-full">
-          <span className="material-symbols-outlined text-[48px] text-on-surface-variant/30">reorder</span>
+          <span className="material-symbols-outlined text-[48px] text-muted/30">reorder</span>
           <div>
             <h1 className="font-headline text-headline-lg font-bold text-primary">Sequences</h1>
-            <p className="font-body text-body-md text-on-surface-variant mt-xs max-w-sm">
+            <p className="font-body text-body-md text-muted mt-xs max-w-sm">
               Chain your workouts into powerful sequences. Combine multiple workouts for a complete training session.
             </p>
           </div>
@@ -64,15 +64,15 @@ export default function SequenceListPage() {
               <div className="absolute left-0 top-2 bottom-2 w-1 bg-primary rounded-r-sm opacity-50" />
 
               <div className="flex-1 min-w-0 pl-3">
-                <h2 className="font-body text-body-lg font-bold text-on-surface truncate">
+                <h2 className="font-body text-body-lg font-bold text-fg-2 truncate">
                   {seq.title}
                 </h2>
                 {seq.description && (
-                  <p className="font-body text-body-md text-on-surface-variant truncate">
+                  <p className="font-body text-body-md text-muted truncate">
                     {seq.description}
                   </p>
                 )}
-                <p className="font-data text-data-sm text-on-surface-variant mt-1">
+                <p className="font-data text-data-sm text-muted mt-1">
                   {resolved.length}/{seq.workoutIds.length} workout
                   {seq.workoutIds.length !== 1 && 's'}
                   {' · '}

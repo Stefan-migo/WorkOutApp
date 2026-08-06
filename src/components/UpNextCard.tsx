@@ -9,12 +9,12 @@ export default function UpNextCard({ totalSessions, thisWeekSessions }: UpNextCa
   return (
     <div className="md:col-span-12">
       <h4 className="font-headline text-headline-md text-primary mb-16">Up Next</h4>
-      <div className="glass-card rounded-xl p-16 flex flex-col md:flex-row items-center justify-between gap-16 border-l-4 border-l-primary-fixed-dim hover:bg-surface-variant/30 transition-colors">
+      <div className="glass-card rounded-xl p-16 flex flex-col md:flex-row items-center justify-between gap-16 border-l-4 border-l-primary-fixed-dim hover:bg-surface/30 transition-colors">
         {totalSessions > 0 ? (
           <>
             <div className="flex items-center gap-24 w-full md:w-auto">
               <div className="flex flex-col items-center justify-center bg-surface w-16 h-16 rounded-lg border border-outline-variant/30 shrink-0">
-                <span className="font-mono text-data-sm text-on-surface-variant">
+                <span className="font-mono text-data-sm text-muted">
                   {new Date().toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()}
                 </span>
                 <span className="font-mono text-data-lg text-primary font-bold">
@@ -28,8 +28,8 @@ export default function UpNextCard({ totalSessions, thisWeekSessions }: UpNextCa
                     : 'No sessions yet'}
                 </h5>
                 <div className="flex items-center gap-8 mt-1">
-                  <span className="material-symbols-outlined text-data-sm text-on-surface-variant">schedule</span>
-                  <span className="font-mono text-data-sm text-on-surface-variant text-[12px]">
+                  <span className="material-symbols-outlined text-data-sm text-muted">schedule</span>
+                  <span className="font-mono text-data-sm text-muted text-[12px]">
                     {thisWeekSessions} this week
                   </span>
                 </div>
@@ -46,11 +46,11 @@ export default function UpNextCard({ totalSessions, thisWeekSessions }: UpNextCa
           <>
             <div className="flex items-center gap-24 w-full md:w-auto">
               <div className="flex flex-col items-center justify-center bg-surface w-16 h-16 rounded-lg border border-outline-variant/30 shrink-0">
-                <span className="material-symbols-outlined text-[28px] text-on-surface-variant">fitness_center</span>
+                <span className="material-symbols-outlined text-[28px] text-muted">fitness_center</span>
               </div>
               <div>
                 <h5 className="font-headline text-body-lg font-bold text-primary">Get Started</h5>
-                <p className="font-body text-body-md text-on-surface-variant mt-1">
+                <p className="font-body text-body-md text-muted mt-1">
                   Create your first workout to start training
                 </p>
               </div>
