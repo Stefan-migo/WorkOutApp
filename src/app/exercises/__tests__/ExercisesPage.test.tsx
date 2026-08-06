@@ -6,6 +6,11 @@ const mockPush = vi.fn()
 const mockToggleFavorite = vi.fn()
 const mockIsFavorite = vi.fn()
 const mockClearOrphans = vi.fn()
+const mockSaveExercise = vi.fn()
+const mockSaveExerciseImage = vi.fn()
+const mockDeleteExercise = vi.fn()
+const mockGetExercise = vi.fn()
+const mockGetExerciseImages = vi.fn().mockResolvedValue([])
 let mockFavoriteIds: string[] = []
 
 const mockExercises = [
@@ -44,11 +49,11 @@ vi.mock('next/navigation', () => ({
 vi.mock('@/hooks/useExercises', () => ({
   useExercises: () => ({
     exercises: mockExercises,
-    saveExercise: vi.fn(),
-    saveExerciseImage: vi.fn(),
-    deleteExercise: vi.fn(),
-    getExercise: vi.fn(),
-    getExerciseImages: vi.fn().mockResolvedValue([]),
+    saveExercise: mockSaveExercise,
+    saveExerciseImage: mockSaveExerciseImage,
+    deleteExercise: mockDeleteExercise,
+    getExercise: mockGetExercise,
+    getExerciseImages: mockGetExerciseImages,
   }),
 }))
 
