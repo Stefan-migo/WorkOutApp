@@ -1,112 +1,88 @@
-# Tasks: Design System for WorkOutApp
+# Tasks: Design System for WorkOutApp — Happy Hues palette replacement (PR 1)
 
 ## Review Workload Forecast
 
 | Field | Value |
 |-------|-------|
-| Estimated changed lines | ~1,900–2,100 (design estimates: foundation ~300, primitives ~1,150, migration ~350–450 + tests) |
+| Estimated changed lines | ~2,300–3,100 (design: Phase A ~250–350, Phase B–C migration ~1,800–2,400, docs+i18n ~250–350) |
 | 400-line budget risk | High |
-| Chained PRs recommended | Yes |
-| Suggested split | PR 1 → PR 2a → PR 2b → PR 2c → PR 2d → PR 3 (stacked to main, in order) |
+| Chained PRs recommended | No |
+| Suggested split | Single PR 1 — design's 5 phases become work-unit commits |
 | Delivery strategy | auto-chain |
-| Chain strategy | stacked-to-main |
+| Chain strategy | size-exception |
 
 Decision needed before apply: No
-Chained PRs recommended: Yes
-Chain strategy: stacked-to-main
+Chained PRs recommended: No
+Chain strategy: size-exception
 400-line budget risk: High
 
-Note: the primitives slice (~1,150 lines per design) cannot be split into 3 PRs ≤400 — adjusted to 4 slices (2a–2d). PR 3 is borderline (~350–450); apply must monitor and split into 3a (`/workouts`) / 3b (`/exercises` + overlays) if it approaches 400.
+User-approved exception: PR 1 grows large ("PR 1 crece bastante, se re-verifica completo"); single PR, RDD review once at the end over the full candidate.
 
-### Suggested Work Units
+### Work Units (all in PR 1; each a commit batch)
 
-| Unit | Goal | Likely PR | Notes |
-|------|------|-----------|-------|
-| 1 | Foundation: tokens, drift test, a11y addon, MDX docs | PR 1 | base main; additive, one-commit segment revert |
-| 2 | Button + IconButton + barrel | PR 2a | base main after PR 1; additive (delete `ui/` to revert) |
-| 3 | Card + Badge + EmptyState | PR 2b | base main after PR 2a |
-| 4 | Input + SearchInput + Vitest browser infra | PR 2c | base main after PR 2b; infra additive, dev-only |
-| 5 | Dialog/Sheet (fixed + sheet) | PR 2d | base main after PR 2c; play + a11y run via 2c infra |
-| 6 | `/workouts` + `/exercises` migration, overlays → Dialog | PR 3 | base main after PR 2d; per-file reverts; split 3a/3b if >400 |
+| Unit | Goal | Focused test command | Runtime harness | Rollback boundary |
+|------|------|---------------------|-----------------|-------------------|
+| T-A | @theme replacement | grep globals.css (no Material tokens, no prefers-color-scheme) + tsc | `npm run dev` (unstyled until E1 — expected) | revert globals.css diff |
+| T-B | audit:tokens rebuild | `npm run audit:tokens` (RED until E5) | N/A — static script | revert package.json |
+| T-C | segments + TimerRing | `npx vitest run src/lib/__tests__/segment-styles.test.ts src/components/__tests__/TimerRing.test.tsx` | `npm run dev` play screen | revert 2 files |
+| T-D | layout themeColor | grep layout.tsx + tsc | `npm run dev` browser chrome | revert layout.tsx |
+| T-E1..E5 | component migration | touched-file vitest + tsc + audit | `npm run dev` visual smoke per family | per-file reverts |
+| T-F | MDX docs rewrite | `npm run build-storybook` | Storybook 6006 | revert src/docs/Foundations/ |
+| T-G | final gate | `npm test` + `npm run audit:tokens` + build | N/A — CI-equivalent | none (end of PR) |
 
-All slices keep the repo green independently: tsc + scoped vitest + storybook build.
+## PR 1 — Happy Hues palette replacement (one PR; all tasks below)
 
-## PR 1 — design-system-foundation
+### T-A — Token layer (`src/app/globals.css`)
 
-- [x] **T1.1** Add 5 timer tokens (`--color-timer-bg #091426`, `--color-timer-surface rgba(255,255,255,0.05)`, `--color-timer-on #ffffff`, `--color-timer-border rgba(255,255,255,0.2)`, `--color-timer-muted #9ca3af`) + 2 shadow tokens (`--shadow-card-hover`, `--shadow-fab`) to `@theme` in `src/app/globals.css`; redefine `.timer-dark-bg`/`.glass-panel-dark` → var() refs. No unit test (CSS; covered by T1.2 drift test + build). Done: `npx tsc --noEmit` clean, `npm run build-storybook` OK.
-- [x] **T1.2** RED — write `src/lib/__tests__/segment-styles.test.ts` (DSF-2a): regex-parse `globals.css` `--color-segment-*` and assert `SEGMENT_COLORS` matches per `IntervalType`. Run `npx vitest run src/lib/__tests__/segment-styles.test.ts` → fails (current hexes drift).
-- [x] **T1.3** GREEN — `src/lib/segment-styles.ts`: `SEGMENT_COLORS` → canonical lowercase hexes (prepare `#3b82f6`, work `#10b981`, rest/rest_between_cycles `#ef4444`, cooldown `#8b5cf6`). Same command → passes.
-- [x] **T1.4** RED — `src/components/__tests__/TimerRing.test.tsx`: update expected stroke hexes to canonical. Run `npx vitest run src/components/__tests__/TimerRing.test.tsx` → fails.
-- [x] **T1.5** GREEN — `src/components/TimerRing.tsx` (DSF-2b/DSF-3b): `text-white`→`text-timer-on`, `text-gray-400`→`text-timer-muted`, track `stroke="#1E293B"`→`var(--color-primary-container)` via `style` (SVG pres. attrs don't resolve vars). Dep: T1.1. Same command → passes.
-- [x] **T1.6** Extend `audit:tokens` in `package.json` (DSF-1b/D4): append scoped hex grep `grep -rE '#[0-9a-fA-F]{3,8}|rgba?\([^)]*\)' src/components/ui src/app/workouts/page.tsx src/app/exercises/page.tsx src/components/ExerciseSearchHeader.tsx || echo OK` (keep `|| echo OK`; `ui/` doesn't exist until PR 2a). Done: `npm run audit:tokens` exits 0.
-- [x] **T1.7** Install `@storybook/addon-a11y` (dev); register in `.storybook/main.ts` `addons` + add `../src/docs/**/*.mdx` to stories glob (DSF-6). Done: `npm run build-storybook` OK.
-- [x] **T1.8** Create `src/docs/Foundations/{Tokens,Typography,Colors}.mdx` listing current `@theme` values + usage examples (DSF-5). Done: `npm run build-storybook` OK.
-- [x] **T1.9** PR 1 gate: `npx tsc --noEmit`; `npx vitest run src/lib/__tests__/segment-styles.test.ts src/components/__tests__/TimerRing.test.tsx`; `npm run audit:tokens`; `npm run build-storybook`; grep touched files for Spanish UI strings (DSF-4 — `RepCompleteDialog` is deferred to future play-screen change, verify only).
+- [x] **T-A1** Replace `@theme` colors with design D1 block verbatim: add 17 palette tokens (`--color-bg #55423d`; `surface #271c19`; `surface-warm color-mix(in srgb,#ffc0ad 14%,#55423d)`; `fg #fffffe`; `fg-2 #fff3ec`; `muted color-mix(in srgb,#fff3ec 62%,#271c19)`; `meta #e78fb5`; `border color-mix(in srgb,#fff3ec 24%,#55423d)`; `border-soft color-mix(in srgb,#fff3ec 12%,#55423d)`; `accent #ffc0ad`; `accent-on #271c19`; `accent-hover color-mix(in oklab,var(--color-accent),white 8%)`; `accent-active color-mix(in oklab,var(--color-accent),white 14%)`; `success #9dbf9c`; `warn #e6a651`; `danger #e07a7f`; `focus-ring 0 0 0 4px rgba(255,192,173,0.28)`); remap segment tokens (prepare `color-mix(in srgb,var(--color-warn) 45%,var(--color-surface))`, work `var(--color-success)`, rest `var(--color-danger)`, cooldown `color-mix(in srgb,var(--color-danger) 45%,var(--color-surface))`); timer tokens → aliases (bg→`var(--color-bg)`, surface→`var(--color-surface-warm)`, on→`var(--color-fg)`, muted→`var(--color-muted)`, border→`var(--color-border)`, track→`var(--color-surface)`).
+- [x] **T-A2** Delete all 42 Material token families (primary*/secondary*/tertiary*/error*/background/on-background/surface*/inverse*/outline*/surface-tint/sidebar*/primary-btn*/on-primary-dark-bg) + entire `@media (prefers-color-scheme: dark)` block; `body` → `var(--color-bg)`/`var(--color-fg-2)`; `.ambient-shadow` → `box-shadow: var(--shadow-fab)`; add `@utility focus-ring { outline:none; box-shadow: var(--color-focus-ring); }`; `--font-mono/--font-timer/--font-data` → `'SF Mono', ui-monospace, 'Cascadia Mono', 'JetBrains Mono', monospace` (drop `--font-jetbrains-mono` var from chains).
+- **DoD**: grep `src/app/globals.css` → zero Material tokens (`--color-(primary|secondary|tertiary|error|background|on-surface|surface-container|surface-dim|surface-bright|surface-variant|inverse|outline|surface-tint|sidebar|primary-btn|on-primary-dark-bg)`) and zero `prefers-color-scheme`; `npx tsc --noEmit` passes; segment drift test RED (expected — proves the swap).
 
-Commits (work units): `feat(tokens): add timer and shadow tokens to @theme` → `fix(segment-styles): canonicalize SEGMENT_COLORS to @theme tokens with drift test` → `refactor(TimerRing): use timer tokens` → `chore(audit): scope audit:tokens hex check to touched paths` → `docs(storybook): add a11y addon and Foundations MDX pages`.
+### T-B — audit:tokens rebuild (`package.json`)
 
-## PR 2a — Button + IconButton + barrel
+- [x] **T-B1** Rebuild `audit:tokens` as D6 4-grep chain: (1) no Material utilities whole-src `*.tsx|*.ts` (D6 regex; do NOT ban `text-fg` — now a real utility); (2) no Material tokens + no `prefers-color-scheme` in globals.css; (3) no raw `#[0-9a-fA-F]{3,8}|rgba?\([^)]*\)` in src `*.tsx|*.ts` except globals.css + lines containing `themeColor`; (4) no second accent (`#3b82f6|#8b5cf6|bg-blue|text-blue|bg-purple|text-purple|bg-violet|text-violet|bg-indigo|text-indigo`). DoD: `npm run audit:tokens` fails NOW on rules 1–2 (proves detector) — stays RED until E5.
+- [x] **T-B2** RED — add `src/lib/__tests__/token-audit.test.ts` (contract-lock): read globals.css + scan `src/**/*.{ts,tsx}`; assert zero Material token names/utilities, zero `prefers-color-scheme`, zero raw hex outside `@theme`/`themeColor` mirror, zero blue/purple. DoD: fails for the right reasons now; GREEN only at T-G.
 
-- [ ] **T2.1** RED — `src/components/ui/__tests__/Button.test.tsx` (UIP-2): native button, variant/size classes, pill/fab, disabled inert + distinct, `loading` → disabled + `aria-busy`. Run `npx vitest run src/components/ui/__tests__/Button.test.tsx` → fails (missing).
-- [ ] **T2.2** GREEN — `src/components/ui/Button.tsx` (D7: plain `Record<variant,string>` maps, `leftIcon`/`rightIcon` Material Symbols, hook-free → no `'use client'`). Same command → passes.
-- [ ] **T2.3** `src/components/ui/Button.stories.tsx` — CSF3 autodocs, args/controls, play fn (click). Done: renders in `npm run build-storybook`; play executes once 2c infra lands.
-- [ ] **T2.4** RED — `src/components/ui/__tests__/IconButton.test.tsx`: `w-11 h-11` (≥44×44), renders `aria-label` (UIP-2). Run `npx vitest run src/components/ui/__tests__/IconButton.test.tsx` → fails.
-- [ ] **T2.5** GREEN — `src/components/ui/IconButton.tsx` (`icon` + required `label` → `aria-label`). Same command → passes.
-- [ ] **T2.6** `src/components/ui/IconButton.stories.tsx` — autodocs; include an unlabeled variant demonstrating the UIP-2 a11y violation (visible in Accessibility panel).
-- [ ] **T2.7** Create `src/components/ui/index.ts` barrel re-exporting Button + IconButton.
-- [ ] **T2.8** PR 2a gate: `npx tsc --noEmit`; `npx vitest run src/components/ui/__tests__/Button.test.tsx src/components/ui/__tests__/IconButton.test.tsx`; `npm run build-storybook`.
+### T-C — Segments + TimerRing (RED → GREEN)
 
-Commits: `feat(ui): add Button primitive with stories, tests, and barrel` → `feat(ui): add IconButton primitive with stories and tests`.
+- [x] **T-C1** RED — rewrite `src/lib/__tests__/segment-styles.test.ts` (DSF-2a): `SEGMENT_COLORS[i]` === `var(--color-segment-{key})` per `IntervalType` (rest_between_cycles→rest) + terminal resolution: work→`#9dbf9c`, rest→`#e07a7f`, prepare→`color-mix(in srgb, #e6a651 45%, #271c19)`, cooldown→`color-mix(in srgb, #e07a7f 45%, #271c19)`. Run → fails.
+- [x] **T-C2** RED — update `src/components/__tests__/TimerRing.test.tsx` (DSF-2b): progress circle `style.stroke === 'var(--color-segment-*)'` per interval, label span `style.color` same, track `var(--color-timer-track)`; drop hex `toHaveAttribute('stroke', …)` assertions. Run → fails.
+- [x] **T-C3** GREEN — `src/lib/segment-styles.ts`: `SEGMENT_COLORS` → var-reference strings per D2 (prepare/work/rest/rest_between_cycles/cooldown → `var(--color-segment-*)`).
+- [x] **T-C4** GREEN — `src/components/TimerRing.tsx`: progress circle `stroke={ringColor}` → `style={{ stroke: ringColor }}` (SVG presentation attrs can't resolve `var()`/`color-mix`).
+- **DoD**: `npx vitest run src/lib/__tests__/segment-styles.test.ts src/components/__tests__/TimerRing.test.tsx` green.
 
-## PR 2b — Card + Badge + EmptyState
+### T-D — Shell (`src/app/layout.tsx`)
 
-- [ ] **T2b.1** RED — `Card.test.tsx` (UIP-3): variants filled/elevated/outlined/glass + padding classes; presentational passthrough. Run `npx vitest run src/components/ui/__tests__/Card.test.tsx` → fails.
-- [ ] **T2b.2** GREEN — `src/components/ui/Card.tsx` (hover:shadow-card-hover on filled). Same command → passes.
-- [ ] **T2b.3** `Card.stories.tsx` — variant cycling incl. dark-mode story.
-- [ ] **T2b.4** RED — `Badge.test.tsx` (UIP-3): variant classes (neutral/primary/error/segment-*), sizes, meaning conveyed in text. Run `npx vitest run src/components/ui/__tests__/Badge.test.tsx` → fails.
-- [ ] **T2b.5** GREEN — `src/components/ui/Badge.tsx`. Same command → passes.
-- [ ] **T2b.6** `Badge.stories.tsx` — segment variants with textual labels (color never sole differentiator).
-- [ ] **T2b.7** RED — `EmptyState.test.tsx` (UIP-5): icon/title/message/action render. Run `npx vitest run src/components/ui/__tests__/EmptyState.test.tsx` → fails.
-- [ ] **T2b.8** GREEN — `src/components/ui/EmptyState.tsx` (centered column, token colors, max-w-sm). Same command → passes.
-- [ ] **T2b.9** `EmptyState.stories.tsx` — with and without action.
-- [ ] **T2b.10** PR 2b gate: tsc; `npx vitest run src/components/ui/__tests__/`; `npm run build-storybook`; update `index.ts` with 3 exports.
+- [x] **T-D1** `themeColor: '#091426'` → `'#55423d'` (literal mirror of `--color-bg`, DSF-1d); `<body className="bg-background text-on-background">` → `bg-bg text-fg-2`. DoD: grep → `themeColor: '#55423d'`; tsc clean; layout.tsx excluded from E1/E2 sweeps.
 
-Commits: `feat(ui): add Card primitive with stories and tests` → `feat(ui): add Badge primitive with stories and tests` → `feat(ui): add EmptyState primitive with stories and tests`.
+### T-E — Component migration (DSF-7) — 49-file set
 
-## PR 2c — Input + SearchInput + Vitest browser infra
+Authoritative set (D6 rule-1 grep): 15 pages in `src/app/` — `(auth)/login`, `exercises/[id]`, `exercises`, `history/[id]`, `history`, `layout` (→T-D), `page`, `sequences/[id]/play`, `sequences/new`, `sequences`, `workouts/[id]/edit`, `workouts/[id]/play`, `workouts/[id]/preview`, `workouts/new`, `workouts`; 34 components in `src/components/` — AddToWorkoutModal, ConsistencyHeatmap, DayAssignmentModal, DayRow, ErrorBoundary, ExerciseDeleteDialog, ExerciseFormDialog, ExercisePanel, ExercisePicker, ExerciseSearchHeader, HeroCard, IntervalDetailSheet, IntervalEditModal, IntervalRow, MiniCalendar, Nav, ProgressBar, QuickActions, RepCompleteDialog, RepCounter, StatsDashboard, StrainGauge, TagChips, TemplatesPanel, TimelineStrip, TimerControls, TimerDisplay, TodaysFocus, UpcomingList, UpNextCard, VolumeChart, WeekNav, WorkoutBuilder, WorkoutEditor. Files may appear in several clusters (family sweeps). Gate after each cluster: `npx tsc --noEmit` + `npm run audit:tokens` (cluster files clean on rules 1/3/4) + touched-file vitest.
 
-- [ ] **T2c.1** Infra (UIP-7/D6): add devDeps `@storybook/addon-vitest`, `@storybook/test`, `@playwright/test`; `vitest.config.ts` → `test.projects` = `unit` (jsdom, current settings) + `storybook` (plugins `storybookTest({configDir: '.storybook'})`, browser `{enabled, headless, provider:'playwright', instances:[{browser:'chromium'}]}`, setupFiles `./.storybook/vitest.setup.ts`); create `.storybook/vitest.setup.ts` (`@testing-library/jest-dom/vitest`); script `"test:stories": "vitest run --project storybook"`; run `npx playwright install chromium` (dev-only, first-run download). Done: `npx vitest run --project unit src/components/__tests__/TimerRing.test.tsx` (existing suite unaffected) + `npm run build-storybook`. Risk: chromium download may fail on Windows/CI — the browser project is additive; if flaky, keep storybook tests as local verification, unit tests remain the gate.
-- [ ] **T2c.2** RED — `Input.test.tsx` (UIP-4): label↔field association (`htmlFor`/`id`, `useId`), `error` → `role="alert"` + `aria-describedby`, hint. Run `npx vitest run src/components/ui/__tests__/Input.test.tsx` → fails.
-- [ ] **T2c.3** GREEN — `src/components/ui/Input.tsx` (`'use client'` for `useId`). Same command → passes.
-- [ ] **T2c.4** `Input.stories.tsx` — autodocs; play fn (type + error).
-- [ ] **T2c.5** RED — `SearchInput.test.tsx`: `type="search"`, clear ✕ appears with value, `onChange('')`. Run `npx vitest run src/components/ui/__tests__/SearchInput.test.tsx` → fails.
-- [ ] **T2c.6** GREEN — `src/components/ui/SearchInput.tsx` (wraps Input, search icon + clear). Same command → passes.
-- [ ] **T2c.7** `SearchInput.stories.tsx` — play fn (type → clear).
-- [ ] **T2c.8** PR 2c gate: tsc; `npx vitest run src/components/ui/__tests__/`; `npx vitest run --project storybook` (all stories incl. 2a Button play); `npm run build-storybook`; update `index.ts`.
+- [x] **T-E1** surface/background/text family — full set minus layout.tsx: `text-on-surface`/`text-on-background`→`text-fg-2`, `text-on-surface-variant`→`text-muted`, `bg-surface-container*`/`bg-surface-dim`/`bg-surface-bright`/`bg-surface-variant`→`bg-surface`, `hover:bg-surface-container*`→`hover:bg-surface-warm`, `bg-background`→`bg-bg`.
+- [x] **T-E2** primary/accent family — full set minus layout.tsx: `bg-primary`/`bg-primary-btn`/`bg-primary/90`/`bg-primary-container`/`bg-secondary-container`→`bg-accent`, `text-primary`/`hover:text-primary`/`text-secondary`/`hover:text-secondary`→`text-accent`, `text-on-primary`/`text-on-primary-btn`/`text-on-primary-dark-bg`→`text-accent-on` (on fills) / `text-fg-2` (on surface), `bg-primary-btn-hover`→`hover:bg-accent-hover`, `border-secondary`/`focus:border-secondary`/`bg-secondary-container/20`→`border-accent`/`focus:border-accent`/`bg-accent/20`.
+- [x] **T-E3** border/outline family — 32 files (login, exercises/[id], exercises, history/[id], history, sequences/new, sequences, workouts/[id]/preview, workouts + AddToWorkoutModal, DayAssignmentModal, DayRow, ExerciseDeleteDialog, ExerciseFormDialog, ExercisePanel, ExercisePicker, ExerciseSearchHeader, HeroCard, IntervalDetailSheet, IntervalEditModal, IntervalRow, MiniCalendar, Nav, StatsDashboard, TagChips, TemplatesPanel, TodaysFocus, UpcomingList, UpNextCard, VolumeChart, WorkoutBuilder, WorkoutEditor): `border-outline-variant` (default)→`border-border`, `…/10..30`→`border-border-soft`, `border-outline`→`border-border`, `text-outline`/`text-outline-variant`/`placeholder:text-outline/50`→`text-muted` (opacity suffix kept), `bg-surface-tint`→`bg-surface`.
+- [x] **T-E4** sidebar + timer/play-screen + inline styles: `Nav.tsx` (`bg-sidebar`→`bg-surface`, `text-on-sidebar*`→`text-fg-2`/`text-muted`); play-screen whites/greys → timer tokens in `sequences/[id]/play/page.tsx`, `workouts/[id]/play/page.tsx`, TimerControls.tsx, RepCounter.tsx, RepCompleteDialog.tsx, PlayHeader.tsx, ProgressBar.tsx, ExercisePanel.tsx, TimerDisplay.tsx (`text-white`→`text-timer-on`, `bg-white`→`bg-timer-on`, `text-gray-400`→`text-timer-muted`, `bg-[#1E293B]`→`bg-timer-track`, `border-white/10`→`border-timer-border/50`, backdrop `bg-black/N`→`bg-surface/80`); any `style={{…}}` raw hex/rgba in touched files → `var(--color-*)` (rule 3); RepCompleteDialog Spanish UI strings → English (DSF-4).
+- [x] **T-E5** states/focus/catch-all — 26 files (login, exercises/[id], exercises, history/[id], history, sequences/new, sequences, workouts + DayAssignmentModal, ErrorBoundary, ExerciseDeleteDialog, ExerciseFormDialog, ExercisePicker, ExerciseSearchHeader, HeroCard, IntervalDetailSheet, IntervalEditModal, IntervalRow, QuickActions, StatsDashboard, TagChips, TemplatesPanel, TimerDisplay, UpNextCard, WorkoutBuilder, WorkoutEditor): `bg-error`/`text-error`/`hover:bg-error`→`bg-danger`/`text-danger`/`hover:bg-danger`, `bg-error-container`→`bg-danger/15`, `text-on-error` (fills)→`text-accent-on`, `ring-primary`/`ring-secondary`→`focus-visible:focus-ring` (104 sites); catch-all pass: any remaining Material utility in the set per DSF-7 mapping + spec catch-all (surface/fg-2/muted/border/accent/danger analogs). DoD: `npm run audit:tokens` fully GREEN.
+- **DoD (T-E total)**: rules 1/3/4 grep-clean on the set; touched suites pass; `npm test` passes.
 
-Commits: `test(storybook): add vitest browser project for play functions and a11y` → `feat(ui): add Input primitive with stories and tests` → `feat(ui): add SearchInput primitive with stories and tests`.
+### T-F — Storybook docs (`src/docs/Foundations/`)
 
-## PR 2d — Dialog/Sheet
+- [x] **T-F1** Rewrite `Tokens.mdx` (DSF-5): 17 palette + 4 segment + 6 timer-alias + 2 shadow tokens (name/value/role); SF Mono chain note; usage examples `bg-bg text-fg-2`, accent button, `focus-visible:focus-ring`.
+- [x] **T-F2** Rewrite `Colors.mdx`: ColorPalette groups Canvas (`bg`/`surface`/`surface-warm`), Ink (`fg`/`fg-2`/`muted`/`meta`), Lines (`border`/`border-soft`), Accent (`accent`/`accent-on`/`accent-hover`/`accent-active`), States (`success`/`warn`/`danger`), Segments (4), Timer (6); accent-discipline section (DSF-1c: ≤2 accents per screen incl. links, accent never a page wash, `accent-on` with every fill, no blue/purple); documented values MUST equal `@theme` definitions — no new hexes.
+- [x] **T-F3** Rewrite `Typography.mdx`: mono row → `'SF Mono', ui-monospace, 'Cascadia Mono', 'JetBrains Mono', monospace`; sample "WorkOutApp — Inter, SF Mono"; warmth from cream/rose, not pink type.
+- **DoD**: `npm run build-storybook` OK; `@storybook/addon-a11y` + mdx glob already in `.storybook/main.ts` (DSF-6 — verify only); grep docs → no hex outside the palette list.
 
-- [ ] **T2d.1** RED — `Dialog.test.tsx` (UIP-6a–d): `open`→`showModal`, ESC (`cancel` event) → `onClose`, backdrop click (`e.target === ref`), focus restored, title `aria-labelledby`, sheet variant class; use repo showModal polyfill pattern (see `WorkoutEditor.test.tsx`). Run `npx vitest run src/components/ui/__tests__/Dialog.test.tsx` → fails.
-- [ ] **T2d.2** GREEN — `src/components/ui/Dialog.tsx` (D5): controlled `open`/`onClose` effect, native `cancel` + `close` events, `fixed` (m-auto max-w-lg) + `sheet` variants, header with X IconButton. Same command → passes.
-- [ ] **T2d.3** Add `.ui-dialog-sheet` class + slide keyframes to `src/app/globals.css` gated by `@media (prefers-reduced-motion: no-preference)` (UIP-6d). No unit test (CSS).
-- [ ] **T2d.4** `Dialog.stories.tsx` — fixed + sheet; play fn (open → ESC → close, focus restored). Done: `npx vitest run --project storybook` runs the play + a11y checks.
-- [ ] **T2d.5** PR 2d gate: tsc; `npx vitest run src/components/ui/__tests__/Dialog.test.tsx`; `npx vitest run --project storybook`; `npm run build-storybook`; update `index.ts`.
+### T-G — Final verification gate (PR 1)
 
-Commits: `feat(ui): add Dialog/Sheet primitive with stories, tests, and play`.
+- [x] **T-G1** `npx tsc --noEmit` clean.
+- [x] **T-G2** `npm test` green — full suite (unit + segment drift + TimerRing + token-audit contract-lock from T-B2 + page tests).
+- [x] **T-G3** `npm run audit:tokens` exits 0 (all 4 rules, whole src).
+- [x] **T-G4** `npm run build` + `npm run build-storybook` succeed.
+- [x] **T-G5** Grep all touched files for Spanish UI strings → none (DSF-4); manual `npm run dev` smoke — timer play screen renders warm palette, 4 segment states pairwise distinct on `--color-bg`.
 
-## PR 3 — page-migration-demo
-
-- [ ] **T3.1** Migrate `src/app/workouts/page.tsx` (PMD-1): empty state → `EmptyState` (icon `fitness_center`, "No workouts yet", action Button "Create Workout"); search → `SearchInput`; "New Workout" → `Button sm primary leftIcon="add"`; type filter → `Button pill`; card → `Card filled` (keep role/tabIndex/onClick passthrough); FAB → `Button fab` + `className="fixed bottom-24 right-24 md:hidden z-50"` + `shadow-fab`. ⋮ menu and 36px quick-play stay inline (PMD-1 non-goal, `ponytail:` comment). Test-first: baseline `npx vitest run src/app/workouts/__tests__/WorkoutListPage.test.tsx` (green pre-migration) → migrate → adjust queries → same command green. Dep: PR 2a–2c (Button, Card, EmptyState, SearchInput).
-- [ ] **T3.2** Overlay API change (PMD-2d, D5): `src/components/ExerciseFormDialog.tsx`, `ExerciseDeleteDialog.tsx`, `AddToWorkoutModal.tsx` — drop `dialogRef` prop + internal `<dialog>`, accept `open`/`onClose` and render `Dialog fixed`. Test-first: update `ExerciseFormDialog.test.tsx` + `ExerciseDeleteDialog.test.tsx` to the `open` prop API → `npx vitest run src/components/__tests__/ExerciseFormDialog.test.tsx src/components/__tests__/ExerciseDeleteDialog.test.tsx`; then implement. Dep: PR 2d.
-- [ ] **T3.3** `src/app/exercises/[id]/page.tsx` (~15 lines): delete-confirm overlay `dialogRef`/`showModal` → `open` state. Test-first: update `src/app/exercises/[id]/__tests__/page.test.tsx` → `npx vitest run src/app/exercises/[id]/__tests__/page.test.tsx`; then implement. Dep: T3.2.
-- [ ] **T3.4** Migrate `src/app/exercises/page.tsx` (PMD-2) + `src/components/ExerciseSearchHeader.tsx`: empty states ×2 → `EmptyState` (icons `star`/`search_off`); card grid → `Card filled` + `Badge` (neutral chips) + star `IconButton filled` + quick-assign `IconButton`; overlays wired via `open` state (T3.2 API); search → `SearchInput`; `FilterSelect` untouched; All/Favorites toggle inline. Test-first: baseline `npx vitest run src/app/exercises/__tests__/ExercisesPage.test.tsx src/components/__tests__/ExerciseSearchHeader.test.tsx` → migrate → adjust queries → same commands green. Dep: T3.1? no — Dep: T3.2, PR 2a–2d.
-- [ ] **T3.5** Colocate minimal stories for extracted page components (WorkoutCard / ExerciseCard) if extraction created named components (PMD-3 proof). Done: `npx vitest run --project storybook` + `npm run build-storybook`.
-- [ ] **T3.6** PR 3 gate (PMD-3/PMD-4): `npx tsc --noEmit`; `npm run audit:tokens` (scoped hex grep now covers migrated paths — must pass); touched suites `npx vitest run src/app/workouts/__tests__/WorkoutListPage.test.tsx src/app/exercises/__tests__/ExercisesPage.test.tsx src/components/__tests__/ExerciseSearchHeader.test.tsx src/components/__tests__/ExerciseFormDialog.test.tsx src/components/__tests__/ExerciseDeleteDialog.test.tsx src/app/exercises/[id]/__tests__/page.test.tsx`; `npm run build-storybook`; manual smoke `npm run dev` (search/filter/navigation/dialogs). If diff approaches 400 → split 3a (`/workouts`) / 3b (`/exercises` + overlays).
-
-Commits: `feat(workouts): migrate list page to ui primitives` → `refactor(exercises): switch overlays to controlled Dialog API` → `feat(exercises): migrate list page to ui primitives` → `test(storybook): add page component stories` (if T3.5 produced files).
+Commits (work units, in order): `feat(tokens): replace @theme with Happy Hues palette + timer aliases` → `chore(audit): rebuild audit:tokens for Happy Hues contract` → `fix(segments): SEGMENT_COLORS → @theme var refs; TimerRing inline stroke` → `feat(layout): themeColor mirrors --color-bg` → `refactor(styles): migrate text/surface/bg families` → `refactor(styles): migrate accent/primary families` → `refactor(styles): migrate border/outline families` → `refactor(styles): migrate sidebar + play-screen to timer tokens` → `refactor(styles): migrate states/focus + catch-all + i18n` → `docs(storybook): rewrite Foundations MDX to Happy Hues` → `test(audit): lock Happy Hues contract`.
 
 ## Dependency Order (for apply)
 
-PR 1 → PR 2a → PR 2b → PR 2c → PR 2d → PR 3 (each merges to main in order; stacked-to-main). Intra-PR: T1.1 before T1.5; T2.1 before T2.3; T3.2 before T3.3 before T3.4. Non-goals (do NOT implement): shadcn/ui, Chromatic, addon-designs, test-runner, dark toggle, remaining 13 primitives.
+T-A → T-B → T-C (needs T-A token values) → T-D → T-E1 → T-E2 → T-E3 → T-E4 → T-E5 → T-F → T-G. Non-goals (do NOT implement): PR 2 primitives (Button/Card/Badge/EmptyState/Input/SearchInput/Dialog) and PR 3 page-demo migration — re-plan those at their launch (design D8–D11 hold their contracts); shadcn/ui, Chromatic, addon-designs, test-runner, theme toggle, light theme.

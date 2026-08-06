@@ -1,199 +1,279 @@
-# Design: Design System for WorkOutApp
+# Design: Design System for WorkOutApp — Happy Hues re-alignment
 
 ## Technical Approach
 
-Brownfield, token-first, Storybook-first extraction. Three independently revertible slices (chained PRs):
+Re-aligned to the revised `design-system-foundation` spec (DSF-1..DSF-7). The Material 3 palette is
+**replaced in full** by the Happy Hues dark-warm contract (user chose "Reemplazar tema completo
+ahora"): `@theme` holds only the new palette + segment/timer remaps + unchanged font/spacing/size/
+shadow tokens; the `prefers-color-scheme` variant is deleted (single dark-warm theme in all OS
+modes); all ~49 files using Material-derived utilities migrate per the DSF-7 mapping; `audit:tokens`
+is rebuilt to enforce the new contract; Storybook docs are rewritten; the a11y addon stays enabled.
 
-1. **Foundation** — token gap fixes in `@theme` (segment canonical values, timer tokens, shadow tokens), `SEGMENT_COLORS` drift test, TimerRing touch-up, a11y addon, Foundations docs (MDX).
-2. **Primitives** — `src/components/ui/` with 8 primitives, colocated CSF3 stories (`tags: ['autodocs']`), play functions, a11y checks under Vitest.
-3. **Migration demo** — `/workouts` and `/exercises` converted to primitives; three exercise overlays rebuilt on the Dialog primitive.
+Three-slice chained-PR structure is kept, now coherent with the palette swap:
 
-No new runtime dependencies. Dev-only additions: `@storybook/addon-a11y`, `@storybook/addon-vitest`, `@storybook/test`, `@playwright/test`.
+1. **PR 1 (foundation)** — full palette replacement: `@theme` rewrite, DSF-7 migration of ~49 files
+   (~970 Material utility instances + white/black/gray cleanups), `SEGMENT_COLORS` remap to CSS-var
+   references, timer aliases, `audit:tokens` rebuild, `themeColor`, test updates, MDX docs, DSF-4
+   i18n cleanup.
+2. **PR 2 (primitives)** — `src/components/ui/` 8 primitives, stories, a11y checks (unchanged plan,
+   token references updated to new roles).
+3. **PR 3 (migration demo)** — `/workouts` + `/exercises` → primitives (unchanged plan).
 
-Map to specs: DSF-1/2/3/5/6 (foundation), UIP-1..8 (primitives), PMD-1..4 (migration). This is a presentational refactor: **no data flow changes** — state continues to live in the pages/hooks/contexts; primitives are controlled components.
+No new runtime dependencies (dev-only: none beyond already-installed `@storybook/addon-a11y`).
+Presentational refactor: **no data flow changes**. Reinforces CA-1 (body rule tokenized, dedupe).
 
 ## Architecture Decisions
 
-### D1: Folder structure — flat `ui/` + barrel
+### D1: Token architecture — full `@theme` replacement block
 
 | Option | Tradeoff | Decision |
 |---|---|---|
-| `ui/Button/Button.tsx + Button.stories.tsx + index.ts` | Nesting, 3 files per primitive | ✗ |
-| **Flat `ui/Button.tsx` + `ui/Button.stories.tsx` + `ui/index.ts`** | Matches repo (everything flat); SB glob `../src/**/*.stories.@(...)` already matches; barrel gives one import point | ✓ |
+| Keep Material tokens, add Happy Hues alongside | Two palettes, DSF-1a violated (REPLACED, not extended), drift risk | ✗ |
+| **Replace `@theme` in full, delete dark-mode media block** | Single source of truth; one big diff; matches user's "reemplazo completo" choice | ✓ |
 
-Tests go in `src/components/ui/__tests__/` (repo convention). Barrel `index.ts` re-exports all 8 primitives so pages import `from '@/components/ui'` — this also gives reviewers a single contract list (PMD-3).
+Exact replacement for the colors section of `@theme` (font/spacing/size/shadow tokens untouched):
 
-### D2: `SEGMENT_COLORS` unification — TS map + drift test
+```css
+/* Happy Hues dark-warm — SOLE palette (DSF-1) */
+--color-bg: #55423d;
+--color-surface: #271c19;
+--color-surface-warm: color-mix(in srgb, #ffc0ad 14%, #55423d);
+--color-fg: #fffffe;
+--color-fg-2: #fff3ec;
+--color-muted: color-mix(in srgb, #fff3ec 62%, #271c19);
+--color-meta: #e78fb5;
+--color-border: color-mix(in srgb, #fff3ec 24%, #55423d);
+--color-border-soft: color-mix(in srgb, #fff3ec 12%, #55423d);
+--color-accent: #ffc0ad;
+--color-accent-on: #271c19;
+--color-accent-hover: color-mix(in oklab, var(--color-accent), white 8%);
+--color-accent-active: color-mix(in oklab, var(--color-accent), white 14%);
+--color-success: #9dbf9c;
+--color-warn: #e6a651;
+--color-danger: #e07a7f;
+--color-focus-ring: 0 0 0 4px rgba(255, 192, 173, 0.28); /* shadow value, see D4 */
 
-| Option | Tradeoff | Decision |
-|---|---|---|
-| Runtime `getComputedStyle(document).getPropertyValue('--color-segment-*')` | SSR first-paint flash (empty before mount) → needs hook/effect; jsdom tests must inject CSS vars; more code | ✗ |
-| **TS map with canonical hexes + vitest test parsing `globals.css`** | Hex duplicated once, but drift is caught in CI; static, zero runtime cost, TimerRing keeps reading a plain object | ✓ |
+/* Segment states → palette (DSF-2) */
+--color-segment-prepare: color-mix(in srgb, var(--color-warn) 45%, var(--color-surface));
+--color-segment-work: var(--color-success);
+--color-segment-rest: var(--color-danger);
+--color-segment-cooldown: color-mix(in srgb, var(--color-danger) 45%, var(--color-surface));
 
-`SEGMENT_COLORS` keeps its `Record<IntervalType, string>` shape with the canonical values (lowercase, matching `@theme`): prepare `#3b82f6`, work `#10b981`, rest `#ef4444`, rest_between_cycles `#ef4444`, cooldown `#8b5cf6`. New test `src/lib/__tests__/segment-styles.test.ts` reads `globals.css`, extracts `--color-segment-*` with a regex, and asserts equality per entry (DSF-2a). `TimerRing` code is unchanged structurally; its tests update expected hexes (DSF-2b). Visible segment colors change — intended (decision #1).
-
-### D3: Timer tokens — created NOW, single always-dark value
-
-| Option | Tradeoff | Decision |
-|---|---|---|
-| Defer tokens to the future play-screen change | Foundation stays incomplete; DSF-3a unmet in this change | ✗ |
-| **Create 5 tokens in `@theme` now, no light-mode override** | Satisfies DSF-3a; play screens are *unconditionally* dark (`timer-dark-bg` is unguarded — they render dark even in light OS mode), so a light variant would change appearance and violate the DSF-3 no-drift scenario | ✓ |
-
-Values (match the current hardcoded palette exactly):
-
-| Token | Value | Replaces |
-|---|---|---|
-| `--color-timer-bg` | `#091426` | `.timer-dark-bg` background |
-| `--color-timer-surface` | `rgba(255,255,255,0.05)` | `glass-panel-dark` background |
-| `--color-on-timer` | `#ffffff` | `text-white` |
-| `--color-timer-border` | `rgba(255,255,255,0.2)` | `border-white/20` (lower-alpha usages become `border-timer-border/50`) |
-| `--color-timer-muted` | `#9ca3af` | `text-gray-400` |
-
-`.timer-dark-bg` and `.glass-panel-dark` in `globals.css` are redefined to reference these tokens. Spec DSF-3's "light-mode values" clause is interpreted as *values usable regardless of OS theme* — play screens stay dark in both (the archive phase should amend that wording). `text-gray-300` (ExercisePanel/RepCounter body) maps to `timer-muted` too — a minor delta accepted and documented.
-
-**DSF-3b scope**: only `TimerRing` is touched by this change (for DSF-2b), so only it gets the token swaps: `text-white` → `text-timer-on`, `text-gray-400` → `text-timer-muted`, track stroke `#1E293B` → `var(--color-primary-container)` via `style={{ stroke: ... }}` (SVG presentation attributes don't resolve CSS vars). The play pages, PlayHeader, ProgressBar, RepCompleteDialog, RepCounter, TimerControls migrate in the future play-screen change.
-
-Also add two shadow tokens to `@theme`: `--shadow-card-hover: 0 8px 30px rgba(11,28,48,0.04)` and `--shadow-fab: 0 4px 20px rgba(30,41,59,0.2)` — Tailwind v4 generates `shadow-card-hover` / `shadow-fab` utilities, replacing the arbitrary-shadow literals in the demo pages.
-
-### D4: `audit:tokens` — extend script + vitest drift test
-
-`audit:tokens` **exists** in `package.json` but greps for legacy shadcn-style token names (`text-fg`, `bg-accent`, ...) — it does NOT catch hardcoded hex. Plan:
-
-- Extend the script with a second grep for hex/rgba literals **scoped to touched paths** (a whole-`src/` grep would false-fail on `globals.css`, stories backgrounds, TimerRing):
-  `grep -rE '#[0-9a-fA-F]{3,8}|rgba?\([^)]*\)' src/components/ui src/app/workouts/page.tsx src/app/exercises/page.tsx src/components/ExerciseSearchHeader.tsx || echo OK`
-- Add the `segment-styles.test.ts` drift test (D2). Both run in CI via `npm test` / the script (DSF-1b, DSF-2a).
-
-### D5: Dialog — controlled native `<dialog>`, no headless lib
-
-| Option | Tradeoff | Decision |
-|---|---|---|
-| Radix/headlessui Dialog | New runtime deps, fights the native element | ✗ |
-| **Native `<dialog>` + controlled `open` prop** | showModal() gives focus trap + focus restore + ESC + `::backdrop` for free; ~10 lines of effect glue | ✓ |
-
-Mechanics: `open` → `ref.showModal()`, `!open` → `ref.close()` (guarded by `dialog.open`); backdrop click via `e.target === ref.current` (works because `::backdrop` events target the dialog element); native `cancel` (ESC) and programmatic `close()` both surface through the `close` event → `onClose`. Focus in/out and trap are native (UIP-6b satisfied with zero code). Title rendered as `<h2 id={titleId}>` linked via `aria-labelledby`; native dialog implies `role="dialog"` + `aria-modal` when shown (UIP-6c). Sheet slide animation (`0.3s ease-out`) lives in `globals.css` as a plain class (repo convention: `.glass-card`, `.timer-dark-bg`) gated by `@media (prefers-reduced-motion: no-preference)` (UIP-6d). This replaces the two duplicated inline `<style>` keyframes blocks when the editor/history sheets migrate (future change — UIP-8 holds for in-scope instances only).
-
-### D6: Storybook tests via Vitest browser project
-
-The SB10 Vitest addon (`@storybook/addon-vitest`, exports `storybookTest` from `@storybook/addon-vitest/vitest-plugin`) runs play functions and a11y checks in a real browser:
-
-```
-vitest.config.ts
-├── test.projects = [
-│     { name: 'unit', environment: 'jsdom', ...current settings... },
-│     { name: 'storybook',
-│       plugins: [storybookTest({ configDir: '.storybook', storybookScript: 'npm run storybook -- --no-open' })],
-│       test: { browser: { enabled: true, headless: true, provider: 'playwright',
-│                          instances: [{ browser: 'chromium' }] },
-│               setupFiles: ['./.storybook/vitest.setup.ts'] } }
-└── shared: alias '@', globals, maxWorkers
+/* Timer aliases → palette (DSF-3) */
+--color-timer-bg: var(--color-bg);
+--color-timer-surface: var(--color-surface-warm);
+--color-timer-on: var(--color-fg);
+--color-timer-muted: var(--color-muted);
+--color-timer-border: var(--color-border);
+--color-timer-track: var(--color-surface);
 ```
 
-`@storybook/addon-a11y` registered in `.storybook/main.ts` `addons` — with the Vitest addon, axe checks run automatically per story (UIP-7). New script `"test:stories": "vitest run --project storybook"`. `@playwright/test` + `npx playwright install chromium` (dev-only; first-run download).
+**DELETED** (42 tokens + dark block): `--color-primary*` (8), `--color-secondary*` (8),
+`--color-tertiary*` (8), `--color-error*` (4), `--color-background`/`--color-on-background`,
+`--color-surface`/`--color-on-surface`/`--color-surface-dim`/`--color-surface-bright`/
+`--color-surface-container*` (5)/`--color-surface-variant`/`--color-on-surface-variant`,
+`--color-inverse-*` (3), `--color-outline`/`--color-outline-variant`/`--color-surface-tint`,
+`--color-sidebar*` (5), `--color-primary-btn*` (3), `--color-on-primary-dark-bg`; the entire
+`@media (prefers-color-scheme: dark)` block; old segment **values** (`#3b82f6`/`#10b981`/`#ef4444`/
+`#8b5cf6` — names kept, values remapped) and old timer **values** (`#091426`, `rgba(255,255,255,…)`,
+`#9ca3af`, `#1e293b` — names kept, become aliases).
 
-### D7: No variants factory, no `asChild`, no cva
+**ADDED** (17): `bg`, `surface`, `surface-warm`, `fg`, `fg-2`, `muted`, `meta`, `border`,
+`border-soft`, `accent`, `accent-on`, `accent-hover`, `accent-active`, `success`, `warn`, `danger`,
+`focus-ring`. **KEPT**: `--font-headline/body/label`, all `--text-*`, `--spacing-*`,
+`--shadow-card-hover`, `--shadow-fab`. **MODIFIED**: `--font-mono/--font-timer/--font-data` (D5).
 
-Plain `Record<variant, string>` class maps per primitive (repo already does this in `segment-styles.ts`). `asChild`/slot mechanics skipped — no link-styled-button use case in the demo pages or play screens; add when one appears. `'use client'` only where hooks are used (Input/SearchInput via `useId`, Dialog via refs/effects); Button/IconButton/Card/Badge/EmptyState are hook-free.
+Companion changes in `globals.css`: delete the dark media block; `body { background-color:
+var(--color-bg); color: var(--color-fg-2); }` (CA-1a/1b updated); `.timer-dark-bg`/`.glass-panel-dark`
+unchanged (they already reference timer tokens, now aliases); `.ambient-shadow` → `box-shadow:
+var(--shadow-fab)` (removes the only raw rgba outside `@theme`; 16 call sites untouched); add
+`@utility focus-ring` (D4).
+
+### D2: `SEGMENT_COLORS` resolution — CSS-var reference strings (option a)
+
+| Option | Tradeoff | Decision |
+|---|---|---|
+| Compute `color-mix` results statically (hexes in TS) | Re-duplicates palette values → DSF-2a drift returns; bakes hexes the audit must then whitelist | ✗ |
+| **`SEGMENT_COLORS` holds `var(--color-segment-*)` strings; TimerRing renders stroke via inline `style`** | Zero duplication — SEGMENT_COLORS *is* a reference to `@theme`, drift impossible; jsdom asserts the var string; runtime resolution is native | ✓ |
+
+```ts
+export const SEGMENT_COLORS: Record<IntervalType, string> = {
+  prepare: 'var(--color-segment-prepare)',
+  work: 'var(--color-segment-work)',
+  rest: 'var(--color-segment-rest)',
+  rest_between_cycles: 'var(--color-segment-rest)',
+  cooldown: 'var(--color-segment-cooldown)',
+}
+```
+
+Rendering mechanism (DSF-2b): SVG **presentation attributes cannot resolve** `var()`/`color-mix`,
+so `TimerRing` moves the stroke to CSS — `<circle style={{ stroke: ringColor }} …>` and the label
+span already uses `style={{ color: ringColor }}` (inline styles resolve `var()` → `color-mix()` at
+runtime in every modern browser). The four segment states stay pairwise distinct on `--color-bg`
+(prepare amber-mix, work sage, rest rose, cooldown rose-mix). `SEGMENT_BG/BORDER/TEXT/BG_80/DOT`
+class maps are untouched — their `bg-segment-*` utilities regenerate from the new token values.
+
+### D3: Timer tokens — palette aliases (DSF-3)
+
+Names kept, values become `var()` aliases (table above). `DSF-3b` scope expands to **all**
+play-screen files touched by PR 1 (both play pages, TimerRing, TimerControls, RepCounter,
+RepCompleteDialog, PlayHeader, ProgressBar, ExercisePanel, TimerDisplay): dark chrome maps to
+`--color-timer-*` aliases, plus DSF-7 role tokens for any Material utility in the same files.
+
+### D4: Focus ring — token + `@utility`
+
+`--color-focus-ring` holds a **complete shadow** (per spec), so `ring-focus-ring` (a color utility)
+would produce invalid CSS. Consumption path: register a variant-composable utility in `globals.css`
+(repo pattern: plain classes; `@utility` is required for variant composition):
+
+```css
+@utility focus-ring {
+  outline: none;
+  box-shadow: var(--color-focus-ring);
+}
+```
+
+DSF-7 maps every `focus-visible:ring-2 focus-visible:ring-secondary [focus-visible:outline-none]`
+→ `focus-visible:focus-ring` (104 sites). The generated `bg/text/ring-focus-ring` color utilities
+are dead but harmless.
+
+### D5: Mono font switch — SF Mono chain
+
+`--font-mono`, `--font-timer`, `--font-data` become:
+`'SF Mono', ui-monospace, 'Cascadia Mono', 'JetBrains Mono', monospace`.
+
+SF Mono is Apple-only; `ui-monospace` and Cascadia Mono cover Windows; the `next/font` JetBrains
+Mono load in `layout.tsx` stays as the downloadable fallback (family name resolves in the chain).
+The `--font-jetbrains-mono` var is dropped from the chains so SF Mono actually wins on Apple.
+
+### D6: `audit:tokens` — rebuild rule set
+
+Current script greps for the **new** names (`text-fg`, `bg-accent`…) — inverted and stale. Rebuild
+as a 4-grep chain (existing `grep … || echo` + `&` structure preserved):
+
+1. **No Material utilities** (whole `src` `*.tsx|*.ts`): zero matches for
+   `text-on-surface|text-on-background|text-on-surface-variant|bg-surface-container|bg-surface-dim|
+   bg-surface-bright|bg-surface-variant|border-outline-variant|border-outline|bg-primary|text-primary|
+   bg-secondary|text-secondary|bg-primary-btn|text-on-primary|bg-error|text-error|ring-primary|
+   ring-secondary|bg-sidebar|text-on-sidebar|bg-background|text-outline|bg-surface-tint|
+   text-on-primary-container|bg-primary-container|bg-secondary-container|bg-error-container|
+   text-on-error|text-on-error-container|text-on-primary-fixed`. (Do **not** ban `text-fg` —
+   it is now a real utility.)
+2. **No Material tokens in `@theme`** (`globals.css` only): zero matches for `--color-(primary|
+   secondary|tertiary|error|background|on-background|on-surface|surface-container|surface-dim|
+   surface-bright|surface-variant|inverse|outline|surface-tint|sidebar|primary-btn|
+   on-primary-dark-bg)` and zero `prefers-color-scheme` (single-theme contract).
+3. **No raw colors in components** (all `src` `*.tsx|*.ts` **excluding** `globals.css`, excluding
+   lines containing `themeColor`): zero matches for `#[0-9a-fA-F]{3,8}|rgba?\([^)]*\)`.
+   `var(--color-*)` and `color-mix(...)` expressions are allowed by construction (they contain no
+   raw hex/rgba literal at the top level).
+4. **No second accent** (whole `src` `*.tsx|*.ts|*.mdx`): zero matches for
+   `#3b82f6|#8b5cf6|bg-blue|text-blue|bg-purple|text-purple|bg-violet|text-violet|bg-indigo|
+   text-indigo` (legacy segment hexes + Tailwind blue/purple utilities).
+
+Gates: DSF-1b/7b (whole-src rule 1 + 2 after migration), DSF-1c/1d (rule 3 + 4), DSF-1d (rule 3's
+`themeColor` carve-out). The `segment-styles.test.ts` drift test remains the 5th gate (T2).
+
+### D7: Component migration — order and file set (DSF-7)
+
+File set (authoritative): the 49 files matched by
+`grep -rlE "<rule-1 pattern>" src --include="*.tsx" --include="*.ts"` (15 app pages incl.
+`(auth)/login`, `layout.tsx`; 33 components incl. Nav, all overlays, all play files, stats/calendar
+components; 1 lib consumer). Normative mapping (spec DSF-7 table, verbatim):
+
+| Old (Material) | New role token |
+|---|---|
+| `bg-background` | `bg-bg` |
+| `text-on-background`, `text-on-surface` | `text-fg-2` |
+| `text-on-surface-variant` | `text-muted` |
+| `bg-surface`, `bg-surface-container*`, `bg-surface-dim`, `bg-surface-variant` | `bg-surface` |
+| `hover:bg-surface-container*` | `hover:bg-surface-warm` |
+| `border-outline-variant` (default) | `border-border` |
+| `border-outline-variant/10..30` | `border-border-soft` |
+| `border-outline` | `border-border` |
+| `bg-primary`, `bg-primary-btn`, `bg-primary/90` | `bg-accent` |
+| `bg-primary-container`, `bg-secondary-container` (colored fills/dots) | `bg-accent` |
+| `text-primary`, `hover:text-primary`, `text-secondary`, `hover:text-secondary` | `text-accent` |
+| `text-on-primary`, `text-on-primary-btn`, `text-on-primary-dark-bg` | `text-accent-on` |
+| `text-on-primary-container/…-fixed`, `text-on-secondary-container` | `text-accent-on` (on colored fills) / `text-fg-2` (on surface) |
+| `bg-primary-btn-hover` | `hover:bg-accent-hover` |
+| `bg-error`, `text-error`, `hover:bg-error` | `bg-danger`, `text-danger`, `hover:bg-danger` |
+| `bg-error-container`, `text-on-error-container` (alerts/chips) | `bg-danger/15`, `text-danger` |
+| `text-on-error` (saturated fills) | `text-accent-on` |
+| `ring-primary`, `ring-secondary` (focus) | `focus-visible:focus-ring` |
+| `bg-sidebar` / `text-on-sidebar*` | `bg-surface` / `text-fg-2` / `text-muted` |
+| `bg-surface-tint` | `bg-surface` |
+| `text-outline`, `text-outline-variant`, `placeholder:text-outline/50` | `text-muted` (+ opacity suffix kept) |
+| `border-secondary`, `focus:border-secondary`, `bg-secondary-container/20` | `border-accent`, `focus:border-accent`, `bg-accent/20` |
+| `bg-tertiary`, `bg-outline` | `bg-accent`, `bg-border` |
+
+Unlisted Material roles map per the spec catch-all (surface for fills, fg-2 for text, muted for
+secondary text, border for outlines, accent for emphasis, danger for errors).
+
+**Play-screen whites/greys** (DSF-3b, in touched files only): `text-white`→`text-timer-on`,
+`bg-white`→`bg-timer-on`, `text-gray-400`→`text-timer-muted`, `bg-[#1E293B]`→`bg-timer-track`,
+`border-white/10`→`border-timer-border/50`, backdrop `bg-black/N`→`bg-surface/80` scrim.
+
+**Migration order** (each phase a commit, gate after each: `npx tsc --noEmit` + `npm run audit:tokens`
++ touched-file vitest):
+- **Phase A — token layer**: D1 globals.css rewrite + `@utility focus-ring` (app visually
+  unstyled-with-old-classes until Phase B; commits are stacked in one PR).
+- **Phase B — utilities-first**, family order (largest blast radius first): (1) text families →
+  fg-2/muted; (2) surface/background → surface/surface-warm; (3) borders → border/border-soft;
+  (4) accent/primary → accent/accent-on/accent-hover; (5) states → danger/danger-15/accent-on;
+  (6) focus rings → focus-ring; (7) sidebar/Nav → surface/fg-2/muted; (8) play-screen whites/
+  greys → timer tokens.
+- **Phase C — inline styles**: any `style={{…}}` raw hex/rgba in touched files → `var(--color-*)`
+  (rule 3 gate).
+- **Phase D — themeColor + shell**: `layout.tsx` `themeColor: '#091426'` → `'#55423d'` (literal
+  mirror of `--color-bg`, DSF-1d); `<body className="bg-background text-on-background">` →
+  `bg-bg text-fg-2`.
+- **Phase E — docs + i18n**: rewrite the 3 MDX pages; DSF-4 — RepCompleteDialog Spanish strings →
+  English (it is a touched play-screen file).
+
+### D8: Folder structure — flat `ui/` + barrel (unchanged from prior design)
+
+`src/components/ui/Button.tsx` + `.stories.tsx` + `__tests__/` + `index.ts` barrel; SB glob
+`../src/**/*.stories.@(…)` already matches.
+
+### D9: Dialog — controlled native `<dialog>`, no headless lib (unchanged)
+
+`open`→`showModal()`, `!open`→`close()`; backdrop click via `e.target === ref.current`; native
+`cancel` (ESC) + `close` → `onClose`; `aria-labelledby`; sheet animation gated by
+`prefers-reduced-motion`. Backdrop `bg-black/40` → `bg-surface/80` per the new contract.
+
+### D10: Storybook tests via Vitest browser project (unchanged infra)
+
+`test.projects = [unit (jsdom), storybook (playwright chromium)]` via `@storybook/addon-vitest`;
+axe per story via installed `@storybook/addon-a11y` (DSF-6 — already registered in
+`.storybook/main.ts`, verify only).
+
+### D11: No variants factory, no `asChild`, no cva (unchanged)
+
+Plain `Record<variant, string>` maps (repo pattern in `segment-styles.ts`); `'use client'` only
+where hooks are used.
 
 ## Interfaces / Contracts
 
-```ts
-// ui/Button.tsx
-type ButtonVariant = 'primary' | 'ghost' | 'outline' | 'danger'
-type ButtonSize = 'sm' | 'md' | 'lg'
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: ButtonVariant   // default 'primary'
-  size?: ButtonSize         // default 'md'
-  pill?: boolean            // rounded-full
-  fab?: boolean             // 56px round + shadow-fab; page owns `fixed` positioning via className
-  loading?: boolean         // disabled + spinner, aria-busy
-  leftIcon?: string         // Material Symbols name
-  rightIcon?: string
-}
-// primary: bg-primary-btn text-on-primary-btn hover:bg-primary-btn-hover
-// ghost:   text-on-surface hover:bg-surface-dim
-// outline: border border-outline-variant/50 text-on-surface hover:bg-surface-dim
-// danger:  bg-error text-on-error hover:bg-error-container hover:text-on-error-container
-// common:  inline-flex items-center gap-2 rounded-lg, disabled:opacity-40 disabled:cursor-not-allowed,
-//          focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none
-// sizes: sm px-3 py-1.5 text-sm | md px-4 py-3.5 font-label-caps (44px touch) | lg px-6 py-3 font-medium
-```
+Primitive class maps re-tokened (PR 2 builds on the new palette):
 
 ```ts
-// ui/IconButton.tsx
-interface IconButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
-  icon: string          // Material Symbols name
-  label: string         // REQUIRED → aria-label (a11y fails without it, UIP-2)
-  variant?: 'ghost' | 'filled' | 'outline'   // default 'ghost'
-  filled?: boolean      // fontVariationSettings "'FILL' 1"
-}
-// fixed w-11 h-11 (44×44 ≥ touch target), rounded-full
+// Button: primary: bg-accent text-accent-on hover:bg-accent-hover
+//         ghost:   text-fg-2 hover:bg-surface-warm
+//         outline: border border-border-soft text-fg-2 hover:bg-surface-warm
+//         danger:  bg-danger text-accent-on hover:bg-danger/80
+//         common:  … focus-visible:focus-ring
+// Badge:  neutral: bg-surface text-muted border border-border-soft
+//         primary: bg-accent text-accent-on
+//         error:   bg-danger/15 text-danger
+//         segment-*: bg-segment-*/10 text-segment-* (regenerate from new tokens)
+// Card:   filled: bg-surface border border-border-soft; glass: .glass-card
+//         hover:shadow-card-hover unchanged
+// Dialog: backdrop bg-surface/80; fixed/sheet classes unchanged
 ```
 
-```ts
-// ui/Card.tsx
-type CardVariant = 'filled' | 'elevated' | 'outlined' | 'glass'
-interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: CardVariant   // default 'filled'
-  padding?: 'none' | 'sm' | 'md' | 'lg'   // default 'md' (p-16)
-}
-// presentational only (no fetch/routing); rounded-xl
-// filled:  bg-surface border border-outline-variant/30 hover:shadow-card-hover (transition-shadow)
-// elevated: bg-surface ambient-shadow | outlined: bg-transparent border-outline-variant/50
-// glass:    glass-card (bg-surface + backdrop-blur)
-```
-
-```ts
-// ui/Badge.tsx
-type BadgeVariant = 'neutral' | 'primary' | 'error'
-  | 'segment-prepare' | 'segment-work' | 'segment-rest' | 'segment-cooldown'
-interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: BadgeVariant   // default 'neutral'
-  size?: 'sm' | 'md'       // default 'sm' (text-label-caps 10px, px-2 py-0.5); md = text-xs px-2.5 py-1
-}
-// colors: bg-{v}/10 text-{v} (neutral: bg-surface-container text-on-surface-variant)
-// meaning conveyed in text — color is never the only differentiator (UIP-3)
-```
-
-```ts
-// ui/Input.tsx
-interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
-  label: string          // visible label + htmlFor/id (useId when id omitted)
-  error?: string         // below field, text-error, role="alert", aria-describedby
-  hint?: string          // helper below field, aria-describedby
-  leftIcon?: string      // Material Symbols name
-  id?: string
-}
-// ui/SearchInput.tsx
-interface SearchInputProps extends Omit<InputProps, 'type' | 'leftIcon'> {}
-// Input type="search" + search icon + clear ✕ button (rendered when value → onChange(''))
-```
-
-```ts
-// ui/EmptyState.tsx
-interface EmptyStateProps {
-  icon?: string          // Material Symbols name, 48px
-  title: string
-  description?: string
-  action?: React.ReactNode
-}
-// centered column, token colors, max-w-sm
-```
-
-```ts
-// ui/Dialog.tsx
-interface DialogProps {
-  open: boolean
-  onClose: () => void
-  title: string
-  variant?: 'fixed' | 'sheet'   // default 'fixed'
-  footer?: React.ReactNode
-  children: React.ReactNode
-}
-// fixed: <dialog> m-auto rounded-xl max-w-lg w-full max-h-[85vh] overflow-y-auto
-// sheet: .ui-dialog-sheet in globals.css — bottom-anchored, rounded-t-2xl, max-w-2xl(32rem), 85vh,
-//        slide-up 0.3s ease-out gated by prefers-reduced-motion; backdrop bg-black/40
-// always renders an X IconButton (escape route) in the header
-```
+`SEGMENT_COLORS` becomes `Record<IntervalType, string>` of `var(--color-segment-*)` strings
+(D2). Everything else (`SEGMENT_BG` et al.) unchanged.
 
 ## Data Flow
 
@@ -202,82 +282,77 @@ Page state ──open/onClose──▶ Dialog ──showModal()/close()──▶
                                   ◀──cancel/close event────┘ (focus trap/restore native)
 ```
 
-No other data flow changes; overlays move from imperative `dialogRef`+`showModal()` calls to declarative `open` state.
+No other data flow changes (presentational refactor).
 
 ## File Changes
 
 | File | Action | Description |
 |---|---|---|
-| `src/app/globals.css` | Modify | +5 timer tokens, +2 shadow tokens, `.ui-dialog-sheet` + keyframes, `.timer-dark-bg`/`.glass-panel-dark` → var() refs |
-| `src/lib/segment-styles.ts` | Modify | `SEGMENT_COLORS` → canonical hexes (lowercase) |
-| `src/components/TimerRing.tsx` | Modify | `text-white`→`text-timer-on`, `text-gray-400`→`text-timer-muted`, track → `var(--color-primary-container)` |
-| `src/components/__tests__/TimerRing.test.tsx` | Modify | expected hexes → canonical |
-| `src/lib/__tests__/segment-styles.test.ts` | Create | DSF-2a drift test (parses globals.css) |
-| `package.json` | Modify | `audit:tokens` hex grep, `test:stories` script, devDeps |
-| `.storybook/main.ts` | Modify | `addons: ['@storybook/addon-a11y']`, stories glob + `../src/docs/**/*.mdx` |
-| `src/docs/Foundations/{Tokens,Typography,Colors}.mdx` | Create | DSF-5 docs pages listing `@theme` values + usage |
-| `vitest.config.ts` | Modify | projects: `unit` (jsdom) + `storybook` (browser) |
-| `.storybook/vitest.setup.ts` | Create | jest-dom for storybook project |
-| `src/components/ui/{Button,IconButton,Card,Badge,Input,SearchInput,EmptyState,Dialog}.tsx` | Create | 8 primitives |
-| `src/components/ui/*.stories.tsx` | Create | 8 CSF3 stories, `tags: ['autodocs']`, play functions on interactive ones |
-| `src/components/ui/__tests__/*.test.tsx` | Create | RTL unit tests |
-| `src/components/ui/index.ts` | Create | barrel |
-| `src/app/workouts/page.tsx` | Modify | PMD-1 migration |
-| `src/app/exercises/page.tsx` | Modify | PMD-2 migration |
-| `src/components/ExerciseSearchHeader.tsx` | Modify | search → SearchInput, buttons → Button (FilterSelect untouched) |
-| `src/components/ExerciseFormDialog.tsx` | Modify | internal `<dialog>` → Dialog fixed; API `dialogRef` → `open`/`onClose` |
-| `src/components/ExerciseDeleteDialog.tsx` | Modify | same |
-| `src/components/AddToWorkoutModal.tsx` | Modify | same |
-| `src/app/exercises/[id]/page.tsx` | Modify | ~15 lines: `dialogRef`/`showModal` → `open` state (delete-confirm overlay lives here — PMD-2d) |
-| Tests for above (`ExerciseSearchHeader.test`, `ExerciseFormDialog.test`, `ExerciseDeleteDialog.test`, page tests) | Modify/verify | keep green (overlay tests mock components; assertions still pass) |
+| `src/app/globals.css` | Modify | D1: `@theme` colors replaced (17 added, 42 deleted, aliases), dark media block deleted, `body` → `bg`/`fg-2`, `.ambient-shadow` → `var(--shadow-fab)`, `@utility focus-ring` |
+| `src/app/layout.tsx` | Modify | `themeColor: '#55423d'`; body `bg-bg text-fg-2` (DSF-1d) |
+| `src/lib/segment-styles.ts` | Modify | `SEGMENT_COLORS` → `var(--color-segment-*)` strings (D2) |
+| `src/components/TimerRing.tsx` | Modify | progress stroke → `style={{ stroke: ringColor }}` (presentation attr can't resolve var) |
+| `src/components/__tests__/TimerRing.test.tsx` | Modify | hex-attr assertions → `style.stroke === 'var(--color-segment-*)'` + canonical resolution check |
+| `src/lib/__tests__/segment-styles.test.ts` | Modify | drift test → reference-chain + terminal-resolution assertions (D2/T2) |
+| `package.json` | Modify | `audit:tokens` rebuilt per D6 (4-grep chain) |
+| 49 migrated files (15 pages incl. `(auth)/login`, `layout.tsx`, 33 components, play files, Nav, overlays) | Modify | DSF-7 mapping per D7 (Phase B/C) |
+| `src/components/RepCompleteDialog.tsx` | Modify | Spanish strings → English (DSF-4) |
+| `src/docs/Foundations/{Tokens,Colors,Typography}.mdx` | Modify | DSF-5 rewrite (D-doc section below) |
+| `src/components/ui/*` (PR 2) + pages (PR 3) | Unchanged plan | see prior design's table; token references now per D11 contracts |
+
+**Storybook docs (DSF-5)** — rewrite all three pages (existing pages show the old palette):
+- `Tokens.mdx`: full table — 17 palette tokens (name, value, role), 4 segment tokens, 6 timer
+  aliases, 2 shadow tokens; note the SF Mono chain; usage examples `bg-bg text-fg-2`, accent button,
+  `focus-visible:focus-ring`.
+- `Colors.mdx`: `ColorPalette` groups — Canvas (`bg`, `surface`, `surface-warm`), Ink (`fg`, `fg-2`,
+  `muted`, `meta`), Lines (`border`, `border-soft`), Accent (`accent`, `accent-on`, `accent-hover`,
+  `accent-active`), States (`success`, `warn`, `danger`), Segments (4), Timer aliases (6). **Accent
+  discipline section (DSF-1c)**: ≤2 visible accent uses per screen, links count, accent never a page
+  wash, `accent-on` accompanies every accent fill, no second accent (blue/purple anywhere).
+- `Typography.mdx`: mono row → `'SF Mono', ui-monospace, 'Cascadia Mono', 'JetBrains Mono',
+  monospace`; sample text "WorkOutApp — Inter, SF Mono"; warmth from cream/rose, not pink type.
+- Docs show only palette hexes (the documented values) — never new hexes (DSF-5).
 
 ## Migration / Rollout
 
-**/workouts** (`page.tsx`, 208 lines):
-- L54–70 empty state → `EmptyState` (icon `fitness_center`, "No workouts yet", action `Button` "Create Workout")
-- L76–85 search input → `SearchInput`; L87–93 "New Workout" → `Button sm primary leftIcon="add"`; L94–103 Type filter → `Button pill` (variant primary/outline by active state)
-- L112–118 card → `Card filled` (keeps role/tabIndex/onClick via props passthrough); arbitrary hover shadow → Card's `hover:shadow-card-hover`
-- L121–167 ⋮ menu **stays inline** (PMD-1 non-goal); L170–176 card quick-play (36px round) stays inline (below primitive coverage — note for future pass)
-- L199–205 FAB → `Button fab` + `className="fixed bottom-24 right-24 md:hidden z-50"`; arbitrary FAB shadow → `shadow-fab`
-- `TimelinePreview` unchanged (already token-based)
-
-**/exercises** (`page.tsx`, 347 lines):
-- L192–202 / L204–212 empty states → `EmptyState` ×2 (second: title-only, icons `star`/`search_off`)
-- L241–317 card → `Card filled` + `Badge` (category, force, mechanic, difficulty, muscle chips → neutral), star → `IconButton filled`, quick-assign → `IconButton`
-- L327–337 `ExerciseFormDialog`, L339–344 `AddToWorkoutModal` → controlled `open` state
-- Header underline search → `SearchInput` box style (documented visual unification); All/Favorites toggle stays inline (SegmentedControl is a future primitive); `FilterSelect` untouched (PMD-2)
-
-**Overlay components** → `Dialog fixed` with the `dialogRef`→`open`/`onClose` API change (both list and detail pages updated). `RepCompleteDialog` (Spanish strings, fixed-div modal) is a play-screen file → **deferred** to the future change (DSF-4 applies to touched files only).
-
-Rollout: 3 chained stacked-to-main PRs (foundation → primitives → migration). Each slice additive/revertible independently (delete `ui/` folder; per-file reverts; segment swap is one commit).
+**PR 1** = Phases A–E above, one PR (user's "reemplazo completo ahora" choice). Default: everything
+in PR 1. Rollout: stacked chained PRs PR 1 → PR 2 → PR 3 (each to main in order); per-file reverts;
+the palette swap is spec-gated by `audit:tokens`.
 
 ## Testing Strategy
 
 | Layer | What | How |
 |---|---|---|
-| Unit (jsdom) | Primitive rendering + variants; Dialog open/close/ESC/backdrop/focus-restore (showModal polyfill per existing repo pattern); Input error announced; SearchInput clear | `vitest` project `unit`, RTL + jest-dom |
-| Storybook | Play functions (Dialog open→ESC close; Input type + error; SearchInput type→clear; Button click) run in a real browser; axe a11y checks per story | project `storybook`, `@storybook/addon-vitest` + Playwright chromium + `@storybook/addon-a11y` |
-| Drift/audit | `SEGMENT_COLORS` === `--color-segment-*`; zero hex/rgba literals in touched paths | `segment-styles.test.ts` + `audit:tokens` |
-| Regression | Existing suites (incl. page tests) keep passing; overlay tests updated for the `open` prop | `npm test` |
+| Unit (jsdom) | TimerRing: stroke/label resolve `var(--color-segment-*)` per interval; track `var(--color-timer-track)`; existing assertions updated | `TimerRing.test.tsx` |
+| Drift | `SEGMENT_COLORS[i]` === `var(--color-segment-{key})`; each segment token resolves to canonical palette value (work→`#9dbf9c` via success, rest→`#e07a7f` via danger, prepare/cooldown→`color-mix(in srgb, #e6a651|#e07a7f 45%, #271c19)`) | rewritten `segment-styles.test.ts` |
+| Audit | D6 rules 1–4 on the full migrated set | `npm run audit:tokens` |
+| Regression | Existing suites (incl. page tests) keep passing — class-string swaps don't change queries | `npm test` + `npx tsc --noEmit` |
+| Storybook | 3 MDX pages render current `@theme` values; axe per story (DSF-5/6) | `npm run build-storybook` |
 
 ## Estimation (for sdd-tasks)
 
-| Component | Impl | Story (incl. play fns) | RTL test | Slice |
-|---|---|---|---|---|
-| Button | 105 | 90 | 45 | 2a |
-| IconButton | 40 | 35 | 25 | 2a |
-| Card | 35 | 35 | 20 | 2a |
-| Badge | 45 | 45 | 25 | 2a |
-| Input | 85 | 65 | 50 | 2b |
-| SearchInput | 40 | 35 | 35 | 2b |
-| EmptyState | 30 | 30 | 20 | 2b |
-| Dialog | 135 | 105 | 90 | 2c |
-| index.ts | 10 | — | — | 2a |
-| Foundation (tokens, docs, config) | ~150 changed | — | ~80 new | 1 |
-| Migration (2 pages + 3 overlays + [id] page + tests) | ~350–450 changed | — | — | 3 |
+| Work | Changed lines |
+|---|---|
+| Phase A token layer + layout + audit + tests | ~250–350 |
+| Phase B–C migration (49 files, ~970 instances + whites/greys) | ~1,800–2,400 |
+| Phase E docs + i18n | ~250–350 |
+| **PR 1 total** | **~2,300–3,100** |
 
-Primitives slice ≈ 1,150 lines → **exceeds the 400-line budget**; the slice must itself chain (2a/2b/2c above) or be accepted as `size:exception`. Forecast: `400-line budget risk: High`, `Chained PRs recommended: Yes`.
+PR 2 (primitives ≈ 1,150) chains 2a–2d as before; PR 3 (~350–450) splits 3a/3b if needed.
 
 ## Open Questions
 
-- None blocking. Spec-clarification notes to record at archive: (1) DSF-3 "light-mode values" → single always-dark values; (2) `text-gray-300` merges into `timer-muted`; (3) exercises hero search drops its underline style; (4) workout-card quick-play (36px) and All/Favorites toggle remain inline (uncovered by this primitive set).
+- **DSF-3 "No visual drift"** scenario cannot hold literally across an intentional palette swap
+  (bg `#091426` → `#55423d`, surfaces re-toned). Interpret as "no drift beyond the intended palette
+  change" — archive phase should amend the wording.
+- **`--color-focus-ring` holds a shadow value** under a `--color-*` name (spec-mandated). Consumption
+  via `@utility focus-ring` (D4); the generated color utilities are dead. Accept as spec-written.
+- **Size vs budget**: PR 1 ≈ 5–8x the 400-line review budget by construction. If apply must chain,
+  recommended boundary — PR 1a: Phase A + D + segment/timer remap + tests + audit + docs
+  (small, verifiable; app renders unstyled until 1b merges — unavoidable given DSF-1a forbids
+  keeping Material tokens as a bridge); PR 1b: Phase B–C migration split by family clusters
+  (typography / surface+border / accent+state+focus / play-screen / sidebar+overlays, ~400-500
+  lines each). Keep everything in PR 1 unless apply hits a hard review ceiling.
+- **White/black/gray utilities** are not Material tokens; they are cleaned only in touched files
+  (play screens → timer tokens, backdrops → `bg-surface/80`). Residual `text-white` outside touched
+  files (none found beyond the 49) would be future work.
