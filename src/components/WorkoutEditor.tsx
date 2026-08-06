@@ -59,35 +59,35 @@ function BulkApplyDialog({
           animation: bulk-slide-up 0.25s ease-out;
         }
       `}</style>
-      <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40" onClick={onApplyOne} />
+      <div className="fixed inset-0 bg-surface/80 backdrop-blur-sm z-40" onClick={onApplyOne} />
       <div className="fixed inset-0 z-50 flex items-end justify-center pb-24">
         <div
-          className="bulk-sheet bg-surface rounded-2xl shadow-xl border border-outline-variant/30 p-24 w-full max-w-md mx-8"
+          className="bulk-sheet bg-surface rounded-2xl shadow-xl border border-border-soft p-24 w-full max-w-md mx-8"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-start gap-12 mb-16">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-2">
-              <span className="material-symbols-outlined text-primary text-[22px]">sync_alt</span>
+            <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-2">
+              <span className="material-symbols-outlined text-accent text-[22px]">sync_alt</span>
             </div>
             <div>
-              <h3 className="font-headline-md text-headline-md text-on-surface font-bold mb-4">
+              <h3 className="font-headline-md text-headline-md text-fg-2 font-bold mb-4">
                 Apply to all {label}?
               </h3>
-              <p className="font-body-md text-body-md text-on-surface-variant">
-                You changed <strong className="text-on-surface">{changedFields.join(', ')}</strong>. Do you want to apply this change to all <strong className="text-on-surface">{label}</strong> intervals?
+              <p className="font-body-md text-body-md text-muted">
+                You changed <strong className="text-fg-2">{changedFields.join(', ')}</strong>. Do you want to apply this change to all <strong className="text-fg-2">{label}</strong> intervals?
               </p>
             </div>
           </div>
           <div className="flex gap-8">
             <button
               onClick={onApplyOne}
-              className="flex-1 py-10 bg-surface border border-outline-variant text-on-surface rounded-xl font-medium hover:bg-surface-dim transition-colors"
+              className="flex-1 py-10 bg-surface border border-border text-fg-2 rounded-xl font-medium hover:bg-surface transition-colors"
             >
               Just this one
             </button>
             <button
               onClick={onApplyAll}
-              className="flex-1 py-10 bg-primary-btn hover:bg-primary-btn-hover text-on-primary-btn rounded-xl font-medium transition-colors"
+              className="flex-1 py-10 bg-accent hover:bg-accent-hover text-accent-on rounded-xl font-medium transition-colors"
             >
               Apply to all
             </button>
@@ -279,18 +279,18 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
       <div className="glass-card rounded-xl p-16 flex flex-col gap-12">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-24">
           <div className="w-full md:w-2/3">
-            <label className="block font-label text-label-caps text-on-surface-variant mb-xs uppercase tracking-wider">Workout Title</label>
+            <label className="block font-label text-label-caps text-muted mb-xs uppercase tracking-wider">Workout Title</label>
             <input
               type="text"
               value={title}
               placeholder="Name your workout..."
-              className="w-full bg-transparent border-0 border-b-2 border-outline-variant pb-xs font-headline text-headline-lg text-on-surface focus:border-secondary focus:ring-0 transition-colors px-0 outline-none placeholder:text-outline/50 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+              className="w-full bg-transparent border-0 border-b-2 border-border pb-xs font-headline text-headline-lg text-fg-2 focus:border-accent focus:ring-0 transition-colors px-0 outline-none placeholder:text-muted/50 focus-visible:focus-ring"
               onChange={(e) => { markDirty(); setTitle(e.target.value) }}
             />
           </div>
           <div className="text-right w-full md:w-auto">
-            <span className="block font-label text-label-caps text-on-surface-variant mb-xs uppercase tracking-wider">Est. Duration</span>
-            <div className="font-mono text-display-timer-mobile text-primary tracking-tighter">
+            <span className="block font-label text-label-caps text-muted mb-xs uppercase tracking-wider">Est. Duration</span>
+            <div className="font-mono text-display-timer-mobile text-accent tracking-tighter">
               {totalMin}:{String(totalSec).padStart(2, '0')}
             </div>
           </div>
@@ -302,11 +302,11 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
       )}
 
       {intervals.length === 0 ? (
-        <div className="glass-card rounded-xl p-24 flex flex-col items-center justify-center gap-16 text-center py-[64px] border-dashed border-2 border-outline-variant/30">
-          <span className="material-symbols-outlined text-[40px] text-on-surface-variant/40">playlist_add</span>
+        <div className="glass-card rounded-xl p-24 flex flex-col items-center justify-center gap-16 text-center py-[64px] border-dashed border-2 border-border-soft">
+          <span className="material-symbols-outlined text-[40px] text-muted/40">playlist_add</span>
           <div>
-            <p className="font-headline-md text-headline-md text-on-surface font-bold">No intervals yet</p>
-            <p className="font-body-md text-body-md text-on-surface-variant mt-xs">Add blocks below to build your workout</p>
+            <p className="font-headline-md text-headline-md text-fg-2 font-bold">No intervals yet</p>
+            <p className="font-body-md text-body-md text-muted mt-xs">Add blocks below to build your workout</p>
           </div>
         </div>
       ) : (
@@ -319,7 +319,7 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
                 {/* Cycle bracket indicator */}
                 {cycle && (
                   <div
-                    className={`absolute left-0 top-0 w-1 rounded-full bg-primary/40 ${isFirstInCycle ? 'h-full' : 'h-full'}`}
+                    className={`absolute left-0 top-0 w-1 rounded-full bg-accent/40 ${isFirstInCycle ? 'h-full' : 'h-full'}`}
                     style={{ minHeight: isFirstInCycle ? '100%' : undefined }}
                   />
                 )}
@@ -327,10 +327,10 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
                 {/* Cycle label at start */}
                 {isFirstInCycle && (
                   <div className="flex items-center gap-2 mb-2 ml-4">
-                    <span className="text-body-xs text-primary font-medium uppercase tracking-wider">
+                    <span className="text-body-xs text-accent font-medium uppercase tracking-wider">
                       {cycle!.label}
                     </span>
-                    <div className="h-px flex-1 bg-primary/20" />
+                    <div className="h-px flex-1 bg-accent/20" />
                   </div>
                 )}
 
@@ -364,19 +364,19 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
       )}
 
       {/* Add Block grid — 5 types, no Cycle */}
-      <div className="pt-24 border-t border-outline-variant/30 mt-32">
-        <h3 className="font-label text-label-caps uppercase text-on-surface-variant mb-16 text-center tracking-widest">Add Block</h3>
+      <div className="pt-24 border-t border-border-soft mt-32">
+        <h3 className="font-label text-label-caps uppercase text-muted mb-16 text-center tracking-widest">Add Block</h3>
         <div className="grid grid-cols-3 md:grid-cols-5 gap-12">
           {ADD_BLOCK_TYPES.map((type) => (
             <button
               key={type}
               onClick={() => handleAdd(type)}
-              className={`glass-card p-12 rounded-xl flex flex-col items-center justify-center gap-6 hover:-translate-y-1 hover:shadow-md transition-all duration-200 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none ${SEGMENT_CLASSES[type].border} group`}
+              className={`glass-card p-12 rounded-xl flex flex-col items-center justify-center gap-6 hover:-translate-y-1 hover:shadow-md transition-all duration-200 focus-visible:focus-ring ${SEGMENT_CLASSES[type].border} group`}
             >
               <div className={`w-10 h-10 rounded-full ${SEGMENT_CLASSES[type].bg10} ${SEGMENT_CLASSES[type].text} flex items-center justify-center group-hover:scale-110 transition-transform`}>
                 <span className="material-symbols-outlined">{TYPE_ICONS[type]}</span>
               </div>
-              <span className="font-label text-label-caps uppercase text-on-surface font-semibold text-[10px] leading-tight text-center">{type.replace(/_/g, ' ')}</span>
+              <span className="font-label text-label-caps uppercase text-fg-2 font-semibold text-[10px] leading-tight text-center">{type.replace(/_/g, ' ')}</span>
             </button>
           ))}
         </div>
@@ -406,7 +406,7 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
         {onCancel && (
           <button
             onClick={onCancel}
-            className="flex-1 py-3 bg-surface border border-outline-variant text-on-surface rounded-lg font-medium transition-colors hover:bg-surface-dim font-label text-label-caps uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="flex-1 py-3 bg-surface border border-border text-fg-2 rounded-lg font-medium transition-colors hover:bg-surface font-label text-label-caps uppercase tracking-wider focus-visible:focus-ring"
           >
             Discard
           </button>
@@ -414,7 +414,7 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
         <button
           onClick={handleSave}
           disabled={!canSave}
-          className="flex-1 py-3 bg-primary-btn hover:bg-primary-btn-hover disabled:bg-surface-container-low disabled:text-on-surface-variant text-on-primary-btn rounded-lg font-medium transition-colors font-label text-label-caps uppercase tracking-wider focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="flex-1 py-3 bg-accent hover:bg-accent-hover disabled:bg-surface disabled:text-muted text-accent-on rounded-lg font-medium transition-colors font-label text-label-caps uppercase tracking-wider focus-visible:focus-ring"
         >
           {existingWorkout ? 'Update Workout' : 'Save Workout'}
         </button>

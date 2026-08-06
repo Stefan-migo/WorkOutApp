@@ -55,7 +55,7 @@ export function TemplatesPanel({
 
   return (
     <div className="glass-card rounded-lg p-16 flex flex-col gap-16">
-      <h2 className="font-label-caps text-label-caps text-primary tracking-wider">
+      <h2 className="font-label-caps text-label-caps text-accent tracking-wider">
         Templates
       </h2>
       <div className="flex flex-col gap-8">
@@ -67,43 +67,43 @@ export function TemplatesPanel({
             setTemplateName(e.target.value)
             setSaveError('')
           }}
-          className="w-full px-3 py-2 rounded-lg bg-surface border border-outline-variant/50 text-body-md text-sm focus:outline-none focus:ring-2 focus:ring-secondary transition-all"
+          className="w-full px-3 py-2 rounded-lg bg-surface border border-border/50 text-body-md text-sm focus:outline-none focus:ring-2 focus:ring-accent transition-all"
         />
         {saveError && (
-          <p className="text-label-caps text-error">{saveError}</p>
+          <p className="text-label-caps text-danger">{saveError}</p>
         )}
         <button
           onClick={handleSaveTemplate}
           disabled={!templateName.trim()}
-          className="w-full px-3 py-2 rounded-lg bg-primary text-on-primary font-label-caps text-label-caps hover:bg-primary/90 disabled:opacity-40 transition-colors ambient-shadow"
+          className="w-full px-3 py-2 rounded-lg bg-accent text-accent-on font-label-caps text-label-caps hover:bg-accent/90 disabled:opacity-40 transition-colors ambient-shadow"
         >
           Save current week
         </button>
       </div>
       <div className="flex flex-col gap-8 max-h-48 overflow-y-auto no-scrollbar">
         {templates.length === 0 && (
-          <p className="text-body-md text-sm text-on-surface-variant">
+          <p className="text-body-md text-sm text-muted">
             No templates saved yet.
           </p>
         )}
         {templates.map((t) => (
           <div
             key={t.id}
-            className="flex items-center justify-between p-8 rounded-lg bg-surface-container-lowest border border-outline-variant/20"
+            className="flex items-center justify-between p-8 rounded-lg bg-surface border border-border-soft"
           >
-            <span className="text-body-md text-sm font-medium truncate text-on-surface">
+            <span className="text-body-md text-sm font-medium truncate text-fg-2">
               {t.title}
             </span>
             <div className="flex gap-1 shrink-0">
               <button
                 onClick={() => handleApplyTemplate(t)}
-                className="px-2 py-1 rounded bg-primary-container text-on-primary-container font-label-caps text-[10px] hover:bg-primary hover:text-on-primary transition-colors"
+                className="px-2 py-1 rounded bg-accent text-accent-on font-label-caps text-[10px] hover:bg-accent-hover transition-colors"
               >
                 Apply
               </button>
               <button
                 onClick={() => deleteTemplate(t.id)}
-                className="px-2 py-1 rounded bg-error-container text-on-error-container font-label-caps text-[10px] hover:bg-error hover:text-on-error transition-colors"
+                className="px-2 py-1 rounded bg-danger/15 text-danger font-label-caps text-[10px] hover:bg-danger hover:text-accent-on transition-colors"
               >
                 Del
               </button>

@@ -27,7 +27,7 @@ function NewWorkoutInner() {
 
 export default function NewWorkoutPage() {
   return (
-    <Suspense fallback={<div className="p-24 text-center text-on-surface-variant">Loading...</div>}>
+    <Suspense fallback={<div className="p-24 text-center text-muted">Loading...</div>}>
       <NewWorkoutInner />
     </Suspense>
   )

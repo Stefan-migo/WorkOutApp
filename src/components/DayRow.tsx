@@ -29,26 +29,26 @@ export function DayRow({
     return (
       <button
         onClick={onClick}
-        className="flex items-center gap-16 p-16 bg-primary-container border-2 border-primary rounded-lg shadow-lg"
+        className="flex items-center gap-16 p-16 bg-accent border-2 border-accent rounded-lg shadow-lg"
       >
-        <div className="flex flex-col items-center justify-center w-16 h-16 bg-primary text-on-primary rounded-lg shrink-0">
+        <div className="flex flex-col items-center justify-center w-16 h-16 bg-accent text-accent-on rounded-lg shrink-0">
           <span className="font-label-caps text-label-caps opacity-80">{dayName}</span>
           <span className="font-headline-md text-headline-md font-bold">{dayNum}</span>
         </div>
         <div className="flex-1 min-w-0 text-left">
-          <h4 className="font-body-md text-body-md font-bold text-on-primary-dark-bg truncate">
+          <h4 className="font-body-md text-body-md font-bold text-accent-on truncate">
             {title}
           </h4>
           <div className="flex gap-xs mt-xs items-center">
-            <span className="px-8 py-0.5 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded-full uppercase tracking-wider">
+            <span className="px-8 py-0.5 bg-accent text-accent-on text-[10px] font-bold rounded-full uppercase tracking-wider">
               {typeLabel}
             </span>
-            <span className="font-data-sm text-data-sm text-on-primary-dark-bg/70">
+            <span className="font-data-sm text-data-sm text-accent-on/70">
               {duration > 0 ? `${Math.floor(duration / 60)} min` : ''}
             </span>
           </div>
         </div>
-        <span className="material-symbols-outlined text-on-primary-dark-bg">check_circle</span>
+        <span className="material-symbols-outlined text-accent-on">check_circle</span>
       </button>
     )
   }
@@ -57,26 +57,26 @@ export function DayRow({
     return (
       <button
         onClick={onClick}
-        className="flex items-center gap-16 p-16 bg-surface-container-lowest/50 border border-dashed border-outline-variant/30 rounded-lg hover:border-primary transition-colors cursor-pointer group"
+        className="flex items-center gap-16 p-16 bg-surface/50 border border-dashed border-border-soft rounded-lg hover:border-accent transition-colors cursor-pointer group"
       >
-        <div className="flex flex-col items-center justify-center w-16 h-16 bg-surface-container-low/50 rounded-lg shrink-0">
-          <span className="font-label-caps text-label-caps text-on-surface-variant">{dayName}</span>
-          <span className="font-headline-md text-headline-md font-bold text-on-surface-variant">
+        <div className="flex flex-col items-center justify-center w-16 h-16 bg-surface/50 rounded-lg shrink-0">
+          <span className="font-label-caps text-label-caps text-muted">{dayName}</span>
+          <span className="font-headline-md text-headline-md font-bold text-muted">
             {dayNum}
           </span>
         </div>
         <div className="flex-1 text-left">
           {assignment ? (
-            <span className="text-on-surface-variant italic text-body-md">
+            <span className="text-muted italic text-body-md">
               (deleted)
             </span>
           ) : (
-            <span className="text-on-surface-variant italic text-body-md">
+            <span className="text-muted italic text-body-md">
               Rest Day / Active Recovery
             </span>
           )}
         </div>
-        <span className="material-symbols-outlined text-outline-variant group-hover:text-primary">
+        <span className="material-symbols-outlined text-muted group-hover:text-accent">
           add_circle
         </span>
       </button>
@@ -86,26 +86,26 @@ export function DayRow({
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-16 p-16 bg-surface-container-lowest border border-outline-variant/20 rounded-lg hover:border-primary transition-colors cursor-pointer group"
+      className="flex items-center gap-16 p-16 bg-surface border border-border-soft rounded-lg hover:border-accent transition-colors cursor-pointer group"
     >
-      <div className="flex flex-col items-center justify-center w-16 h-16 bg-surface-container-low rounded-lg shrink-0">
-        <span className="font-label-caps text-label-caps text-on-surface-variant">{dayName}</span>
-        <span className="font-headline-md text-headline-md font-bold text-on-surface">{dayNum}</span>
+      <div className="flex flex-col items-center justify-center w-16 h-16 bg-surface rounded-lg shrink-0">
+        <span className="font-label-caps text-label-caps text-muted">{dayName}</span>
+        <span className="font-headline-md text-headline-md font-bold text-fg-2">{dayNum}</span>
       </div>
       <div className="flex-1 min-w-0 text-left">
-        <h4 className="font-body-md text-body-md font-bold text-on-surface truncate">
+        <h4 className="font-body-md text-body-md font-bold text-fg-2 truncate">
           {title}
         </h4>
         <div className="flex gap-xs mt-xs items-center">
-          <span className="px-8 py-0.5 bg-primary-fixed-dim text-on-primary-fixed-variant text-[10px] font-bold rounded-full uppercase tracking-wider">
+          <span className="px-8 py-0.5 bg-accent/15 text-accent text-[10px] font-bold rounded-full uppercase tracking-wider">
             {typeLabel}
           </span>
-          <span className="font-data-sm text-data-sm text-on-surface-variant">
+          <span className="font-data-sm text-data-sm text-muted">
             {duration > 0 ? `${Math.floor(duration / 60)} min` : ''}
           </span>
         </div>
       </div>
-      <span className="material-symbols-outlined text-outline-variant group-hover:text-primary">
+      <span className="material-symbols-outlined text-muted group-hover:text-accent">
         chevron_right
       </span>
     </button>

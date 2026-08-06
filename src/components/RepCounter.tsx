@@ -12,19 +12,19 @@ export function RepCounter({ exerciseName, reps, weight, onComplete }: RepCounte
   return (
     <div className="flex flex-col items-center justify-center gap-8 py-8">
       {/* Exercise name */}
-      <span className="font-headline-lg text-headline-lg text-white text-center">
+      <span className="font-headline-lg text-headline-lg text-timer-on text-center">
         {exerciseName}
       </span>
 
       {/* Target reps in large display */}
-      <span className="font-display-timer-mobile text-display-timer-mobile md:font-display-timer md:text-display-timer text-white tabular-nums">
+      <span className="font-display-timer-mobile text-display-timer-mobile md:font-display-timer md:text-display-timer text-timer-on tabular-nums">
         {reps}
-        <span className="font-body-md text-body-md text-gray-400 ml-2">reps</span>
+        <span className="font-body-md text-body-md text-timer-muted ml-2">reps</span>
       </span>
 
       {/* Weight if provided */}
       {weight !== undefined && (
-        <span className="font-body-lg text-body-lg text-gray-300">
+        <span className="font-body-lg text-body-lg text-timer-muted">
           {weight} kg
         </span>
       )}
@@ -32,7 +32,7 @@ export function RepCounter({ exerciseName, reps, weight, onComplete }: RepCounte
       {/* Complete button large and centered */}
       <button
         onClick={onComplete}
-        className="px-16 py-6 bg-white text-primary rounded-full text-xl font-bold hover:bg-gray-200 transition-colors mt-4"
+        className="px-16 py-6 bg-timer-on text-accent rounded-full text-xl font-bold hover:bg-timer-on/80 transition-colors mt-4"
         aria-label="Complete set"
       >
         Complete

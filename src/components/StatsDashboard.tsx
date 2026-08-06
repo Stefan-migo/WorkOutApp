@@ -88,18 +88,18 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
   if (sessions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center flex-1 gap-24 p-margin-mobile md:p-margin-desktop text-center">
-        <span className="material-symbols-outlined text-[64px] text-on-surface-variant">
+        <span className="material-symbols-outlined text-[64px] text-muted">
           monitoring
         </span>
-        <h1 className="font-headline-lg text-headline-lg text-on-background">
+        <h1 className="font-headline-lg text-headline-lg text-fg-2">
           Performance Stats
         </h1>
-        <p className="font-body-md text-body-md text-on-surface-variant max-w-sm">
+        <p className="font-body-md text-body-md text-muted max-w-sm">
           Complete your first workout to see stats
         </p>
         <Link
           href="/workouts"
-          className="px-24 py-16 bg-primary text-on-primary rounded-lg font-label-caps text-label-caps hover:bg-primary/90 transition-colors ambient-shadow"
+          className="px-24 py-16 bg-accent text-accent-on rounded-lg font-label-caps text-label-caps hover:bg-accent/90 transition-colors ambient-shadow"
         >
           Browse Workouts
         </Link>
@@ -112,17 +112,17 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 mb-24">
         <div>
-          <h2 className="font-headline-lg text-headline-lg text-on-surface mb-1">
+          <h2 className="font-headline-lg text-headline-lg text-fg-2 mb-1">
             Performance Stats
           </h2>
-          <p className="font-body-lg text-body-lg text-on-surface-variant">
+          <p className="font-body-lg text-body-lg text-muted">
             Last 30 Days Overview
           </p>
         </div>
         <div className="flex gap-8">
           <button
             onClick={exportAllData}
-            className="px-4 py-2 border border-outline rounded font-label-caps text-label-caps text-on-surface hover:bg-surface-variant transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="px-4 py-2 border border-border rounded font-label-caps text-label-caps text-fg-2 hover:bg-surface transition-colors focus-visible:focus-ring"
           >
             Export JSON
           </button>
@@ -137,26 +137,26 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
 
         {/* Personal Records — 5 cols */}
         <div className="md:col-span-5 glass-card rounded-xl p-16 ambient-shadow flex flex-col">
-          <div className="flex items-center mb-16 border-b border-outline-variant/30 pb-8">
-            <h3 className="font-headline-md text-headline-md text-on-surface">
+          <div className="flex items-center mb-16 border-b border-border-soft pb-8">
+            <h3 className="font-headline-md text-headline-md text-fg-2">
               Personal Records
             </h3>
           </div>
           <div className="flex-1 overflow-y-auto min-h-0 space-y-16 pr-8">
             <section>
-              <h4 className="font-label-caps text-label-caps text-on-surface-variant mb-8">
+              <h4 className="font-label-caps text-label-caps text-muted mb-8">
                 Strength
               </h4>
               {strengthPRs.length === 0 ? (
-                <p className="font-body-sm text-body-sm text-on-surface-variant">
+                <p className="font-body-sm text-body-sm text-muted">
                   No strength PRs yet — complete rep-based workouts to track them.
                 </p>
               ) : (
                 <ul className="space-y-8">
                   {strengthPRs.map((r) => (
                     <li key={r.exercise} className="flex items-baseline justify-between gap-8">
-                      <span className="font-body-md text-body-md text-on-surface truncate">{r.exercise}</span>
-                      <span className="font-data-sm text-data-sm text-secondary whitespace-nowrap">
+                      <span className="font-body-md text-body-md text-fg-2 truncate">{r.exercise}</span>
+                      <span className="font-data-sm text-data-sm text-accent whitespace-nowrap">
                         {strengthValue(r)}
                       </span>
                     </li>
@@ -165,19 +165,19 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
               )}
             </section>
             <section>
-              <h4 className="font-label-caps text-label-caps text-on-surface-variant mb-8">
+              <h4 className="font-label-caps text-label-caps text-muted mb-8">
                 Cardio
               </h4>
               {cardioPRs.length === 0 ? (
-                <p className="font-body-sm text-body-sm text-on-surface-variant">
+                <p className="font-body-sm text-body-sm text-muted">
                   No cardio PRs yet — complete timed run, bike or row intervals to track them.
                 </p>
               ) : (
                 <ul className="space-y-8">
                   {cardioPRs.map((r) => (
                     <li key={r.exercise} className="flex items-baseline justify-between gap-8">
-                      <span className="font-body-md text-body-md text-on-surface truncate">{r.exercise}</span>
-                      <span className="font-data-sm text-data-sm text-secondary whitespace-nowrap">
+                      <span className="font-body-md text-body-md text-fg-2 truncate">{r.exercise}</span>
+                      <span className="font-data-sm text-data-sm text-accent whitespace-nowrap">
                         {formatDuration(r.bestCardioSeconds!)}
                       </span>
                     </li>

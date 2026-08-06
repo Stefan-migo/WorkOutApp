@@ -42,10 +42,10 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
       onDragOver={(e) => onDragOver?.(e, index)}
       onDrop={() => onDrop?.(index)}
       onDragEnd={() => onDragEnd?.()}
-      className={`glass-card rounded-lg flex items-center group transition-all duration-200 border-l-4 ${SEGMENT_BORDER[interval.type] ?? 'border-l-segment-work'} pl-0 hover:shadow-md relative overflow-hidden ${isDragging ? 'opacity-40 ring-2 ring-secondary' : ''}`}
+      className={`glass-card rounded-lg flex items-center group transition-all duration-200 border-l-4 ${SEGMENT_BORDER[interval.type] ?? 'border-l-segment-work'} pl-0 hover:shadow-md relative overflow-hidden ${isDragging ? 'opacity-40 ring-2 ring-accent' : ''}`}
     >
       {/* Drag handle */}
-      <div className="px-8 py-16 text-outline-variant cursor-grab flex items-center justify-center active:cursor-grabbing" role="button" aria-label="Drag to reorder">
+      <div className="px-8 py-16 text-muted cursor-grab flex items-center justify-center active:cursor-grabbing" role="button" aria-label="Drag to reorder">
         <span className="material-symbols-outlined text-[20px]">drag_indicator</span>
       </div>
 
@@ -60,7 +60,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
           type="text"
           value={interval.title}
           onChange={(e) => onChange(index, { ...interval, title: e.target.value })}
-          className="bg-transparent border-none p-0 font-body-md font-semibold text-on-surface w-full focus:ring-0 focus:outline-none placeholder-on-surface-variant/50"
+          className="bg-transparent border-none p-0 font-body-md font-semibold text-fg-2 w-full focus:ring-0 focus:outline-none placeholder:text-muted/50"
           aria-label={`Interval ${index + 1} title`}
         />
         {exercise && (
@@ -72,13 +72,13 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
                 className="w-8 h-8 rounded object-cover shrink-0"
               />
             ) : (
-              <div className="w-8 h-8 rounded bg-surface-dim flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-[14px] text-on-surface-variant">fitness_center</span>
+              <div className="w-8 h-8 rounded bg-surface flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[14px] text-muted">fitness_center</span>
               </div>
             )}
             <Link
               href={`/exercises/${interval.exerciseId}`}
-              className="text-[11px] font-body-md text-secondary hover:underline"
+              className="text-[11px] font-body-md text-accent hover:underline"
               onClick={(e) => e.stopPropagation()}
             >
               {exercise.name}
@@ -88,7 +88,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
                 {exercise.primaryMuscles.slice(0, 2).map((muscle) => (
                   <span
                     key={muscle}
-                    className="text-[9px] px-4 py-1 rounded-full bg-primary/10 text-primary font-medium whitespace-nowrap"
+                    className="text-[9px] px-4 py-1 rounded-full bg-accent/10 text-accent font-medium whitespace-nowrap"
                   >
                     {muscle}
                   </span>
@@ -100,9 +100,9 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
       </div>
 
       {/* Duration + Reps + Actions */}
-      <div className="px-16 flex items-center gap-8 border-l border-outline-variant/30 py-16">
+      <div className="px-16 flex items-center gap-8 border-l border-border-soft py-16">
         {interval.reps != null ? (
-          <div className="font-data-lg text-data-lg text-primary font-bold tracking-tight whitespace-nowrap">
+          <div className="font-data-lg text-data-lg text-accent font-bold tracking-tight whitespace-nowrap">
             {interval.weight != null ? `${interval.reps} reps @ ${interval.weight}kg` : `${interval.reps} reps`}
           </div>
         ) : (
@@ -118,7 +118,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
                 onChange(index, { ...interval, duration: m * 60 + s })
               }
             }}
-            className="bg-transparent border-none p-0 font-data-lg text-data-lg text-primary focus:ring-0 focus:outline-none w-20 text-center font-bold tracking-tight"
+            className="bg-transparent border-none p-0 font-data-lg text-data-lg text-accent focus:ring-0 focus:outline-none w-20 text-center font-bold tracking-tight"
             aria-label={`Interval ${index + 1} duration`}
           />
         )}
@@ -127,7 +127,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
           <button
             onClick={() => onMoveUp?.(index)}
             disabled={isFirst}
-            className="text-outline-variant hover:text-secondary transition-colors disabled:opacity-20 disabled:pointer-events-none"
+            className="text-muted hover:text-accent transition-colors disabled:opacity-20 disabled:pointer-events-none"
             aria-label={`Move interval ${index + 1} up`}
           >
             <span className="material-symbols-outlined text-[18px]">keyboard_arrow_up</span>
@@ -136,7 +136,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
           <button
             onClick={() => onMoveDown?.(index)}
             disabled={isLast}
-            className="text-outline-variant hover:text-secondary transition-colors disabled:opacity-20 disabled:pointer-events-none"
+            className="text-muted hover:text-accent transition-colors disabled:opacity-20 disabled:pointer-events-none"
             aria-label={`Move interval ${index + 1} down`}
           >
             <span className="material-symbols-outlined text-[18px]">keyboard_arrow_down</span>
@@ -144,7 +144,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
           {/* Remove */}
           <button
             onClick={() => onRemove(index)}
-            className="text-outline-variant hover:text-error transition-colors"
+            className="text-muted hover:text-danger transition-colors"
             aria-label={`Remove interval ${index + 1}`}
           >
             <span className="material-symbols-outlined text-[18px]">delete</span>

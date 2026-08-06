@@ -59,14 +59,14 @@ export default function DashboardPage() {
       {/* Greeting + Date */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div>
-          <h2 className="font-headline text-headline-lg text-on-surface tracking-tight">
+          <h2 className="font-headline text-headline-lg text-fg-2 tracking-tight">
             {getGreeting()}.
           </h2>
-          <p className="font-body text-body-md text-on-surface-variant mt-xs">
+          <p className="font-body text-body-md text-muted mt-xs">
             Stay focused. Stay disciplined.
           </p>
         </div>
-        <p className="font-mono text-data-lg text-primary tracking-tight">{formatDate()}</p>
+        <p className="font-mono text-data-lg text-accent tracking-tight">{formatDate()}</p>
       </div>
 
       {/* Bento Grid */}

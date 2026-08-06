@@ -1,0 +1,139 @@
+import { Meta, Title, Subtitle, ColorPalette, ColorItem } from '@storybook/addon-docs/blocks'
+
+<Meta title="Foundations/Colors" />
+
+<Title>Colors</Title>
+
+<Subtitle>
+  The Happy Hues dark-warm palette — the **only** color contract. Every visible color comes from a
+  `@theme` token (`var(--color-*)` or its generated utility); never raw hex in components. Values
+  below are the canonical sources in `src/app/globals.css`.
+</Subtitle>
+
+## Canvas
+
+The page canvas and raised surfaces. Warm brown base, darker panels.
+
+<ColorPalette>
+  <ColorItem title="Background" subtitle="--color-bg" colors={{ canvas: '#55423d' }} />
+  <ColorItem title="Surface" subtitle="--color-surface" colors={{ panel: '#271c19' }} />
+  <ColorItem
+    title="Surface warm"
+    subtitle="--color-surface-warm"
+    colors={{ tinted: 'color-mix(in srgb, #ffc0ad 14%, #55423d)' }}
+  />
+</ColorPalette>
+
+## Ink
+
+Text hierarchy — cream body copy, muted secondary text, a pink caption accent.
+
+<ColorPalette>
+  <ColorItem title="Foreground" subtitle="--color-fg" colors={{ heading: '#fffffe' }} />
+  <ColorItem title="Foreground 2" subtitle="--color-fg-2" colors={{ cream: '#fff3ec' }} />
+  <ColorItem
+    title="Muted"
+    subtitle="--color-muted"
+    colors={{ secondary: 'color-mix(in srgb, #fff3ec 62%, #271c19)' }}
+  />
+  <ColorItem title="Meta" subtitle="--color-meta" colors={{ caption: '#e78fb5' }} />
+</ColorPalette>
+
+## Lines
+
+Hairlines and soft borders.
+
+<ColorPalette>
+  <ColorItem
+    title="Border"
+    subtitle="--color-border"
+    colors={{ hairline: 'color-mix(in srgb, #fff3ec 24%, #55423d)' }}
+  />
+  <ColorItem
+    title="Border soft"
+    subtitle="--color-border-soft"
+    colors={{ soft: 'color-mix(in srgb, #fff3ec 12%, #55423d)' }}
+  />
+</ColorPalette>
+
+## Accent
+
+The sole emphasis ink — salmon. Used sparingly: at most two visible accent uses per screen, links
+count, and an accent fill always carries `--color-accent-on` text (never white on salmon).
+
+<ColorPalette>
+  <ColorItem title="Accent" subtitle="--color-accent" colors={{ salmon: '#ffc0ad' }} />
+  <ColorItem title="Accent on" subtitle="--color-accent-on" colors={{ on: '#271c19' }} />
+  <ColorItem
+    title="Accent hover"
+    subtitle="--color-accent-hover"
+    colors={{ hover: 'color-mix(in oklab, var(--color-accent), white 8%)' }}
+  />
+  <ColorItem
+    title="Accent active"
+    subtitle="--color-accent-active"
+    colors={{ active: 'color-mix(in oklab, var(--color-accent), white 14%)' }}
+  />
+</ColorPalette>
+
+## States
+
+Semantic state colors — sage, amber, rose.
+
+<ColorPalette>
+  <ColorItem title="Success" subtitle="--color-success" colors={{ sage: '#9dbf9c' }} />
+  <ColorItem title="Warn" subtitle="--color-warn" colors={{ amber: '#e6a651' }} />
+  <ColorItem title="Danger" subtitle="--color-danger" colors={{ rose: '#e07a7f' }} />
+</ColorPalette>
+
+## Segments
+
+Interval segment states map onto the palette (warm hues keep the green-work / red-rest traffic
+convention). Color never carries meaning alone — every segment is also labeled with text.
+
+<ColorPalette>
+  <ColorItem
+    title="Segment — Prepare"
+    subtitle="--color-segment-prepare"
+    colors={{ prepare: 'color-mix(in srgb, var(--color-warn) 45%, var(--color-surface))' }}
+  />
+  <ColorItem title="Segment — Work" subtitle="--color-segment-work" colors={{ work: 'var(--color-success)' }} />
+  <ColorItem title="Segment — Rest" subtitle="--color-segment-rest" colors={{ rest: 'var(--color-danger)' }} />
+  <ColorItem
+    title="Segment — Cooldown"
+    subtitle="--color-segment-cooldown"
+    colors={{ cooldown: 'color-mix(in srgb, var(--color-danger) 45%, var(--color-surface))' }}
+  />
+</ColorPalette>
+
+## Timer (play screens)
+
+Play screens consume palette aliases so the always-dark chrome stays in lockstep with the palette.
+
+<ColorPalette>
+  <ColorItem title="Timer — Background" subtitle="--color-timer-bg" colors={{ bg: 'var(--color-bg)' }} />
+  <ColorItem
+    title="Timer — Surface"
+    subtitle="--color-timer-surface"
+    colors={{ surface: 'var(--color-surface-warm)' }}
+  />
+  <ColorItem title="Timer — On" subtitle="--color-timer-on" colors={{ on: 'var(--color-fg)' }} />
+  <ColorItem title="Timer — Muted" subtitle="--color-timer-muted" colors={{ muted: 'var(--color-muted)' }} />
+  <ColorItem
+    title="Timer — Border"
+    subtitle="--color-timer-border"
+    colors={{ border: 'var(--color-border)' }}
+  />
+  <ColorItem
+    title="Timer — Track"
+    subtitle="--color-timer-track"
+    colors={{ track: 'var(--color-surface)' }}
+  />
+</ColorPalette>
+
+## Accent discipline (DSF-1c)
+
+- At most **two visible accent uses per screen** — links count.
+- Accent is never a page wash (the page canvas is `--color-bg`, always).
+- Every accent **fill** carries `--color-accent-on` text.
+- **No second accent**: no blue, purple, indigo, or violet anywhere in the app.

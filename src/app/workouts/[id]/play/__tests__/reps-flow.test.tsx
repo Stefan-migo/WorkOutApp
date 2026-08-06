@@ -148,9 +148,9 @@ describe('Reps mode integration', () => {
 
     // Dialog with default reps and weight
     await waitFor(() => {
-      expect(screen.getByLabelText(/reps hiciste/i)).toBeInTheDocument()
-      expect((screen.getByLabelText(/reps hiciste/i) as HTMLInputElement).value).toBe('10')
-      expect((screen.getByLabelText(/peso/i) as HTMLInputElement).value).toBe('80')
+      expect(screen.getByLabelText(/how many reps did you complete/i)).toBeInTheDocument()
+      expect((screen.getByLabelText(/how many reps did you complete/i) as HTMLInputElement).value).toBe('10')
+      expect((screen.getByLabelText(/weight \(kg\)/i) as HTMLInputElement).value).toBe('80')
     })
   })
 
@@ -168,7 +168,7 @@ describe('Reps mode integration', () => {
 
     // Set actual reps to 12 (planned was 10)
     await waitFor(() => {
-      const repsInput = screen.getByLabelText(/reps hiciste/i)
+      const repsInput = screen.getByLabelText(/how many reps did you complete/i)
       fireEvent.change(repsInput, { target: { value: '12' } })
     })
     fireEvent.click(screen.getByRole('button', { name: /confirm/i }))
@@ -181,7 +181,7 @@ describe('Reps mode integration', () => {
     // Squat (reps work)
     await waitFor(() => expect(screen.getByRole('button', { name: /complete/i })).toBeInTheDocument())
     fireEvent.click(screen.getByRole('button', { name: /complete/i }))
-    await waitFor(() => expect(screen.getByLabelText(/reps hiciste/i)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByLabelText(/how many reps did you complete/i)).toBeInTheDocument())
     fireEvent.click(screen.getByRole('button', { name: /confirm/i }))
 
     // Stretch (timed cooldown)
@@ -211,7 +211,7 @@ describe('Reps mode integration', () => {
 
     await skipWarmup()
     fireEvent.click(screen.getByRole('button', { name: /complete/i }))
-    await waitFor(() => expect(screen.getByLabelText(/reps hiciste/i)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByLabelText(/how many reps did you complete/i)).toBeInTheDocument())
     fireEvent.click(screen.getByRole('button', { name: /confirm/i }))
 
     // Now on Rest interval — should show addTime buttons
@@ -236,7 +236,7 @@ describe('Reps mode integration', () => {
 
     await skipWarmup()
     fireEvent.click(screen.getByRole('button', { name: /complete/i }))
-    await waitFor(() => expect(screen.getByLabelText(/reps hiciste/i)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByLabelText(/how many reps did you complete/i)).toBeInTheDocument())
 
     // Click Skip in dialog
     fireEvent.click(screen.getByRole('button', { name: /skip/i }))

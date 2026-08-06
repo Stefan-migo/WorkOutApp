@@ -97,12 +97,12 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
           border: none;
           padding: 0;
           border-radius: 12px 12px 0 0;
-          background: var(--color-surface, #fff);
+          background: var(--color-surface);
           max-height: 85vh;
           overflow-y: auto;
         }
         .interval-sheet::backdrop {
-          background: rgba(0, 0, 0, 0.1);
+          background: color-mix(in srgb, var(--color-surface) 80%, transparent);
         }
       `}</style>
       <dialog
@@ -112,31 +112,31 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
       >
         <div className="p-6 flex flex-col gap-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-on-surface-variant font-medium uppercase tracking-wider">{interval.type}</span>
+            <span className="text-xs text-muted font-medium uppercase tracking-wider">{interval.type}</span>
           </div>
 
           {/* Title */}
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs text-on-surface-variant">Title</span>
+            <span className="text-xs text-muted">Title</span>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="bg-surface-container-low text-on-surface rounded-lg px-3 py-2.5 text-sm border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
+              className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-border focus:outline-none focus:ring-1 focus:ring-accent"
             />
           </label>
 
           {/* Mode toggle — work intervals only; rest/prepare/cooldown are always timed */}
           {interval.type === 'work' && (
             <div className="flex items-center gap-2">
-              <span className="font-label-caps text-label-caps text-on-surface-variant text-[9px] uppercase tracking-wider">Mode</span>
+              <span className="font-label-caps text-label-caps text-muted text-[9px] uppercase tracking-wider">Mode</span>
               <button
                 type="button"
                 onClick={() => setEditMode('timed')}
                 className={`px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider transition-colors ${
                   editMode !== 'reps'
-                    ? 'bg-primary text-on-primary-btn'
-                    : 'bg-surface-dim text-on-surface-variant'
+                    ? 'bg-accent text-accent-on'
+                    : 'bg-surface text-muted'
                 }`}
               >
                 Timed
@@ -146,8 +146,8 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
                 onClick={() => setEditMode('reps')}
                 className={`px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider transition-colors ${
                   editMode === 'reps'
-                    ? 'bg-primary text-on-primary-btn'
-                    : 'bg-surface-dim text-on-surface-variant'
+                    ? 'bg-accent text-accent-on'
+                    : 'bg-surface text-muted'
                 }`}
               >
                 Reps
@@ -159,18 +159,18 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
           {showRepsInput ? (
             <>
               <label className="flex flex-col gap-1.5">
-                <span className="text-xs text-on-surface-variant">Reps</span>
+                <span className="text-xs text-muted">Reps</span>
                 <input
                   type="number"
                   value={reps}
                   onChange={(e) => setReps(Math.max(1, Math.min(999, Number(e.target.value))))}
                   min={1}
                   max={999}
-                  className="bg-surface-container-low text-on-surface rounded-lg px-3 py-2.5 text-sm w-28 border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
+                  className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-28 border border-border focus:outline-none focus:ring-1 focus:ring-accent"
                 />
               </label>
               <label className="flex flex-col gap-1.5">
-                <span className="text-xs text-on-surface-variant">Weight (kg)</span>
+                <span className="text-xs text-muted">Weight (kg)</span>
                 <input
                   type="number"
                   value={weight || ''}
@@ -178,20 +178,20 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
                   min={0}
                   max={9999}
                   placeholder="0"
-                  className="bg-surface-container-low text-on-surface rounded-lg px-3 py-2.5 text-sm w-28 border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
+                  className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-28 border border-border focus:outline-none focus:ring-1 focus:ring-accent"
                 />
               </label>
             </>
           ) : (
             <label className="flex flex-col gap-1.5">
-              <span className="text-xs text-on-surface-variant">Duration (seconds)</span>
+              <span className="text-xs text-muted">Duration (seconds)</span>
               <input
                 type="number"
                 value={duration}
                 onChange={(e) => setDuration(Math.max(1, Math.min(3600, Number(e.target.value))))}
                 min={1}
                 max={3600}
-                className="bg-surface-container-low text-on-surface rounded-lg px-3 py-2.5 text-sm w-28 border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
+                className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-28 border border-border focus:outline-none focus:ring-1 focus:ring-accent"
               />
             </label>
           )}
@@ -199,19 +199,19 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
           {/* Exercise picker trigger — only for work type */}
           {interval.type === 'work' && exercises && exercises.length > 0 && (
             <label className="flex flex-col gap-1.5">
-              <span className="text-xs text-on-surface-variant">Exercise</span>
+              <span className="text-xs text-muted">Exercise</span>
               <button
                 type="button"
                 onClick={() => setPickerOpen(true)}
-                className="bg-surface-container-low text-on-surface rounded-lg px-3 py-2.5 text-sm border border-outline-variant hover:bg-surface-container transition-colors text-left w-full flex items-center gap-3 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-border hover:bg-surface-warm transition-colors text-left w-full flex items-center gap-3 focus-visible:focus-ring"
               >
                 {selectedExercise ? (
                   <>
-                    <div className="w-8 h-8 rounded bg-surface-container-lowest flex items-center justify-center shrink-0 overflow-hidden">
+                    <div className="w-8 h-8 rounded bg-surface flex items-center justify-center shrink-0 overflow-hidden">
                       {selectedExercise.images?.[0] ? (
                         <img src={selectedExercise.images[0]} alt="" className="w-full h-full object-cover" />
                       ) : (
-                        <svg className="w-4 h-4 text-outline-variant/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <svg className="w-4 h-4 text-muted/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                         </svg>
                       )}
@@ -219,17 +219,17 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
                     <span className="font-medium text-sm">{selectedExercise.name}</span>
                   </>
                 ) : (
-                  <span className="text-on-surface-variant">Select exercise...</span>
+                  <span className="text-muted">Select exercise...</span>
                 )}
               </button>
               {/* Mini preview when exercise is selected */}
               {selectedExercise && (
                 <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                  <span className="px-2 py-0.5 rounded bg-surface-container-high text-[10px] text-on-surface-variant font-medium uppercase tracking-wider">
+                  <span className="px-2 py-0.5 rounded bg-surface text-[10px] text-muted font-medium uppercase tracking-wider">
                     {selectedExercise.category}
                   </span>
                   {(selectedExercise.primaryMuscles ?? selectedExercise.muscleGroups ?? []).slice(0, 2).map((m) => (
-                    <span key={m} className="px-1.5 py-0.5 rounded bg-surface-container-high text-[10px] text-on-surface-variant">
+                    <span key={m} className="px-1.5 py-0.5 rounded bg-surface text-[10px] text-muted">
                       {m}
                     </span>
                   ))}
@@ -240,31 +240,31 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
 
           {/* Description */}
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs text-on-surface-variant">Description</span>
+            <span className="text-xs text-muted">Description</span>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="bg-surface-container-low text-on-surface rounded-lg px-3 py-2.5 text-sm border border-outline-variant resize-none focus:outline-none focus:ring-1 focus:ring-secondary"
+              className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-border resize-none focus:outline-none focus:ring-1 focus:ring-accent"
             />
           </label>
 
           {/* Image URL + upload */}
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs text-on-surface-variant">Image URL</span>
+            <span className="text-xs text-muted">Image URL</span>
             <div className="flex gap-2">
               <input
                 type="text"
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
                 placeholder="https://example.com/image.jpg"
-                className="flex-1 bg-surface-container-low text-on-surface rounded-lg px-3 py-2.5 text-sm border border-outline-variant focus:outline-none focus:ring-1 focus:ring-secondary"
+                className="flex-1 bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-border focus:outline-none focus:ring-1 focus:ring-accent"
               />
               <button
                 type="button"
                 disabled={uploading || !onImageUpload}
                 onClick={() => fileInputRef.current?.click()}
-                className="px-3 py-2.5 rounded-lg bg-surface-container-low text-sm border border-outline-variant hover:bg-surface-container transition-colors disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                className="px-3 py-2.5 rounded-lg bg-surface text-sm border border-border hover:bg-surface-warm transition-colors disabled:opacity-30 focus-visible:focus-ring"
                 title="Upload image file"
               >
                 {uploading ? '...' : '📁'}
@@ -294,13 +294,13 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
           <div className="flex gap-3 pt-2">
             <button
               onClick={handleCancel}
-              className="flex-1 py-3 bg-surface-container-low text-on-surface rounded-lg font-medium hover:bg-surface-container transition-colors text-sm"
+              className="flex-1 py-3 bg-surface text-fg-2 rounded-lg font-medium hover:bg-surface-warm transition-colors text-sm"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
-              className="flex-1 py-3 bg-primary-btn text-on-primary-btn rounded-lg font-medium hover:opacity-90 transition-colors text-sm"
+              className="flex-1 py-3 bg-accent text-accent-on rounded-lg font-medium hover:opacity-90 transition-colors text-sm"
             >
               Save
             </button>

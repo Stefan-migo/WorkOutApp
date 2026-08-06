@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "test": "vitest",
-    "audit:tokens": "grep -r \"text-fg\\|bg-accent\\|border-border\\|text-muted\\|bg-surface-alt\\|bg-interval-\" src/ --include=\"*.tsx\" --include=\"*.ts\" || echo \"✅ No old tokens found\"",
+    "audit:tokens": "vitest run src/lib/__tests__/token-audit.test.ts",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
@@ -18,6 +18,10 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@storybook/addon-a11y": "^10.5.6",
+    "@storybook/addon-docs": "^10.5.6",
+    "@storybook/nextjs-vite": "^10.5.6",
+    "@storybook/react-vite": "^10.5.6",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
@@ -28,12 +32,11 @@
     "@vitejs/plugin-react": "^6.0.3",
     "fake-indexeddb": "^6.2.5",
     "jsdom": "^29.1.1",
+    "storybook": "^10.5.5",
     "tailwindcss": "^4",
     "typescript": "^5",
+    "vite": "^8.2.0",
     "vite-tsconfig-paths": "^6.1.1",
-    "vitest": "^4.1.9",
-    "storybook": "^10.5.5",
-    "@storybook/nextjs-vite": "^10.5.5",
-    "vite": "^8.2.0"
+    "vitest": "^4.1.9"
   }
 }

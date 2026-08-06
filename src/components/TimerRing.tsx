@@ -20,11 +20,11 @@ export function TimerRing({ timeLeft, duration, intervalType, label, nextLabel, 
   if (isRepsMode) {
     return (
       <div className="flex flex-col items-center text-center">
-        <span className="font-label-caps text-label-caps tracking-widest uppercase mb-sm text-white">
+        <span className="font-label-caps text-label-caps tracking-widest uppercase mb-sm text-timer-on">
           {label}
         </span>
         {nextLabel && (
-          <span className="font-data-sm text-data-sm text-gray-400 mt-xs">{nextLabel}</span>
+          <span className="font-data-sm text-data-sm text-timer-muted mt-xs">{nextLabel}</span>
         )}
       </div>
     )
@@ -37,16 +37,23 @@ export function TimerRing({ timeLeft, duration, intervalType, label, nextLabel, 
   return (
     <div className="relative w-72 h-72 md:w-96 md:h-96 flex items-center justify-center">
       <svg className="absolute inset-0 w-full h-full drop-shadow-2xl" viewBox="0 0 100 100">
-        {/* Track */}
-        <circle cx="50" cy="50" r="45" fill="transparent" stroke="#1E293B" strokeWidth="4" />
-        {/* Progress */}
+        {/* Track — inline style: SVG presentation attrs don't resolve CSS vars */}
+        <circle
+          cx="50"
+          cy="50"
+          r="45"
+          fill="transparent"
+          style={{ stroke: 'var(--color-timer-track)' }}
+          strokeWidth="4"
+        />
+        {/* Progress — inline style: SVG presentation attrs can't resolve var()/color-mix (D2) */}
         <circle
           className="progress-ring__circle"
           cx="50"
           cy="50"
           r="45"
           fill="transparent"
-          stroke={ringColor}
+          style={{ stroke: ringColor }}
           strokeDasharray="283"
           strokeDashoffset={offset}
           strokeLinecap="round"
@@ -57,11 +64,11 @@ export function TimerRing({ timeLeft, duration, intervalType, label, nextLabel, 
         <span className="font-label-caps text-label-caps tracking-widest uppercase mb-sm" style={{ color: ringColor }}>
           {label}
         </span>
-        <span className="font-display-timer-mobile text-display-timer-mobile md:font-display-timer md:text-display-timer text-white tabular-nums">
+        <span className="font-display-timer-mobile text-display-timer-mobile md:font-display-timer md:text-display-timer text-timer-on tabular-nums">
           {formatTime(timeLeft)}
         </span>
         {nextLabel && (
-          <span className="font-data-sm text-data-sm text-gray-400 mt-xs">{nextLabel}</span>
+          <span className="font-data-sm text-data-sm text-timer-muted mt-xs">{nextLabel}</span>
         )}
       </div>
     </div>

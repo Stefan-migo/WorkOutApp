@@ -191,10 +191,10 @@ export default function ExercisesPage() {
       {/* Empty states */}
       {hasNoExercises && (
         <div className="flex flex-col items-center justify-center gap-4 py-[64px] text-center">
-          <p className="font-body text-body-md text-on-surface-variant">No exercises yet. Create your first one!</p>
+          <p className="font-body text-body-md text-muted">No exercises yet. Create your first one!</p>
           <button
             onClick={openCreate}
-            className="px-6 py-3 bg-primary text-on-primary font-label text-label-caps rounded-lg hover:bg-primary-container transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+            className="px-6 py-3 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:focus-ring"
           >
             Create Exercise
           </button>
@@ -203,7 +203,7 @@ export default function ExercisesPage() {
 
       {hasNoResults && !hasNoExercises && (
         <div className="flex flex-col items-center justify-center gap-4 py-[64px] text-center">
-          <p className="font-body text-body-md text-on-surface-variant">
+          <p className="font-body text-body-md text-muted">
             {isFavoritesEmpty
               ? 'No favorites yet — star exercises to add them'
               : 'No exercises match your filters.'}
@@ -219,14 +219,14 @@ export default function ExercisesPage() {
             if (!items || items.length === 0) return null
             return (
               <section key={cat} className="flex flex-col gap-16">
-                <div className="flex items-center justify-between border-b border-outline-variant/20 pb-8">
-                  <h2 className="font-headline text-headline-md font-semibold text-primary">
+                <div className="flex items-center justify-between border-b border-border-soft pb-8">
+                  <h2 className="font-headline text-headline-md font-semibold text-accent">
                     {CATEGORY_LABELS[cat]} ({items.length})
                   </h2>
                   {items.length > 20 && (
                     <button
                       onClick={() => {}}
-                      className="font-label text-label-caps text-secondary hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                      className="font-label text-label-caps text-accent hover:text-accent transition-colors focus-visible:focus-ring"
                     >
                       {/* ponytail: show all/show less — add real toggle when >20 exercises in any category */}
                     </button>
@@ -241,10 +241,10 @@ export default function ExercisesPage() {
                       <div
                         key={ex.id}
                         onClick={() => router.push(`/exercises/${ex.id}`)}
-                        className="bg-surface rounded-xl border border-outline-variant/30 overflow-hidden hover:shadow-[0_4px_20px_rgba(30,41,59,0.05)] transition-all duration-300 group flex flex-col cursor-pointer"
+                        className="bg-surface rounded-xl border border-border-soft overflow-hidden hover:shadow-card-hover transition-all duration-300 group flex flex-col cursor-pointer"
                       >
                         {/* ponytail: 2:1 image — background-image for static display (no GIF animation) */}
-                        <div className="relative aspect-[2/1] bg-surface-container-lowest overflow-hidden flex items-center justify-center"
+                        <div className="relative aspect-[2/1] bg-surface overflow-hidden flex items-center justify-center"
                           style={
                             (ex.images?.[0] ?? idbImageMap[ex.id])
                               ? { backgroundImage: `url(${ex.images?.[0] ?? idbImageMap[ex.id]})`, backgroundSize: 'cover', backgroundPosition: 'center' }
@@ -252,14 +252,14 @@ export default function ExercisesPage() {
                           }
                         >
                           {!(ex.images?.[0] ?? idbImageMap[ex.id]) && (
-                            <svg className="w-10 h-10 text-outline-variant/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <svg className="w-10 h-10 text-muted/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                             </svg>
                           )}
                           {/* Star toggle top-left */}
                           <button
                             onClick={(e) => { e.stopPropagation(); toggleFavorite(ex.id) }}
-                            className="absolute top-2 left-2 w-8 h-8 flex items-center justify-center rounded-full bg-surface/80 backdrop-blur text-lg shadow-sm hover:bg-surface transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                            className="absolute top-2 left-2 w-8 h-8 flex items-center justify-center rounded-full bg-surface/80 backdrop-blur text-lg shadow-sm hover:bg-surface transition-colors focus-visible:focus-ring"
                             aria-label={isFavorite(ex.id) ? 'Remove from favorites' : 'Add to favorites'}
                           >
                             {isFavorite(ex.id) ? '★' : '☆'}
@@ -267,7 +267,7 @@ export default function ExercisesPage() {
                           {/* Quick assign bottom-right */}
                           <button
                             onClick={(e) => { e.stopPropagation(); setAssigningExercise(ex) }}
-                            className="absolute bottom-2 right-2 w-10 h-10 flex items-center justify-center rounded-full bg-surface/90 backdrop-blur shadow-md hover:bg-primary-btn hover:text-on-primary-btn hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none z-10"
+                            className="absolute bottom-2 right-2 w-10 h-10 flex items-center justify-center rounded-full bg-surface/90 backdrop-blur shadow-md hover:bg-accent hover:text-accent-on hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer focus-visible:focus-ring z-10"
                             aria-label="Assign to workout"
                           >
                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -275,40 +275,40 @@ export default function ExercisesPage() {
                             </svg>
                           </button>
                           {/* Category badge top-right */}
-                          <span className="absolute top-2 right-2 bg-surface/80 backdrop-blur px-2 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-on-surface-variant font-semibold shadow-sm uppercase tracking-wider">
+                          <span className="absolute top-2 right-2 bg-surface/80 backdrop-blur px-2 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-muted font-semibold shadow-sm uppercase tracking-wider">
                             {ex.category}
                           </span>
                           {/* Force/mechanic badges on hover — overlay bottom-center of image */}
                           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                             {ex.force && (
-                              <span className="px-2 py-0.5 rounded bg-surface/90 backdrop-blur text-on-surface font-label-caps text-[10px] shadow-sm">
+                              <span className="px-2 py-0.5 rounded bg-surface/90 backdrop-blur text-fg-2 font-label-caps text-[10px] shadow-sm">
                                 {ex.force}
                               </span>
                             )}
                             {ex.mechanic && (
-                              <span className="px-2 py-0.5 rounded bg-surface/90 backdrop-blur text-on-surface font-label-caps text-[10px] shadow-sm">
+                              <span className="px-2 py-0.5 rounded bg-surface/90 backdrop-blur text-fg-2 font-label-caps text-[10px] shadow-sm">
                                 {ex.mechanic}
                               </span>
                             )}
                           </div>
                           {/* Difficulty badge bottom-left of image */}
                           {ex.difficulty && (
-                            <span className="absolute bottom-2 left-2 bg-primary/80 backdrop-blur px-2 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-on-primary font-semibold shadow-sm">
+                            <span className="absolute bottom-2 left-2 bg-accent/80 backdrop-blur px-2 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-accent-on font-semibold shadow-sm">
                               {ex.difficulty.charAt(0).toUpperCase() + ex.difficulty.slice(1)}
                             </span>
                           )}
                         </div>
                         {/* Compact content area — p-12 */}
                         <div className="p-12 flex flex-col gap-2">
-                          <h3 className="font-body text-body-md font-bold text-primary line-clamp-1">{ex.name}</h3>
+                          <h3 className="font-body text-body-md font-bold text-accent line-clamp-1">{ex.name}</h3>
                           <div className="flex flex-wrap gap-1.5">
                             {muscles.slice(0, maxMuscles).map((mg) => (
-                              <span key={mg} className="bg-surface-container px-1.5 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-on-surface-variant tracking-wider">
+                              <span key={mg} className="bg-surface px-1.5 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-muted tracking-wider">
                                 {mg.toUpperCase()}
                               </span>
                             ))}
                             {overflow > 0 && (
-                              <span className="bg-surface-container-high px-1.5 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-on-surface-variant font-semibold">
+                              <span className="bg-surface px-1.5 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-muted font-semibold">
                                 +{overflow}
                               </span>
                             )}

@@ -28,21 +28,21 @@ export default function Nav() {
       {/* Mobile menu overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/40 z-40 md:hidden"
+          className="fixed inset-0 bg-surface/80 z-40 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar — Desktop (fixed) + Mobile (overlay) */}
       <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-sidebar z-50 flex flex-col py-24 px-16 transition-transform duration-300 ${
+        className={`fixed top-0 left-0 h-full w-64 bg-surface z-50 flex flex-col py-24 px-16 transition-transform duration-300 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } md:translate-x-0`}
       >
         {/* Brand */}
         <div className="mb-32 px-8">
-          <h1 className="font-headline text-[24px] font-bold text-on-sidebar leading-tight tracking-tight">WorkOutApp</h1>
-          <p className="font-mono text-sm text-on-sidebar-muted mt-1">Nordic Athletic</p>
+          <h1 className="font-headline text-[24px] font-bold text-fg-2 leading-tight tracking-tight">WorkOutApp</h1>
+          <p className="font-mono text-sm text-muted mt-1">Nordic Athletic</p>
         </div>
 
         {/* Nav items */}
@@ -56,8 +56,8 @@ export default function Nav() {
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-16 px-8 py-2.5 rounded-lg transition-all duration-200 ${
                   active
-                    ? 'text-on-sidebar font-bold bg-sidebar-active'
-                    : 'text-on-sidebar-muted hover:bg-sidebar-hover hover:text-on-sidebar transition-colors'
+                    ? 'text-fg-2 font-bold bg-surface-warm'
+                    : 'text-muted hover:bg-surface-warm hover:text-fg-2 transition-colors'
                 }`}
               >
                 <span
@@ -74,12 +74,12 @@ export default function Nav() {
       </aside>
 
       {/* Top App Bar — hidden on mobile, visible on desktop */}
-      <header className="hidden md:flex fixed top-0 left-64 right-0 h-20 bg-surface border-b border-outline-variant/30 items-center px-margin-desktop z-[60]">
-        <span className="font-headline text-headline-md font-bold text-primary tracking-tight">WorkOutApp</span>
+      <header className="hidden md:flex fixed top-0 left-64 right-0 h-20 bg-surface border-b border-border-soft items-center px-margin-desktop z-[60]">
+        <span className="font-headline text-headline-md font-bold text-accent tracking-tight">WorkOutApp</span>
       </header>
 
       {/* Bottom Nav — Mobile only */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-md border-t border-outline-variant/30 flex justify-around items-center px-2 py-1 z-40 ">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-md border-t border-border-soft flex justify-around items-center px-2 py-1 z-40 ">
         {navItems.slice(0, 5).map(({ href, label, icon }) => {
           const active = isActive(href)
           return (
@@ -87,7 +87,7 @@ export default function Nav() {
               key={href}
               href={href}
               className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg min-w-0 transition-colors ${
-                active ? 'text-primary' : 'text-on-surface-variant'
+                active ? 'text-accent' : 'text-muted'
               }`}
             >
               <span
@@ -104,11 +104,11 @@ export default function Nav() {
 
       {/* Mobile hamburger */}
       <button
-        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-full bg-surface/80 backdrop-blur-md border border-outline-variant/30 shadow-sm"
+        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-full bg-surface/80 backdrop-blur-md border border-border-soft shadow-sm"
         onClick={() => setSidebarOpen(!sidebarOpen)}
         aria-label="Toggle menu"
       >
-        <span className="material-symbols-outlined text-[24px] text-on-surface">
+        <span className="material-symbols-outlined text-[24px] text-fg-2">
           {sidebarOpen ? 'close' : 'menu'}
         </span>
       </button>

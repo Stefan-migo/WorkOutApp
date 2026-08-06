@@ -252,9 +252,9 @@ export default function PlaySequencePage() {
 
   if (!sequence) {
     return (
-      <div className="timer-dark-bg text-white min-h-screen flex flex-col items-center justify-center gap-4 px-margin-mobile">
+      <div className="timer-dark-bg text-timer-on min-h-screen flex flex-col items-center justify-center gap-4 px-margin-mobile">
         <h1 className="font-headline-lg text-headline-lg">Sequence not found</h1>
-        <Link href="/sequences" className="text-gray-400 hover:text-white transition-colors">
+        <Link href="/sequences" className="text-timer-muted hover:text-timer-on transition-colors">
           &larr; Back to sequences
         </Link>
       </div>
@@ -263,14 +263,14 @@ export default function PlaySequencePage() {
 
   if (!workout && phase !== 'complete') {
     return (
-      <div className="timer-dark-bg text-white min-h-screen flex flex-col items-center justify-center gap-4 px-margin-mobile">
+      <div className="timer-dark-bg text-timer-on min-h-screen flex flex-col items-center justify-center gap-4 px-margin-mobile">
         <h1 className="font-headline-lg text-headline-lg">Workout not found</h1>
-        <p className="font-body-md text-body-md text-gray-400">A workout in this sequence may have been deleted.</p>
+        <p className="font-body-md text-body-md text-timer-muted">A workout in this sequence may have been deleted.</p>
         <div className="flex gap-4">
-          <button onClick={handleSkipWorkout} className="px-6 py-3 rounded-full bg-primary text-on-primary font-medium hover:opacity-90 transition-colors">
+          <button onClick={handleSkipWorkout} className="px-6 py-3 rounded-full bg-accent text-accent-on font-medium hover:opacity-90 transition-colors">
             Skip to next
           </button>
-          <Link href="/sequences" className="px-6 py-3 rounded-full border border-white/20 text-white font-medium hover:bg-white/10 transition-colors">
+          <Link href="/sequences" className="px-6 py-3 rounded-full border border-timer-border text-timer-on font-medium hover:bg-timer-on/10 transition-colors">
             Back to sequences
           </Link>
         </div>
@@ -286,7 +286,7 @@ export default function PlaySequencePage() {
       : 0
 
   return (
-    <div className="timer-dark-bg text-white min-h-screen flex flex-col">
+    <div className="timer-dark-bg text-timer-on min-h-screen flex flex-col">
       <PlayHeader title={sequence.title} onClose={() => router.push('/sequences')} />
 
       <main className="flex-grow flex flex-col items-center px-margin-mobile py-24 w-full max-w-4xl mx-auto">
@@ -294,11 +294,11 @@ export default function PlaySequencePage() {
         {phase !== 'idle' && (
           <div className="w-full max-w-2xl mb-24">
             <div className="flex justify-between items-center mb-8">
-              <span className="font-data-sm text-data-sm text-gray-400">{sequence.title} Progress</span>
-              <span className="font-data-sm text-data-sm text-white">{progress.percent}%</span>
+              <span className="font-data-sm text-data-sm text-timer-muted">{sequence.title} Progress</span>
+              <span className="font-data-sm text-data-sm text-timer-on">{progress.percent}%</span>
             </div>
             <ProgressBar progress={progress.percent / 100} dark />
-            <div className="flex justify-between w-full font-label-caps text-label-caps text-gray-400 mt-sm">
+            <div className="flex justify-between w-full font-label-caps text-label-caps text-timer-muted mt-sm">
               <span>{progress.current + 1}/{progress.total}</span>
               {workout && <span>Workout: {workout.title}</span>}
             </div>
@@ -307,15 +307,15 @@ export default function PlaySequencePage() {
 
         {phase === 'idle' && (
           <>
-            <h1 className="font-headline-lg text-headline-lg text-white mb-8 mt-24">{sequence.title}</h1>
-            <p className="font-body-md text-body-md text-gray-400 mb-24">
+            <h1 className="font-headline-lg text-headline-lg text-timer-on mb-8 mt-24">{sequence.title}</h1>
+            <p className="font-body-md text-body-md text-timer-muted mb-24">
               {totalRounds} round{totalRounds !== 1 && 's'} &middot;{' '}
               {sequence.workoutIds.length} workout{sequence.workoutIds.length !== 1 && 's'}
               {sequence.repeatCount > 1 && ` × ${sequence.repeatCount}`}
             </p>
             <button
               onClick={handleStart}
-              className="px-12 py-4 rounded-full text-xl font-bold transition-colors bg-primary text-on-primary hover:opacity-90"
+              className="px-12 py-4 rounded-full text-xl font-bold transition-colors bg-accent text-accent-on hover:opacity-90"
             >
               Start Sequence
             </button>
@@ -375,11 +375,11 @@ export default function PlaySequencePage() {
               {/* Workout-level Progress */}
               <div className="w-full max-w-2xl">
                 <div className="flex justify-between items-center mb-8">
-                  <span className="font-data-sm text-data-sm text-gray-400">{workout?.title ?? 'Workout'} Progress</span>
-                  <span className="font-data-sm text-data-sm text-white">{Math.round(progressVal * 100)}%</span>
+                  <span className="font-data-sm text-data-sm text-timer-muted">{workout?.title ?? 'Workout'} Progress</span>
+                  <span className="font-data-sm text-data-sm text-timer-on">{Math.round(progressVal * 100)}%</span>
                 </div>
                 <ProgressBar progress={progressVal} dark />
-                <div className="flex justify-between w-full font-label-caps text-label-caps text-gray-400 mt-8">
+                <div className="flex justify-between w-full font-label-caps text-label-caps text-timer-muted mt-8">
                   <span>{intervalIdx + 1} of {flat.length}</span>
                   <span>{currentInterval ? getIntervalName(currentInterval, seqWorkCount, exercise) : ''}</span>
                 </div>
@@ -389,13 +389,13 @@ export default function PlaySequencePage() {
               <div className="flex items-center justify-center gap-4">
                 <button
                   onClick={handleSkipWorkout}
-                  className="px-4 py-2 rounded-lg text-sm font-medium border border-white/20 text-gray-400 hover:text-white transition-colors"
+                  className="px-4 py-2 rounded-lg text-sm font-medium border border-timer-border text-timer-muted hover:text-timer-on transition-colors"
                 >
                   Skip to next workout
                 </button>
                 <button
                   onClick={handleFinishEarly}
-                  className="px-4 py-2 rounded-lg text-sm font-medium border border-red-400/50 text-red-400 hover:text-white transition-colors"
+                  className="px-4 py-2 rounded-lg text-sm font-medium border border-danger/50 text-danger hover:text-timer-on transition-colors"
                 >
                   Finish Early
                 </button>
@@ -406,16 +406,16 @@ export default function PlaySequencePage() {
 
         {phase === 'workout-summary' && (
           <div className="flex flex-col items-center gap-4 mt-12 text-center">
-            <h1 className="font-headline-lg text-headline-lg text-white">Workout Complete!</h1>
-            <p className="font-body-md text-body-md text-gray-400">
+            <h1 className="font-headline-lg text-headline-lg text-timer-on">Workout Complete!</h1>
+            <p className="font-body-md text-body-md text-timer-muted">
               {workout?.title} &mdash; {flat.length} interval{flat.length !== 1 && 's'}
             </p>
             {countdown > 0 && (
               <>
-                <p className="font-body-lg text-body-lg text-white">Next workout in {countdown}s</p>
+                <p className="font-body-lg text-body-lg text-timer-on">Next workout in {countdown}s</p>
                 <button
                   onClick={goToNextRound}
-                  className="px-6 py-3 rounded-full bg-primary text-on-primary font-medium hover:opacity-90 transition-colors"
+                  className="px-6 py-3 rounded-full bg-accent text-accent-on font-medium hover:opacity-90 transition-colors"
                 >
                   Next Workout
                 </button>
@@ -426,12 +426,12 @@ export default function PlaySequencePage() {
 
         {phase === 'complete' && (
           <div className="flex flex-col items-center gap-4 mt-12 text-center">
-            <h1 className="font-headline-lg text-headline-lg text-white">Sequence Complete!</h1>
-            <p className="font-body-md text-body-md text-gray-400">
+            <h1 className="font-headline-lg text-headline-lg text-timer-on">Sequence Complete!</h1>
+            <p className="font-body-md text-body-md text-timer-muted">
               {completedIntervals.length} interval{completedIntervals.length !== 1 && 's'} across{' '}
               {totalRounds} round{totalRounds !== 1 && 's'}
             </p>
-            <p className="font-body-md text-body-md text-gray-400">Saving session...</p>
+            <p className="font-body-md text-body-md text-timer-muted">Saving session...</p>
           </div>
         )}
       </main>

@@ -10,10 +10,10 @@ export default function StrainGauge({ avgRpe }: StrainGaugeProps) {
   return (
     <div className="md:col-span-4 glass-card rounded-xl p-16 flex flex-col h-96 ambient-shadow justify-between">
       <div className="pb-3">
-        <h3 className="font-headline-md text-headline-md text-on-surface">
+        <h3 className="font-headline-md text-headline-md text-fg-2">
           Average Strain
         </h3>
-        <p className="font-body-md text-body-md text-on-surface-variant">
+        <p className="font-body-md text-body-md text-muted">
           RPE Focus
         </p>
       </div>
@@ -24,7 +24,7 @@ export default function StrainGauge({ avgRpe }: StrainGaugeProps) {
             <circle
               cx="92" cy="92" r={gaugeR}
               fill="none" stroke="currentColor" strokeWidth="16"
-              className="text-surface-variant"
+              className="text-border-soft"
             />
             <circle
               cx="92" cy="92" r={gaugeR}
@@ -32,14 +32,14 @@ export default function StrainGauge({ avgRpe }: StrainGaugeProps) {
               strokeLinecap="round"
               strokeDasharray={gaugeCirc}
               strokeDashoffset={gaugeOffset}
-              className="text-secondary-container transition-all duration-700 ease-out"
+              className="text-accent transition-all duration-700 ease-out"
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="font-display-timer-mobile text-display-timer-mobile text-primary leading-none">
+            <span className="font-display-timer-mobile text-display-timer-mobile text-accent leading-none">
               {avgRpe}
             </span>
-            <span className="font-label-caps text-label-caps text-on-surface-variant mt-1">
+            <span className="font-label-caps text-label-caps text-muted mt-1">
               Avg RPE
             </span>
           </div>

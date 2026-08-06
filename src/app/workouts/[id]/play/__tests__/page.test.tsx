@@ -305,10 +305,10 @@ describe('PlayWorkoutPage', () => {
       fireEvent.click(screen.getByRole('button', { name: /Complete/i }))
 
       // Dialog appears with default reps = 10, weight = 80
-      expect(screen.getByLabelText(/reps hiciste/i)).toBeInTheDocument()
-      const repsInput = screen.getByLabelText(/reps hiciste/i) as HTMLInputElement
+      expect(screen.getByLabelText(/how many reps did you complete/i)).toBeInTheDocument()
+      const repsInput = screen.getByLabelText(/how many reps did you complete/i) as HTMLInputElement
       expect(repsInput.value).toBe('10')
-      const weightInput = screen.getByLabelText(/peso/i) as HTMLInputElement
+      const weightInput = screen.getByLabelText(/weight \(kg\)/i) as HTMLInputElement
       expect(weightInput.value).toBe('80')
 
       // Change reps to 12, confirm

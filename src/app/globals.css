@@ -1,75 +1,46 @@
 @import "tailwindcss";
 
 @theme {
-  /* Deep Nordic Athletic — colors */
-  --color-primary: #091426;
-  --color-on-primary: #ffffff;
-  --color-primary-container: #1e293b;
-  --color-on-primary-container: #8590a6;
-  --color-primary-fixed: #d8e3fb;
-  --color-primary-fixed-dim: #bcc7de;
-  --color-on-primary-fixed: #111c2d;
-  --color-on-primary-fixed-variant: #3c475a;
+  /* Happy Hues dark-warm — SOLE palette (DSF-1) */
+  --color-bg: #55423d;
+  --color-surface: #271c19;
+  --color-surface-warm: color-mix(in srgb, #ffc0ad 14%, #55423d);
+  --color-fg: #fffffe;
+  --color-fg-2: #fff3ec;
+  --color-muted: color-mix(in srgb, #fff3ec 62%, #271c19);
+  --color-meta: #e78fb5;
+  --color-border: color-mix(in srgb, #fff3ec 24%, #55423d);
+  --color-border-soft: color-mix(in srgb, #fff3ec 12%, #55423d);
+  --color-accent: #ffc0ad;
+  --color-accent-on: #271c19;
+  --color-accent-hover: color-mix(in oklab, var(--color-accent), white 8%);
+  --color-accent-active: color-mix(in oklab, var(--color-accent), white 14%);
+  --color-success: #9dbf9c;
+  --color-warn: #e6a651;
+  --color-danger: #e07a7f;
+  --color-focus-ring: 0 0 0 4px rgba(255, 192, 173, 0.28); /* shadow value, see D4 */
 
-  --color-secondary: #ac3400;
-  --color-on-secondary: #ffffff;
-  --color-secondary-container: #fd6b36;
-  --color-on-secondary-container: #5d1900;
-  --color-secondary-fixed: #ffdbd0;
-  --color-secondary-fixed-dim: #ffb59d;
-  --color-on-secondary-fixed: #390c00;
-  --color-on-secondary-fixed-variant: #832600;
+  /* Segment states → palette (DSF-2) */
+  --color-segment-prepare: color-mix(in srgb, var(--color-warn) 45%, var(--color-surface));
+  --color-segment-work: var(--color-success);
+  --color-segment-rest: var(--color-danger);
+  --color-segment-cooldown: color-mix(in srgb, var(--color-danger) 45%, var(--color-surface));
 
-  --color-tertiary: #111516;
-  --color-on-tertiary: #ffffff;
-  --color-tertiary-container: #26292b;
-  --color-on-tertiary-container: #8d9092;
-  --color-tertiary-fixed: #e0e3e5;
-  --color-tertiary-fixed-dim: #c4c7c9;
-  --color-on-tertiary-fixed: #191c1e;
-  --color-on-tertiary-fixed-variant: #444749;
-
-  --color-error: #ba1a1a;
-  --color-on-error: #ffffff;
-  --color-error-container: #ffdad6;
-  --color-on-error-container: #93000a;
-
-  --color-background: #f8f9ff;
-  --color-on-background: #0b1c30;
-
-  --color-surface: #f8f9ff;
-  --color-on-surface: #0b1c30;
-  --color-surface-dim: #cbdbf5;
-  --color-surface-bright: #f8f9ff;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #eff4ff;
-  --color-surface-container: #e5eeff;
-  --color-surface-container-high: #dce9ff;
-  --color-surface-container-highest: #d3e4fe;
-  --color-surface-variant: #d3e4fe;
-  --color-on-surface-variant: #45474c;
-
-  --color-inverse-surface: #213145;
-  --color-inverse-on-surface: #eaf1ff;
-  --color-inverse-primary: #bcc7de;
-
-  --color-outline: #75777d;
-  --color-outline-variant: #c5c6cd;
-  --color-surface-tint: #545f73;
-
-  /* Interval segment colors */
-  --color-segment-prepare: #3b82f6;
-  --color-segment-work: #10b981;
-  --color-segment-rest: #ef4444;
-  --color-segment-cooldown: #8b5cf6;
+  /* Timer aliases → palette (DSF-3) */
+  --color-timer-bg: var(--color-bg);
+  --color-timer-surface: var(--color-surface-warm);
+  --color-timer-on: var(--color-fg);
+  --color-timer-muted: var(--color-muted);
+  --color-timer-border: var(--color-border);
+  --color-timer-track: var(--color-surface);
 
   /* Font families */
   --font-headline: var(--font-inter), system-ui, sans-serif;
   --font-body: var(--font-inter), system-ui, sans-serif;
   --font-label: var(--font-inter), system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
-  --font-timer: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
-  --font-data: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  --font-mono: 'SF Mono', ui-monospace, 'Cascadia Mono', 'JetBrains Mono', monospace;
+  --font-timer: 'SF Mono', ui-monospace, 'Cascadia Mono', 'JetBrains Mono', monospace;
+  --font-data: 'SF Mono', ui-monospace, 'Cascadia Mono', 'JetBrains Mono', monospace;
 
   /* Font-size utilities with line-height, tracking, weight */
   --text-headline-lg: 32px;
@@ -124,82 +95,15 @@
   --spacing-24: 24px;
   --spacing-32: 32px;
 
-  /* Sidebar — always dark, never inverts with OS theme */
-  --color-sidebar: #1e293b;
-  --color-on-sidebar: #f1f5f9;
-  --color-on-sidebar-muted: #94a3b8;
-  --color-sidebar-active: rgba(255, 255, 255, 0.1);
-  --color-sidebar-hover: rgba(255, 255, 255, 0.06);
-
-  /* Primary button — consistent across themes (avoids inverted dark-on-dark) */
-  --color-primary-btn: #1e293b;
-  --color-on-primary-btn: #ffffff;
-  --color-primary-btn-hover: #091426;
-
-  /* Light text on consistently-dark backgrounds (primary-container, etc.) */
-  --color-on-primary-dark-bg: #f1f5f9;
+  /* Elevation shadows */
+  --shadow-card-hover: 0 8px 30px rgba(11, 28, 48, 0.04);
+  --shadow-fab: 0 4px 20px rgba(30, 41, 59, 0.2);
 }
 
-/* Dark mode — follows OS preference */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-primary: #d3e4fe;
-    --color-on-primary: #0b1c30;
-    --color-primary-container: #233153;
-    --color-on-primary-container: #bcc7de;
-    --color-primary-fixed: #091426;
-    --color-primary-fixed-dim: #1e293b;
-    --color-on-primary-fixed: #d8e3fb;
-    --color-on-primary-fixed-variant: #8590a6;
-
-    --color-secondary: #ffb59d;
-    --color-on-secondary: #5d1900;
-    --color-secondary-container: #832600;
-    --color-on-secondary-container: #ffdbd0;
-    --color-secondary-fixed: #ac3400;
-    --color-secondary-fixed-dim: #fd6b36;
-    --color-on-secondary-fixed: #ffdbd0;
-    --color-on-secondary-fixed-variant: #ffb59d;
-
-    --color-tertiary: #c4c7c9;
-    --color-on-tertiary: #191c1e;
-    --color-tertiary-container: #2e3133;
-    --color-on-tertiary-container: #8d9092;
-    --color-tertiary-fixed: #111516;
-    --color-tertiary-fixed-dim: #26292b;
-    --color-on-tertiary-fixed: #e0e3e5;
-    --color-on-tertiary-fixed-variant: #8d9092;
-
-    --color-error: #ffb4ab;
-    --color-on-error: #690005;
-    --color-error-container: #93000a;
-    --color-on-error-container: #ffdad6;
-
-    --color-background: #0a0e1a;
-    --color-on-background: #eaf1ff;
-
-    --color-surface: #111624;
-    --color-on-surface: #eaf1ff;
-    --color-surface-dim: #0a0e1a;
-    --color-surface-bright: #31364a;
-    --color-surface-container-lowest: #050811;
-    --color-surface-container-low: #151a29;
-    --color-surface-container: #1a1f2e;
-    --color-surface-container-high: #242938;
-    --color-surface-container-highest: #2f3444;
-    --color-surface-variant: #2f3444;
-    --color-on-surface-variant: #c5c6cd;
-
-    --color-inverse-surface: #eaf1ff;
-    --color-inverse-on-surface: #0b1c30;
-    --color-inverse-primary: #091426;
-
-    --color-outline: #8e9099;
-    --color-outline-variant: #45474c;
-    --color-surface-tint: #bcc7de;
-  }
-
-  /* ponytail: segment colors stay same — they're already high-contrast on any bg */
+/* Focus ring — box-shadow value lives in --color-focus-ring (D4) */
+@utility focus-ring {
+  outline: none;
+  box-shadow: var(--color-focus-ring);
 }
 
 /* Glassmorphism card */
@@ -211,12 +115,12 @@
 
 /* Ambient shadow for elevated elements */
 .ambient-shadow {
-  box-shadow: 0 4px 20px rgba(30, 41, 59, 0.1);
+  box-shadow: var(--shadow-fab);
 }
 
 /* Timer dark background */
 .timer-dark-bg {
-  background-color: #091426;
+  background-color: var(--color-timer-bg);
 }
 
 /* Hide scrollbar for clean lists */
@@ -229,8 +133,8 @@
 }
 
 body {
-  background-color: var(--color-background);
-  color: var(--color-on-background);
+  background-color: var(--color-bg);
+  color: var(--color-fg-2);
   font-family: var(--font-body);
 }
 
@@ -241,8 +145,9 @@ body {
 }
 
 .glass-panel-dark {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-timer-surface);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  /* rgba(255,255,255,0.1) — half of --color-timer-border (0.2) */
+  border: 1px solid color-mix(in srgb, var(--color-timer-border) 50%, transparent);
 }

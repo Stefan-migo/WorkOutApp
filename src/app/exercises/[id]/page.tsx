@@ -77,7 +77,7 @@ export default function ExerciseDetailPage() {
   if (isLoading) {
     return (
       <div className="max-w-[1440px] mx-auto w-full p-margin-mobile md:p-margin-desktop flex flex-col items-center justify-center gap-4 py-[64px] text-center">
-        <p className="font-headline text-headline-md font-semibold text-primary">Loading...</p>
+        <p className="font-headline text-headline-md font-semibold text-accent">Loading...</p>
       </div>
     )
   }
@@ -85,10 +85,10 @@ export default function ExerciseDetailPage() {
   if (error) {
     return (
       <div className="max-w-[1440px] mx-auto w-full p-margin-mobile md:p-margin-desktop flex flex-col items-center justify-center gap-4 py-[64px] text-center">
-        <p className="font-headline text-headline-md font-semibold text-error">{error}</p>
+        <p className="font-headline text-headline-md font-semibold text-danger">{error}</p>
         <Link
           href="/exercises"
-          className="px-6 py-3 bg-primary text-on-primary font-label text-label-caps rounded-lg hover:bg-primary-container transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="px-6 py-3 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:focus-ring"
         >
           ← Back to exercises
         </Link>
@@ -99,13 +99,13 @@ export default function ExerciseDetailPage() {
   if (!exercise) {
     return (
       <div className="max-w-[1440px] mx-auto w-full p-margin-mobile md:p-margin-desktop flex flex-col items-center justify-center gap-4 py-[64px] text-center">
-        <svg className="w-16 h-16 text-outline-variant/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <svg className="w-16 h-16 text-muted/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
         </svg>
-        <p className="font-headline text-headline-md font-semibold text-primary">Exercise not found</p>
+        <p className="font-headline text-headline-md font-semibold text-accent">Exercise not found</p>
         <Link
           href="/exercises"
-          className="px-6 py-3 bg-primary text-on-primary font-label text-label-caps rounded-lg hover:bg-primary-container transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="px-6 py-3 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:focus-ring"
         >
           ← Back to exercises
         </Link>
@@ -179,7 +179,7 @@ export default function ExerciseDetailPage() {
       {/* Back link */}
       <Link
         href="/exercises"
-        className="text-on-surface-variant hover:text-primary transition-colors font-body text-body-md w-fit"
+        className="text-muted hover:text-accent transition-colors font-body text-body-md w-fit"
       >
         ← Back to exercises
       </Link>
@@ -196,7 +196,7 @@ export default function ExerciseDetailPage() {
               {allImages.map((url, idx) => (
                 <div
                   key={`${url}-${idx}`}
-                  className="snap-start shrink-0 w-full max-w-[600px] aspect-[4/3] bg-surface-container-lowest rounded-xl overflow-hidden"
+                  className="snap-start shrink-0 w-full max-w-[600px] aspect-[4/3] bg-surface rounded-xl overflow-hidden"
                 >
                   <img
                     src={url}
@@ -224,7 +224,7 @@ export default function ExerciseDetailPage() {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="px-3 py-1.5 rounded-lg font-label text-label-caps bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                className="px-3 py-1.5 rounded-lg font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm transition-colors disabled:opacity-50 focus-visible:focus-ring"
               >
                 {uploading ? 'Uploading...' : '+ Upload Image'}
               </button>
@@ -232,8 +232,8 @@ export default function ExerciseDetailPage() {
           </div>
         ) : (
           <div>
-            <div className="aspect-[4/3] bg-surface-container-lowest rounded-xl flex items-center justify-center max-w-[600px]">
-              <svg className="w-16 h-16 text-outline-variant/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <div className="aspect-[4/3] bg-surface rounded-xl flex items-center justify-center max-w-[600px]">
+              <svg className="w-16 h-16 text-muted/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
               </svg>
             </div>
@@ -251,7 +251,7 @@ export default function ExerciseDetailPage() {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="px-3 py-1.5 rounded-lg font-label text-label-caps bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+                className="px-3 py-1.5 rounded-lg font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm transition-colors disabled:opacity-50 focus-visible:focus-ring"
               >
                 {uploading ? 'Uploading...' : '+ Upload Image'}
               </button>
@@ -262,10 +262,10 @@ export default function ExerciseDetailPage() {
 
       {/* Name + star toggle */}
       <div className="flex items-center gap-3">
-        <h1 className="font-headline text-headline-lg font-bold text-primary">{ex.name}</h1>
+        <h1 className="font-headline text-headline-lg font-bold text-accent">{ex.name}</h1>
         <button
           onClick={() => toggleFavorite(ex.id)}
-          className="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container text-lg hover:bg-surface-container-high transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="w-10 h-10 flex items-center justify-center rounded-full bg-surface text-lg hover:bg-surface-warm transition-colors focus-visible:focus-ring"
           aria-label={isFavorite(ex.id) ? 'Remove from favorites' : 'Add to favorites'}
         >
           {isFavorite(ex.id) ? '★' : '☆'}
@@ -274,25 +274,25 @@ export default function ExerciseDetailPage() {
 
       {/* Metadata chips */}
       <div className="flex flex-wrap gap-2">
-        <span className="px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-caps text-label-caps">
+        <span className="px-3 py-1 rounded-full bg-surface text-fg-2 font-label-caps text-label-caps">
           {ex.category}
         </span>
         {ex.difficulty && (
-          <span className="px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-caps text-label-caps">
+          <span className="px-3 py-1 rounded-full bg-surface text-fg-2 font-label-caps text-label-caps">
             {ex.difficulty.charAt(0).toUpperCase() + ex.difficulty.slice(1)}
           </span>
         )}
         {ex.force && (
-          <span className="px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-caps text-label-caps">
+          <span className="px-3 py-1 rounded-full bg-surface text-fg-2 font-label-caps text-label-caps">
             {ex.force}
           </span>
         )}
         {ex.mechanic && (
-          <span className="px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-caps text-label-caps">
+          <span className="px-3 py-1 rounded-full bg-surface text-fg-2 font-label-caps text-label-caps">
             {ex.mechanic}
           </span>
         )}
-        <span className="px-3 py-1 rounded-full bg-secondary/10 text-secondary font-label-caps text-label-caps">
+        <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-label-caps text-label-caps">
           {ex.source === 'free-exercise-db' ? 'free-exercise-db' : 'User created'}
         </span>
       </div>
@@ -300,14 +300,14 @@ export default function ExerciseDetailPage() {
       {/* Instructions */}
       {ex.instructions && ex.instructions.length > 0 && (
         <section className="flex flex-col gap-8">
-          <h2 className="font-headline text-headline-sm font-semibold text-primary">Instructions</h2>
+          <h2 className="font-headline text-headline-sm font-semibold text-accent">Instructions</h2>
           <ol className="list-none flex flex-col gap-4" role="list">
             {ex.instructions.map((step, idx) => (
               <li key={idx} className="flex gap-3 items-start" role="listitem">
-                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-label-caps text-label-caps shrink-0">
+                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-accent/10 text-accent font-label-caps text-label-caps shrink-0">
                   {idx + 1}
                 </span>
-                <span className="font-body text-body-md text-on-surface pt-1">{step}</span>
+                <span className="font-body text-body-md text-fg-2 pt-1">{step}</span>
               </li>
             ))}
           </ol>
@@ -317,12 +317,12 @@ export default function ExerciseDetailPage() {
       {/* Primary Muscles */}
       {ex.primaryMuscles && ex.primaryMuscles.length > 0 && (
         <section className="flex flex-col gap-6">
-          <h2 className="font-headline text-headline-sm font-semibold text-primary">Primary Muscles</h2>
+          <h2 className="font-headline text-headline-sm font-semibold text-accent">Primary Muscles</h2>
           <div className="flex flex-wrap gap-2">
             {ex.primaryMuscles.map((m) => (
               <span
                 key={m}
-                className="px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-caps text-label-caps"
+                className="px-3 py-1 rounded-full bg-surface text-fg-2 font-label-caps text-label-caps"
               >
                 {m}
               </span>
@@ -334,12 +334,12 @@ export default function ExerciseDetailPage() {
       {/* Secondary Muscles */}
       {ex.secondaryMuscles && ex.secondaryMuscles.length > 0 && (
         <section className="flex flex-col gap-6">
-          <h2 className="font-headline text-headline-sm font-semibold text-primary">Secondary Muscles</h2>
+          <h2 className="font-headline text-headline-sm font-semibold text-accent">Secondary Muscles</h2>
           <div className="flex flex-wrap gap-2">
             {ex.secondaryMuscles.map((m) => (
               <span
                 key={m}
-                className="px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-caps text-label-caps"
+                className="px-3 py-1 rounded-full bg-surface text-fg-2 font-label-caps text-label-caps"
               >
                 {m}
               </span>
@@ -351,12 +351,12 @@ export default function ExerciseDetailPage() {
       {/* Equipment */}
       {ex.equipment && ex.equipment.length > 0 && (
         <section className="flex flex-col gap-6">
-          <h2 className="font-headline text-headline-sm font-semibold text-primary">Equipment</h2>
+          <h2 className="font-headline text-headline-sm font-semibold text-accent">Equipment</h2>
           <div className="flex flex-wrap gap-2">
             {ex.equipment.map((eq) => (
               <span
                 key={eq}
-                className="px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-caps text-label-caps"
+                className="px-3 py-1 rounded-full bg-surface text-fg-2 font-label-caps text-label-caps"
               >
                 {eq}
               </span>
@@ -366,10 +366,10 @@ export default function ExerciseDetailPage() {
       )}
 
       {/* Action buttons */}
-      <div className="flex flex-wrap gap-4 pt-8 border-t border-outline-variant/20">
+      <div className="flex flex-wrap gap-4 pt-8 border-t border-border-soft">
         <button
           onClick={openEdit}
-          className="px-6 py-3 bg-primary text-on-primary font-label text-label-caps rounded-lg hover:bg-primary-container transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="px-6 py-3 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:focus-ring"
         >
           Edit
         </button>
@@ -378,13 +378,13 @@ export default function ExerciseDetailPage() {
             setDeleteTarget(ex.id)
             deleteDialogRef.current?.showModal()
           }}
-          className="px-6 py-3 bg-error text-on-error font-label text-label-caps rounded-lg hover:bg-error-container hover:text-on-error-container transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="px-6 py-3 bg-danger text-accent-on font-label text-label-caps rounded-lg hover:bg-danger/15 hover:text-danger transition-colors focus-visible:focus-ring"
         >
           Delete
         </button>
         <button
           onClick={() => setShowAssignModal(true)}
-          className="px-6 py-3 border border-outline text-primary font-label text-label-caps rounded-lg hover:bg-surface-container transition-colors focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none"
+          className="px-6 py-3 border border-border text-accent font-label text-label-caps rounded-lg hover:bg-surface-warm transition-colors focus-visible:focus-ring"
         >
           Assign to Workout
         </button>

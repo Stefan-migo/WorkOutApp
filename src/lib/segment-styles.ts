@@ -47,13 +47,13 @@ export const SEGMENT_DOT: Record<IntervalType, string> = {
   cooldown: 'bg-segment-cooldown',
 }
 
-/** Hex color values per interval type (used in TimerRing SVG stroke) */
+/** CSS var references per interval type (TimerRing stroke + label) — @theme segment tokens (DSF-2) */
 export const SEGMENT_COLORS: Record<IntervalType, string> = {
-  prepare: '#F59E0B',
-  work: '#84cc16',
-  rest: '#fb7185',
-  rest_between_cycles: '#fb7185',
-  cooldown: '#818cf8',
+  prepare: 'var(--color-segment-prepare)',
+  work: 'var(--color-segment-work)',
+  rest: 'var(--color-segment-rest)',
+  rest_between_cycles: 'var(--color-segment-rest)',
+  cooldown: 'var(--color-segment-cooldown)',
 }
 
 /** Material icon names per interval type */
