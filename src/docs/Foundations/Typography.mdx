@@ -16,13 +16,16 @@ import { Meta, Title, Subtitle, Typeset, Source } from '@storybook/addon-docs/bl
 | `--font-headline` | Inter | `font-headline` |
 | `--font-body` | Inter | `font-body` |
 | `--font-label` | Inter | `font-label` |
-| `--font-mono` / `--font-timer` / `--font-data` | JetBrains Mono | `font-mono`, `font-timer`, `font-data` |
+| `--font-mono` / `--font-timer` / `--font-data` | `'SF Mono', ui-monospace, 'Cascadia Mono', 'JetBrains Mono', monospace` | `font-mono`, `font-timer`, `font-data` |
+
+SF Mono is Apple-only; `ui-monospace` and Cascadia Mono cover Windows; the next/font JetBrains Mono
+load in `layout.tsx` stays as the downloadable fallback (the family name resolves inside the chain).
 
 ## Text sizes
 
 <Typeset
   fontSizes={['32px', '24px', '18px', '16px', '14px', '12px']}
-  sampleText="WorkOutApp — Inter, JetBrains Mono"
+  sampleText="WorkOutApp — Inter, SF Mono"
 />
 
 | Utility | Size / Line-height | Weight | Usage |
@@ -49,3 +52,6 @@ import { Meta, Title, Subtitle, Typeset, Source } from '@storybook/addon-docs/bl
   Up next: Rest
 </span>`}
 />
+
+Warmth comes from the palette — cream text and salmon accent — not from pink type. Keep body copy
+cream (`text-fg-2`) and reserve `--color-meta` for small kickers and captions.

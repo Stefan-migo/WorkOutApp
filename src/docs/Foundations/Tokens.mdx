@@ -10,22 +10,57 @@ import { Meta, Title, Subtitle, Source } from '@storybook/addon-docs/blocks'
   never hardcode colors in components.
 </Subtitle>
 
-## Color tokens
+## Palette tokens (Happy Hues dark-warm)
 
-| Token | Value | Typical usage |
+The **sole** palette. Material 3 token families are gone — the app renders this single dark-warm
+theme in every OS mode (no `prefers-color-scheme` variant).
+
+| Token | Value | Role |
 | --- | --- | --- |
-| `--color-timer-bg` | `#091426` | Play screen background (`bg-timer-bg`) |
-| `--color-timer-surface` | `rgba(255,255,255,0.05)` | Glass panels on play screens (`bg-timer-surface`) |
-| `--color-timer-on` | `#ffffff` | Text on dark timer screens (`text-timer-on`) |
-| `--color-timer-border` | `rgba(255,255,255,0.2)` | Borders on dark surfaces (`border-timer-border`) |
-| `--color-timer-muted` | `#9ca3af` | Secondary text on dark surfaces (`text-timer-muted`) |
-| `--color-segment-prepare` | `#3b82f6` | Prepare segments (`text-segment-prepare`, `bg-segment-prepare/10`) |
-| `--color-segment-work` | `#10b981` | Work segments |
-| `--color-segment-rest` | `#ef4444` | Rest + rest-between-cycles segments |
-| `--color-segment-cooldown` | `#8b5cf6` | Cooldown segments |
+| `--color-bg` | `#55423d` | Page canvas (`bg-bg`) |
+| `--color-surface` | `#271c19` | Raised panel: cards, modals, inputs (`bg-surface`) |
+| `--color-surface-warm` | `color-mix(in srgb, #ffc0ad 14%, #55423d)` | Hover/tinted glass (`bg-surface-warm`) |
+| `--color-fg` | `#fffffe` | Headings (`text-fg`) |
+| `--color-fg-2` | `#fff3ec` | Body copy, cream (`text-fg-2`) |
+| `--color-muted` | `color-mix(in srgb, #fff3ec 62%, #271c19)` | Secondary text (`text-muted`) |
+| `--color-meta` | `#e78fb5` | Kickers/captions (`text-meta`) |
+| `--color-border` | `color-mix(in srgb, #fff3ec 24%, #55423d)` | Hairline (`border-border`) |
+| `--color-border-soft` | `color-mix(in srgb, #fff3ec 12%, #55423d)` | Soft hairline (`border-border-soft`) |
+| `--color-accent` | `#ffc0ad` | Sole emphasis ink — salmon (`bg-accent`, `text-accent`) |
+| `--color-accent-on` | `#271c19` | Text on accent fills — never white on salmon (`text-accent-on`) |
+| `--color-accent-hover` | `color-mix(in oklab, var(--color-accent), white 8%)` | Accent hover (`hover:bg-accent-hover`) |
+| `--color-accent-active` | `color-mix(in oklab, var(--color-accent), white 14%)` | Accent active |
+| `--color-success` | `#9dbf9c` | Sage state (`text-success`, `bg-success/10`) |
+| `--color-warn` | `#e6a651` | Amber state (`text-warn`) |
+| `--color-danger` | `#e07a7f` | Rosy-red state (`text-danger`, `bg-danger/15`) |
+| `--color-focus-ring` | `0 0 0 4px rgba(255, 192, 173, 0.28)` | Focus ring — full shadow value |
 
-`SEGMENT_COLORS` in `src/lib/segment-styles.ts` mirrors the segment tokens; a drift test
-(`src/lib/__tests__/segment-styles.test.ts`) fails the build if they ever diverge.
+## Segment tokens (DSF-2)
+
+Interval segment colors map onto the palette state tokens — no new hexes, no blue/purple:
+
+| Token | Value | Role |
+| --- | --- | --- |
+| `--color-segment-prepare` | `color-mix(in srgb, var(--color-warn) 45%, var(--color-surface))` | Prepare (amber mix) |
+| `--color-segment-work` | `var(--color-success)` | Work (sage) |
+| `--color-segment-rest` | `var(--color-danger)` | Rest + rest-between-cycles (rose) |
+| `--color-segment-cooldown` | `color-mix(in srgb, var(--color-danger) 45%, var(--color-surface))` | Cooldown (rose mix) |
+
+`SEGMENT_COLORS` in `src/lib/segment-styles.ts` holds `var(--color-segment-*)` references; a drift
+test (`src/lib/__tests__/segment-styles.test.ts`) fails if they ever diverge from `@theme`.
+
+## Timer aliases (DSF-3)
+
+Play screens consume these aliases so the dark chrome stays in lockstep with the palette:
+
+| Token | Aliases | Role |
+| --- | --- | --- |
+| `--color-timer-bg` | `var(--color-bg)` | Play screen background |
+| `--color-timer-surface` | `var(--color-surface-warm)` | Glass panels on play screens |
+| `--color-timer-on` | `var(--color-fg)` | Text on dark timer screens |
+| `--color-timer-muted` | `var(--color-muted)` | Secondary text on dark surfaces |
+| `--color-timer-border` | `var(--color-border)` | Borders on dark surfaces |
+| `--color-timer-track` | `var(--color-surface)` | Ring track |
 
 ## Elevation shadows
 
@@ -39,16 +74,23 @@ import { Meta, Title, Subtitle, Source } from '@storybook/addon-docs/blocks'
 Every `--color-*` token generates Tailwind utilities; every `--shadow-*` token generates a
 `shadow-*` utility:
 
-<Source language="tsx" code={`<div className="bg-timer-bg text-timer-on border border-timer-border/50 rounded-xl p-16">
-  Always-dark play surface
-</div>
+<Source language="tsx" code={`<div className="bg-bg text-fg-2 min-h-screen">
+  <button className="bg-accent text-accent-on hover:bg-accent-hover rounded-full px-6 py-3 focus-visible:focus-ring">
+    Start
+  </button>
+</div>`} />
 
-<button className="shadow-fab fixed bottom-24 right-24 rounded-full bg-primary-btn">
-  +
+## Focus ring
+
+`--color-focus-ring` holds a complete box-shadow, consumed through the `focus-ring` utility
+registered in `globals.css`. Apply it with `focus-visible:focus-ring` — never `ring-focus-ring`:
+
+<Source language="tsx" code={`<button className="bg-accent text-accent-on focus-visible:focus-ring">
+  Primary action
 </button>`} />
 
-## Dark mode
+## Typography note
 
-Dark mode is OS-driven (`prefers-color-scheme`). The timer tokens and segment tokens are
-**always-dark** by design: play screens render dark regardless of the OS theme, so they ship a
-single unconditional value.
+The mono chain is `'SF Mono', ui-monospace, 'Cascadia Mono', 'JetBrains Mono', monospace` — SF Mono
+wins on Apple, Cascadia Mono covers Windows, and the next/font JetBrains Mono load remains as the
+downloadable fallback. See `Foundations/Typography`.
