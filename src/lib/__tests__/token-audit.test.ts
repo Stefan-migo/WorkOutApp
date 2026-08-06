@@ -22,7 +22,7 @@ function allTsFiles(dir: string): string[] {
 }
 
 const ALL_FILES = allTsFiles(SRC)
-const PRODUCTION_FILES = ALL_FILES.filter((f) => !f.includes('/__tests__/'))
+const PRODUCTION_FILES = ALL_FILES.filter((f) => !f.replaceAll('\\', '/').includes('/__tests__/'))
 const CONTENTS = new Map(ALL_FILES.map((f) => [f, readFileSync(f, 'utf8')]))
 
 describe('token audit contract (D6)', () => {
