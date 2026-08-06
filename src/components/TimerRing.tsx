@@ -46,14 +46,14 @@ export function TimerRing({ timeLeft, duration, intervalType, label, nextLabel, 
           style={{ stroke: 'var(--color-timer-track)' }}
           strokeWidth="4"
         />
-        {/* Progress */}
+        {/* Progress — inline style: SVG presentation attrs can't resolve var()/color-mix (D2) */}
         <circle
           className="progress-ring__circle"
           cx="50"
           cy="50"
           r="45"
           fill="transparent"
-          stroke={ringColor}
+          style={{ stroke: ringColor }}
           strokeDasharray="283"
           strokeDashoffset={offset}
           strokeLinecap="round"

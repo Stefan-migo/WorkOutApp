@@ -48,29 +48,40 @@ describe('TimerRing', () => {
     })
   })
 
-  describe('interval type colors', () => {
-    it('uses blue #3b82f6 for prepare', () => {
+  describe('interval type colors (DSF-2b: var references, not hexes)', () => {
+    it('uses var(--color-segment-prepare) stroke and label color for prepare', () => {
       render(<TimerRing timeLeft={30} duration={60} intervalType="prepare" label="PREPARE" />)
       const circles = document.querySelectorAll('circle')
-      expect(circles[1]).toHaveAttribute('stroke', '#3b82f6')
+      expect(circles[1]).toHaveStyle({ stroke: 'var(--color-segment-prepare)' })
+      expect(screen.getByText('PREPARE')).toHaveStyle({ color: 'var(--color-segment-prepare)' })
     })
 
-    it('uses green #10b981 for work', () => {
+    it('uses var(--color-segment-work) stroke and label color for work', () => {
       render(<TimerRing timeLeft={30} duration={60} intervalType="work" label="WORK" />)
       const circles = document.querySelectorAll('circle')
-      expect(circles[1]).toHaveAttribute('stroke', '#10b981')
+      expect(circles[1]).toHaveStyle({ stroke: 'var(--color-segment-work)' })
+      expect(screen.getByText('WORK')).toHaveStyle({ color: 'var(--color-segment-work)' })
     })
 
-    it('uses red #ef4444 for rest', () => {
+    it('uses var(--color-segment-rest) stroke and label color for rest', () => {
       render(<TimerRing timeLeft={30} duration={60} intervalType="rest" label="REST" />)
       const circles = document.querySelectorAll('circle')
-      expect(circles[1]).toHaveAttribute('stroke', '#ef4444')
+      expect(circles[1]).toHaveStyle({ stroke: 'var(--color-segment-rest)' })
+      expect(screen.getByText('REST')).toHaveStyle({ color: 'var(--color-segment-rest)' })
     })
 
-    it('uses violet #8b5cf6 for cooldown', () => {
+    it('maps rest_between_cycles to the rest segment token', () => {
+      render(<TimerRing timeLeft={30} duration={60} intervalType="rest_between_cycles" label="REST BETWEEN" />)
+      const circles = document.querySelectorAll('circle')
+      expect(circles[1]).toHaveStyle({ stroke: 'var(--color-segment-rest)' })
+      expect(screen.getByText('REST BETWEEN')).toHaveStyle({ color: 'var(--color-segment-rest)' })
+    })
+
+    it('uses var(--color-segment-cooldown) stroke and label color for cooldown', () => {
       render(<TimerRing timeLeft={30} duration={60} intervalType="cooldown" label="COOLDOWN" />)
       const circles = document.querySelectorAll('circle')
-      expect(circles[1]).toHaveAttribute('stroke', '#8b5cf6')
+      expect(circles[1]).toHaveStyle({ stroke: 'var(--color-segment-cooldown)' })
+      expect(screen.getByText('COOLDOWN')).toHaveStyle({ color: 'var(--color-segment-cooldown)' })
     })
   })
 
