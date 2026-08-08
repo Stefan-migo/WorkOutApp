@@ -44,14 +44,14 @@ Contingency: if 2d exceeds budget, split EmptyState (~180) into its own slice be
 
 ## Slice 2b — Card + Badge (PR 2b)
 
-- [ ] **2b.1** RED — `__tests__/Card.test.tsx` (UIP-3): `default`/`raised`/`inset` variant class maps; `interactive` → `cursor-pointer` + hover classes; presentational only (no fetch/router). Fails.
-- [ ] **2b.2** RED — `__tests__/Badge.test.tsx` (UIP-3): all tones incl. `segment-*`; semantic text conveys meaning — color never sole differentiator (scenario).
-- [ ] **2b.3** GREEN — `Card.tsx` (DD-2 maps: `bg-surface`/`shadow-card-hover`/`bg-bg`; DD-7/8).
-- [ ] **2b.4** GREEN — `Badge.tsx` (neutral/primary/success/warn/danger + 4 segment tones; `bg-segment-*/10` opacity suffix must compile under Tailwind v4).
-- [ ] **2b.5** `Card.stories.tsx` + `Badge.stories.tsx` — CSF3 autodocs; variants via controls (UIP-3 cycling scenario).
-- [ ] **2b.6** `index.ts` +2 exports.
-- [ ] **2b.7** Extend `ui-primitives.a11y.test.ts` with Card/Badge stories.
-- [ ] **2b.8** Gate: tsc + slice tests + `--project storybook` + `audit:tokens` + `build-storybook`.
+- [x] **2b.1** RED — `__tests__/Card.test.tsx` (UIP-3): `default`/`raised`/`inset` variant class maps; `interactive` → `cursor-pointer` + hover classes; presentational only (no fetch/router). Fails.
+- [x] **2b.2** RED — `__tests__/Badge.test.tsx` (UIP-3): all tones incl. `segment-*`; semantic text conveys meaning — color never sole differentiator (scenario).
+- [x] **2b.3** GREEN — `Card.tsx` (DD-2 maps: `bg-surface`/`shadow-card-hover`/`bg-bg`; DD-7/8).
+- [x] **2b.4** GREEN — `Badge.tsx` (neutral/primary/success/warn/danger + 4 segment tones; `bg-segment-*/10` opacity suffix must compile under Tailwind v4).
+- [x] **2b.5** `Card.stories.tsx` + `Badge.stories.tsx` — CSF3 autodocs; variants via controls (UIP-3 cycling scenario).
+- [x] **2b.6** `index.ts` +2 exports.
+- [x] **2b.7** Extend `ui-primitives.a11y.test.ts` with Card/Badge stories.
+- [x] **2b.8** Gate: tsc + slice tests + `--project storybook` + `audit:tokens` + `build-storybook`.
 
 ## Slice 2c — Input + SearchInput (PR 2c)
 
