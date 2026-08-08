@@ -34,19 +34,19 @@ describe('Badge (UIP-3)', () => {
   })
 
   it.each([
-    ['success', 'bg-success/15', 'text-success'],
-    ['warn', 'bg-warn/15', 'text-warn'],
-    ['danger', 'bg-danger/15', 'text-danger'],
+    ['success', 'bg-success/15', 'text-fg-2'],
+    ['warn', 'bg-warn/15', 'text-fg-2'],
+    ['danger', 'bg-danger/15', 'text-fg-2'],
   ] as const)('applies the %s tone class map', (tone, bg, text) => {
     render(<Badge tone={tone}>{tone}</Badge>)
     expect(screen.getByText(tone)).toHaveClass(bg, text)
   })
 
   it.each([
-    ['segment-prepare', 'bg-segment-prepare/10', 'text-segment-prepare'],
-    ['segment-work', 'bg-segment-work/10', 'text-segment-work'],
-    ['segment-rest', 'bg-segment-rest/10', 'text-segment-rest'],
-    ['segment-cooldown', 'bg-segment-cooldown/10', 'text-segment-cooldown'],
+    ['segment-prepare', 'bg-segment-prepare/10', 'text-fg-2'],
+    ['segment-work', 'bg-segment-work/10', 'text-fg-2'],
+    ['segment-rest', 'bg-segment-rest/10', 'text-fg-2'],
+    ['segment-cooldown', 'bg-segment-cooldown/10', 'text-fg-2'],
   ] as const)('applies the %s tone class map', (tone, bg, text) => {
     render(<Badge tone={tone}>{tone}</Badge>)
     expect(screen.getByText(tone)).toHaveClass(bg, text)

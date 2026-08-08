@@ -11,6 +11,10 @@ const meta = {
     backgrounds: { default: 'app' },
     a11y: { test: 'error' },
   },
+  // Landmark shell: the isolated story canvas has no landmarks, so axe's
+  // region rule flags bare div content. Real pages render Cards inside
+  // <main>, so the story mirrors that structure.
+  decorators: [(Story) => <main><Story /></main>],
   args: {
     children: 'Card content',
     onClick: fn(),
