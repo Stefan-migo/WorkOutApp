@@ -55,14 +55,14 @@ Contingency: if 2d exceeds budget, split EmptyState (~180) into its own slice be
 
 ## Slice 2c — Input + SearchInput (PR 2c)
 
-- [ ] **2c.1** RED — `__tests__/Input.test.tsx` (UIP-4): visible label (never placeholder-only); `htmlFor`/`id` association; error renders near field + `aria-invalid` + `aria-describedby`; `leadingIcon` → `pl-10`. Fails.
-- [ ] **2c.2** RED — `__tests__/SearchInput.test.tsx` (UIP-4): `type="search"`; clear affordance `aria-label="Clear search"` visible when `value !== ''`; click → `onChange('')` + refocus. Fails.
-- [ ] **2c.3** GREEN — `Input.tsx` (`'use client'` for `useId`; DD-2/7/8 maps: `text-label-caps` label, `text-body-md` field, `text-data-sm` error).
-- [ ] **2c.4** GREEN — `SearchInput.tsx` (composes Input; inline-SVG search icon).
-- [ ] **2c.5** `Input.stories.tsx` + `SearchInput.stories.tsx` — CSF3 autodocs; error state story (UIP-4 announced scenario).
-- [ ] **2c.6** `index.ts` +2 exports.
-- [ ] **2c.7** Extend `ui-primitives.a11y.test.ts` (label association + error `aria-describedby` wiring must be axe-exact).
-- [ ] **2c.8** Gate: tsc + slice tests + storybook project + audit + build-storybook. (Risk: `useId` SSR hydration — harmless single render.)
+- [x] **2c.1** RED — `__tests__/Input.test.tsx` (UIP-4): visible label (never placeholder-only); `htmlFor`/`id` association; error renders near field + `aria-invalid` + `aria-describedby`; `leadingIcon` → `pl-10`. Fails.
+- [x] **2c.2** RED — `__tests__/SearchInput.test.tsx` (UIP-4): `type="search"`; clear affordance `aria-label="Clear search"` visible when `value !== ''`; click → `onChange('')` + refocus. Fails.
+- [x] **2c.3** GREEN — `Input.tsx` (`'use client'` for `useId`; DD-2/7/8 maps: `text-label-caps` label, `text-body-md` field, `text-data-sm` error).
+- [x] **2c.4** GREEN — `SearchInput.tsx` (composes Input; inline-SVG search icon).
+- [x] **2c.5** `Input.stories.tsx` + `SearchInput.stories.tsx` — CSF3 autodocs; error state story (UIP-4 announced scenario).
+- [x] **2c.6** `index.ts` +2 exports.
+- [x] **2c.7** Extend `ui-primitives.a11y.test.ts` (label association + error `aria-describedby` wiring must be axe-exact).
+- [x] **2c.8** Gate: tsc + slice tests + storybook project + audit + build-storybook. (Risk: `useId` SSR hydration — harmless single render.)
 
 ## Slice 2d — EmptyState + Dialog/Sheet (PR 2d)
 
