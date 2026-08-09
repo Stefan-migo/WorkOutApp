@@ -18,10 +18,10 @@ export interface InputProps extends Omit<ComponentProps<'input'>, 'id'> {
 // Token-only class maps (D11): every class exists in the @theme (DD-2/7/8).
 // Deviation from design.md lines 102-104 (documented in apply-progress): the
 // design's `text-muted` label and `text-danger` error sit on the page bg
-// `--color-bg` (#55423d) and measure 3.74:1 / 3.25:1 — below WCAG AA 4.5:1
-// (verified with real axe in chromium). Same defect class as Badge (2b).
-// Label → `text-fg-2` (8.64:1); error → the Badge danger map
-// `bg-danger/15 text-fg-2` chip (7.18:1). UIP-7 (MUST a11y) wins.
+// token and measure 3.74:1 / 3.25:1 — below WCAG AA 4.5:1 (verified with real
+// axe in chromium). Same defect class as Badge (2b). Label → `text-fg-2`
+// (8.64:1); error → the Badge danger map `bg-danger/15 text-fg-2` chip
+// (7.18:1). UIP-7 (MUST a11y) wins.
 const WRAPPER = 'flex flex-col gap-1'
 const LABEL = 'font-label text-label-caps text-fg-2'
 const FIELD =

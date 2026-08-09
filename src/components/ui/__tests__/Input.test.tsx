@@ -54,7 +54,7 @@ describe('Input (UIP-4)', () => {
 
   // Deviation pin (design.md lines 102-104, fixed for AA): label + error maps
   // were re-tokenized in apply — text-muted/text-danger failed axe on the page
-  // bg (#55423d); label → text-fg-2, error → bg-danger/15 text-fg-2 chip.
+  // bg token; label → text-fg-2, error → bg-danger/15 text-fg-2 chip.
   it('uses the AA-corrected label and error class maps', () => {
     render(<Input label="Email" error="This field is required" />)
 
