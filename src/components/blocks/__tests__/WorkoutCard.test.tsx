@@ -38,17 +38,17 @@ describe('WorkoutCard (WB-1)', () => {
     renderCard()
 
     expect(screen.getByRole('heading', { level: 3, name: 'Morning HIIT' })).toBeInTheDocument()
-    // 180+30+30+120 = 360s -> "6:00"
-    expect(screen.getByText('6:00')).toBeInTheDocument()
-    expect(screen.getByText('4 intervals')).toBeInTheDocument()
+    // 180+30+30+120 = 360s -> "6:00" (regex: meta <p> concatenates its text nodes)
+    expect(screen.getByText(/6:00/)).toBeInTheDocument()
+    expect(screen.getByText(/4 intervals/)).toBeInTheDocument()
   })
 
   it('pluralizes "1 interval" and "0 intervals" (WB-1a edge)', () => {
     renderCard({ workout: { ...TIMED, intervals: [{ type: 'work', duration: 30 }] } })
-    expect(screen.getByText('1 interval')).toBeInTheDocument()
+    expect(screen.getByText(/1 interval/)).toBeInTheDocument()
 
     renderCard({ workout: { ...TIMED, intervals: [] } })
-    expect(screen.getByText('0 intervals')).toBeInTheDocument()
+    expect(screen.getByText(/0 intervals/)).toBeInTheDocument()
   })
 
   it('renders the TimelinePreview strip with duration-proportional segments (WB-1b)', () => {
@@ -64,7 +64,7 @@ describe('WorkoutCard (WB-1)', () => {
   it('renders no TimelinePreview strip when total duration is 0 (WB-1b, total=0 -> null)', () => {
     renderCard({ workout: { ...TIMED, intervals: [] } })
 
-    const card = screen.getByText('0 intervals').closest('[role="button"]')!
+    const card = screen.getByText(/0 intervals/).closest('[role="button"]')!
     expect(card.querySelector('.h-2')).toBeNull()
   })
 
