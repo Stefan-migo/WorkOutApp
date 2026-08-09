@@ -6,6 +6,8 @@ import * as CardStories from '../Card.stories'
 import * as BadgeStories from '../Badge.stories'
 import * as InputStories from '../Input.stories'
 import * as SearchInputStories from '../SearchInput.stories'
+import * as EmptyStateStories from '../EmptyState.stories'
+import * as DialogStories from '../Dialog.stories'
 
 // DD-5: one browser-project test composing all slice stories. Runs play
 // functions (via the addon's testStory) and asserts axe violations empty
@@ -107,6 +109,28 @@ const searchInput = (exportName: string, storyId: string) =>
     componentName: 'SearchInput',
   })
 
+const emptyState = (exportName: string, storyId: string) =>
+  storyCase({
+    exportName,
+    story: EmptyStateStories[exportName as keyof typeof EmptyStateStories],
+    meta: EmptyStateStories.default,
+    skipTags: [],
+    storyId,
+    componentPath: 'EmptyState.tsx',
+    componentName: 'EmptyState',
+  })
+
+const dialog = (exportName: string, storyId: string) =>
+  storyCase({
+    exportName,
+    story: DialogStories[exportName as keyof typeof DialogStories],
+    meta: DialogStories.default,
+    skipTags: [],
+    storyId,
+    componentPath: 'Dialog.tsx',
+    componentName: 'Dialog',
+  })
+
 describe('UI primitives a11y (DD-5)', () => {
   describe('Button (UIP-2)', () => {
     test('Primary', button('Primary', 'ui-button--primary'))
@@ -156,6 +180,20 @@ describe('UI primitives a11y (DD-5)', () => {
   describe('SearchInput (UIP-4)', () => {
     test('Default', searchInput('Default', 'ui-searchinput--default'))
     test('ClearAffordance (play: clear + refocus)', searchInput('ClearAffordance', 'ui-searchinput--clear-affordance'))
+  })
+
+  // UIP-5: token colors verified by browser axe on the page bg token.
+  describe('EmptyState (UIP-5)', () => {
+    test('Default', emptyState('Default', 'ui-emptystate--default'))
+    test('WithAction (icon + action)', emptyState('WithAction', 'ui-emptystate--with-action'))
+  })
+
+  // UIP-6: the OpenCloseFlow play runs open -> ESC -> backdrop ->
+  // focus-restore in real chromium (UIP-6b cannot be asserted in jsdom).
+  describe('Dialog (UIP-6)', () => {
+    test('Open (aria-modal + labelled title axe)', dialog('Open', 'ui-dialog--open'))
+    test('Sheet (reduced-motion gated)', dialog('Sheet', 'ui-dialog--sheet'))
+    test('OpenCloseFlow (play: open, ESC, backdrop, focus-restore)', dialog('OpenCloseFlow', 'ui-dialog--open-close-flow'))
   })
 })
 
