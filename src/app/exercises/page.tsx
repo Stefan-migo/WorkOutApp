@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useExercises } from '@/hooks/useExercises'
 import { useFavorites } from '@/hooks/useFavorites'
 import { useRouter } from 'next/navigation'
@@ -43,7 +43,7 @@ export default function ExercisesPage() {
   const { exercises, saveExercise, saveExerciseImage, getExerciseImages } = useExercises()
   const { favoriteIds, isFavorite, toggleFavorite, clearOrphans } = useFavorites()
   const router = useRouter()
-  const dialogRef = useRef<HTMLDialogElement>(null)
+  const [formOpen, setFormOpen] = useState(false)
   const [form, setForm] = useState(EMPTY_FORM)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [favoritesFilter, setFavoritesFilter] = useState(false)
@@ -134,7 +134,7 @@ export default function ExercisesPage() {
     const newId = crypto.randomUUID()
     setForm(EMPTY_FORM)
     setEditingId(newId)
-    dialogRef.current?.showModal()
+    setFormOpen(true)
   }
 
   function handleSave(e: React.FormEvent) {
@@ -160,7 +160,7 @@ export default function ExercisesPage() {
       updatedAt: now,
     }
     saveExercise(exercise)
-    dialogRef.current?.close()
+    setFormOpen(false)
   }
 
   // ponytail: delete dialog removed from compact cards — add back via context menu or detail page
@@ -326,12 +326,12 @@ export default function ExercisesPage() {
       )}
 
       <ExerciseFormDialog
-        onClose={() => dialogRef.current?.close()}
+        open={formOpen}
+        onOpenChange={setFormOpen}
         form={form}
         onFormChange={setForm}
         editingId={editingId}
         onSave={handleSave}
-        dialogRef={dialogRef}
         allMuscleGroups={allMuscleGroups}
         allEquipment={allEquipment}
         onImageUpload={editingId ? (file) => saveExerciseImage(editingId, file) : undefined}
