@@ -31,16 +31,16 @@ Contingency: if 2d exceeds budget, split EmptyState (~180) into its own slice be
 
 ## Slice 2a — D10 infra + Button + IconButton (PR 2a)
 
-- [ ] **2a.1** RED — `src/components/ui/__tests__/Button.test.tsx` (UIP-2): native `<button>`; 4 variants (`primary`/`ghost`/`outline`/`danger`) assert exact DD-2 class maps; sizes sm/md/lg → `h-9 px-3`/`h-11 px-4`/`h-12 px-5`; `pill` → `rounded-full`; `elevated` → `shadow-fab`; disabled → `disabled:opacity-50 disabled:pointer-events-none` + `disabled` attr. Fails (no component).
-- [ ] **2a.2** RED — `src/components/ui/__tests__/IconButton.test.tsx` (UIP-2 + touch-target constraint): ≥44×44 (`h-11 w-11`); variant map; disabled inert. TS-level RED: omitting `aria-label` must fail `npx tsc --noEmit` (UIP-2).
-- [ ] **2a.3** GREEN — `src/components/ui/Button.tsx`: base + variant maps per design (DD-1/2); typography ONLY `font-label text-label-caps` (DD-8); zero hex/rgba (DD-7).
-- [ ] **2a.4** GREEN — `src/components/ui/IconButton.tsx`: `'aria-label': string` required prop; size `sm`|`md` (md = 44×44).
-- [ ] **2a.5** `src/components/ui/index.ts` — export Button, IconButton (D8 barrel, 2 exports).
-- [ ] **2a.6** `Button.stories.tsx` + `IconButton.stories.tsx` — CSF3, `tags: ['autodocs']`, args/controls; play fn on Button (fn spy) per UIP-7; backgrounds only named SB values (DD-7).
-- [ ] **2a.7** D10 infra (DD-4): add devDeps `@storybook/addon-vitest`, `@vitest/browser`, `playwright`; `vitest.config.ts` → `test.projects = [unit (jsdom), storybook (playwright chromium)]` keeping `@` alias + `globals: true` + `maxWorkers`; delete `vitest.config.mts`; `ci.yml` add `npx playwright install --with-deps chromium` before Tests step. Verify `npm test` still runs all 598 existing tests (design open Q2).
-- [ ] **2a.8** RED — `src/components/ui/__tests__/ui-primitives.a11y.test.ts` (DD-5/UIP-7): compose 2a stories, run play fns, assert axe violations empty under storybook project. Fails until 2a.6/2a.7 land; extended in 2b–2d.
-- [ ] **2a.9** DD-6 — `.storybook/preview.tsx`: `app` bg `var(--color-background)` → `var(--color-bg)`; delete `#0a0e1a`/`#f8f9ff` + stale Material var (drift fix; not a PR 1 reopen).
-- [ ] **2a.10** Gate: `npx tsc --noEmit` + unit + `--project storybook` + `npm run audit:tokens` (DD-7: rule 3 scans `__tests__`, rules 1/4 scan stories) + `npm run build-storybook`.
+- [x] **2a.1** RED — `src/components/ui/__tests__/Button.test.tsx` (UIP-2): native `<button>`; 4 variants (`primary`/`ghost`/`outline`/`danger`) assert exact DD-2 class maps; sizes sm/md/lg → `h-9 px-3`/`h-11 px-4`/`h-12 px-5`; `pill` → `rounded-full`; `elevated` → `shadow-fab`; disabled → `disabled:opacity-50 disabled:pointer-events-none` + `disabled` attr. Fails (no component).
+- [x] **2a.2** RED — `src/components/ui/__tests__/IconButton.test.tsx` (UIP-2 + touch-target constraint): ≥44×44 (`h-11 w-11`); variant map; disabled inert. TS-level RED: omitting `aria-label` must fail `npx tsc --noEmit` (UIP-2).
+- [x] **2a.3** GREEN — `src/components/ui/Button.tsx`: base + variant maps per design (DD-1/2); typography ONLY `font-label text-label-caps` (DD-8); zero hex/rgba (DD-7).
+- [x] **2a.4** GREEN — `src/components/ui/IconButton.tsx`: `'aria-label': string` required prop; size `sm`|`md` (md = 44×44).
+- [x] **2a.5** `src/components/ui/index.ts` — export Button, IconButton (D8 barrel, 2 exports).
+- [x] **2a.6** `Button.stories.tsx` + `IconButton.stories.tsx` — CSF3, `tags: ['autodocs']`, args/controls; play fn on Button (fn spy) per UIP-7; backgrounds only named SB values (DD-7).
+- [x] **2a.7** D10 infra (DD-4): add devDeps `@storybook/addon-vitest`, `@vitest/browser`, `playwright`; `vitest.config.ts` → `test.projects = [unit (jsdom), storybook (playwright chromium)]` keeping `@` alias + `globals: true` + `maxWorkers`; delete `vitest.config.mts`; `ci.yml` add `npx playwright install --with-deps chromium` before Tests step. Verify `npm test` still runs all 598 existing tests (design open Q2).
+- [x] **2a.8** RED — `src/components/ui/__tests__/ui-primitives.a11y.test.ts` (DD-5/UIP-7): compose 2a stories, run play fns, assert axe violations empty under storybook project. Fails until 2a.6/2a.7 land; extended in 2b–2d.
+- [x] **2a.9** DD-6 — `.storybook/preview.tsx`: `app` bg `var(--color-background)` → `var(--color-bg)`; delete `#0a0e1a`/`#f8f9ff` + stale Material var (drift fix; not a PR 1 reopen).
+- [x] **2a.10** Gate: `npx tsc --noEmit` + unit + `--project storybook` + `npm run audit:tokens` (DD-7: rule 3 scans `__tests__`, rules 1/4 scan stories) + `npm run build-storybook`.
 
 ## Slice 2b — Card + Badge (PR 2b)
 
