@@ -8,6 +8,11 @@ import type { Exercise, ExerciseCategory } from '@/types/workout'
 import { ExerciseSearchHeader } from '@/components/ExerciseSearchHeader'
 import { ExerciseFormDialog } from '@/components/ExerciseFormDialog'
 import { AddToWorkoutModal } from '@/components/AddToWorkoutModal'
+import { Card } from '@/components/ui/Card'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { Badge } from '@/components/ui/Badge'
+import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
 import type { ExerciseFormData } from '@/components/ExerciseFormDialog'
 
 // ponytail: flat list CRUD, no pagination, no drag-reorder — add when >50 exercises exist
@@ -190,25 +195,17 @@ export default function ExercisesPage() {
 
       {/* Empty states */}
       {hasNoExercises && (
-        <div className="flex flex-col items-center justify-center gap-4 py-[64px] text-center">
-          <p className="font-body text-body-md text-muted">No exercises yet. Create your first one!</p>
-          <button
-            onClick={openCreate}
-            className="px-6 py-3 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:focus-ring"
-          >
-            Create Exercise
-          </button>
-        </div>
+        <EmptyState
+          title="No exercises yet"
+          body="Create your first one!"
+          action={<Button onClick={openCreate}>Create Exercise</Button>}
+        />
       )}
 
       {hasNoResults && !hasNoExercises && (
-        <div className="flex flex-col items-center justify-center gap-4 py-[64px] text-center">
-          <p className="font-body text-body-md text-muted">
-            {isFavoritesEmpty
-              ? 'No favorites yet — star exercises to add them'
-              : 'No exercises match your filters.'}
-          </p>
-        </div>
+        <EmptyState
+          title={isFavoritesEmpty ? 'No favorites yet — star exercises to add them' : 'No exercises match your filters.'}
+        />
       )}
 
       {/* Category sections */}
@@ -238,10 +235,11 @@ export default function ExercisesPage() {
                     const maxMuscles = 2
                     const overflow = muscles.length > maxMuscles ? muscles.length - maxMuscles : 0
                     return (
-                      <div
+                      <Card
                         key={ex.id}
+                        interactive
                         onClick={() => router.push(`/exercises/${ex.id}`)}
-                        className="bg-surface rounded-xl border border-border-soft overflow-hidden hover:shadow-card-hover transition-all duration-300 group flex flex-col cursor-pointer"
+                        className="overflow-hidden group flex flex-col"
                       >
                         {/* ponytail: 2:1 image — background-image for static display (no GIF animation) */}
                         <div className="relative aspect-[2/1] bg-surface overflow-hidden flex items-center justify-center"
@@ -257,45 +255,48 @@ export default function ExercisesPage() {
                             </svg>
                           )}
                           {/* Star toggle top-left */}
-                          <button
-                            onClick={(e) => { e.stopPropagation(); toggleFavorite(ex.id) }}
-                            className="absolute top-2 left-2 w-8 h-8 flex items-center justify-center rounded-full bg-surface/80 backdrop-blur text-lg shadow-sm hover:bg-surface transition-colors focus-visible:focus-ring"
+                          <IconButton
+                            variant="ghost"
+                            size="sm"
                             aria-label={isFavorite(ex.id) ? 'Remove from favorites' : 'Add to favorites'}
+                            onClick={(e) => { e.stopPropagation(); toggleFavorite(ex.id) }}
+                            className="absolute top-2 left-2 w-8 h-8 bg-surface/80 backdrop-blur shadow-fab"
                           >
                             {isFavorite(ex.id) ? '★' : '☆'}
-                          </button>
+                          </IconButton>
                           {/* Quick assign bottom-right */}
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setAssigningExercise(ex) }}
-                            className="absolute bottom-2 right-2 w-10 h-10 flex items-center justify-center rounded-full bg-surface/90 backdrop-blur shadow-md hover:bg-accent hover:text-accent-on hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer focus-visible:focus-ring z-10"
+                          <IconButton
+                            variant="ghost"
                             aria-label="Assign to workout"
+                            onClick={(e) => { e.stopPropagation(); setAssigningExercise(ex) }}
+                            className="absolute bottom-2 right-2 w-10 h-10 bg-surface/90 backdrop-blur shadow-fab hover:bg-accent hover:text-accent-on hover:scale-110 active:scale-95 transition-transform z-10"
                           >
                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                             </svg>
-                          </button>
+                          </IconButton>
                           {/* Category badge top-right */}
-                          <span className="absolute top-2 right-2 bg-surface/80 backdrop-blur px-2 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-muted font-semibold shadow-sm uppercase tracking-wider">
+                          <Badge tone="neutral" className="absolute top-2 right-2 bg-surface/80 backdrop-blur shadow-fab">
                             {ex.category}
-                          </span>
+                          </Badge>
                           {/* Force/mechanic badges on hover — overlay bottom-center of image */}
                           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                             {ex.force && (
-                              <span className="px-2 py-0.5 rounded bg-surface/90 backdrop-blur text-fg-2 font-label-caps text-[10px] shadow-sm">
+                              <Badge tone="neutral" className="bg-surface/90 backdrop-blur text-fg-2">
                                 {ex.force}
-                              </span>
+                              </Badge>
                             )}
                             {ex.mechanic && (
-                              <span className="px-2 py-0.5 rounded bg-surface/90 backdrop-blur text-fg-2 font-label-caps text-[10px] shadow-sm">
+                              <Badge tone="neutral" className="bg-surface/90 backdrop-blur text-fg-2">
                                 {ex.mechanic}
-                              </span>
+                              </Badge>
                             )}
                           </div>
                           {/* Difficulty badge bottom-left of image */}
                           {ex.difficulty && (
-                            <span className="absolute bottom-2 left-2 bg-accent/80 backdrop-blur px-2 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-accent-on font-semibold shadow-sm">
+                            <Badge tone="primary" className="absolute bottom-2 left-2 bg-accent/80 backdrop-blur">
                               {ex.difficulty.charAt(0).toUpperCase() + ex.difficulty.slice(1)}
-                            </span>
+                            </Badge>
                           )}
                         </div>
                         {/* Compact content area — p-12 */}
@@ -303,18 +304,18 @@ export default function ExercisesPage() {
                           <h3 className="font-body text-body-md font-bold text-accent line-clamp-1">{ex.name}</h3>
                           <div className="flex flex-wrap gap-1.5">
                             {muscles.slice(0, maxMuscles).map((mg) => (
-                              <span key={mg} className="bg-surface px-1.5 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-muted tracking-wider">
+                              <Badge key={mg} tone="neutral" className="px-1.5 py-0.5">
                                 {mg.toUpperCase()}
-                              </span>
+                              </Badge>
                             ))}
                             {overflow > 0 && (
-                              <span className="bg-surface px-1.5 py-0.5 rounded font-label-caps text-label-caps text-[10px] text-muted font-semibold">
+                              <Badge tone="neutral" className="px-1.5 py-0.5">
                                 +{overflow}
-                              </span>
+                              </Badge>
                             )}
                           </div>
                         </div>
-                      </div>
+                      </Card>
                     )
                   })}
                 </div>

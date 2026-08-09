@@ -1,5 +1,8 @@
 'use client'
 
+import { SearchInput } from '@/components/ui/SearchInput'
+import { Button } from '@/components/ui/Button'
+
 interface ExerciseSearchHeaderProps {
   search: string
   onSearchChange: (v: string) => void
@@ -78,34 +81,32 @@ export function ExerciseSearchHeader({
 
       {/* Search + Favorites row */}
       <div className="flex flex-col sm:flex-row sm:items-end gap-4 z-10">
-        <div className="relative w-full sm:flex-1">
-          <span className="material-symbols-outlined absolute left-0 bottom-3 text-[48px] text-muted">search</span>
-          <input
-            type="text"
+        <div className="w-full sm:flex-1">
+          <SearchInput
+            label="Search"
             value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full bg-transparent border-0 border-b-2 border-border/50 pl-10 py-3 font-data text-data-lg text-accent placeholder:text-muted focus:ring-0 focus:border-accent transition-colors outline-none"
+            onChange={onSearchChange}
             placeholder="Search by name, muscle, or equipment..."
           />
         </div>
         {onFavoritesFilterChange !== undefined && (
           <div className="flex gap-2 items-center shrink-0 pb-1">
-            <button
+            <Button
+              variant={!favoritesFilter ? 'primary' : 'ghost'}
+              size="sm"
+              pill
               onClick={() => onFavoritesFilterChange(false)}
-              className={`px-3 py-1.5 rounded-lg font-label text-label-caps transition-colors focus-visible:focus-ring ${
-                !favoritesFilter ? 'bg-accent text-accent-on' : 'bg-surface text-fg-2 hover:bg-surface-warm'
-              }`}
             >
               All
-            </button>
-            <button
+            </Button>
+            <Button
+              variant={favoritesFilter ? 'primary' : 'ghost'}
+              size="sm"
+              pill
               onClick={() => onFavoritesFilterChange(true)}
-              className={`px-3 py-1.5 rounded-lg font-label text-label-caps transition-colors focus-visible:focus-ring ${
-                favoritesFilter ? 'bg-accent text-accent-on' : 'bg-surface text-fg-2 hover:bg-surface-warm'
-              }`}
             >
               {favoritesFilter ? '★' : '☆'} Favorites
-            </button>
+            </Button>
           </div>
         )}
       </div>
@@ -130,12 +131,9 @@ export function ExerciseSearchHeader({
 
       {/* Create button */}
       <div className="z-10">
-        <button
-          onClick={onCreate}
-          className="px-4 py-2 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:focus-ring"
-        >
+        <Button size="sm" onClick={onCreate}>
           + New Exercise
-        </button>
+        </Button>
       </div>
     </section>
   )
