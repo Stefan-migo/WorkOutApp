@@ -15,6 +15,7 @@ export default defineConfig({
     // instead of the unit suite.
     exclude: [
       'src/components/ui/__tests__/ui-primitives.a11y.test.ts',
+      'src/components/blocks/__tests__/blocks.a11y.test.ts',
       '**/node_modules/**',
       '**/dist/**',
     ],

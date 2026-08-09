@@ -14,7 +14,8 @@ const dirname = path.dirname(fileURLToPath(import.meta.url))
 // violations are empty. Run explicitly with:
 //   npx vitest run --config vitest.browser.config.ts
 // Not part of the default unit suite (jsdom cannot run play/axe).
-process.env.STORYBOOK_COMPONENT_PATHS = 'src/components/ui/__tests__/ui-primitives.a11y.test.ts'
+process.env.STORYBOOK_COMPONENT_PATHS =
+  'src/components/ui/__tests__/ui-primitives.a11y.test.ts;src/components/blocks/__tests__/blocks.a11y.test.ts'
 
 export default defineConfig({
   plugins: [
