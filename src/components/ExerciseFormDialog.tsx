@@ -3,6 +3,8 @@
 import { useState, useRef } from 'react'
 import type { ExerciseCategory } from '@/types/workout'
 import { TagChips } from './TagChips'
+import { Dialog } from './ui/Dialog'
+import { Button } from './ui/Button'
 
 export interface ExerciseFormData {
   name: string
@@ -19,12 +21,12 @@ export interface ExerciseFormData {
 }
 
 interface ExerciseFormDialogProps {
-  onClose: () => void
+  open: boolean
+  onOpenChange: (open: boolean) => void
   form: ExerciseFormData
   onFormChange: (f: ExerciseFormData) => void
   editingId: string | null
   onSave: (e: React.FormEvent) => void
-  dialogRef: React.RefObject<HTMLDialogElement | null>
   allMuscleGroups: string[]
   allEquipment: string[]
   onImageUpload?: (file: File) => Promise<string>
@@ -36,11 +38,11 @@ const FORCE_OPTIONS = ['push', 'pull', 'static'] as const
 const MECHANIC_OPTIONS = ['compound', 'isolation'] as const
 
 export function ExerciseFormDialog({
-  onClose,
+  open,
+  onOpenChange,
   form, onFormChange,
   editingId,
   onSave,
-  dialogRef,
   allMuscleGroups,
   allEquipment,
   onImageUpload,
@@ -79,16 +81,13 @@ export function ExerciseFormDialog({
   }
 
   return (
-    <dialog
-      ref={dialogRef}
-      className="rounded-xl bg-surface border border-border/50 text-fg-2 p-24 max-w-lg w-full m-auto backdrop:bg-surface/80 max-h-[85vh] overflow-y-auto"
-      onClose={onClose}
+    <Dialog
+      open={open}
+      onOpenChange={onOpenChange}
+      contained
+      title={editingId ? 'Edit Exercise' : 'New Exercise'}
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4" data-testid="exercise-form">
-        <h3 className="font-headline text-headline-md font-semibold text-accent">
-          {editingId ? 'Edit Exercise' : 'New Exercise'}
-        </h3>
-
         {/* Name */}
         <label className="flex flex-col gap-1">
           <span className="font-label text-label-caps text-muted">Name</span>
@@ -412,21 +411,19 @@ export function ExerciseFormDialog({
 
         {/* Actions */}
         <div className="flex gap-2 justify-end mt-2">
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             type="button"
-            onClick={onClose}
-            className="px-4 py-2 rounded-lg font-label text-label-caps text-muted hover:text-accent transition-colors focus-visible:focus-ring"
+            onClick={() => onOpenChange(false)}
           >
             Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 rounded-lg font-label text-label-caps bg-accent text-accent-on hover:bg-accent-hover transition-colors focus-visible:focus-ring"
-          >
+          </Button>
+          <Button variant="primary" size="sm" type="submit">
             {editingId ? 'Save' : 'Create'}
-          </button>
+          </Button>
         </div>
       </form>
-    </dialog>
+    </Dialog>
   )
 }
