@@ -6,6 +6,7 @@ import { useWorkoutContext } from '@/context/WorkoutContext'
 import { formatDuration } from '@/lib/format'
 import { SEGMENT_BG_80 } from '@/lib/segment-styles'
 import type { IntervalType } from '@/types/workout'
+import { Button, Card, EmptyState, IconButton } from '@/components/ui'
 
 function totalSeconds(intervals: { duration: number }[]) {
   return intervals.reduce((s, i) => s + i.duration, 0)
@@ -53,18 +54,13 @@ export default function WorkoutListPage() {
 
   if (workouts.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center flex-1 gap-6 p-32 text-center">
-        <span className="material-symbols-outlined text-[48px] text-muted">fitness_center</span>
-        <h1 className="font-headline-md text-[24px] font-bold text-fg-2">No workouts yet</h1>
-        <p className="font-body-md text-muted max-w-sm">
-          Create your first workout to start tracking your training sessions and progress.
-        </p>
-        <button
-          onClick={() => router.push('/workouts/new')}
-          className="px-6 py-3 bg-accent hover:bg-accent-hover disabled:bg-surface disabled:text-muted text-accent-on rounded-lg font-medium transition-colors focus-visible:focus-ring"
-        >
-          Create Workout
-        </button>
+      <div className="flex-1 flex items-center justify-center">
+        <EmptyState
+          icon={<span className="material-symbols-outlined text-[48px] text-muted">fitness_center</span>}
+          title="No workouts yet"
+          body="Create your first workout to start tracking your training sessions and progress."
+          action={<Button onClick={() => router.push('/workouts/new')}>Create Workout</Button>}
+        />
       </div>
     )
   }
@@ -84,13 +80,10 @@ export default function WorkoutListPage() {
           />
         </div>
         <div className="flex flex-wrap gap-2 items-center">
-          <button
-            onClick={() => router.push('/workouts/new')}
-            className="px-4 py-2 rounded-lg bg-accent text-accent-on font-label-caps text-label-caps hover:opacity-90 transition-opacity flex items-center gap-2 focus-visible:focus-ring"
-          >
+          <Button size="sm" onClick={() => router.push('/workouts/new')}>
             <span className="material-symbols-outlined text-[16px]">add</span>
             New Workout
-          </button>
+          </Button>
           <button
             onClick={() => setTypeFilter(typeFilter === null ? 'all' : null)}
             className={`px-4 py-2 rounded-full transition-colors border font-label-caps text-label-caps flex items-center gap-2 focus-visible:focus-ring ${
@@ -109,13 +102,14 @@ export default function WorkoutListPage() {
         {filtered.map((w) => {
           const total = totalSeconds(w.intervals)
           return (
-            <div
+            <Card
               key={w.id}
+              interactive
               role="button"
               tabIndex={0}
               onClick={() => router.push(`/workouts/${w.id}/edit`)}
               onKeyDown={(e) => { if (e.key === 'Enter') router.push(`/workouts/${w.id}/edit`) }}
-              className="bg-surface rounded-xl border border-border-soft p-16 flex flex-col gap-4 hover:shadow-card-hover transition-shadow duration-300 relative group cursor-pointer"
+              className="p-16 flex flex-col gap-4 relative group"
             >
               {/* Three-dot menu */}
               <div className="absolute top-4 right-4 z-40">
@@ -167,13 +161,15 @@ export default function WorkoutListPage() {
               </div>
 
               {/* Play button — always visible on card */}
-              <button
-                onClick={(e) => { e.stopPropagation(); router.push(`/workouts/${w.id}/play`) }}
-                className="absolute bottom-4 right-4 w-9 h-9 rounded-full bg-accent text-accent-on flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-transform focus-visible:focus-ring"
+              <IconButton
+                variant="primary"
+                size="sm"
                 aria-label={`Play ${w.title}`}
+                onClick={(e) => { e.stopPropagation(); router.push(`/workouts/${w.id}/play`) }}
+                className="absolute bottom-4 right-4 shadow-fab"
               >
                 <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
-              </button>
+              </IconButton>
 
               <div className="flex justify-between items-start">
                 <div>
@@ -190,19 +186,22 @@ export default function WorkoutListPage() {
               {/* Timeline Preview */}
               <TimelinePreview intervals={w.intervals} />
 
-            </div>
+            </Card>
           )
         })}
       </div>
 
       {/* FAB - mobile only */}
-      <button
+      <Button
+        variant="primary"
+        pill
+        elevated
         aria-label="Create workout"
         onClick={() => router.push('/workouts/new')}
-        className="fixed bottom-24 right-24 w-14 h-14 bg-accent text-accent-on rounded-full shadow-fab flex items-center justify-center hover:scale-105 active:scale-95 transition-transform md:hidden z-50 focus-visible:focus-ring"
+        className="fixed bottom-24 right-24 w-14 h-14 px-0 md:hidden z-50"
       >
         <span className="material-symbols-outlined text-[24px]">add</span>
-      </button>
+      </Button>
     </div>
   )
 }

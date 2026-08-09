@@ -42,14 +42,14 @@ Goal: migrate `workouts/page.tsx` to Card/EmptyState/Button/IconButton with toke
 Files: `src/app/workouts/page.tsx`. Focused test: `npx vitest run src/app/workouts/__tests__/WorkoutListPage.test.tsx`.
 Runtime harness: `npm run storybook` :6006 → UI/Card/EmptyState/Button/IconButton; `npm run dev` smoke `/workouts`. Rollback: revert `page.tsx` diff. Line budget: ≤180.
 
-- [ ] **3a.1** RED (behavior contract) — run `npx vitest run src/app/workouts/__tests__/WorkoutListPage.test.tsx` on current main; record baseline green (card click/Enter→edit, FAB, empty-state CTA) — this green suite is the RED contract the migration must preserve.
-- [ ] **3a.2** GREEN — Empty state (L54–70): `<EmptyState>` in `<div className="flex-1 flex items-center justify-center">`; `title="No workouts yet"` (h1→h2, DD-G), body unchanged, icon span `fitness_center text-[48px] text-muted` kept as `icon`; CTA `<Button onClick={() => router.push('/workouts/new')}>Create Workout</Button>`.
-- [ ] **3a.3** GREEN — Workout card (L112–119): `<Card interactive role="button" tabIndex={0} onClick={push edit} onKeyDown={Enter→push edit}>` + `p-16 flex flex-col gap-4 relative group` override (DD-A className-last); `closest('[role="button"]')` test passes.
-- [ ] **3a.4** GREEN — Play (L170–176): `<IconButton variant="primary" size="sm" aria-label={`Play ${w.title}`}>` + `absolute bottom-4 right-4 shadow-fab` (DD-B: sm = 36px exact; DD-I); icon span `text-[20px]` + `fontVariationSettings` kept; hover/active scale dropped.
-- [ ] **3a.5** GREEN — FAB (L199–205): `<Button variant="primary" pill elevated aria-label="Create workout">` + `fixed bottom-24 right-24 w-14 h-14 px-0 md:hidden z-50` (className-last overrides `h-11 px-4`); icon span `text-[24px]` kept.
-- [ ] **3a.6** GREEN — "New Workout" (L87–93): `<Button size="sm" onClick={push new}>`; icon span `text-[16px]` + text kept.
-- [ ] **3a.7** STAYS byte-for-byte — ⋮ menu (L120–167, spec non-goal), `TimelinePreview` (L14–28, TimelineStrip non-goal), search input (L76–85 incl. dead `font-body-md` classes), Type toggle (L94–103, DD-H — no Button selected-state).
-- [ ] **3a.8** Gate — `npx tsc --noEmit` + `npx vitest run src/app/workouts/__tests__/WorkoutListPage.test.tsx` + `npm run test:a11y` + `npm run audit:tokens` (rule 3 scans tests) + `npm run build-storybook`.
+- [x] **3a.1** RED (behavior contract) — run `npx vitest run src/app/workouts/__tests__/WorkoutListPage.test.tsx` on current main; record baseline green (card click/Enter→edit, FAB, empty-state CTA) — this green suite is the RED contract the migration must preserve.
+- [x] **3a.2** GREEN — Empty state (L54–70): `<EmptyState>` in `<div className="flex-1 flex items-center justify-center">`; `title="No workouts yet"` (h1→h2, DD-G), body unchanged, icon span `fitness_center text-[48px] text-muted` kept as `icon`; CTA `<Button onClick={() => router.push('/workouts/new')}>Create Workout</Button>`.
+- [x] **3a.3** GREEN — Workout card (L112–119): `<Card interactive role="button" tabIndex={0} onClick={push edit} onKeyDown={Enter→push edit}>` + `p-16 flex flex-col gap-4 relative group` override (DD-A className-last); `closest('[role="button"]')` test passes.
+- [x] **3a.4** GREEN — Play (L170–176): `<IconButton variant="primary" size="sm" aria-label={`Play ${w.title}`}>` + `absolute bottom-4 right-4 shadow-fab` (DD-B: sm = 36px exact; DD-I); icon span `text-[20px]` + `fontVariationSettings` kept; hover/active scale dropped.
+- [x] **3a.5** GREEN — FAB (L199–205): `<Button variant="primary" pill elevated aria-label="Create workout">` + `fixed bottom-24 right-24 w-14 h-14 px-0 md:hidden z-50` (className-last overrides `h-11 px-4`); icon span `text-[24px]` kept.
+- [x] **3a.6** GREEN — "New Workout" (L87–93): `<Button size="sm" onClick={push new}>`; icon span `text-[16px]` + text kept.
+- [x] **3a.7** STAYS byte-for-byte — ⋮ menu (L120–167, spec non-goal), `TimelinePreview` (L14–28, TimelineStrip non-goal), search input (L76–85 incl. dead `font-body-md` classes), Type toggle (L94–103, DD-H — no Button selected-state).
+- [x] **3a.8** Gate — `npx tsc --noEmit` + `npx vitest run src/app/workouts/__tests__/WorkoutListPage.test.tsx` + `npm run test:a11y` + `npm run audit:tokens` (rule 3 scans tests) + `npm run build-storybook`.
 
 ## Slice 3b — `/exercises` list surface (PR 3b)
 
