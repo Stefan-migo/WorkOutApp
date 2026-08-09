@@ -20,12 +20,12 @@ export function RepCounter({ exerciseName, reps, weight, onComplete }: RepCounte
       {/* Target reps in large display */}
       <span className="font-display-timer-mobile text-display-timer-mobile md:font-display-timer md:text-display-timer text-fg-2 tabular-nums">
         {reps}
-        <span className="font-body-md text-body-md text-muted ml-2">reps</span>
+        <span className="font-body-md text-body-md text-fg-2/70 ml-2">reps</span>
       </span>
 
       {/* Weight if provided */}
       {weight !== undefined && (
-        <span className="font-body-lg text-body-lg text-muted">
+        <span className="font-body-lg text-body-lg text-fg-2/70">
           {weight} kg
         </span>
       )}
