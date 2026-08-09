@@ -211,7 +211,7 @@ describe('ExercisesPage empty state boundaries', () => {
     expect(screen.queryByText('Squat')).not.toBeInTheDocument()
 
     // Now search for something that doesn't match any favorites
-    const searchInput = screen.getByRole('textbox')
+    const searchInput = screen.getByRole('searchbox')
     fireEvent.change(searchInput, { target: { value: 'zzznonexistent' } })
 
     expect(screen.getByText(/no exercises match/i)).toBeInTheDocument()
