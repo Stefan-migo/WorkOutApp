@@ -4,6 +4,8 @@ import * as ButtonStories from '../Button.stories'
 import * as IconButtonStories from '../IconButton.stories'
 import * as CardStories from '../Card.stories'
 import * as BadgeStories from '../Badge.stories'
+import * as InputStories from '../Input.stories'
+import * as SearchInputStories from '../SearchInput.stories'
 
 // DD-5: one browser-project test composing all slice stories. Runs play
 // functions (via the addon's testStory) and asserts axe violations empty
@@ -83,6 +85,28 @@ const badge = (exportName: string, storyId: string) =>
     componentName: 'Badge',
   })
 
+const input = (exportName: string, storyId: string) =>
+  storyCase({
+    exportName,
+    story: InputStories[exportName as keyof typeof InputStories],
+    meta: InputStories.default,
+    skipTags: [],
+    storyId,
+    componentPath: 'Input.tsx',
+    componentName: 'Input',
+  })
+
+const searchInput = (exportName: string, storyId: string) =>
+  storyCase({
+    exportName,
+    story: SearchInputStories[exportName as keyof typeof SearchInputStories],
+    meta: SearchInputStories.default,
+    skipTags: [],
+    storyId,
+    componentPath: 'SearchInput.tsx',
+    componentName: 'SearchInput',
+  })
+
 describe('UI primitives a11y (DD-5)', () => {
   describe('Button (UIP-2)', () => {
     test('Primary', button('Primary', 'ui-button--primary'))
@@ -119,6 +143,19 @@ describe('UI primitives a11y (DD-5)', () => {
     test('SegmentWork', badge('SegmentWork', 'ui-badge--segment-work'))
     test('SegmentRest', badge('SegmentRest', 'ui-badge--segment-rest'))
     test('SegmentCooldown', badge('SegmentCooldown', 'ui-badge--segment-cooldown'))
+  })
+
+  // UIP-4: label/field association and error aria-describedby wiring must be
+  // axe-exact — the WithError story is the announced-error scenario.
+  describe('Input (UIP-4)', () => {
+    test('Default', input('Default', 'ui-input--default'))
+    test('WithError (aria-invalid + aria-describedby)', input('WithError', 'ui-input--with-error'))
+    test('WithLeadingIcon', input('WithLeadingIcon', 'ui-input--with-leading-icon'))
+  })
+
+  describe('SearchInput (UIP-4)', () => {
+    test('Default', searchInput('Default', 'ui-searchinput--default'))
+    test('ClearAffordance (play: clear + refocus)', searchInput('ClearAffordance', 'ui-searchinput--clear-affordance'))
   })
 })
 
