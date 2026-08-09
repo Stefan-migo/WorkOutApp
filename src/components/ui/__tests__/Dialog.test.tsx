@@ -108,6 +108,33 @@ describe('Dialog (UIP-6, jsdom partial)', () => {
     expect(onOpenChange).toHaveBeenCalledWith(false)
   })
 
+  it('contained appends scroll classes to FIXED only (DD-C)', () => {
+    const { rerender } = render(
+      <Dialog open contained title="Long form" onOpenChange={vi.fn()}>
+        Content
+      </Dialog>,
+    )
+
+    const dialog = document.querySelector('dialog')!
+    expect(dialog).toHaveClass('max-h-[85vh]', 'overflow-y-auto')
+
+    // Without contained, the fixed dialog must NOT carry the scroll classes.
+    rerender(
+      <Dialog open title="Long form" onOpenChange={vi.fn()}>
+        Content
+      </Dialog>,
+    )
+    expect(dialog).not.toHaveClass('max-h-[85vh]', 'overflow-y-auto')
+
+    // Contained applies to FIXED only — the sheet is already h-full (UIP-6d).
+    rerender(
+      <Dialog open contained variant="sheet" title="Long form" onOpenChange={vi.fn()}>
+        Content
+      </Dialog>,
+    )
+    expect(dialog).not.toHaveClass('max-h-[85vh]', 'overflow-y-auto')
+  })
+
   it('sheet variant carries the motion-reduce slide classes (UIP-6d)', () => {
     render(
       <Dialog open title="Sheet" variant="sheet" onOpenChange={vi.fn()}>
