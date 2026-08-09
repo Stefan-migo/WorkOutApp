@@ -66,14 +66,14 @@ Contingency: if 2d exceeds budget, split EmptyState (~180) into its own slice be
 
 ## Slice 2d — EmptyState + Dialog/Sheet (PR 2d)
 
-- [ ] **2d.1** RED — `__tests__/EmptyState.test.tsx` (UIP-5): optional icon/title/body/action render; token colors. Fails.
-- [ ] **2d.2** RED — `__tests__/Dialog.test.tsx` (UIP-6, jsdom): `open` → `showModal()`, close → `close()`; ESC/cancel + backdrop → `onOpenChange(false)`; `aria-modal="true"` + labelled title. jsdom `<dialog>` is partial — focus-restore NOT asserted here (UIP-6b → browser play in 2d.7). Fails.
-- [ ] **2d.3** GREEN — `EmptyState.tsx` (`text-headline-md` title, `text-body-md` body, `text-meta` icon — DD-8).
-- [ ] **2d.4** GREEN — `Dialog.tsx` (DD-3, D9): controlled native `<dialog>`; backdrop `e.target === ref.current`; `onCancel` preventDefault + `onOpenChange(false)`; `onClose` idempotent; `aria-labelledby` via `useId`; `fixed`/`sheet` variants; sheet slide `motion-reduce:translate-x-0 motion-reduce:transition-none` (UIP-6d).
-- [ ] **2d.5** `EmptyState.stories.tsx` + `Dialog.stories.tsx` — Dialog story: stateful wrapper + trigger Button (reuses 2a).
-- [ ] **2d.6** `index.ts` +2 exports (complete barrel, UIP-1).
-- [ ] **2d.7** Extend `ui-primitives.a11y.test.ts`: browser play open → ESC → backdrop → focus-restore (UIP-6b asserted in browser, NOT jsdom) + axe per story.
-- [ ] **2d.8** Gate: tsc + slice tests + `--project storybook` + audit + build-storybook.
+- [x] **2d.1** RED — `__tests__/EmptyState.test.tsx` (UIP-5): optional icon/title/body/action render; token colors. Fails.
+- [x] **2d.2** RED — `__tests__/Dialog.test.tsx` (UIP-6, jsdom): `open` → `showModal()`, close → `close()`; ESC/cancel + backdrop → `onOpenChange(false)`; `aria-modal="true"` + labelled title. jsdom `<dialog>` is partial — focus-restore NOT asserted here (UIP-6b → browser play in 2d.7). Fails.
+- [x] **2d.3** GREEN — `EmptyState.tsx` (`text-headline-md` title, `text-body-md` body, `text-meta` icon — DD-8).
+- [x] **2d.4** GREEN — `Dialog.tsx` (DD-3, D9): controlled native `<dialog>`; backdrop `e.target === ref.current`; `onCancel` preventDefault + `onOpenChange(false)`; `onClose` idempotent; `aria-labelledby` via `useId`; `fixed`/`sheet` variants; sheet slide `motion-reduce:translate-x-0 motion-reduce:transition-none` (UIP-6d).
+- [x] **2d.5** `EmptyState.stories.tsx` + `Dialog.stories.tsx` — Dialog story: stateful wrapper + trigger Button (reuses 2a).
+- [x] **2d.6** `index.ts` +2 exports (complete barrel, UIP-1).
+- [x] **2d.7** Extend `src/components/ui/__tests__/ui-primitives.a11y.test.ts`: browser play open → ESC → backdrop → focus-restore (UIP-6b asserted in browser, NOT jsdom) + axe per story.
+- [x] **2d.8** Gate: tsc + slice tests + `--project storybook` + audit + build-storybook.
 
 ## Dependency Order (for apply)
 
