@@ -23,8 +23,9 @@ describe('Input (UIP-4)', () => {
 
     const field = screen.getByLabelText('Email')
     expect(field).toHaveAttribute('id', 'email-field')
+    // jsdom exposes the for attribute as `for`; htmlFor is the JS property.
     expect(screen.getByText('Email').closest('label')).toHaveAttribute(
-      'htmlFor',
+      'for',
       'email-field',
     )
   })
