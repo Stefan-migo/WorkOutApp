@@ -41,7 +41,8 @@ describe('PlayScreen (WB-3)', () => {
     renderScreen()
 
     // Ring: label (also mirrored in the left title-only panel -> 2) + time
-    expect(screen.getByText('0:45')).toBeInTheDocument()
+    // (formatTime pads minutes: 45s -> "00:45")
+    expect(screen.getByText('00:45')).toBeInTheDocument()
     expect(screen.getAllByText('Work')).toHaveLength(2)
     expect(screen.getByRole('heading', { level: 2, name: 'Work' })).toBeInTheDocument()
     // Next label forwarded (WB-3b prop mirror)
@@ -60,7 +61,7 @@ describe('PlayScreen (WB-3)', () => {
   it('renders remaining time from timeLeft and progress from progressPercent (triangulation)', () => {
     renderScreen({ timeLeft: 5, progressPercent: 25, totalProgress: 0.25 })
 
-    expect(screen.getByText('0:05')).toBeInTheDocument()
+    expect(screen.getByText('00:05')).toBeInTheDocument()
     expect(screen.getByText('25%')).toBeInTheDocument()
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '25')
   })
@@ -90,7 +91,7 @@ describe('PlayScreen (WB-3)', () => {
     expect(screen.getByText('Bench Press')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Complete set' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Pause' })).not.toBeInTheDocument()
-    expect(screen.queryByText('0:45')).not.toBeInTheDocument()
+    expect(screen.queryByText('00:45')).not.toBeInTheDocument()
   })
 
   it('never composes TimerDisplay (WB-3d)', () => {
