@@ -23,6 +23,8 @@ export interface DialogProps extends ComponentPropsWithoutRef<'dialog'> {
   variant?: 'fixed' | 'sheet'
   /** Accessible name, wired via aria-labelledby (UIP-6c). */
   title: string
+  /** Long-form content (DD-C): cap fixed variant at 85vh and scroll. */
+  contained?: boolean
 }
 
 // Token-only class maps (D11): every class exists in the @theme (DD-2).
@@ -36,6 +38,7 @@ export function Dialog({
   onOpenChange,
   variant = 'fixed',
   title,
+  contained = false,
   className = '',
   children,
   ...rest
@@ -71,7 +74,11 @@ export function Dialog({
     if (event.target === dialogRef.current) onOpenChange(false)
   }
 
-  const classes = [variant === 'fixed' ? FIXED : SHEET, className]
+  const classes = [
+    variant === 'fixed' ? FIXED : SHEET,
+    contained && variant === 'fixed' && 'max-h-[85vh] overflow-y-auto',
+    className,
+  ]
     .filter(Boolean)
     .join(' ')
 
