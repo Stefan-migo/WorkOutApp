@@ -1,14 +1,19 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { fn } from 'storybook/test'
+import { fn, userEvent, within, expect } from 'storybook/test'
 import { RepCounter } from './RepCounter'
 
 const meta = {
-  title: 'Components/RepCounter',
+  title: 'Blocks/RepCounter',
   component: RepCounter,
+  tags: ['autodocs'],
   parameters: {
     layout: 'centered',
-    backgrounds: { default: 'dark' },
+    backgrounds: { default: 'app' },
+    a11y: { test: 'error' },
   },
+  // Landmark shell: the isolated story canvas has no landmarks, so axe's
+  // region rule flags bare div content (UI-primitives precedent).
+  decorators: [(Story) => <main><Story /></main>],
   args: {
     exerciseName: 'Bench Press',
     reps: 10,
@@ -20,18 +25,16 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {}
+export const Default: Story = {
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('button', { name: 'Complete set' }))
+    expect(args.onComplete).toHaveBeenCalledTimes(1)
+  },
+}
 
 export const NoWeight: Story = {
   args: {
     weight: undefined,
-  },
-}
-
-export const HeavySet: Story = {
-  args: {
-    exerciseName: 'Deadlift',
-    reps: 5,
-    weight: 140,
   },
 }

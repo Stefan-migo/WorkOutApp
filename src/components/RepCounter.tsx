@@ -1,4 +1,4 @@
-'use client'
+import { Button } from '@/components/ui'
 
 interface RepCounterProps {
   exerciseName: string
@@ -8,35 +8,39 @@ interface RepCounterProps {
 }
 
 // ponytail: no timer, no auto-count. Manual "Complete" button. Add rep tracking if users want history mid-set.
+// DD-2: legacy timer-alias white pill -> Button primary pill; token-only colors (text-fg-2/text-muted).
 export function RepCounter({ exerciseName, reps, weight, onComplete }: RepCounterProps) {
   return (
     <div className="flex flex-col items-center justify-center gap-8 py-8">
       {/* Exercise name */}
-      <span className="font-headline-lg text-headline-lg text-timer-on text-center">
+      <span className="font-headline-lg text-headline-lg text-fg-2 text-center">
         {exerciseName}
       </span>
 
       {/* Target reps in large display */}
-      <span className="font-display-timer-mobile text-display-timer-mobile md:font-display-timer md:text-display-timer text-timer-on tabular-nums">
+      <span className="font-display-timer-mobile text-display-timer-mobile md:font-display-timer md:text-display-timer text-fg-2 tabular-nums">
         {reps}
-        <span className="font-body-md text-body-md text-timer-muted ml-2">reps</span>
+        <span className="font-body-md text-body-md text-fg-2/70 ml-2">reps</span>
       </span>
 
       {/* Weight if provided */}
       {weight !== undefined && (
-        <span className="font-body-lg text-body-lg text-timer-muted">
+        <span className="font-body-lg text-body-lg text-fg-2/70">
           {weight} kg
         </span>
       )}
 
       {/* Complete button large and centered */}
-      <button
-        onClick={onComplete}
-        className="px-16 py-6 bg-timer-on text-accent rounded-full text-xl font-bold hover:bg-timer-on/80 transition-colors mt-4"
+      <Button
+        variant="primary"
+        pill
+        size="lg"
+        className="px-12"
         aria-label="Complete set"
+        onClick={onComplete}
       >
         Complete
-      </button>
+      </Button>
     </div>
   )
 }
