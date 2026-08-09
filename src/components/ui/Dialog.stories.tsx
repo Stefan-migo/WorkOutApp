@@ -53,6 +53,7 @@ const meta = {
   argTypes: {
     title: { control: 'text' },
     variant: { control: 'select', options: ['fixed', 'sheet'] },
+    contained: { control: 'boolean' },
   },
 } satisfies Meta<typeof Dialog>
 
@@ -70,6 +71,11 @@ export const Open: Story = {
 // the open sheet is what axe samples.
 export const Sheet: Story = {
   args: { open: true, variant: 'sheet', title: 'Filter workout' },
+}
+
+// Long-form content (DD-C): fixed variant capped at 85vh with internal scroll.
+export const Contained: Story = {
+  args: { open: true, contained: true, title: 'Edit exercise' },
 }
 
 // UIP-6a/b + UIP-7: browser play — open, focus moves in; ESC closes with

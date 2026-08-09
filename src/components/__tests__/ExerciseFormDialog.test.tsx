@@ -1,8 +1,31 @@
-import { describe, it, expect, afterEach, vi } from 'vitest'
+import { describe, it, expect, afterEach, vi, beforeAll } from 'vitest'
 import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { ExerciseFormDialog } from '../ExerciseFormDialog'
 import type { ExerciseFormData } from '../ExerciseFormDialog'
+
+// jsdom 29 ships no HTMLDialogElement implementation — install the same
+// spec-faithful shim as Dialog.test.tsx (repo pattern) so the controlled
+// open/close wiring can be asserted here (PR 2 2d.7 precedent).
+beforeAll(() => {
+  const proto = HTMLDialogElement.prototype as unknown as {
+    showModal?: () => void
+    close?: () => void
+  }
+  if (typeof proto.showModal !== 'function') {
+    proto.showModal = function (this: HTMLDialogElement) {
+      if (this.open) {
+        throw new DOMException('The dialog already has an open attribute', 'InvalidStateError')
+      }
+      this.setAttribute('open', '')
+    }
+    proto.close = function (this: HTMLDialogElement) {
+      if (!this.open) return
+      this.removeAttribute('open')
+      this.dispatchEvent(new Event('close'))
+    }
+  }
+})
 
 afterEach(cleanup)
 
@@ -35,12 +58,12 @@ function renderDialog(overrides: Partial<{
   form: ExerciseFormData
 }> = {}) {
   const props = {
-    onClose: vi.fn(),
+    open: true,
+    onOpenChange: vi.fn(),
     form: overrides.form ?? EMPTY_FORM,
     onFormChange: vi.fn(),
     editingId: overrides.editingId ?? null,
     onSave: vi.fn(),
-    dialogRef: { current: null } as React.RefObject<HTMLDialogElement | null>,
     allMuscleGroups: ['Chest', 'Shoulders', 'Triceps', 'Biceps'],
     allEquipment: ['Barbell', 'Bench', 'Dumbbell', 'Kettlebell'],
   }
@@ -76,12 +99,12 @@ describe('ExerciseFormDialog', () => {
     const onSave = vi.fn()
     render(
       <ExerciseFormDialog
-        onClose={vi.fn()}
+        open
         form={EMPTY_FORM}
         onFormChange={vi.fn()}
         editingId={null}
         onSave={onSave}
-        dialogRef={{ current: null }}
+        onOpenChange={vi.fn()}
         allMuscleGroups={[]}
         allEquipment={[]}
       />,
@@ -96,12 +119,12 @@ describe('ExerciseFormDialog', () => {
     const onSave = vi.fn()
     render(
       <ExerciseFormDialog
-        onClose={vi.fn()}
+        open
         form={{ ...EMPTY_FORM, name: 'Push Ups' }}
         onFormChange={vi.fn()}
         editingId={null}
         onSave={onSave}
-        dialogRef={{ current: null }}
+        onOpenChange={vi.fn()}
         allMuscleGroups={[]}
         allEquipment={[]}
       />,
@@ -135,12 +158,12 @@ describe('ExerciseFormDialog', () => {
     const form: ExerciseFormData = { ...EMPTY_FORM, instructions: [] }
     render(
       <ExerciseFormDialog
-        onClose={vi.fn()}
+        open
         form={form}
         onFormChange={onFormChange}
         editingId={null}
         onSave={vi.fn()}
-        dialogRef={{ current: null }}
+        onOpenChange={vi.fn()}
         allMuscleGroups={[]}
         allEquipment={[]}
       />,
@@ -160,12 +183,12 @@ describe('ExerciseFormDialog', () => {
     }
     render(
       <ExerciseFormDialog
-        onClose={vi.fn()}
+        open
         form={form}
         onFormChange={onFormChange}
         editingId={null}
         onSave={vi.fn()}
-        dialogRef={{ current: null }}
+        onOpenChange={vi.fn()}
         allMuscleGroups={[]}
         allEquipment={[]}
       />,
@@ -190,12 +213,12 @@ describe('ExerciseFormDialog', () => {
     }
     render(
       <ExerciseFormDialog
-        onClose={vi.fn()}
+        open
         form={form}
         onFormChange={onFormChange}
         editingId={null}
         onSave={vi.fn()}
-        dialogRef={{ current: null }}
+        onOpenChange={vi.fn()}
         allMuscleGroups={[]}
         allEquipment={[]}
       />,
@@ -232,10 +255,10 @@ describe('ExerciseFormDialog', () => {
     expect(screen.getByText('Create')).toBeInTheDocument()
   })
 
-  it('calls onClose when Cancel is clicked', () => {
+  it('calls onOpenChange(false) when Cancel is clicked', () => {
     const { props } = renderDialog()
     fireEvent.click(screen.getByText('Cancel'))
-    expect(props.onClose).toHaveBeenCalled()
+    expect(props.onOpenChange).toHaveBeenCalledWith(false)
   })
 
   it('renders difficulty dropdown', () => {

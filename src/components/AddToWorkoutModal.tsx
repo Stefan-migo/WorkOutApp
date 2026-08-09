@@ -1,10 +1,12 @@
 'use client'
 
-import { useMemo, useEffect, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useWorkoutContext } from '@/context/WorkoutContext'
 import { getIntervalName } from '@/lib/interval-display'
 import type { Exercise, Workout } from '@/types/workout'
 import { detectCycles, isInCycle } from '@/lib/detect-cycles'
+import { Dialog } from './ui/Dialog'
+import { IconButton } from './ui/IconButton'
 
 interface Props {
   exercise: Exercise
@@ -13,17 +15,11 @@ interface Props {
 
 export function AddToWorkoutModal({ exercise, onClose }: Props) {
   const { workouts, saveWorkout } = useWorkoutContext()
-  const dialogRef = useRef<HTMLDialogElement>(null)
+  // ponytail: modal only mounts while the parent wants it — internal open state
+  // (DD-F) avoids a parent ripple; onOpenChange(false) funnels to onClose().
+  const [open, setOpen] = useState(true)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
-
-  useEffect(() => {
-    dialogRef.current?.showModal()
-  }, [])
-
-  function handleBackdrop(e: React.MouseEvent) {
-    if (e.target === dialogRef.current) onClose()
-  }
 
   const assignable = useMemo(
     () => workouts.filter((w) => w.intervals.some((i) => i.type === 'work')),
@@ -63,20 +59,30 @@ export function AddToWorkoutModal({ exercise, onClose }: Props) {
   }, [selectedWorkout])
 
   return (
-    <dialog
-      ref={dialogRef}
-      onClick={handleBackdrop}
-      onClose={onClose}
-      className="fixed inset-0 z-50 w-full h-full max-w-[520px] max-h-[80vh] m-auto rounded-2xl bg-surface text-fg-2 shadow-xl backdrop:bg-surface/80 open:flex open:flex-col"
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o)
+        if (!o) onClose()
+      }}
+      variant="fixed"
+      title={`Assign "${exercise.name}"`}
+      className="p-6 max-h-[80vh]"
     >
-      <div className="flex items-center justify-between p-6 pb-0">
-        <h2 className="font-headline text-headline-sm font-semibold text-accent">
-          Assign &quot;{exercise.name}&quot;
-        </h2>
-        <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-warm transition-colors" aria-label="Close">✕</button>
-      </div>
+      <IconButton
+        variant="ghost"
+        size="sm"
+        aria-label="Close"
+        onClick={() => {
+          setOpen(false)
+          onClose()
+        }}
+        className="absolute right-4 top-4"
+      >
+        ✕
+      </IconButton>
 
-      <div className="flex flex-col gap-4 p-6 overflow-y-auto">
+      <div className="flex flex-col gap-4 overflow-y-auto">
         {assignable.length === 0 ? (
           <p className="text-muted font-body text-body-md text-center py-8">
             No workouts with work intervals yet.{' '}
@@ -143,7 +149,7 @@ export function AddToWorkoutModal({ exercise, onClose }: Props) {
           </>
         )}
       </div>
-    </dialog>
+    </Dialog>
   )
 }
 

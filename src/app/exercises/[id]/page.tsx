@@ -69,7 +69,6 @@ export default function ExerciseDetailPage() {
 
   const [form, setForm] = useState<ExerciseFormData | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const dialogRef = useRef<HTMLDialogElement>(null)
   const deleteDialogRef = useRef<HTMLDialogElement>(null)
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
   const [showAssignModal, setShowAssignModal] = useState(false)
@@ -132,7 +131,6 @@ export default function ExerciseDetailPage() {
     }
     setForm(ed)
     setEditingId(ex.id)
-    dialogRef.current?.showModal()
   }
 
   function handleSave(e: React.FormEvent) {
@@ -157,7 +155,6 @@ export default function ExerciseDetailPage() {
       updatedAt: now,
     }
     saveExercise(updated)
-    dialogRef.current?.close()
     setForm(null)
   }
 
@@ -393,15 +390,14 @@ export default function ExerciseDetailPage() {
       {/* Dialogs */}
       {form && (
           <ExerciseFormDialog
-            onClose={() => {
-              dialogRef.current?.close()
-              setForm(null)
+            open={form !== null}
+            onOpenChange={(o) => {
+              if (!o) setForm(null)
             }}
             form={form}
             onFormChange={setForm}
             editingId={editingId}
             onSave={handleSave}
-            dialogRef={dialogRef}
             allMuscleGroups={allMuscleGroups}
             allEquipment={allEquipment}
             onImageUpload={(file) => saveExerciseImage(exercise.id, file)}
