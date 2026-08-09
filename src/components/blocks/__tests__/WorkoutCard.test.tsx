@@ -2,13 +2,14 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { WorkoutCard } from '../WorkoutCard'
+import type { IntervalType } from '@/types/workout'
 
 afterEach(cleanup)
 
 // WB-1 contract (DD-1). The page test contract (WorkoutListPage.test.tsx)
 // locates the card surface via `closest('[role="button"]')` — the block test
 // enforces the same locator so future wiring keeps the sibling layout.
-const TIMED = {
+const TIMED: { id: string; title: string; intervals: { type: IntervalType; duration: number }[] } = {
   id: 'w1',
   title: 'Morning HIIT',
   intervals: [
