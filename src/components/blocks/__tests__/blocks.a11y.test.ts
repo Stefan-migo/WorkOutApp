@@ -2,6 +2,8 @@ import { describe, expect, test } from 'vitest'
 import { testStory } from '@storybook/addon-vitest/internal/test-utils'
 import * as WorkoutCardStories from '../WorkoutCard.stories'
 import * as RepCounterStories from '../../RepCounter.stories'
+import * as PlayScreenStories from '../PlayScreen.stories'
+import * as WorkoutCompleteStories from '../WorkoutComplete.stories'
 
 // DD-6: browser-project compose following the ui-primitives pattern. Runs
 // play functions (via the addon's testStory) and asserts axe violations
@@ -10,7 +12,6 @@ import * as RepCounterStories from '../../RepCounter.stories'
 // config excludes this file (jsdom cannot run play/axe).
 // PR A covers WorkoutCard + RepCounter; PR B extends with PlayScreen +
 // WorkoutComplete.
-
 type StoryTestContext = Parameters<ReturnType<typeof testStory>>[0]
 
 async function runStoryAndCheckAxe(
@@ -59,6 +60,28 @@ const repCounter = (exportName: string, storyId: string) =>
     componentName: 'RepCounter',
   })
 
+const playScreen = (exportName: string, storyId: string) =>
+  storyCase({
+    exportName,
+    story: PlayScreenStories[exportName as keyof typeof PlayScreenStories],
+    meta: PlayScreenStories.default,
+    skipTags: [],
+    storyId,
+    componentPath: 'PlayScreen.tsx',
+    componentName: 'PlayScreen',
+  })
+
+const workoutComplete = (exportName: string, storyId: string) =>
+  storyCase({
+    exportName,
+    story: WorkoutCompleteStories[exportName as keyof typeof WorkoutCompleteStories],
+    meta: WorkoutCompleteStories.default,
+    skipTags: [],
+    storyId,
+    componentPath: 'WorkoutComplete.tsx',
+    componentName: 'WorkoutComplete',
+  })
+
 describe('Blocks a11y (DD-6)', () => {
   describe('WorkoutCard (WB-1)', () => {
     test('Default (play: click/Enter/Play)', workoutCard('Default', 'blocks-workoutcard--default'))
@@ -69,5 +92,17 @@ describe('Blocks a11y (DD-6)', () => {
   describe('RepCounter (WB-2)', () => {
     test('Default (play: Complete)', repCounter('Default', 'blocks-repcounter--default'))
     test('NoWeight', repCounter('NoWeight', 'blocks-repcounter--no-weight'))
+  })
+
+  describe('PlayScreen (WB-3)', () => {
+    test('Running (play: Pause)', playScreen('Running', 'blocks-playscreen--running'))
+    test('Paused', playScreen('Paused', 'blocks-playscreen--paused'))
+    test('RepsMode (play: Complete)', playScreen('RepsMode', 'blocks-playscreen--reps-mode'))
+    test('AddTime', playScreen('AddTime', 'blocks-playscreen--add-time'))
+  })
+
+  describe('WorkoutComplete (WB-4)', () => {
+    test('Default (play: Play Again/Back Home)', workoutComplete('Default', 'blocks-workoutcomplete--default'))
+    test('CustomTitle', workoutComplete('CustomTitle', 'blocks-workoutcomplete--custom-title'))
   })
 })
