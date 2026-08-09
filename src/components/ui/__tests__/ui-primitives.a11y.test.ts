@@ -2,6 +2,8 @@ import { describe, expect, test } from 'vitest'
 import { testStory } from '@storybook/addon-vitest/internal/test-utils'
 import * as ButtonStories from '../Button.stories'
 import * as IconButtonStories from '../IconButton.stories'
+import * as CardStories from '../Card.stories'
+import * as BadgeStories from '../Badge.stories'
 
 // DD-5: one browser-project test composing all slice stories. Runs play
 // functions (via the addon's testStory) and asserts axe violations empty
@@ -59,6 +61,28 @@ const iconButton = (exportName: string, storyId: string) =>
     componentName: 'IconButton',
   })
 
+const card = (exportName: string, storyId: string) =>
+  storyCase({
+    exportName,
+    story: CardStories[exportName as keyof typeof CardStories],
+    meta: CardStories.default,
+    skipTags: [],
+    storyId,
+    componentPath: 'Card.tsx',
+    componentName: 'Card',
+  })
+
+const badge = (exportName: string, storyId: string) =>
+  storyCase({
+    exportName,
+    story: BadgeStories[exportName as keyof typeof BadgeStories],
+    meta: BadgeStories.default,
+    skipTags: [],
+    storyId,
+    componentPath: 'Badge.tsx',
+    componentName: 'Badge',
+  })
+
 describe('UI primitives a11y (DD-5)', () => {
   describe('Button (UIP-2)', () => {
     test('Primary', button('Primary', 'ui-button--primary'))
@@ -76,6 +100,25 @@ describe('UI primitives a11y (DD-5)', () => {
     test('Ghost', iconButton('Ghost', 'ui-iconbutton--ghost'))
     test('Outline', iconButton('Outline', 'ui-iconbutton--outline'))
     test('Danger', iconButton('Danger', 'ui-iconbutton--danger'))
+  })
+
+  describe('Card (UIP-3)', () => {
+    test('Default', card('Default', 'ui-card--default'))
+    test('Raised', card('Raised', 'ui-card--raised'))
+    test('Inset', card('Inset', 'ui-card--inset'))
+    test('Interactive (play: click spy)', card('Interactive', 'ui-card--interactive'))
+  })
+
+  describe('Badge (UIP-3)', () => {
+    test('Neutral', badge('Neutral', 'ui-badge--neutral'))
+    test('Primary', badge('Primary', 'ui-badge--primary'))
+    test('Success', badge('Success', 'ui-badge--success'))
+    test('Warn', badge('Warn', 'ui-badge--warn'))
+    test('Danger', badge('Danger', 'ui-badge--danger'))
+    test('SegmentPrepare', badge('SegmentPrepare', 'ui-badge--segment-prepare'))
+    test('SegmentWork', badge('SegmentWork', 'ui-badge--segment-work'))
+    test('SegmentRest', badge('SegmentRest', 'ui-badge--segment-rest'))
+    test('SegmentCooldown', badge('SegmentCooldown', 'ui-badge--segment-cooldown'))
   })
 })
 
