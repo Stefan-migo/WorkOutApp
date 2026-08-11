@@ -22,11 +22,36 @@ describe('TimerRing', () => {
     expect(track).toHaveAttribute('fill', 'transparent')
   })
 
+  it('renders a glow halo circle before the progress circle, keeping the semantic ring color', () => {
+    render(<TimerRing timeLeft={30} duration={60} intervalType="work" label="WORK" />)
+    const circles = document.querySelectorAll('circle')
+    // Halo sits between track (0) and progress (2): same geometry, wider and faint
+    const halo = circles[1]!
+    expect(halo).toHaveAttribute('stroke-width', '10')
+    expect(halo).toHaveAttribute('opacity', '0.25')
+    expect(halo).toHaveAttribute('stroke-dashoffset', '141.5')
+    expect(halo).toHaveAttribute('stroke', 'var(--color-segment-work)')
+    // Halo must share the progress circle's rotation (progress-ring__circle =
+    // rotate(-90deg)) so it starts at 12 o'clock like the progress arc — without
+    // it the halo starts at 3 o'clock and covers the un-traveled portion.
+    expect(halo.getAttribute('class')).toContain('progress-ring__circle')
+    // Halo is blurred via CSS filter (NOT an SVG <filter> region — an SVG
+    // filter with percentage region on a CSS-transformed element renders a
+    // visible container boundary). CSS blur touches only the halo stroke.
+    expect(halo).toHaveStyle({ filter: 'blur(0.8px)' })
+
+    const progress = circles[2]
+    expect(progress).toHaveStyle({ stroke: 'var(--color-segment-work)' })
+    expect(progress).toHaveAttribute('stroke-dashoffset', '141.5')
+    // The progress circle must NOT carry the blur — only the halo glows.
+    expect(progress).not.toHaveAttribute('filter')
+  })
+
   describe('progress circle dashoffset', () => {
     it('shows offset 0 when timeLeft equals duration (full ring)', () => {
       render(<TimerRing timeLeft={60} duration={60} intervalType="work" label="WORK" />)
       const circles = document.querySelectorAll('circle')
-      const progress = circles[1]
+      const progress = circles[2]
       // timeLeft/duration=1 → offset = 283*(1-1) = 0 (ring full at start of countdown)
       expect(progress).toHaveAttribute('stroke-dashoffset', '0')
     })
@@ -34,7 +59,7 @@ describe('TimerRing', () => {
     it('shows offset 141.5 when timeLeft is half of duration', () => {
       render(<TimerRing timeLeft={30} duration={60} intervalType="work" label="WORK" />)
       const circles = document.querySelectorAll('circle')
-      const progress = circles[1]
+      const progress = circles[2]
       // timeLeft/duration=0.5 → offset = 283*(1-0.5) = 141.5
       expect(progress).toHaveAttribute('stroke-dashoffset', '141.5')
     })
@@ -42,7 +67,7 @@ describe('TimerRing', () => {
     it('shows offset 283 when timeLeft is 0 (empty ring)', () => {
       render(<TimerRing timeLeft={0} duration={60} intervalType="work" label="WORK" />)
       const circles = document.querySelectorAll('circle')
-      const progress = circles[1]
+      const progress = circles[2]
       // timeLeft/duration=0 → offset = 283*(1-0) = 283 (ring empty at countdown end)
       expect(progress).toHaveAttribute('stroke-dashoffset', '283')
     })
@@ -52,35 +77,35 @@ describe('TimerRing', () => {
     it('uses var(--color-segment-prepare) stroke and label color for prepare', () => {
       render(<TimerRing timeLeft={30} duration={60} intervalType="prepare" label="PREPARE" />)
       const circles = document.querySelectorAll('circle')
-      expect(circles[1]).toHaveStyle({ stroke: 'var(--color-segment-prepare)' })
+      expect(circles[2]).toHaveStyle({ stroke: 'var(--color-segment-prepare)' })
       expect(screen.getByText('PREPARE')).toHaveStyle({ color: 'var(--color-segment-prepare)' })
     })
 
     it('uses var(--color-segment-work) stroke and label color for work', () => {
       render(<TimerRing timeLeft={30} duration={60} intervalType="work" label="WORK" />)
       const circles = document.querySelectorAll('circle')
-      expect(circles[1]).toHaveStyle({ stroke: 'var(--color-segment-work)' })
+      expect(circles[2]).toHaveStyle({ stroke: 'var(--color-segment-work)' })
       expect(screen.getByText('WORK')).toHaveStyle({ color: 'var(--color-segment-work)' })
     })
 
     it('uses var(--color-segment-rest) stroke and label color for rest', () => {
       render(<TimerRing timeLeft={30} duration={60} intervalType="rest" label="REST" />)
       const circles = document.querySelectorAll('circle')
-      expect(circles[1]).toHaveStyle({ stroke: 'var(--color-segment-rest)' })
+      expect(circles[2]).toHaveStyle({ stroke: 'var(--color-segment-rest)' })
       expect(screen.getByText('REST')).toHaveStyle({ color: 'var(--color-segment-rest)' })
     })
 
     it('maps rest_between_cycles to the rest segment token', () => {
       render(<TimerRing timeLeft={30} duration={60} intervalType="rest_between_cycles" label="REST BETWEEN" />)
       const circles = document.querySelectorAll('circle')
-      expect(circles[1]).toHaveStyle({ stroke: 'var(--color-segment-rest)' })
+      expect(circles[2]).toHaveStyle({ stroke: 'var(--color-segment-rest)' })
       expect(screen.getByText('REST BETWEEN')).toHaveStyle({ color: 'var(--color-segment-rest)' })
     })
 
     it('uses var(--color-segment-cooldown) stroke and label color for cooldown', () => {
       render(<TimerRing timeLeft={30} duration={60} intervalType="cooldown" label="COOLDOWN" />)
       const circles = document.querySelectorAll('circle')
-      expect(circles[1]).toHaveStyle({ stroke: 'var(--color-segment-cooldown)' })
+      expect(circles[2]).toHaveStyle({ stroke: 'var(--color-segment-cooldown)' })
       expect(screen.getByText('COOLDOWN')).toHaveStyle({ color: 'var(--color-segment-cooldown)' })
     })
   })
@@ -111,6 +136,26 @@ describe('TimerRing', () => {
   it('does not render a next label when nextLabel is undefined', () => {
     render(<TimerRing timeLeft={30} duration={60} intervalType="work" label="WORK" />)
     expect(screen.queryByText(/^Next:/)).not.toBeInTheDocument()
+  })
+
+  describe('mobileCompact', () => {
+    it('renders the compact container (w-52) when mobileCompact is true', () => {
+      render(<TimerRing timeLeft={30} duration={60} intervalType="work" label="WORK" mobileCompact />)
+      const ringContainer = document.querySelector('svg')!.parentElement!
+      expect(ringContainer).toHaveClass('w-52')
+    })
+
+    it('keeps the default container size (w-72) when mobileCompact is not provided', () => {
+      render(<TimerRing timeLeft={30} duration={60} intervalType="work" label="WORK" />)
+      const ringContainer = document.querySelector('svg')!.parentElement!
+      expect(ringContainer).toHaveClass('w-72')
+    })
+
+    it('keeps the default container size (w-72) when mobileCompact is false', () => {
+      render(<TimerRing timeLeft={30} duration={60} intervalType="work" label="WORK" mobileCompact={false} />)
+      const ringContainer = document.querySelector('svg')!.parentElement!
+      expect(ringContainer).toHaveClass('w-72')
+    })
   })
 
   describe('isRepsMode', () => {

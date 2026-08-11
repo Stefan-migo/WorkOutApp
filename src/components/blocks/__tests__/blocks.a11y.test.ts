@@ -3,6 +3,7 @@ import { testStory } from '@storybook/addon-vitest/internal/test-utils'
 import * as WorkoutCardStories from '../WorkoutCard.stories'
 import * as RepCounterStories from '../../RepCounter.stories'
 import * as PlayScreenStories from '../PlayScreen.stories'
+import * as PlayScreenSplitStories from '../PlayScreenSplit.stories'
 import * as WorkoutCompleteStories from '../WorkoutComplete.stories'
 
 // DD-6: browser-project compose following the ui-primitives pattern. Runs
@@ -71,6 +72,17 @@ const playScreen = (exportName: string, storyId: string) =>
     componentName: 'PlayScreen',
   })
 
+const playScreenSplit = (exportName: string, storyId: string) =>
+  storyCase({
+    exportName,
+    story: PlayScreenSplitStories[exportName as keyof typeof PlayScreenSplitStories],
+    meta: PlayScreenSplitStories.default,
+    skipTags: [],
+    storyId,
+    componentPath: 'PlayScreenSplit.tsx',
+    componentName: 'PlayScreenSplit',
+  })
+
 const workoutComplete = (exportName: string, storyId: string) =>
   storyCase({
     exportName,
@@ -96,9 +108,17 @@ describe('Blocks a11y (DD-6)', () => {
 
   describe('PlayScreen (WB-3)', () => {
     test('Running (play: Pause)', playScreen('Running', 'blocks-playscreen--running'))
+    test('RunningNoImage', playScreen('RunningNoImage', 'blocks-playscreen--running-no-image'))
     test('Paused', playScreen('Paused', 'blocks-playscreen--paused'))
     test('RepsMode (play: Complete)', playScreen('RepsMode', 'blocks-playscreen--reps-mode'))
     test('AddTime', playScreen('AddTime', 'blocks-playscreen--add-time'))
+  })
+
+  describe('PlayScreenSplit', () => {
+    test('Running (play: Pause)', playScreenSplit('Running', 'blocks-playscreensplit--running'))
+    test('RunningNoImage', playScreenSplit('RunningNoImage', 'blocks-playscreensplit--running-no-image'))
+    test('FuturisticProgress', playScreenSplit('FuturisticProgress', 'blocks-playscreensplit--futuristic-progress'))
+    test('SegmentedProgress', playScreenSplit('SegmentedProgress', 'blocks-playscreensplit--segmented-progress'))
   })
 
   describe('WorkoutComplete (WB-4)', () => {

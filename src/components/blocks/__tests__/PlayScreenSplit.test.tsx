@@ -1,16 +1,18 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
-import { PlayScreen } from '../PlayScreen'
+import { PlayScreenSplit } from '../PlayScreenSplit'
 import type { IntervalType } from '@/types/workout'
 import type { TimerStatus } from '@/hooks/useTimer'
 
 afterEach(cleanup)
 
-// WB-3 contract (DD-3). PlayScreen is strictly presentational: props in,
-// callbacks out. It composes TimerRing + TimerControls + ProgressBar +
-// RepCounter (reps branch) and MUST NOT compose TimerDisplay.
-type PlayScreenProps = Parameters<typeof PlayScreen>[0]
+// PlayScreenSplit mirrors the PlayScreen contract (DD-3): strictly
+// presentational, props in/callbacks out, composes TimerRing + TimerControls +
+// ProgressBar + RepCounter and never TimerDisplay. Layout split: with
+// `imageUrl` the context row (name + Set counter) lives on the image panel
+// overlay; without it the flat PlayScreen structure renders verbatim.
+type PlayScreenSplitProps = Parameters<typeof PlayScreenSplit>[0]
 
 const TIMED_PROPS = {
   timeLeft: 45,
@@ -30,32 +32,23 @@ const TIMED_PROPS = {
   isRepsMode: false,
 }
 
-function renderScreen(overrides: Partial<PlayScreenProps> = {}) {
+function renderScreen(overrides: Partial<PlayScreenSplitProps> = {}) {
   const props = { ...TIMED_PROPS, ...overrides }
-  const { container } = render(<PlayScreen {...props} />)
+  const { container } = render(<PlayScreenSplit {...props} />)
   return { ...props, container }
 }
 
-describe('PlayScreen (WB-3)', () => {
-  it('renders the 4 timer surfaces: ring, controls, progress bar, set row (WB-3a)', () => {
+describe('PlayScreenSplit', () => {
+  it('renders the timer surfaces: ring, controls, progress bar, set row', () => {
     renderScreen()
 
-    // Ring: label (also mirrored in the top context row h2, which falls back
-    // to `label` without exerciseName -> 2) + time (formatTime pads minutes:
-    // 45s -> "00:45")
+    // Flat fallback mirrors PlayScreen: label in the top h2 AND in TimerRing
     expect(screen.getByText('00:45')).toBeInTheDocument()
     expect(screen.getAllByText('Work')).toHaveLength(2)
     expect(screen.getByRole('heading', { level: 2, name: 'Work' })).toBeInTheDocument()
-    // Next label forwarded (WB-3b prop mirror)
     expect(screen.getByText('Next: Rest')).toBeInTheDocument()
-
-    // Controls: running -> Pause
     expect(screen.getByRole('button', { name: 'Pause' })).toBeInTheDocument()
-
-    // Progress bar
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '62')
-
-    // Set row
     expect(screen.getByText('Set 1 of 4')).toBeInTheDocument()
   })
 
@@ -73,14 +66,14 @@ describe('PlayScreen (WB-3)', () => {
     expect(screen.getByText('Set 4 of 4')).toBeInTheDocument()
   })
 
-  it('paused status exposes Resume and hides Pause (WB-3 paused scenario)', () => {
+  it('paused status exposes Resume and hides Pause', () => {
     renderScreen({ status: 'paused' })
 
     expect(screen.getByRole('button', { name: 'Resume' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Pause' })).not.toBeInTheDocument()
   })
 
-  it('reps mode swaps in RepCounter and drops the timed controls (WB-3c)', () => {
+  it('reps mode swaps in RepCounter and drops the timed controls', () => {
     renderScreen({
       isRepsMode: true,
       exerciseName: 'Bench Press',
@@ -95,10 +88,9 @@ describe('PlayScreen (WB-3)', () => {
     expect(screen.queryByText('00:45')).not.toBeInTheDocument()
   })
 
-  it('never composes TimerDisplay (WB-3d)', () => {
+  it('never composes TimerDisplay', () => {
     renderScreen()
 
-    // TimerDisplay is the only component with role="timer" + aria-live
     expect(screen.queryByRole('timer')).not.toBeInTheDocument()
     expect(screen.queryByText(/remaining/)).not.toBeInTheDocument()
   })
@@ -120,7 +112,7 @@ describe('PlayScreen (WB-3)', () => {
     expect(onSkip).toHaveBeenCalledTimes(1)
   })
 
-  it('Add time buttons render and fire onAddTime when showAddTime (WB-3b)', () => {
+  it('Add time buttons render and fire onAddTime when showAddTime', () => {
     const { onAddTime } = renderScreen({ showAddTime: true, onAddTime: vi.fn() })
 
     fireEvent.click(screen.getByRole('button', { name: 'Add 10 seconds' }))
@@ -142,7 +134,7 @@ describe('PlayScreen (WB-3)', () => {
     expect(onComplete).toHaveBeenCalledTimes(1)
   })
 
-  it('renders the exercise image as full-bleed background when imageUrl is provided', () => {
+  it('renders the image panel when imageUrl is provided', () => {
     const { container } = renderScreen({ imageUrl: 'https://example.com/bench.jpg' })
 
     const imageLayer = container.querySelector('[style*="background-image"]')
@@ -150,26 +142,54 @@ describe('PlayScreen (WB-3)', () => {
     expect(imageLayer).toHaveAttribute('aria-hidden', 'true')
   })
 
-  it('renders no image layer when imageUrl is absent', () => {
+  it('progressVariant="futuristic" renders the progressbar with an accent fill', () => {
+    const { container } = renderScreen({ progressVariant: 'futuristic' })
+
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '62')
+    expect(container.querySelector('[style*="width: 62%"]')).toHaveClass('bg-accent')
+  })
+
+  it('default (no progressVariant) renders the futuristic bar with a bg-accent fill', () => {
     const { container } = renderScreen()
 
-    expect(container.querySelector('[style*="background-image"][aria-hidden="true"]')).not.toBeInTheDocument()
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '62')
+    expect(container.querySelector('[style*="width: 62%"]')).toHaveClass('bg-accent')
   })
 
-  it('shows exerciseName in the top context row in timed mode', () => {
-    renderScreen({ exerciseName: 'Bench Press' })
+  it('progressVariant="segmented" renders exactly 20 cells inside the block', () => {
+    renderScreen({ progressVariant: 'segmented' })
 
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '62')
+    expect(screen.getByRole('progressbar').children).toHaveLength(20)
+  })
+
+  it('renders no image layer and keeps the h2 name in the top context row without imageUrl', () => {
+    const { container } = renderScreen({ exerciseName: 'Bench Press' })
+
+    expect(container.querySelector('[style*="background-image"][aria-hidden="true"]')).not.toBeInTheDocument()
     // getByText throws on multiple matches -> uniqueness asserted
     expect(screen.getByText('Bench Press')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'Bench Press' })).toBeInTheDocument()
   })
 
-  it('reps mode renders the exercise name once (top row hidden, RepCounter owns it)', () => {
+  it('timed with image: exerciseName renders as h2 on the overlay; label stays only in TimerRing', () => {
+    renderScreen({ imageUrl: 'https://example.com/bench.jpg', exerciseName: 'Bench Press' })
+
+    expect(screen.getByRole('heading', { level: 2, name: 'Bench Press' })).toBeInTheDocument()
+    // No top-row h2 duplicate: 'Work' appears only inside TimerRing
+    expect(screen.getAllByText('Work')).toHaveLength(1)
+    // Set row moves onto the image overlay
+    expect(screen.getByText('Set 1 of 4')).toBeInTheDocument()
+  })
+
+  it('reps mode renders the exercise name once (overlay hidden, RepCounter owns it)', () => {
     renderScreen({
       isRepsMode: true,
       exerciseName: 'Bench Press',
       reps: 10,
       weight: 60,
       onComplete: vi.fn(),
+      imageUrl: 'https://example.com/bench.jpg',
     })
 
     expect(screen.getAllByText('Bench Press')).toHaveLength(1)

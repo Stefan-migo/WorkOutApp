@@ -151,3 +151,9 @@ body {
   /* rgba(255,255,255,0.1) — half of --color-timer-border (0.2) */
   border: 1px solid color-mix(in srgb, var(--color-timer-border) 50%, transparent);
 }
+
+/* ProgressBar futuristic shimmer streak */
+@keyframes progressShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}

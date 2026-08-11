@@ -13,6 +13,11 @@ export const MOCK_REPS_INTERVALS: Interval[] = [
   { id: 'r1', type: 'work', title: 'Work', duration: 30, reps: 10, weight: 60, exerciseId: 'ex1' },
 ]
 
+// Remote placeholder for visual review; jsdom never fetches CSS backgrounds.
+// Animated GIF — proves the full-bleed background plays GIFs natively.
+export const MOCK_EXERCISE_IMAGE =
+  'https://movilidad-stefan-millantu.bopbee.app/files/mov01.gif?v=1'
+
 const TS = 1700000000000
 
 export const MOCK_WORKOUTS: Workout[] = [

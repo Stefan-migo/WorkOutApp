@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { fn, userEvent, within, expect } from 'storybook/test'
-import { PlayScreen } from './PlayScreen'
+import { PlayScreenSplit } from './PlayScreenSplit'
 import { MOCK_EXERCISE_IMAGE } from './mock-data'
 
 const meta = {
-  title: 'Blocks/PlayScreen',
-  component: PlayScreen,
+  title: 'Blocks/PlayScreenSplit',
+  component: PlayScreenSplit,
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
@@ -31,19 +31,17 @@ const meta = {
     totalProgress: 0.62,
     progressPercent: 62,
     isRepsMode: false,
+    imageUrl: MOCK_EXERCISE_IMAGE,
+    exerciseName: 'Kettlebell Swing',
   },
-} satisfies Meta<typeof PlayScreen>
+} satisfies Meta<typeof PlayScreenSplit>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
-// WB-3 scenarios: running state composes the full-bleed surfaces; the play fn
-// exercises Pause -> onPause.
+// Split layout: image panel owns the context row; the play fn exercises
+// Pause -> onPause on the timer panel.
 export const Running: Story = {
-  args: {
-    imageUrl: MOCK_EXERCISE_IMAGE,
-    exerciseName: 'Kettlebell Swing',
-  },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement)
     await userEvent.click(canvas.getByRole('button', { name: 'Pause' }))
@@ -51,18 +49,20 @@ export const Running: Story = {
   },
 }
 
-// Flat fallback: no imageUrl -> no background layers, app background only.
-export const RunningNoImage: Story = {}
+// Flat fallback: no imageUrl -> PlayScreen structure verbatim.
+export const RunningNoImage: Story = {
+  args: {
+    imageUrl: undefined,
+  },
+}
 
 export const Paused: Story = {
   args: {
     status: 'paused',
-    imageUrl: MOCK_EXERCISE_IMAGE,
-    exerciseName: 'Kettlebell Swing',
   },
 }
 
-// WB-3c: reps mode swaps the timed display for RepCounter.
+// Reps mode swaps the timed display for RepCounter; the overlay name hides.
 export const RepsMode: Story = {
   args: {
     isRepsMode: true,
@@ -70,19 +70,11 @@ export const RepsMode: Story = {
     reps: 10,
     weight: 60,
     onComplete: fn(),
-    imageUrl: MOCK_EXERCISE_IMAGE,
   },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement)
     await userEvent.click(canvas.getByRole('button', { name: 'Complete set' }))
     expect(args.onComplete).toHaveBeenCalledTimes(1)
-  },
-}
-
-export const AddTime: Story = {
-  args: {
-    showAddTime: true,
-    onAddTime: fn(),
   },
 }
 
@@ -94,5 +86,19 @@ export const MobileRunning: Story = {
   },
   globals: {
     viewport: { value: 'mobile1' },
+  },
+}
+
+// Futuristic energy-bar progress (running args + variant).
+export const FuturisticProgress: Story = {
+  args: {
+    progressVariant: 'futuristic',
+  },
+}
+
+// Segmented LED progress (running args + variant).
+export const SegmentedProgress: Story = {
+  args: {
+    progressVariant: 'segmented',
   },
 }
