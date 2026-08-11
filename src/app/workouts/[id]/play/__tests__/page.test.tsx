@@ -267,7 +267,7 @@ describe('PlayWorkoutPage', () => {
         expect(screen.getByLabelText('Pause')).toBeInTheDocument()
         expect(mockTimer.start).toHaveBeenCalled()
       })
-      expect(screen.getByText('Warmup')).toBeInTheDocument()
+      expect(screen.getAllByText('Warmup').length).toBeGreaterThanOrEqual(1)
 
       // Skip the prepare interval to get to bench press (reps work)
       mockTimer.timeLeft = 10
@@ -317,7 +317,7 @@ describe('PlayWorkoutPage', () => {
 
       // Should advance to rest interval (timer starts for rest)
       await waitFor(() => {
-        expect(screen.getByText('Rest')).toBeInTheDocument()
+        expect(screen.getAllByText('Rest').length).toBeGreaterThanOrEqual(1)
       })
     })
 
@@ -379,7 +379,41 @@ describe('PlayWorkoutPage', () => {
 
       // Advances to rest interval
       await waitFor(() => {
-        expect(screen.getByText('Rest')).toBeInTheDocument()
+        expect(screen.getAllByText('Rest').length).toBeGreaterThanOrEqual(1)
+      })
+    })
+  })
+
+  describe('active phase PlayScreen surface', () => {
+    it('renders the full-bleed exercise image background on a work interval (PlayScreen, not ExercisePanel)', async () => {
+      mockWorkouts = [mockWorkout]
+      mockExercisesData = [{
+        id: 'ex1',
+        name: 'Sprints',
+        category: 'strength' as const,
+        images: ['https://example.com/sprints.jpg'],
+        createdAt: 0,
+        updatedAt: 0,
+      }]
+      mockTimer.status = 'running'
+      mockTimer.timeLeft = 60
+
+      const Page = (await import('../page')).default
+      const { container } = render(<Page />)
+
+      fireEvent.click(screen.getByText('Start'))
+
+      // Prepare interval (no image) — no background layer yet
+      await waitFor(() => expect(screen.getByLabelText('Skip interval')).toBeInTheDocument())
+      expect(container.querySelector('[style*="background-image"][aria-hidden="true"]')).not.toBeInTheDocument()
+
+      // Skip to Sprints (work, has exercise image) — PlayScreen full-bleed layer appears
+      mockTimer.timeLeft = 10
+      fireEvent.click(screen.getByLabelText('Skip interval'))
+
+      await waitFor(() => {
+        const imageLayer = container.querySelector('[style*="background-image"][aria-hidden="true"]')
+        expect(imageLayer).toBeInTheDocument()
       })
     })
   })

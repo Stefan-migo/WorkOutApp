@@ -243,7 +243,7 @@ describe('Reps mode integration', () => {
 
     // Advances to Rest interval
     await waitFor(() => {
-      expect(screen.getByText('Rest')).toBeInTheDocument()
+      expect(screen.getAllByText('Rest').length).toBeGreaterThanOrEqual(1)
     })
   })
 

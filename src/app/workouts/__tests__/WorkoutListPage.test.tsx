@@ -124,4 +124,52 @@ describe('WorkoutListPage', () => {
     fireEvent.click(fab)
     expect(mockPush).toHaveBeenCalledWith('/workouts/new')
   })
+
+  it('wires the WorkoutCard Play button to the play route', () => {
+    vi.mocked(useWorkoutContext).mockReturnValue({
+      workouts: mockWorkouts,
+      getWorkout: vi.fn(),
+      saveWorkout: vi.fn(),
+      deleteWorkout: vi.fn(),
+    })
+
+    render(<WorkoutListPage />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Play Morning HIIT' }))
+    expect(mockPush).toHaveBeenCalledWith('/workouts/w1/play')
+  })
+
+  it('wires the WorkoutCard overflow menu: Play/Edit/Preview navigate, Delete confirms then deletes', () => {
+    const deleteWorkout = vi.fn()
+    vi.mocked(useWorkoutContext).mockReturnValue({
+      workouts: mockWorkouts,
+      getWorkout: vi.fn(),
+      saveWorkout: vi.fn(),
+      deleteWorkout,
+    })
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true)
+
+    render(<WorkoutListPage />)
+
+    const options = () => screen.getAllByRole('button', { name: 'Workout options' })[0]!
+
+    fireEvent.click(options())
+    fireEvent.click(screen.getByText('Play').closest('button')!)
+    expect(mockPush).toHaveBeenCalledWith('/workouts/w1/play')
+
+    fireEvent.click(options())
+    fireEvent.click(screen.getByText('Edit').closest('button')!)
+    expect(mockPush).toHaveBeenCalledWith('/workouts/w1/edit')
+
+    fireEvent.click(options())
+    fireEvent.click(screen.getByText('Preview').closest('button')!)
+    expect(mockPush).toHaveBeenCalledWith('/workouts/w1/preview')
+
+    fireEvent.click(options())
+    fireEvent.click(screen.getByText('Delete').closest('button')!)
+    expect(confirmSpy).toHaveBeenCalledWith('Delete this workout?')
+    expect(deleteWorkout).toHaveBeenCalledWith('w1')
+
+    confirmSpy.mockRestore()
+  })
 })
