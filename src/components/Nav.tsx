@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useAuth } from '@/context/AuthContext'
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: 'dashboard' },
@@ -17,6 +18,7 @@ const navItems = [
 export default function Nav() {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { user, signOut } = useAuth()
 
   function isActive(href: string) {
     if (href === '/') return pathname === '/'
@@ -71,6 +73,23 @@ export default function Nav() {
             )
           })}
         </nav>
+
+        {/* User + sign out */}
+        {user && (
+          <div className="border-t border-border-soft pt-16 mt-16">
+            <div className="flex items-center gap-16 px-8 pb-8">
+              <span className="material-symbols-outlined text-[20px] text-muted">account_circle</span>
+              <span className="font-body text-body-sm text-muted truncate">{user.email}</span>
+            </div>
+            <button
+              onClick={() => signOut()}
+              className="flex w-full items-center gap-16 px-8 py-2.5 rounded-lg text-muted hover:bg-surface-warm hover:text-danger transition-colors"
+            >
+              <span className="material-symbols-outlined text-[20px]">logout</span>
+              <span className="font-label text-label-caps uppercase tracking-wider">Sign out</span>
+            </button>
+          </div>
+        )}
       </aside>
 
       {/* Top App Bar — hidden on mobile, visible on desktop */}
