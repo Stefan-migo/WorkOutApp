@@ -9,7 +9,8 @@ interface AuthContextValue {
   user: User | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error: string | null }>
-  signUp: (email: string, password: string) => Promise<{ error: string | null }>
+  signUp: (email: string, password: string) => Promise<{ error: string | null; requiresConfirmation?: boolean }>
+  resetPassword: (email: string) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
 }
 
@@ -42,8 +43,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error?.message ?? null }
   }, [supabase])
 
-  const signUp = useCallback(async (email: string, password: string): Promise<{ error: string | null }> => {
-    const { error } = await supabase.auth.signUp({ email, password })
+  const signUp = useCallback(async (email: string, password: string): Promise<{ error: string | null; requiresConfirmation?: boolean }> => {
+    const { data, error } = await supabase.auth.signUp({ email, password })
+    // With email confirmation enabled, signUp creates the user without a
+    // session; the UI must then show "check your email".
+    return { error: error?.message ?? null, requiresConfirmation: !error && !data?.session }
+  }, [supabase])
+
+  const resetPassword = useCallback(async (email: string): Promise<{ error: string | null }> => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email)
     return { error: error?.message ?? null }
   }, [supabase])
 
@@ -53,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [supabase])
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, resetPassword, signOut }}>
       {children}
     </AuthContext.Provider>
   )
