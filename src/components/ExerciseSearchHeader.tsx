@@ -72,16 +72,13 @@ export function ExerciseSearchHeader({
   favoritesFilter, onFavoritesFilterChange,
 }: ExerciseSearchHeaderProps) {
   return (
-    <section className="sticky top-0 z-30 bg-surface rounded-xl p-9 border border-border-soft flex flex-col gap-12 relative overflow-hidden shadow-sm">
+    <section className="sticky top-0 z-30 bg-surface rounded-xl px-9 py-4 border border-border-soft flex flex-col gap-3 relative overflow-hidden shadow-sm">
       <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-accent via-transparent to-transparent" />
-      <div className="flex flex-col gap-4 z-10">
-        <h1 className="font-headline text-headline-lg font-bold text-accent">Exercise Library</h1>
-        <p className="font-body text-body-md text-muted">What exercises are you looking for?</p>
-      </div>
 
-      {/* Search + Favorites row */}
-      <div className="flex flex-col sm:flex-row sm:items-end gap-4 z-10">
-        <div className="w-full sm:flex-1">
+      {/* Search + title + favorites + create — one compact row */}
+      <div className="flex flex-col sm:flex-row sm:items-end gap-3 z-10">
+        <div className="w-full sm:flex-1 flex flex-col sm:flex-row sm:items-end gap-3">
+          <h1 className="font-headline text-headline-md font-bold text-accent whitespace-nowrap sm:mb-8">Exercise Library</h1>
           <SearchInput
             label="Search"
             value={search}
@@ -89,30 +86,35 @@ export function ExerciseSearchHeader({
             placeholder="Search by name, muscle, or equipment..."
           />
         </div>
-        {onFavoritesFilterChange !== undefined && (
-          <div className="flex gap-2 items-center shrink-0 pb-1">
-            <Button
-              variant={!favoritesFilter ? 'primary' : 'ghost'}
-              size="sm"
-              pill
-              onClick={() => onFavoritesFilterChange(false)}
-            >
-              All
-            </Button>
-            <Button
-              variant={favoritesFilter ? 'primary' : 'ghost'}
-              size="sm"
-              pill
-              onClick={() => onFavoritesFilterChange(true)}
-            >
-              {favoritesFilter ? '★' : '☆'} Favorites
-            </Button>
-          </div>
-        )}
+        <div className="flex gap-2 items-center shrink-0 sm:pb-1">
+          {onFavoritesFilterChange !== undefined && (
+            <>
+              <Button
+                variant={!favoritesFilter ? 'primary' : 'ghost'}
+                size="sm"
+                pill
+                onClick={() => onFavoritesFilterChange(false)}
+              >
+                All
+              </Button>
+              <Button
+                variant={favoritesFilter ? 'primary' : 'ghost'}
+                size="sm"
+                pill
+                onClick={() => onFavoritesFilterChange(true)}
+              >
+                {favoritesFilter ? '★' : '☆'} Favorites
+              </Button>
+            </>
+          )}
+          <Button size="sm" onClick={onCreate}>
+            + New
+          </Button>
+        </div>
       </div>
 
-      {/* Filter dropdowns row */}
-      <div className="flex flex-wrap gap-3 z-10">
+      {/* Filter dropdowns row — single scrollable row, no wrap */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 z-10 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <FilterSelect label="Muscle" options={allMuscleGroups} value={muscleFilter} onChange={onMuscleFilter} allLabel="All Muscles" />
         <FilterSelect label="Equipment" options={allEquipment} value={equipmentFilter} onChange={onEquipmentFilter} allLabel="All Equipment" />
         {onForceFilter && (
@@ -127,13 +129,6 @@ export function ExerciseSearchHeader({
         {onCategoryFilter && (
           <FilterSelect label="Category" options={CATEGORY_OPTIONS} value={categoryFilter ?? null} onChange={onCategoryFilter} />
         )}
-      </div>
-
-      {/* Create button */}
-      <div className="z-10">
-        <Button size="sm" onClick={onCreate}>
-          + New Exercise
-        </Button>
       </div>
     </section>
   )

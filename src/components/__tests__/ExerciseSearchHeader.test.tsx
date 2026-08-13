@@ -38,10 +38,9 @@ function renderHeader(overrides: Partial<{
 }
 
 describe('ExerciseSearchHeader', () => {
-  it('renders title and description', () => {
+  it('renders title', () => {
     renderHeader()
     expect(screen.getByText('Exercise Library')).toBeInTheDocument()
-    expect(screen.getByText(/What exercises are you looking for/)).toBeInTheDocument()
   })
 
   it('renders search input', () => {
@@ -51,12 +50,12 @@ describe('ExerciseSearchHeader', () => {
 
   it('renders Create New Exercise button', () => {
     renderHeader()
-    expect(screen.getByText('+ New Exercise')).toBeInTheDocument()
+    expect(screen.getByText('+ New')).toBeInTheDocument()
   })
 
   it('calls onCreate when Create button is clicked', () => {
     const { props } = renderHeader()
-    fireEvent.click(screen.getByText('+ New Exercise'))
+    fireEvent.click(screen.getByText('+ New'))
     expect(props.onCreate).toHaveBeenCalled()
   })
 
