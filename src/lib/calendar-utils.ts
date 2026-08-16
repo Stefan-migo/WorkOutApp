@@ -10,6 +10,11 @@ export function getMonday(date: Date): string {
   return d.toISOString().slice(0, 10)
 }
 
+/** ISO YYYY-MM-DD of the Monday of the week containing the ISO date string. */
+export function weekOfDate(date: string): string {
+  return getMonday(new Date(date + 'T00:00:00'))
+}
+
 /** Human-readable week range e.g. "Jun 29 - Jul 5, 2026" */
 export function formatWeekRange(startDate: string): string {
   const start = new Date(startDate + 'T00:00:00')

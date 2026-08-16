@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getMonday, formatWeekRange, previousWeek, nextWeek, getDayOfWeek } from '../calendar-utils'
+import { getMonday, formatWeekRange, previousWeek, nextWeek, getDayOfWeek, weekOfDate } from '../calendar-utils'
 
 describe('getMonday', () => {
   it('returns itself for a Monday', () => {
@@ -98,5 +98,25 @@ describe('getDayOfWeek', () => {
 
   it('returns 2 for Wednesday', () => {
     expect(getDayOfWeek(new Date('2026-07-01T12:00:00'))).toBe(2)
+  })
+})
+
+describe('weekOfDate', () => {
+  it('returns the Monday ISO string for a mid-week date', () => {
+    // Wednesday July 1, 2026 → Monday June 29
+    expect(weekOfDate('2026-07-01')).toBe('2026-06-29')
+  })
+
+  it('returns the same ISO string when the date is already a Monday', () => {
+    expect(weekOfDate('2026-06-29')).toBe('2026-06-29')
+  })
+
+  it('returns the previous Monday for a Sunday (string in, string out)', () => {
+    expect(weekOfDate('2026-07-05')).toBe('2026-06-29')
+  })
+
+  it('handles cross-year boundary', () => {
+    // Thursday Jan 1, 2026 → Monday Dec 29, 2025
+    expect(weekOfDate('2026-01-01')).toBe('2025-12-29')
   })
 })
