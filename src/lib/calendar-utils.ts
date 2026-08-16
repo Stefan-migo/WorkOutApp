@@ -98,6 +98,38 @@ export function getDayOfWeek(date: Date): number {
   return (date.getDay() + 6) % 7
 }
 
+/** The next upcoming assignment within a displayed week (or null). */
+export interface NextUp {
+  date: string // ISO YYYY-MM-DD
+  dayIndex: number // 0=Mon … 6=Sun
+  assignment: DayAssignment
+}
+
+/**
+ * First assignment at/after `now` within the displayed week (day granularity:
+ * today counts as upcoming). Null when the week is past, empty, or unassigned.
+ */
+export function deriveNextUp(
+  weekPlan: WeekPlan | undefined,
+  weekStart: string,
+  now: Date,
+): NextUp | null {
+  if (!weekPlan) return null
+
+  // Start scanning from today when viewing the current week, else Monday
+  let start = 0
+  const nowWeek = getMonday(now)
+  if (nowWeek === weekStart) start = getDayOfWeek(now)
+  // Whole displayed week already past
+  else if (weekStart < nowWeek) return null
+
+  for (let i = start; i < 7; i++) {
+    const a = weekPlan.days[i]
+    if (a) return { date: isoAddDays(weekStart, i), dayIndex: i, assignment: a }
+  }
+  return null
+}
+
 /**
  * Derive a human-readable type label from a DayAssignment + resolved workout/sequence.
  */

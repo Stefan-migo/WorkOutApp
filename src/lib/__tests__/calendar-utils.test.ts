@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getMonday, formatWeekRange, previousWeek, nextWeek, getDayOfWeek, weekOfDate, buildMonthMatrix } from '../calendar-utils'
+import { getMonday, formatWeekRange, previousWeek, nextWeek, getDayOfWeek, weekOfDate, buildMonthMatrix, deriveNextUp } from '../calendar-utils'
 import type { WeekPlan } from '@/types/workout'
 
 function makeWeekPlan(startDate: string, assignedDayIndexes: number[] = []): WeekPlan {
@@ -178,5 +178,54 @@ describe('buildMonthMatrix', () => {
     const matrix = buildMonthMatrix('2026-06-01', plans)
     expect(matrix[0][0].hasAssignment).toBe(false)
     expect(matrix[0][3].hasAssignment).toBe(true)
+  })
+})
+
+describe('deriveNextUp', () => {
+  // Week of Jun 29 – Jul 5, 2026; "now" Wed Jul 1, 2026 10:00 local
+  const now = new Date('2026-07-01T10:00:00')
+
+  it('returns the first assignment at/after now in the displayed week (future day)', () => {
+    const plan = makeWeekPlan('2026-06-29', [4]) // Friday Jul 3
+    const next = deriveNextUp(plan, '2026-06-29', now)
+    expect(next).not.toBeNull()
+    expect(next!.date).toBe('2026-07-03')
+    expect(next!.dayIndex).toBe(4)
+    expect(next!.assignment.workoutId).toBe('w-2026-06-29-4')
+  })
+
+  it('includes an assignment later today (CU-5 later-today)', () => {
+    const plan = makeWeekPlan('2026-06-29', [2]) // Wednesday Jul 1 = today
+    const next = deriveNextUp(plan, '2026-06-29', now)
+    expect(next).not.toBeNull()
+    expect(next!.dayIndex).toBe(2)
+    expect(next!.date).toBe('2026-07-01')
+  })
+
+  it('skips earlier days of the current week', () => {
+    const plan = makeWeekPlan('2026-06-29', [0, 4]) // Monday Jun 29 + Friday Jul 3
+    const next = deriveNextUp(plan, '2026-06-29', now)
+    expect(next!.dayIndex).toBe(4)
+  })
+
+  it('returns null when the whole displayed week is already past (wrap-past-week)', () => {
+    const plan = makeWeekPlan('2026-06-22', [0, 6]) // week Jun 22–28, before now
+    expect(deriveNextUp(plan, '2026-06-22', now)).toBeNull()
+  })
+
+  it('returns null for an empty weekPlan', () => {
+    expect(deriveNextUp(undefined, '2026-06-29', now)).toBeNull()
+  })
+
+  it('returns null when the displayed week has no assignments', () => {
+    const plan = makeWeekPlan('2026-06-29', [])
+    expect(deriveNextUp(plan, '2026-06-29', now)).toBeNull()
+  })
+
+  it('scans a future week from Monday (index 0)', () => {
+    const plan = makeWeekPlan('2026-07-06', [0]) // Monday Jul 6
+    const next = deriveNextUp(plan, '2026-07-06', now)
+    expect(next!.dayIndex).toBe(0)
+    expect(next!.date).toBe('2026-07-06')
   })
 })
