@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest'
-import { getMonday, formatWeekRange, previousWeek, nextWeek, getDayOfWeek, weekOfDate } from '../calendar-utils'
+import { getMonday, formatWeekRange, previousWeek, nextWeek, getDayOfWeek, weekOfDate, buildMonthMatrix } from '../calendar-utils'
+import type { WeekPlan } from '@/types/workout'
+
+function makeWeekPlan(startDate: string, assignedDayIndexes: number[] = []): WeekPlan {
+  const days = [null, null, null, null, null, null, null] as WeekPlan['days']
+  for (const i of assignedDayIndexes) days[i] = { workoutId: `w-${startDate}-${i}` }
+  return { id: startDate, startDate, days, createdAt: 0, updatedAt: 0 }
+}
 
 describe('getMonday', () => {
   it('returns itself for a Monday', () => {
@@ -118,5 +125,58 @@ describe('weekOfDate', () => {
   it('handles cross-year boundary', () => {
     // Thursday Jan 1, 2026 → Monday Dec 29, 2025
     expect(weekOfDate('2026-01-01')).toBe('2025-12-29')
+  })
+})
+
+describe('buildMonthMatrix', () => {
+  it('builds a 5-row Mon-start grid for a month starting on Monday (June 2026)', () => {
+    const matrix = buildMonthMatrix('2026-06-01', [])
+    expect(matrix).toHaveLength(5)
+    expect(matrix[0][0]).toMatchObject({ date: '2026-06-01', isCurrentMonth: true })
+    expect(matrix[0]).toHaveLength(7)
+    expect(matrix[4][6].date).toBe('2026-07-05')
+  })
+
+  it('flags adjacent-month cells as not current month and without density', () => {
+    // July 2026 starts Wednesday → grid starts Mon Jun 29 and ends Sun Aug 2
+    const plans = [makeWeekPlan('2026-06-29', [0, 1])] // Jun 29, Jun 30 assigned
+    const matrix = buildMonthMatrix('2026-07-01', plans)
+    expect(matrix[0][0]).toEqual({
+      date: '2026-06-29',
+      isCurrentMonth: false,
+      hasAssignment: false,
+    })
+    expect(matrix[0][2]).toEqual({
+      date: '2026-07-01',
+      isCurrentMonth: true,
+      hasAssignment: false,
+    })
+  })
+
+  it('derives density via weekPlans.find(startDate) day lookup', () => {
+    // Week of Jun 29 2026 spans June and July; Tue Jun 30 and Wed Jul 1 assigned
+    const plans = [makeWeekPlan('2026-06-29', [1, 2])]
+    const matrix = buildMonthMatrix('2026-07-01', plans)
+    // Jun 30 is adjacent-month cell → no density reported for displayed month
+    expect(matrix[0][1].hasAssignment).toBe(false)
+    // Jul 1 (index 2 of that week) is current-month → density true
+    expect(matrix[0][2].hasAssignment).toBe(true)
+  })
+
+  it('builds a 6-row grid for a month spanning six Mon-start weeks (August 2026)', () => {
+    const matrix = buildMonthMatrix('2026-08-03', [])
+    expect(matrix).toHaveLength(6)
+    expect(matrix[0][0].date).toBe('2026-07-27')
+    expect(matrix[5][0].date).toBe('2026-08-31')
+    expect(matrix[5][0].isCurrentMonth).toBe(true)
+    expect(matrix[5][6].date).toBe('2026-09-06')
+    expect(matrix[5][6].isCurrentMonth).toBe(false)
+  })
+
+  it('marks days without an assignment (null day) as no density', () => {
+    const plans = [makeWeekPlan('2026-06-01', [3])] // only Thursday assigned
+    const matrix = buildMonthMatrix('2026-06-01', plans)
+    expect(matrix[0][0].hasAssignment).toBe(false)
+    expect(matrix[0][3].hasAssignment).toBe(true)
   })
 })

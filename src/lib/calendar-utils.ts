@@ -1,4 +1,4 @@
-import type { DayAssignment, Workout, Sequence } from '@/types/workout'
+import type { DayAssignment, Workout, Sequence, WeekPlan } from '@/types/workout'
 
 // ponytail: pure js date math — no date-fns/luxon for 4 trivial functions
 
@@ -13,6 +13,58 @@ export function getMonday(date: Date): string {
 /** ISO YYYY-MM-DD of the Monday of the week containing the ISO date string. */
 export function weekOfDate(date: string): string {
   return getMonday(new Date(date + 'T00:00:00'))
+}
+
+/** A single cell of a month-overview grid. */
+export interface MonthCell {
+  date: string // ISO YYYY-MM-DD
+  isCurrentMonth: boolean
+  hasAssignment: boolean
+}
+
+function isoAddDays(date: string, days: number): string {
+  const d = new Date(date + 'T00:00:00')
+  d.setDate(d.getDate() + days)
+  return d.toISOString().slice(0, 10)
+}
+
+/**
+ * Mon-start week rows covering the month of `anchorMonday`.
+ * Density (hasAssignment) only reported for displayed-month cells, derived from
+ * the already-loaded `weekPlans` list via startDate lookup.
+ */
+export function buildMonthMatrix(anchorMonday: string, weekPlans: WeekPlan[]): MonthCell[][] {
+  const anchorDate = new Date(anchorMonday + 'T00:00:00')
+  const month = anchorDate.getMonth()
+  const year = anchorDate.getFullYear()
+
+  // First cell: Monday of the week containing the 1st of the month
+  const firstOfMonth = `${year}-${String(month + 1).padStart(2, '0')}-01`
+  // Last day of month: day 0 of next month (handles December → January rollover)
+  const lastDay = new Date(year, month + 1, 0)
+  const lastDayIso = `${lastDay.getFullYear()}-${String(lastDay.getMonth() + 1).padStart(2, '0')}-${String(lastDay.getDate()).padStart(2, '0')}`
+
+  const matrix: MonthCell[][] = []
+  let weekStart = weekOfDate(firstOfMonth)
+  while (true) {
+    const plan = weekPlans.find((wp) => wp.startDate === weekStart)
+    const row: MonthCell[] = []
+    for (let i = 0; i < 7; i++) {
+      const date = isoAddDays(weekStart, i)
+      const isCurrentMonth = new Date(date + 'T00:00:00').getMonth() === month
+      row.push({
+        date,
+        isCurrentMonth,
+        // Adjacent-month cells never report density for the displayed month
+        hasAssignment: isCurrentMonth && plan != null && plan.days[i] != null,
+      })
+    }
+    matrix.push(row)
+    // Done when this row contains the month's last day
+    if (weekStart <= lastDayIso && lastDayIso <= isoAddDays(weekStart, 6)) break
+    weekStart = isoAddDays(weekStart, 7)
+  }
+  return matrix
 }
 
 /** Human-readable week range e.g. "Jun 29 - Jul 5, 2026" */
