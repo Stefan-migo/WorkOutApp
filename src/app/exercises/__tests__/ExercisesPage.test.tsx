@@ -119,7 +119,7 @@ describe('ExercisesPage star toggle', () => {
   })
 
   it('shows filled star (★) when exercise is favorited', async () => {
-    mockIsFavorite.mockImplementation((id: string) => id === 'ex1')
+    mockFavoriteIds = ['ex1']
     const ExercisesPage = (await import('../page')).default
     render(<ExercisesPage />)
 
@@ -231,18 +231,15 @@ describe('ExercisesPage card display', () => {
     expect(intermediateBadges.length).toBeGreaterThanOrEqual(1)
   })
 
-  it('shows primary muscles chips with +N overflow', async () => {
+  it('shows primary muscles meta line with +N overflow', async () => {
     const ExercisesPage = (await import('../page')).default
     render(<ExercisesPage />)
 
-    // ex1 has 3 muscles -> show 2 + "+1" overflow
-    expect(screen.getByText('CHEST')).toBeInTheDocument()
-    expect(screen.getByText('TRICEPS')).toBeInTheDocument()
-    expect(screen.getByText('+1')).toBeInTheDocument()
+    // ex1 has 3 muscles -> "chest, triceps" + "+1" overflow in the meta line
+    expect(screen.getByText(/chest, triceps \+1/)).toBeInTheDocument()
 
-    // ex2 has 2 muscles -> show both
-    expect(screen.getByText('QUADRICEPS')).toBeInTheDocument()
-    expect(screen.getByText('GLUTES')).toBeInTheDocument()
+    // ex2 has 2 muscles -> shown together, no overflow
+    expect(screen.getByText(/quadriceps, glutes/)).toBeInTheDocument()
   })
 
   it('shows image thumbnail when exercise has images', async () => {
@@ -263,12 +260,12 @@ describe('ExercisesPage card display', () => {
     expect(svgs.length).toBeGreaterThan(0)
   })
 
-  it('shows category badge on each card', async () => {
+  it('shows category chip with count in the toolbar', async () => {
     const ExercisesPage = (await import('../page')).default
     render(<ExercisesPage />)
 
-    const cardBadges = screen.getAllByText('strength')
-    expect(cardBadges.length).toBeGreaterThanOrEqual(2)
+    // Both exercises are strength — the chip rail shows the category with its count
+    expect(screen.getByRole('tab', { name: /strength/i })).toBeInTheDocument()
   })
 
   it('does not show +N overflow when muscles ≤ 2', async () => {
@@ -291,11 +288,13 @@ describe('ExercisesPage responsive grid', () => {
 })
 
 describe('ExercisesPage filter dropdowns', () => {
-  it('shows all filter dropdowns including Level', async () => {
+  it('shows all filter dropdowns including Level once Filters is opened', async () => {
     const ExercisesPage = (await import('../page')).default
     render(<ExercisesPage />)
 
-    // All filters are now inline dropdowns (no more collapsible section)
+    // Secondary filters live in the collapsible Filters panel
+    fireEvent.click(screen.getByRole('button', { name: /^filters/i }))
+
     expect(screen.getByLabelText('Muscle')).toBeInTheDocument()
     expect(screen.getByLabelText('Equipment')).toBeInTheDocument()
     expect(screen.getByLabelText('Force')).toBeInTheDocument()
@@ -311,6 +310,7 @@ describe('ExercisesPage filter dropdowns', () => {
     expect(screen.getByText('Push Up')).toBeInTheDocument()
     expect(screen.getByText('Squat')).toBeInTheDocument()
 
+    fireEvent.click(screen.getByRole('button', { name: /^filters/i }))
     const forceSelect = screen.getByLabelText('Force') as HTMLSelectElement
     fireEvent.change(forceSelect, { target: { value: 'push' } })
 
@@ -319,13 +319,13 @@ describe('ExercisesPage filter dropdowns', () => {
   })
 })
 
-describe('ExercisesPage category section headers', () => {
-  it('shows category name and count in header', async () => {
+describe('ExercisesPage header', () => {
+  it('shows live result count in the header', async () => {
     const ExercisesPage = (await import('../page')).default
     render(<ExercisesPage />)
 
-    // Both exercises are in "strength" category
-    expect(screen.getByText('Strength (2)')).toBeInTheDocument()
+    expect(screen.getByText('Exercises')).toBeInTheDocument()
+    expect(screen.getByText('(2)')).toBeInTheDocument()
   })
 })
 

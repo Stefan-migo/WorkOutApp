@@ -4,19 +4,11 @@ import { useState, useMemo, useEffect } from 'react'
 import { useExercises } from '@/hooks/useExercises'
 import { useFavorites } from '@/hooks/useFavorites'
 import { useRouter } from 'next/navigation'
-import type { Exercise, ExerciseCategory } from '@/types/workout'
-import { ExerciseSearchHeader } from '@/components/ExerciseSearchHeader'
+import type { Exercise } from '@/types/workout'
+import { ExerciseLibrary } from '@/components/blocks/ExerciseLibrary'
 import { ExerciseFormDialog } from '@/components/ExerciseFormDialog'
 import { AddToWorkoutModal } from '@/components/AddToWorkoutModal'
-import { Card } from '@/components/ui/Card'
-import { EmptyState } from '@/components/ui/EmptyState'
-import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
-import { IconButton } from '@/components/ui/IconButton'
 import type { ExerciseFormData } from '@/components/ExerciseFormDialog'
-
-// ponytail: flat list CRUD, no pagination, no drag-reorder — add when >50 exercises exist
-const CATEGORIES: ExerciseCategory[] = ['strength', 'cardio', 'stretching', 'mobility', 'other']
 
 const EMPTY_FORM: ExerciseFormData = {
   name: '',
@@ -28,40 +20,19 @@ const EMPTY_FORM: ExerciseFormData = {
   images: [],
 }
 
-const CATEGORY_LABELS: Record<ExerciseCategory, string> = {
-  strength: 'Strength',
-  cardio: 'Cardio',
-  stretching: 'Stretching',
-  mobility: 'Mobility',
-  plyometrics: 'Plyometrics',
-  strongman: 'Strongman',
-  powerlifting: 'Powerlifting',
-  other: 'Other',
-}
-
 export default function ExercisesPage() {
   const { exercises, saveExercise, saveExerciseImage, getExerciseImages } = useExercises()
-  const { favoriteIds, isFavorite, toggleFavorite, clearOrphans } = useFavorites()
+  const { favoriteIds, toggleFavorite, clearOrphans } = useFavorites()
   const router = useRouter()
   const [formOpen, setFormOpen] = useState(false)
   const [form, setForm] = useState(EMPTY_FORM)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [favoritesFilter, setFavoritesFilter] = useState(false)
   const [assigningExercise, setAssigningExercise] = useState<Exercise | null>(null)
 
   // ponytail: clearOrphans on every exercise list refresh to keep favorites clean
   useEffect(() => { clearOrphans(exercises.map((e) => e.id)) }, [exercises, clearOrphans])
 
-  // Filters
-  const [search, setSearch] = useState('')
-  const [muscleFilter, setMuscleFilter] = useState<string | null>(null)
-  const [equipmentFilter, setEquipmentFilter] = useState<string | null>(null)
-  const [forceFilter, setForceFilter] = useState<string | null>(null)
-  const [mechanicFilter, setMechanicFilter] = useState<string | null>(null)
-  const [difficultyFilter, setDifficultyFilter] = useState<string | null>(null)
-  const [categoryFilter, setCategoryFilter] = useState<string | null>(null)
-
-  // Derive unique filter options
+  // Derive unique filter options (shared with the form dialog's autocomplete)
   const allMuscleGroups = useMemo(() => {
     const set = new Set<string>()
     exercises.forEach((ex) => {
@@ -78,46 +49,10 @@ export default function ExercisesPage() {
     return Array.from(set).sort()
   }, [exercises])
 
-  // Filter + search
-  const filtered = useMemo(() => {
-    return exercises.filter((ex) => {
-      if (search.trim()) {
-        const q = search.toLowerCase()
-        const nameMatch = ex.name.toLowerCase().includes(q)
-        const descMatch = ex.description?.toLowerCase().includes(q)
-        const muscleMatch = [...(ex.primaryMuscles ?? ex.muscleGroups ?? []), ...(ex.secondaryMuscles ?? [])].some((m) => m.toLowerCase().includes(q))
-        const equipMatch = ex.equipment?.some((e) => e.toLowerCase().includes(q))
-        if (!nameMatch && !descMatch && !muscleMatch && !equipMatch) return false
-      }
-      if (muscleFilter) {
-        const muscles = [...(ex.primaryMuscles ?? ex.muscleGroups ?? []), ...(ex.secondaryMuscles ?? [])]
-        if (!muscles.includes(muscleFilter)) return false
-      }
-      if (equipmentFilter && !ex.equipment?.includes(equipmentFilter)) return false
-      if (forceFilter && ex.force !== forceFilter) return false
-      if (mechanicFilter && ex.mechanic !== mechanicFilter) return false
-      if (difficultyFilter && ex.difficulty !== difficultyFilter) return false
-      if (categoryFilter && ex.category !== categoryFilter) return false
-      if (favoritesFilter && !isFavorite(ex.id)) return false
-      return true
-    })
-  }, [exercises, search, muscleFilter, equipmentFilter, forceFilter, mechanicFilter, difficultyFilter, categoryFilter, favoritesFilter, isFavorite])
-
-  // Group by category
-  const grouped = useMemo(() => {
-    const map = new Map<ExerciseCategory, Exercise[]>()
-    for (const ex of filtered) {
-      const list = map.get(ex.category) ?? []
-      list.push(ex)
-      map.set(ex.category, list)
-    }
-    return map
-  }, [filtered])
-
   // ponytail: only query IDB for exercises WITHOUT an external image — saves 800+ IDB calls
   const [idbImageMap, setIdbImageMap] = useState<Record<string, string>>({})
   useEffect(() => {
-    const candidates = (filtered.length > 0 ? filtered : exercises).filter((e) => !e.images?.[0])
+    const candidates = exercises.filter((e) => !e.images?.[0])
     if (candidates.length === 0) { setIdbImageMap({}); return }
     Promise.all(candidates.map(async (ex) => {
       const entries = await getExerciseImages(ex.id).catch(() => [] as { blobUrl: string }[])
@@ -127,7 +62,7 @@ export default function ExercisesPage() {
       for (const r of results) { if (r) map[r[0]] = r[1] }
       setIdbImageMap(map)
     })
-  }, [filtered, exercises, getExerciseImages])
+  }, [exercises, getExerciseImages])
 
   function openCreate() {
     // ponytail: generate ID upfront so uploads can store under the correct key
@@ -165,165 +100,17 @@ export default function ExercisesPage() {
 
   // ponytail: delete dialog removed from compact cards — add back via context menu or detail page
 
-  const hasNoExercises = exercises.length === 0
-  const hasNoResults = !hasNoExercises && filtered.length === 0
-  const isFavoritesEmpty = favoritesFilter && favoriteIds.length === 0
-
   return (
-    <div className="max-w-[1440px] mx-auto w-full p-margin-mobile md:p-margin-desktop flex flex-col gap-32 pb-32">
-      <ExerciseSearchHeader
-        search={search}
-        onSearchChange={setSearch}
-        muscleFilter={muscleFilter}
-        onMuscleFilter={setMuscleFilter}
-        allMuscleGroups={allMuscleGroups}
-        equipmentFilter={equipmentFilter}
-        onEquipmentFilter={setEquipmentFilter}
-        allEquipment={allEquipment}
+    <>
+      <ExerciseLibrary
+        exercises={exercises}
+        favoriteIds={favoriteIds}
+        onToggleFavorite={toggleFavorite}
         onCreate={openCreate}
-        forceFilter={forceFilter}
-        onForceFilter={setForceFilter}
-        mechanicFilter={mechanicFilter}
-        onMechanicFilter={setMechanicFilter}
-        difficultyFilter={difficultyFilter}
-        onDifficultyFilter={setDifficultyFilter}
-        categoryFilter={categoryFilter}
-        onCategoryFilter={setCategoryFilter}
-        favoritesFilter={favoritesFilter}
-        onFavoritesFilterChange={setFavoritesFilter}
+        onOpenExercise={(id) => router.push(`/exercises/${id}`)}
+        onAssignToWorkout={setAssigningExercise}
+        externalImages={idbImageMap}
       />
-
-      {/* Empty states */}
-      {hasNoExercises && (
-        <EmptyState
-          title="No exercises yet"
-          body="Create your first one!"
-          action={<Button onClick={openCreate}>Create Exercise</Button>}
-        />
-      )}
-
-      {hasNoResults && !hasNoExercises && (
-        <EmptyState
-          title={isFavoritesEmpty ? 'No favorites yet — star exercises to add them' : 'No exercises match your filters.'}
-        />
-      )}
-
-      {/* Category sections */}
-      {!hasNoExercises && !hasNoResults && (
-        <div className="flex flex-col gap-32">
-          {CATEGORIES.map((cat) => {
-            const items = grouped.get(cat)
-            if (!items || items.length === 0) return null
-            return (
-              <section key={cat} className="flex flex-col gap-16">
-                <div className="flex items-center justify-between border-b border-border-soft pb-8">
-                  <h2 className="font-headline text-headline-md font-semibold text-accent">
-                    {CATEGORY_LABELS[cat]} ({items.length})
-                  </h2>
-                  {items.length > 20 && (
-                    <button
-                      onClick={() => {}}
-                      className="font-label text-label-caps text-accent hover:text-accent transition-colors focus-visible:focus-ring"
-                    >
-                      {/* ponytail: show all/show less — add real toggle when >20 exercises in any category */}
-                    </button>
-                  )}
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-4 lg:gap-6">
-                  {items.map((ex) => {
-                    const muscles = ex.primaryMuscles ?? ex.muscleGroups ?? []
-                    const maxMuscles = 2
-                    const overflow = muscles.length > maxMuscles ? muscles.length - maxMuscles : 0
-                    return (
-                      <Card
-                        key={ex.id}
-                        interactive
-                        onClick={() => router.push(`/exercises/${ex.id}`)}
-                        className="overflow-hidden group flex flex-col"
-                      >
-                        {/* ponytail: 2:1 image — background-image for static display (no GIF animation) */}
-                        <div className="relative aspect-[2/1] bg-surface overflow-hidden flex items-center justify-center"
-                          style={
-                            (ex.images?.[0] ?? idbImageMap[ex.id])
-                              ? { backgroundImage: `url(${ex.images?.[0] ?? idbImageMap[ex.id]})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-                              : undefined
-                          }
-                        >
-                          {!(ex.images?.[0] ?? idbImageMap[ex.id]) && (
-                            <svg className="w-10 h-10 text-muted/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                            </svg>
-                          )}
-                          {/* Star toggle top-left */}
-                          <IconButton
-                            variant="ghost"
-                            size="sm"
-                            aria-label={isFavorite(ex.id) ? 'Remove from favorites' : 'Add to favorites'}
-                            onClick={(e) => { e.stopPropagation(); toggleFavorite(ex.id) }}
-                            className="absolute top-2 left-2 w-8 h-8 bg-surface/80 backdrop-blur shadow-fab"
-                          >
-                            {isFavorite(ex.id) ? '★' : '☆'}
-                          </IconButton>
-                          {/* Quick assign bottom-right */}
-                          <IconButton
-                            variant="ghost"
-                            aria-label="Assign to workout"
-                            onClick={(e) => { e.stopPropagation(); setAssigningExercise(ex) }}
-                            className="absolute bottom-2 right-2 w-10 h-10 bg-surface/90 backdrop-blur shadow-fab hover:bg-accent hover:text-accent-on hover:scale-110 active:scale-95 transition-transform z-10"
-                          >
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                            </svg>
-                          </IconButton>
-                          {/* Category badge top-right */}
-                          <Badge tone="neutral" className="absolute top-2 right-2 bg-surface/80 backdrop-blur shadow-fab">
-                            {ex.category}
-                          </Badge>
-                          {/* Force/mechanic badges on hover — overlay bottom-center of image */}
-                          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                            {ex.force && (
-                              <Badge tone="neutral" className="bg-surface/90 backdrop-blur text-fg-2">
-                                {ex.force}
-                              </Badge>
-                            )}
-                            {ex.mechanic && (
-                              <Badge tone="neutral" className="bg-surface/90 backdrop-blur text-fg-2">
-                                {ex.mechanic}
-                              </Badge>
-                            )}
-                          </div>
-                          {/* Difficulty badge bottom-left of image */}
-                          {ex.difficulty && (
-                            <Badge tone="primary" className="absolute bottom-2 left-2 bg-accent/80 backdrop-blur">
-                              {ex.difficulty.charAt(0).toUpperCase() + ex.difficulty.slice(1)}
-                            </Badge>
-                          )}
-                        </div>
-                        {/* Compact content area — p-12 */}
-                        <div className="p-12 flex flex-col gap-2">
-                          <h3 className="font-body text-body-md font-bold text-accent line-clamp-1">{ex.name}</h3>
-                          <div className="flex flex-wrap gap-1.5">
-                            {muscles.slice(0, maxMuscles).map((mg) => (
-                              <Badge key={mg} tone="neutral" className="px-1.5 py-0.5">
-                                {mg.toUpperCase()}
-                              </Badge>
-                            ))}
-                            {overflow > 0 && (
-                              <Badge tone="neutral" className="px-1.5 py-0.5">
-                                +{overflow}
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      </Card>
-                    )
-                  })}
-                </div>
-              </section>
-            )
-          })}
-        </div>
-      )}
 
       <ExerciseFormDialog
         open={formOpen}
@@ -343,6 +130,6 @@ export default function ExercisesPage() {
           onClose={() => setAssigningExercise(null)}
         />
       )}
-    </div>
+    </>
   )
 }
