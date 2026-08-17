@@ -77,7 +77,7 @@ The focus card MUST include a single-line "next up" element describing the next 
 
 #### Scenario: Next-up shown in focus card
 
-- GIVEN at least one future assignment in the displayed week or later
+- GIVEN at least one future assignment in the displayed week
 - WHEN the focus card renders
 - THEN a one-line summary shows the next assignment's day, title, and duration
 

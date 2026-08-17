@@ -41,13 +41,13 @@ Chain strategy: pending
 
 ## Phase 3: Page Recomposition (PR 3)
 
-- [ ] 3.1 Restyle `src/components/DayRow.tsx`: single card style, today accent ring (`ring-1 ring-accent`) not fill (CU-4)
-- [ ] 3.2 Rework `src/components/TodaysFocus.tsx`: compact hero shown only on current week + `deriveNextUp` one-liner incl. empty/rest state (CU-5)
-- [ ] 3.3 Rewire `src/app/calendar/page.tsx`: CalendarHeader replaces WeekNav; desktop main+sidebar (MonthOverview); mobile stack with collapsed `<details>` for month/templates (CU-2); keep all hooks unchanged
-- [ ] 3.4 Add date-based modal open: `onSelectDay` → `weekOfDate` + `getWeekPlan` + `setCurrentMonday` if other week + open DayAssignmentModal via `getDayOfWeek` (CP-1 "Direct day assignment")
-- [ ] 3.5 Delete `src/components/WeekNav.tsx`, `TemplatesPanel.tsx`, `UpcomingList.tsx` and remove imports/exports
+- [x] 3.1 Restyle `src/components/DayRow.tsx`: single card style, today accent ring (`ring-1 ring-accent`) not fill (CU-4)
+- [x] 3.2 Rework `src/components/TodaysFocus.tsx`: compact hero shown only on current week + `deriveNextUp` one-liner incl. empty/rest state (CU-5)
+- [x] 3.3 Rewire `src/app/calendar/page.tsx`: CalendarHeader replaces WeekNav; desktop main+sidebar (MonthOverview); mobile stack with collapsed `<details>` for month/templates (CU-2); keep all hooks unchanged
+- [x] 3.4 Add date-based modal open: `onSelectDay` → `weekOfDate` + `getWeekPlan` + `setCurrentMonday` if other week + open DayAssignmentModal via `getDayOfWeek` (CP-1 "Direct day assignment")
+- [x] 3.5 Delete `src/components/WeekNav.tsx`, `TemplatesPanel.tsx`, `UpcomingList.tsx` and remove imports/exports
 
 ## Phase 4: Verification
 
-- [ ] 4.1 `npx vitest run` — full suite green, zero regressions
-- [ ] 4.2 Manual dev-server walkthrough: CU-1 desktop 2-zone, CU-2 mobile stacking/collapse, CU-3 density+direct assign, CU-4 today ring, CU-5 next-up; CP-1 nav/rest/duration/month-jump scenarios
+- [x] 4.1 `npx vitest run` — full suite green, zero regressions (746/746 passed, exit 0; `npx tsc --noEmit` clean; `npx next build` succeeded)
+- [x] 4.2 Manual dev-server walkthrough: CU-1 desktop 2-zone, CU-2 mobile stacking/collapse, CU-3 density+direct assign, CU-4 today ring, CU-5 next-up; CP-1 nav/rest/duration/month-jump scenarios — reconciled 2026-08-17: substituted by static verification (verify-report.md WARNING 1) with accepted residual risk per orchestrator + user decision
