@@ -35,9 +35,9 @@ Chain strategy: pending
 
 ## Phase 2: Components (PR 2)
 
-- [ ] 2.1 Create `src/components/CalendarHeader.tsx`: row 1 ◀ / `formatWeekRange` label / ▶ + Today; row 2 template save input + template dropdown (props from page, CU-1)
-- [ ] 2.2 Create `src/components/MonthOverview.tsx` per `MonthOverviewProps` (design Interfaces): Mon-start grid, density dots, adjacent-month de-emphasis, `onSelectWeek`/`onSelectDay` (CU-3)
-- [ ] 2.3 Verify via dev server in isolation (storybook-less: temp render check), then remove temp render
+- [x] 2.1 Create `src/components/CalendarHeader.tsx`: row 1 ◀ / `formatWeekRange` label / ▶ + Today; row 2 template save input + template dropdown (props from page, CU-1)
+- [x] 2.2 Create `src/components/MonthOverview.tsx` per `MonthOverviewProps` (design Interfaces): Mon-start grid, density dots, adjacent-month de-emphasis, `onSelectWeek`/`onSelectDay` (CU-3)
+- [x] 2.3 Verify via dev server in isolation (storybook-less: temp render check), then remove temp render
 
 ## Phase 3: Page Recomposition (PR 3)
 
