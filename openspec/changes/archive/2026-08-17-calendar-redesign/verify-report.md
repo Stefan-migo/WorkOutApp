@@ -1,11 +1,11 @@
 ```yaml
 schema: gentle-ai.verify-result/v1
-evidence_revision: sha256:0d1dd5377507b28c7d54f4263bdd3ff71673c816188ee9d3e41d480fbb5b8d95
+evidence_revision: sha256:2fa6e73798c58a69a2ba9ff8c004c1352173a3424259b40a59817d1e23a7c1e0
 verdict: pass_with_warnings
 blockers: 0
 critical_findings: 0
 requirements: 6/6
-scenarios: 15/16
+scenarios: 16/16
 test_command: npx vitest run
 test_exit_code: 0
 test_output_hash: sha256:035e5e656e9654d0124702f8c342deff79eb240ab711ac78f55cb98e358875e8
@@ -64,10 +64,10 @@ Runtime = covering unit test passed. Static = code inspection only (no component
 | CU-3 | Direct assignment from month overview | (none — UI) | ⚠️ Static: cell click → `onSelectDay(dateIso)` → modal; assign persists via `saveWeekPlan` |
 | CU-3 | Edge — day in adjacent month | `calendar-utils.test.ts > flags adjacent-month cells...` | ✅ COMPLIANT (no density, isCurrentMonth false); de-emphasis static (`text-muted/40`) |
 | CU-4 | Today with rest day | (none — UI) | ⚠️ Static: empty DayRow shows "Rest" badge with `ring-1 ring-accent` border, no fill |
-| CU-5 | Next-up shown in focus card | `calendar-utils.test.ts > deriveNextUp` (7 tests) | ⚠️ PARTIAL — pure derivation fully tested; rendered label shows day + title + TYPE label but NOT duration, and only scans the displayed week (spec says "displayed week or later") |
+| CU-5 | Next-up shown in focus card | `calendar-utils.test.ts > deriveNextUp` (7 tests) | ✅ COMPLIANT — pure derivation fully tested; rendered label shows day + title + TYPE label + duration (`formatDuration(totalSec)`); spec reconciled to displayed-week scope (2026-08-17 remediation) |
 | CU-5 | No upcoming assignment | `calendar-utils.test.ts > deriveNextUp returns null...` (3 tests) | ✅ COMPLIANT (pure fn); rest-state string always rendered in `TodaysFocus` (static) |
 
-**Compliance summary**: 4/16 scenarios runtime-compliant; 11/16 static-verified compliant (manual UI verification pending, Task 4.2); 1/16 PARTIAL (CU-5 next-up line). Counted complete: 15/16.
+**Compliance summary**: 5/16 scenarios runtime-compliant; 11/16 static-verified compliant (manual UI verification pending, Task 4.2); 0/16 PARTIAL. Counted complete: 16/16 (CU-5 remediated 2026-08-17: duration added to next-up label, spec scope reconciled to displayed week).
 
 ### Correctness (Static Evidence)
 | Requirement | Status | Notes |
@@ -77,7 +77,7 @@ Runtime = covering unit test passed. Static = code inspection only (no component
 | CU-2 responsive | ✅ Implemented | Mobile stack: header → week rows → focus → collapsed details; no duplicate upcoming list |
 | CU-3 month overview | ✅ Implemented | `buildMonthMatrix` pure + tested; density dots; adjacent-month de-emphasis; day/week select |
 | CU-4 today treatment | ✅ Implemented | Accent ring/border, never full fill; Rest badge legible on ring background |
-| CU-5 next-up | ⚠️ Partially implemented | One-liner always renders incl. rest state; duration missing from label; displayed-week-only scope |
+| CU-5 next-up | ✅ Implemented | One-liner always renders incl. rest state; duration included via `formatDuration(totalSec)`; scope = displayed week (spec amended 2026-08-17) |
 
 ### Coherence (Design)
 | Decision | Followed? | Notes |
@@ -131,8 +131,8 @@ Coverage analysis skipped — no coverage tool detected.
 
 **WARNING**:
 1. Task 4.2 (manual dev-server walkthrough) is incomplete — all CU/CP UI scenarios were verified by static code inspection only, per orchestrator instruction. Residual risk: Tailwind class behavior, visual 2-zone rendering, collapsible `<details>` behavior, and modal interaction are unproven at runtime. Recommend performing the walkthrough before archive.
-2. CU-5 scenario "Next-up shown in focus card" is PARTIAL: the rendered label (`${dayName}: ${title} · ${label}`) shows day, title, and type label but omits duration, which the scenario requires ("day, title, and duration"). `deriveNextUp` returns the assignment; duration is computable and simply not included in `nextUpLabel` (page.tsx L74-87).
-3. CU-5 scope: spec says next assignment "in the displayed week or later", but `deriveNextUp` scans only the displayed week; if the current week has no remaining assignments but a later week does, the rest-state line is shown. Design Decision 3 deliberately scoped to the displayed week — a spec/design divergence that should be reconciled (fix impl or amend spec).
+2. ~~CU-5 scenario "Next-up shown in focus card" is PARTIAL~~ — **RESOLVED 2026-08-17**: `nextUpLabel` now includes duration via `formatDuration(totalSec)`; spec reconciled to displayed-week scope. New label format: `${dayName}: ${title} · ${label} · ${formatDuration(totalSec)}`.
+3. ~~CU-5 scope: spec says next assignment "in the displayed week or later"~~ — **RESOLVED 2026-08-17**: spec amended to "in the displayed week" (matches design Decision 3; no impl change needed for scope).
 4. No apply-progress artifact with a TDD Cycle Evidence table was persisted (see TDD Compliance note).
 5. Card style consistency (CU-1 "single consistent card style") is only partially evidenced statically: DayRow/TodaysFocus use `bg-surface` + `border-border-soft` while MonthOverview and the header templates row use `glass-card`. Both are card styles; whether this reads as "single consistent" needs the visual walkthrough.
 
@@ -142,4 +142,4 @@ Coverage analysis skipped — no coverage tool detected.
 
 ### Verdict
 PASS WITH WARNINGS
-All pure-logic requirements are implemented and runtime-proven (746/746 tests, tsc clean); every UI scenario is statically satisfied except CU-5's next-up label (duration missing, displayed-week-only scope), and the manual walkthrough (Task 4.2) remains outstanding as accepted residual risk.
+All pure-logic requirements are implemented and runtime-proven (746/746 tests, tsc clean); every UI scenario is statically satisfied, CU-5 remediated 2026-08-17 (duration in next-up label, spec scope reconciled to displayed week), and the manual walkthrough (Task 4.2) remains outstanding as accepted residual risk.

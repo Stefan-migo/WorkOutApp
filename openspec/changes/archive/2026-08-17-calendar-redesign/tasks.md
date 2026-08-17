@@ -50,4 +50,4 @@ Chain strategy: pending
 ## Phase 4: Verification
 
 - [x] 4.1 `npx vitest run` — full suite green, zero regressions (746/746 passed, exit 0; `npx tsc --noEmit` clean; `npx next build` succeeded)
-- [ ] 4.2 Manual dev-server walkthrough: CU-1 desktop 2-zone, CU-2 mobile stacking/collapse, CU-3 density+direct assign, CU-4 today ring, CU-5 next-up; CP-1 nav/rest/duration/month-jump scenarios
+- [x] 4.2 Manual dev-server walkthrough: CU-1 desktop 2-zone, CU-2 mobile stacking/collapse, CU-3 density+direct assign, CU-4 today ring, CU-5 next-up; CP-1 nav/rest/duration/month-jump scenarios — reconciled 2026-08-17: substituted by static verification (verify-report.md WARNING 1) with accepted residual risk per orchestrator + user decision
