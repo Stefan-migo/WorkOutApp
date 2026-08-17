@@ -14,6 +14,7 @@ import {
   deriveNextUp,
   deriveTypeLabel,
 } from '@/lib/calendar-utils'
+import { formatDuration } from '@/lib/format'
 import { CalendarHeader } from '@/components/CalendarHeader'
 import { MonthOverview } from '@/components/MonthOverview'
 import { DayRow } from '@/components/DayRow'
@@ -83,7 +84,24 @@ export default function CalendarPage() {
     const title = workout?.title ?? sequence?.title
     const label = deriveTypeLabel(nextUp.assignment, workout, sequence)
     const dayName = DAY_NAMES[nextUp.dayIndex]
-    return title ? `${dayName}: ${title} · ${label}` : null
+    // Duration: workout → sum of its intervals; sequence → sum of its
+    // workouts' intervals × repeatCount (convention: sequences/new/page.tsx)
+    const totalSec = workout
+      ? workout.intervals.reduce((s, iv) => s + iv.duration, 0)
+      : sequence
+        ? sequence.workoutIds.reduce(
+            (sum, id) =>
+              sum +
+              (workouts.find((w) => w.id === id)?.intervals.reduce(
+                (s, iv) => s + iv.duration,
+                0,
+              ) ?? 0),
+            0,
+          ) * sequence.repeatCount
+        : 0
+    return title
+      ? `${dayName}: ${title} · ${label} · ${formatDuration(totalSec)}`
+      : null
   }, [weekPlan, currentMonday, workouts, sequences])
 
   function handleAssign(plan: WeekPlan, dayIndex: number, assignment: DayAssignment) {
