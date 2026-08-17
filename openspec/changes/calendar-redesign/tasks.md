@@ -26,18 +26,18 @@ Chain strategy: pending
 
 ## Phase 1: Pure Helpers — Strict TDD (PR 1)
 
-- [ ] 1.1 RED: add failing tests in `src/lib/__tests__/calendar-utils.test.ts` for `weekOfDate` (mid-week, already-Monday, ISO string in/out)
-- [ ] 1.2 GREEN: implement `weekOfDate` in `src/lib/calendar-utils.ts` wrapping `getMonday`; refactor
-- [ ] 1.3 RED: failing tests for `buildMonthMatrix` — density via `weekPlans.find(startDate)`, `isCurrentMonth` flags, 5- and 6-row months, adjacent-month cells (CU-3 scenarios)
-- [ ] 1.4 GREEN: implement `MonthCell` type + `buildMonthMatrix`; refactor
-- [ ] 1.5 RED: failing tests for `deriveNextUp` — future assignment, later-today, wrap-past-week → null, empty weekPlan → null (CU-5 scenarios)
-- [ ] 1.6 GREEN: implement `NextUp` type + `deriveNextUp`; refactor; full suite green
+- [x] 1.1 RED: add failing tests in `src/lib/__tests__/calendar-utils.test.ts` for `weekOfDate` (mid-week, already-Monday, ISO string in/out)
+- [x] 1.2 GREEN: implement `weekOfDate` in `src/lib/calendar-utils.ts` wrapping `getMonday`; refactor
+- [x] 1.3 RED: failing tests for `buildMonthMatrix` — density via `weekPlans.find(startDate)`, `isCurrentMonth` flags, 5- and 6-row months, adjacent-month cells (CU-3 scenarios)
+- [x] 1.4 GREEN: implement `MonthCell` type + `buildMonthMatrix`; refactor
+- [x] 1.5 RED: failing tests for `deriveNextUp` — future assignment, later-today, wrap-past-week → null, empty weekPlan → null (CU-5 scenarios)
+- [x] 1.6 GREEN: implement `NextUp` type + `deriveNextUp`; refactor; full suite green
 
 ## Phase 2: Components (PR 2)
 
-- [ ] 2.1 Create `src/components/CalendarHeader.tsx`: row 1 ◀ / `formatWeekRange` label / ▶ + Today; row 2 template save input + template dropdown (props from page, CU-1)
-- [ ] 2.2 Create `src/components/MonthOverview.tsx` per `MonthOverviewProps` (design Interfaces): Mon-start grid, density dots, adjacent-month de-emphasis, `onSelectWeek`/`onSelectDay` (CU-3)
-- [ ] 2.3 Verify via dev server in isolation (storybook-less: temp render check), then remove temp render
+- [x] 2.1 Create `src/components/CalendarHeader.tsx`: row 1 ◀ / `formatWeekRange` label / ▶ + Today; row 2 template save input + template dropdown (props from page, CU-1)
+- [x] 2.2 Create `src/components/MonthOverview.tsx` per `MonthOverviewProps` (design Interfaces): Mon-start grid, density dots, adjacent-month de-emphasis, `onSelectWeek`/`onSelectDay` (CU-3)
+- [x] 2.3 Verify via dev server in isolation (storybook-less: temp render check), then remove temp render
 
 ## Phase 3: Page Recomposition (PR 3)
 
