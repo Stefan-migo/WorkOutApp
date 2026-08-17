@@ -43,7 +43,7 @@ export function MonthOverview({
           </span>
         ))}
         {matrix.map((week) => {
-          const monday = week[0].date
+          const monday = week[0]!.date
           const isSelectedWeek = monday === currentMonday
           const weekNum = isoWeekNumber(monday)
           return (
