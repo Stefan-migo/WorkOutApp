@@ -5,6 +5,7 @@ import { WorkoutProvider } from '@/context/WorkoutContext'
 import AppShell from '@/components/AppShell'
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration'
 import ErrorBoundary from '@/components/ErrorBoundary'
+import { themeColor } from '@/lib/brand'
 import './globals.css'
 
 const inter = Inter({
@@ -26,7 +27,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#f8f4ed',
+  themeColor,
 }
 
 export default function RootLayout({

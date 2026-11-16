@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next'
+import { themeColor } from '@/lib/brand'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -9,8 +10,8 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: '/',
     scope: '/',
     display: 'standalone',
-    background_color: '#f8f4ed',
-    theme_color: '#f8f4ed',
+    background_color: themeColor,
+    theme_color: themeColor,
     icons: [
       { src: '/baronda-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
       { src: '/baronda-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
