@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 const links = [
   { href: '/exercises', label: 'Exercise library', icon: 'search' },
-  { href: '/history', label: 'Session history', icon: 'history' },
+  { href: '/history', label: 'Training log', icon: 'history' },
 ]
 
 export default function QuickActions() {

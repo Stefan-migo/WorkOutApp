@@ -87,8 +87,31 @@ export default function SessionDetailPage() {
           href="/history"
           className="font-body-md text-body-md text-accent hover:underline"
         >
-          &larr; Back to history
+          &larr; Back to training log
         </Link>
+      </div>
+    )
+  }
+
+  if (session.type === 'free') {
+    return (
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-16">
+        <Link href="/history" className="w-fit text-sm font-semibold text-accent hover:underline">Back to training log</Link>
+        <header>
+          <p className="mb-2 text-sm text-muted">{formatDateFull(session.startedAt)}</p>
+          <h1 className="break-words text-headline-lg font-bold">{session.title || 'Free training'}</h1>
+        </header>
+        <section aria-labelledby="logged-exercises" className="flex flex-col gap-8">
+          <h2 id="logged-exercises" className="text-lg font-semibold">Exercises</h2>
+          <ul className="divide-y divide-border-soft rounded-card border border-border-soft bg-surface">
+            {session.intervals.map((interval) => (
+              <li key={interval.intervalId} className="flex items-center justify-between gap-8 p-16">
+                <span className="min-w-0 break-words font-medium">{interval.title}</span>
+                <span className="shrink-0 font-mono text-sm text-accent">{interval.actualReps != null ? `${interval.actualReps} reps` : formatDuration(interval.actualDuration)}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
       </div>
     )
   }
@@ -122,7 +145,7 @@ export default function SessionDetailPage() {
           className="font-body-md text-body-md text-muted hover:text-fg-2 transition-colors inline-flex items-center gap-xs w-fit"
         >
           <span className="material-symbols-outlined text-sm">arrow_back</span>
-          Back to history
+          Back to training log
         </Link>
 
         <div className="flex flex-col gap-xs">
