@@ -85,7 +85,7 @@ export function useSequences() {
 
   const saveSequence = useCallback(
     async (sequence: Sequence) => {
-      if (!user) return
+      if (!user) return false
       setError(null)
 
       const { error: upsertError } = await supabase
@@ -94,9 +94,10 @@ export function useSequences() {
 
       if (upsertError) {
         setError(upsertError.message)
-      } else {
-        await fetchSequences()
+        return false
       }
+      await fetchSequences()
+      return true
     },
     [user, supabase, fetchSequences],
   )

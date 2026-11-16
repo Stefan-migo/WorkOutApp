@@ -1,107 +1,106 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useWorkoutContext } from '@/context/WorkoutContext'
-import { Button, EmptyState } from '@/components/ui'
+import { Button, EmptyState, SearchInput } from '@/components/ui'
+import { PageHeading } from '@/components/ui/PageHeading'
 import { WorkoutCard } from '@/components/blocks/WorkoutCard'
+import { getEffectiveMode } from '@/lib/interval-engine'
+import type { WorkoutMode } from '@/types/workout'
+
+const modes = [
+  { value: 'all', label: 'All workouts' },
+  { value: 'timed', label: 'Timed' },
+  { value: 'reps', label: 'Repetitions' },
+] as const
 
 export default function WorkoutListPage() {
-  const { workouts, deleteWorkout } = useWorkoutContext()
+  const { workouts, deleteWorkout, isLoading } = useWorkoutContext()
   const router = useRouter()
   const [search, setSearch] = useState('')
-  const [typeFilter, setTypeFilter] = useState<string | null>(null)
+  const [mode, setMode] = useState<WorkoutMode | 'all'>('all')
+  const query = search.trim().toLowerCase()
+  const filtered = workouts.filter((workout) =>
+    workout.title.toLowerCase().includes(query) &&
+    (mode === 'all' || workout.intervals.some((interval) =>
+      interval.type === 'work' && getEffectiveMode(workout, interval) === mode,
+    )),
+  )
 
-  // ponytail: client-side filter by title — no debounce needed at this scale
-  const filtered = useMemo(() => {
-    let result = workouts
-    if (search.trim()) {
-      const q = search.toLowerCase()
-      result = result.filter((w) => w.title.toLowerCase().includes(q))
-    }
-    // ponytail: simple type heuristic — first interval type determines "category"
-    if (typeFilter) {
-      result = result.filter((w) => {
-        const t = w.intervals[0]?.type
-        return typeFilter === 'all' || !typeFilter || t === typeFilter
-      })
-    }
-    return result
-  }, [workouts, search, typeFilter])
-
-  if (workouts.length === 0) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <EmptyState
-          icon={<span className="material-symbols-outlined text-[48px] text-muted">fitness_center</span>}
-          title="No workouts yet"
-          body="Create your first workout to start tracking your training sessions and progress."
-          action={<Button onClick={() => router.push('/workouts/new')}>Create Workout</Button>}
-        />
-      </div>
-    )
+  function createWorkout() {
+    router.push('/workouts/new')
   }
 
   return (
-    <div className="flex-1 overflow-y-auto px-6 py-24 space-y-24">
-      {/* Search & Filters + New Workout */}
-      <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-        <div className="relative w-full md:w-96">
-          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted">search</span>
-          <input
-            className="w-full bg-surface border border-border/50 rounded-lg pl-12 pr-4 py-3 font-body-md focus:border-accent focus:ring-1 focus:ring-accent transition-all outline-none focus-visible:focus-ring"
-            placeholder="Search workouts..."
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        <div className="flex flex-wrap gap-2 items-center">
-          <Button size="sm" onClick={() => router.push('/workouts/new')}>
-            <span className="material-symbols-outlined text-[16px]">add</span>
-            New Workout
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-24">
+      <PageHeading
+        title="Workouts"
+        description="Build a routine or start one you’ve already saved."
+        action={workouts.length > 0 && (
+          <Button aria-label="Create workout" onClick={createWorkout}>
+            <span aria-hidden="true" className="material-symbols-outlined text-[18px]">add</span>
+            New workout
           </Button>
-          <button
-            onClick={() => setTypeFilter(typeFilter === null ? 'all' : null)}
-            className={`px-4 py-2 rounded-full transition-colors border font-label-caps text-label-caps flex items-center gap-2 focus-visible:focus-ring ${
-              typeFilter !== null
-                ? 'bg-accent text-accent-on border-accent'
-                : 'bg-surface text-fg-2 border-transparent hover:bg-surface-warm'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[16px]">filter_list</span> Type
-          </button>
-        </div>
-      </div>
+        )}
+      />
 
-      {/* Workout Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-24 pb-20">
-        {filtered.map((w) => (
-          <WorkoutCard
-            key={w.id}
-            workout={w}
-            onOpen={() => router.push(`/workouts/${w.id}/edit`)}
-            onPlay={() => router.push(`/workouts/${w.id}/play`)}
-            onEdit={() => router.push(`/workouts/${w.id}/edit`)}
-            onPreview={() => router.push(`/workouts/${w.id}/preview`)}
-            onDelete={() => {
-              if (confirm('Delete this workout?')) deleteWorkout(w.id)
-            }}
-          />
-        ))}
-      </div>
+      {workouts.length === 0 ? (
+        isLoading ? <p role="status" className="text-muted">Loading workouts…</p> : (
+          <div className="glass-card rounded-xl px-16">
+            <EmptyState
+              icon={<span className="material-symbols-outlined text-[40px]">fitness_center</span>}
+              title="No workouts yet"
+              body="Create a routine by adding exercises and setting the time or repetitions."
+              action={<Button onClick={createWorkout}>Create workout</Button>}
+            />
+          </div>
+        )
+      ) : (
+        <>
+          <div className="flex flex-col gap-16 lg:flex-row lg:items-end">
+            <div className="w-full lg:max-w-sm">
+              <SearchInput label="Search workouts" value={search} onChange={setSearch} />
+            </div>
+            <div role="group" aria-label="Workout mode" className="flex flex-wrap gap-8">
+              {modes.map(({ value, label }) => (
+                <Button
+                  key={value}
+                  pill
+                  variant={mode === value ? 'primary' : 'outline'}
+                  aria-pressed={mode === value}
+                  onClick={() => setMode(value)}
+                >
+                  {label}
+                </Button>
+              ))}
+            </div>
+          </div>
 
-      {/* FAB - mobile only */}
-      <Button
-        variant="primary"
-        pill
-        elevated
-        aria-label="Create workout"
-        onClick={() => router.push('/workouts/new')}
-        className="fixed bottom-24 right-24 w-14 h-14 px-0 md:hidden z-50"
-      >
-        <span className="material-symbols-outlined text-[24px]">add</span>
-      </Button>
+          {filtered.length === 0 ? (
+            <EmptyState
+              title="No workouts match"
+              action={<Button variant="outline" onClick={() => { setSearch(''); setMode('all') }}>Reset filters</Button>}
+            />
+          ) : (
+            <div className="grid grid-cols-1 gap-16 sm:grid-cols-2 xl:grid-cols-3">
+              {filtered.map((workout) => (
+                <WorkoutCard
+                  key={workout.id}
+                  workout={workout}
+                  onOpen={() => router.push(`/workouts/${workout.id}/edit`)}
+                  onPlay={() => router.push(`/workouts/${workout.id}/play`)}
+                  onEdit={() => router.push(`/workouts/${workout.id}/edit`)}
+                  onPreview={() => router.push(`/workouts/${workout.id}/preview`)}
+                  onDelete={() => {
+                    if (confirm('Delete this workout?')) deleteWorkout(workout.id)
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </>
+      )}
     </div>
   )
 }

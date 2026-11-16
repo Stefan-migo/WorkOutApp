@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { PageHeading } from '@/components/ui/PageHeading'
+import { useState, useEffect, useId } from 'react'
 import { SEGMENT_BG, SEGMENT_BORDER, SEGMENT_TEXT, TYPE_ICONS } from '@/lib/segment-styles'
 import type { Interval, CycleTemplate, IntervalType, WorkoutMode } from '@/types/workout'
 
@@ -243,17 +244,20 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
     onSave(flat, title)
   }
 
+  const titleId = useId()
   const canSave = items.length > 0
 
   return (
-    <div className="max-w-2xl mx-auto w-full p-margin-mobile md:p-margin-desktop flex flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-24">
+      <PageHeading title="New workout" />
       {/* Title + Est. Duration */}
       <div className="glass-card rounded-xl p-16 flex flex-col md:flex-row justify-between items-start md:items-end gap-24">
         <div className="w-full md:w-2/3">
-          <label className="block font-label text-label-caps text-muted mb-xs uppercase tracking-wider">
+          <label htmlFor={titleId} className="block font-label text-label-caps text-muted mb-xs uppercase tracking-wider">
             Workout Title
           </label>
           <input
+            id={titleId}
             type="text"
             value={title}
             placeholder="Name your workout..."
@@ -261,11 +265,11 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
-        <div className="text-right w-full md:w-auto">
+        <div className="w-full md:w-auto md:text-right">
           <span className="block font-label text-label-caps text-muted mb-xs uppercase tracking-wider">
             Est. Duration
           </span>
-          <div className="font-mono text-display-timer-mobile text-accent tracking-tighter">
+          <div className="font-mono text-4xl text-accent tracking-tighter">
             {totalMin}:{String(remainSec).padStart(2, '0')}
           </div>
         </div>

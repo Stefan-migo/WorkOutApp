@@ -110,7 +110,7 @@ describe('WorkoutListPage', () => {
     expect(mockPush).toHaveBeenCalledWith('/workouts/w1/edit')
   })
 
-  it('renders a mobile FAB that navigates to create', () => {
+  it('offers a single create action in the page header', () => {
     vi.mocked(useWorkoutContext).mockReturnValue({
       workouts: mockWorkouts,
       getWorkout: vi.fn(),
@@ -120,9 +120,33 @@ describe('WorkoutListPage', () => {
 
     render(<WorkoutListPage />)
 
-    const fab = screen.getByLabelText(/create workout/i)
-    fireEvent.click(fab)
+    fireEvent.click(screen.getByRole('button', { name: /create workout/i }))
     expect(mockPush).toHaveBeenCalledWith('/workouts/new')
+  })
+
+  it('filters by the mode of work intervals and resets search and mode together', () => {
+    vi.mocked(useWorkoutContext).mockReturnValue({
+      workouts: [...mockWorkouts, {
+        ...mockWorkouts[1]!,
+        id: 'w3',
+        title: 'Strength session',
+        intervals: [{ id: 'i6', type: 'work', title: 'Deadlift', duration: 0, mode: 'reps', reps: 5 }],
+      }],
+      getWorkout: vi.fn(),
+      saveWorkout: vi.fn(),
+      deleteWorkout: vi.fn(),
+    })
+
+    render(<WorkoutListPage />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Repetitions' }))
+    expect(screen.getByText('Strength session')).toBeInTheDocument()
+    expect(screen.queryByText('Morning HIIT')).not.toBeInTheDocument()
+
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'morning' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Reset filters' }))
+    expect(screen.getByText('Morning HIIT')).toBeInTheDocument()
+    expect(screen.getByText('Strength session')).toBeInTheDocument()
   })
 
   it('wires the WorkoutCard Play button to the play route', () => {
