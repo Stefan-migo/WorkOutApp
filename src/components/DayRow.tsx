@@ -36,26 +36,26 @@ export function DayRow({
     return (
       <button
         onClick={onClick}
-        className={`flex items-center gap-16 p-16 bg-surface/50 border border-dashed ${todayRing} rounded-lg hover:border-accent transition-colors cursor-pointer group`}
+        className={`flex items-center gap-16 p-16 bg-surface/50 border border-dashed ${todayRing} rounded-card hover:border-accent hover:shadow-card-hover hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 focus-visible:focus-ring cursor-pointer group`}
       >
-        <div className="flex flex-col items-center justify-center w-16 h-16 bg-surface/50 rounded-lg shrink-0">
-          <span className="font-label-caps text-label-caps text-muted">{dayName}</span>
-          <span className="font-headline-md text-headline-md font-bold text-muted">
+        <div className="flex flex-col items-center justify-center w-12 h-12 bg-surface/50 rounded-card shrink-0">
+          <span className="text-label-caps text-muted">{dayName}</span>
+          <span className="text-data-lg font-bold text-muted">
             {dayNum}
           </span>
         </div>
         <div className="flex-1 text-left">
           {assignment ? (
-            <span className="text-muted italic text-body-md">
-              (deleted)
+            <span className="text-sm text-muted">
+              Replace unavailable session
             </span>
           ) : (
-            <span className="px-8 py-0.5 border border-border-soft text-muted font-label-caps text-label-caps rounded-full">
-              Rest
+            <span className="text-sm font-medium text-muted">
+              Assign a session
             </span>
           )}
         </div>
-        <span className="material-symbols-outlined text-muted group-hover:text-accent">
+        <span aria-hidden="true" className="material-symbols-outlined text-muted group-hover:text-accent">
           add_circle
         </span>
       </button>
@@ -65,26 +65,26 @@ export function DayRow({
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-16 p-16 bg-surface border ${todayRing} rounded-lg hover:border-accent transition-colors cursor-pointer group`}
+      className={`flex items-center gap-16 p-16 bg-surface border ${todayRing} rounded-card hover:border-accent hover:shadow-card-hover hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 focus-visible:focus-ring cursor-pointer group`}
     >
-      <div className="flex flex-col items-center justify-center w-16 h-16 bg-surface rounded-lg shrink-0">
-        <span className="font-label-caps text-label-caps text-muted">{dayName}</span>
-        <span className="font-headline-md text-headline-md font-bold text-fg-2">{dayNum}</span>
+      <div className="flex flex-col items-center justify-center w-12 h-12 bg-surface rounded-card shrink-0">
+        <span className="text-label-caps text-muted">{dayName}</span>
+        <span className="text-data-lg font-bold text-fg-2">{dayNum}</span>
       </div>
       <div className="flex-1 min-w-0 text-left">
-        <h4 className="font-body-md text-body-md font-bold text-fg-2 truncate">
+        <span className="block break-words text-body-md font-bold text-fg-2">
           {title}
-        </h4>
-        <div className="flex gap-xs mt-xs items-center">
-          <span className="px-8 py-0.5 bg-accent/15 text-accent text-[10px] font-bold rounded-full uppercase tracking-wider">
+        </span>
+        <div className="mt-xs flex flex-wrap items-center gap-xs">
+          <span className="px-8 py-0.5 bg-accent/15 text-accent text-label-caps font-bold uppercase tracking-wider rounded-pill">
             {typeLabel}
           </span>
-          <span className="font-data-sm text-data-sm text-muted">
-            {duration > 0 ? `${Math.floor(duration / 60)} min` : ''}
+          <span className="text-data-sm text-muted">
+            {duration >= 60 ? `${Math.round(duration / 60)} min` : duration > 0 ? `${duration} sec` : ''}
           </span>
         </div>
       </div>
-      <span className="material-symbols-outlined text-muted group-hover:text-accent">
+      <span aria-hidden="true" className="material-symbols-outlined text-muted group-hover:text-accent">
         chevron_right
       </span>
     </button>

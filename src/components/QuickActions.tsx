@@ -1,44 +1,20 @@
 import Link from 'next/link'
 
+const links = [
+  { href: '/exercises', label: 'Exercise library', icon: 'search' },
+  { href: '/history', label: 'Session history', icon: 'history' },
+]
+
 export default function QuickActions() {
   return (
-    <div className="md:col-span-12 grid grid-cols-1 sm:grid-cols-3 gap-24">
-      <Link
-        href="/workouts/new"
-        className="glass-card p-16 rounded-xl flex items-center gap-16 hover:bg-surface/50 transition-colors duration-200 group border-l-4 border-l-transparent hover:border-l-accent focus-visible:focus-ring"
-      >
-        <div className="w-12 h-12 rounded-lg bg-surface flex items-center justify-center text-accent group-hover:scale-110 transition-transform">
-          <span className="material-symbols-outlined text-[24px]">add_circle</span>
-        </div>
-        <div>
-          <h5 className="font-headline text-body-md font-bold text-accent">Create Workout</h5>
-          <p className="font-label text-label-caps text-muted mt-1">CUSTOM ROUTINE</p>
-        </div>
-      </Link>
-      <Link
-        href="/exercises"
-        className="glass-card p-16 rounded-xl flex items-center gap-16 hover:bg-surface/50 transition-colors duration-200 group border-l-4 border-l-transparent hover:border-l-accent focus-visible:focus-ring"
-      >
-        <div className="w-12 h-12 rounded-lg bg-surface flex items-center justify-center text-accent group-hover:scale-110 transition-transform">
-          <span className="material-symbols-outlined text-[24px]">search</span>
-        </div>
-        <div>
-          <h5 className="font-headline text-body-md font-bold text-accent">Browse Exercises</h5>
-          <p className="font-label text-label-caps text-muted mt-1">LIBRARY &amp; FORMS</p>
-        </div>
-      </Link>
-      <Link
-        href="/calendar"
-        className="glass-card p-16 rounded-xl flex items-center gap-16 hover:bg-surface/50 transition-colors duration-200 group border-l-4 border-l-transparent hover:border-l-accent focus-visible:focus-ring"
-      >
-        <div className="w-12 h-12 rounded-lg bg-surface flex items-center justify-center text-accent group-hover:scale-110 transition-transform">
-          <span className="material-symbols-outlined text-[24px]">calendar_month</span>
-        </div>
-        <div>
-          <h5 className="font-headline text-body-md font-bold text-accent">View Calendar</h5>
-          <p className="font-label text-label-caps text-muted mt-1">PLANNING &amp; HISTORY</p>
-        </div>
-      </Link>
-    </div>
+    <nav className="grid gap-8 sm:grid-cols-2" aria-label="Training shortcuts">
+      {links.map(({ href, label, icon }) => (
+        <Link key={href} href={href} className="glass-card flex min-h-12 items-center gap-3 rounded-card px-4 text-sm font-semibold text-fg-2 hover:bg-surface-warm">
+          <span className="material-symbols-outlined text-accent" aria-hidden="true">{icon}</span>
+          {label}
+          <span className="material-symbols-outlined ml-auto text-muted" aria-hidden="true">chevron_right</span>
+        </Link>
+      ))}
+    </nav>
   )
 }

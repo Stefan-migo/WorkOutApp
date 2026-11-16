@@ -2,12 +2,18 @@ import type { DayAssignment, Workout, Sequence, WeekPlan } from '@/types/workout
 
 // ponytail: pure js date math — no date-fns/luxon for 4 trivial functions
 
+export function localDateKey(date: Date): string {
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${date.getFullYear()}-${month}-${day}`
+}
+
 /** ISO YYYY-MM-DD of the Monday of the week containing `date`. */
 export function getMonday(date: Date): string {
   const d = new Date(date)
   const day = d.getDay() // 0=Sun … 6=Sat
   d.setDate(d.getDate() - (day === 0 ? 6 : day - 1))
-  return d.toISOString().slice(0, 10)
+  return localDateKey(d)
 }
 
 /** ISO YYYY-MM-DD of the Monday of the week containing the ISO date string. */
@@ -25,7 +31,7 @@ export interface MonthCell {
 function isoAddDays(date: string, days: number): string {
   const d = new Date(date + 'T00:00:00')
   d.setDate(d.getDate() + days)
-  return d.toISOString().slice(0, 10)
+  return localDateKey(d)
 }
 
 /**
@@ -42,7 +48,7 @@ export function buildMonthMatrix(anchorMonday: string, weekPlans: WeekPlan[]): M
   const firstOfMonth = `${year}-${String(month + 1).padStart(2, '0')}-01`
   // Last day of month: day 0 of next month (handles December → January rollover)
   const lastDay = new Date(year, month + 1, 0)
-  const lastDayIso = `${lastDay.getFullYear()}-${String(lastDay.getMonth() + 1).padStart(2, '0')}-${String(lastDay.getDate()).padStart(2, '0')}`
+  const lastDayIso = localDateKey(lastDay)
 
   const matrix: MonthCell[][] = []
   let weekStart = weekOfDate(firstOfMonth)
@@ -80,16 +86,12 @@ export function formatWeekRange(startDate: string): string {
 
 /** ISO YYYY-MM-DD of the Monday of the previous week. */
 export function previousWeek(startDate: string): string {
-  const d = new Date(startDate + 'T00:00:00')
-  d.setDate(d.getDate() - 7)
-  return d.toISOString().slice(0, 10)
+  return isoAddDays(startDate, -7)
 }
 
 /** ISO YYYY-MM-DD of the Monday of the next week. */
 export function nextWeek(startDate: string): string {
-  const d = new Date(startDate + 'T00:00:00')
-  d.setDate(d.getDate() + 7)
-  return d.toISOString().slice(0, 10)
+  return isoAddDays(startDate, 7)
 }
 
 /** 0=Mon … 6=Sun for calendar day indexing. */

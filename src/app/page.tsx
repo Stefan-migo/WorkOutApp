@@ -1,91 +1,88 @@
 'use client'
 
-import { useWorkoutContext } from '@/context/WorkoutContext'
-import { useSessions } from '@/hooks/useSessions'
-import { useWeekPlans } from '@/hooks/useWeekPlans'
-import { getMonday } from '@/lib/calendar-utils'
-import { useMemo, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import HeroCard from '@/components/HeroCard'
 import MiniCalendar from '@/components/MiniCalendar'
 import QuickActions from '@/components/QuickActions'
 import UpNextCard from '@/components/UpNextCard'
-import type { WeekPlan } from '@/types/workout'
-
-function getGreeting() {
-  const h = new Date().getHours()
-  if (h < 12) return 'Good Morning'
-  if (h < 18) return 'Good Afternoon'
-  return 'Good Evening'
-}
-
-function formatDate() {
-  return new Date().toLocaleDateString('en-US', { weekday: 'short', day: '2-digit', month: 'short' })
-}
+import { useWorkoutContext } from '@/context/WorkoutContext'
+import { useSequences } from '@/hooks/useSequences'
+import { useWeekPlans } from '@/hooks/useWeekPlans'
+import { getDayOfWeek, getMonday } from '@/lib/calendar-utils'
+import { formatDuration } from '@/lib/format'
+import type { DayAssignment } from '@/types/workout'
 
 export default function DashboardPage() {
-  const { workouts } = useWorkoutContext()
-  const { sessions } = useSessions()
-  const { getWeekPlan } = useWeekPlans()
-  const monday = useMemo(() => getMonday(new Date()), [])
+  const { workouts, isLoading: workoutsLoading } = useWorkoutContext()
+  const { sequences, isLoading: sequencesLoading } = useSequences()
+  const { weekPlans, isLoading: plansLoading, error: plansError } = useWeekPlans()
+  const [today, setToday] = useState<Date>()
+  useEffect(() => { setToday(new Date()) }, [])
+  if (!today) {
+    return <div className="mx-auto w-full max-w-5xl"><HeroCard hasWorkouts={false} loading /></div>
+  }
 
-  const [weekPlan, setWeekPlan] = useState<WeekPlan | undefined>(undefined)
-  useEffect(() => {
-    getWeekPlan(monday).then(setWeekPlan)
-  }, [monday, getWeekPlan])
+  const monday = getMonday(today)
+  const todayIndex = getDayOfWeek(today)
+  const days = weekPlans.find((plan) => plan.startDate === monday)?.days ?? []
+  const dateLabel = today.toLocaleDateString('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric',
+  })
 
-  const totalSessions = sessions.length
-  const thisWeekSessions = sessions.filter((s) => {
-    const d = new Date(s.startedAt)
-    const day = d.getDay()
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1)
-    const mon = new Date(d.setDate(diff))
-    return mon.toISOString().slice(0, 10) === monday
-  }).length
+  function resolve(assignment?: DayAssignment | null) {
+    const workout = workouts.find((item) => item.id === assignment?.workoutId)
+    if (workout) {
+      const duration = workout.intervals.reduce((sum, interval) => sum + interval.duration, 0)
+      const details = workout.mode === 'reps'
+        ? 'Rep-based workout'
+        : [`${workout.intervals.length} intervals`, duration > 0 && formatDuration(duration)].filter(Boolean).join(' · ')
+      return { title: workout.title, details, href: `/workouts/${workout.id}/play`, kind: 'workout' as const }
+    }
 
-  const assignedDays = weekPlan?.days.filter((d) => d !== null).length ?? 0
-  const weekProgress = Math.round((assignedDays / 5) * 100)
+    const sequence = sequences.find((item) => item.id === assignment?.sequenceId)
+    if (sequence) {
+      const count = sequence.workoutIds.length
+      return {
+        title: sequence.title,
+        details: `${count} workout${count === 1 ? '' : 's'}${sequence.repeatCount > 1 ? ` × ${sequence.repeatCount}` : ''}`,
+        href: `/sequences/${sequence.id}/play`,
+        kind: 'sequence' as const,
+      }
+    }
+  }
 
-  // ponytail: first workout as "today's focus" — naive, pick by day of week
-  const today = new Date().getDay()
-  const todayIndex = today === 0 ? 6 : today - 1
-  const todayAssignment = weekPlan?.days[todayIndex]
-  const todayWorkout =
-    todayAssignment?.workoutId
-      ? workouts.find((w) => w.id === todayAssignment.workoutId)
-      : null
+  const next = weekPlans
+    .filter((plan) => plan.startDate >= monday)
+    .sort((first, second) => first.startDate.localeCompare(second.startDate))
+    .flatMap((plan) => plan.days.flatMap((assignment, dayIndex) => {
+      if (plan.startDate === monday && dayIndex <= todayIndex) return []
+      const session = resolve(assignment)
+      if (!session) return []
+      const date = new Date(plan.startDate + 'T00:00:00')
+      date.setDate(date.getDate() + dayIndex)
+      return [{ ...session, dayLabel: date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) }]
+    }))[0]
+  const training = resolve(days[todayIndex])
 
   return (
-    <div className="flex-1 flex flex-col gap-24 max-w-6xl mx-auto w-full">
-      {/* Greeting + Date */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-        <div>
-          <h2 className="font-headline text-headline-lg text-fg-2 tracking-tight">
-            {getGreeting()}.
-          </h2>
-          <p className="font-body text-body-md text-muted mt-xs">
-            Stay focused. Stay disciplined.
-          </p>
-        </div>
-        <p className="font-mono text-data-lg text-accent tracking-tight">{formatDate()}</p>
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-24">
+      <header>
+        <p className="mb-xs text-sm font-semibold text-muted">{dateLabel}</p>
+        <h1 className="text-4xl font-bold tracking-tight text-fg-2 sm:text-5xl">Today</h1>
+      </header>
+
+      <div className="grid gap-16 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <HeroCard
+          training={training}
+          hasWorkouts={workouts.length > 0}
+          loading={workoutsLoading || sequencesLoading || plansLoading}
+          planUnavailable={Boolean(plansError && weekPlans.length === 0)}
+        />
+        <MiniCalendar monday={monday} todayIndex={todayIndex} weekPlanDays={days} />
       </div>
 
-      {/* Bento Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-24">
-        <HeroCard
-          todayWorkout={todayWorkout}
-          workoutCount={workouts.length}
-          totalSessions={totalSessions}
-        />
-        <MiniCalendar
-          monday={monday}
-          todayIndex={todayIndex}
-          weekPlanDays={weekPlan?.days ?? [null, null, null, null, null, null, null]}
-          assignedDays={assignedDays}
-          weekProgress={weekProgress}
-        />
-        <QuickActions />
-        <UpNextCard totalSessions={totalSessions} thisWeekSessions={thisWeekSessions} />
-      </div>
+      <UpNextCard session={next} />
+      <QuickActions />
     </div>
   )
 }

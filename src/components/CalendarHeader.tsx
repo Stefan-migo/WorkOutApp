@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { formatWeekRange } from '@/lib/calendar-utils'
+import { Button } from '@/components/ui/Button'
 import type { ProgramTemplate, WeekPlan } from '@/types/workout'
 
 interface CalendarHeaderProps {
@@ -71,39 +72,48 @@ export function CalendarHeader({
       {/* Row 1: week navigation + Today */}
       <div className="flex items-center justify-between gap-16 flex-wrap">
         <div className="flex items-center gap-16">
-          <button
+          <Button
             onClick={onPrev}
-            className="p-xs rounded-full hover:bg-surface-warm transition-colors"
+            variant="ghost"
+            size="sm"
+            pill
+            className="active:scale-95 !transition-all duration-200"
             aria-label="Previous week"
           >
-            <span className="material-symbols-outlined text-muted">chevron_left</span>
-          </button>
-          <h1 className="font-headline-md text-headline-md font-bold text-fg-2">
+            <span className="material-symbols-outlined text-muted text-2xl">chevron_left</span>
+          </Button>
+          <h2 className="text-lg font-bold text-fg-2 sm:text-headline-md">
             {formatWeekRange(weekStart)}
-          </h1>
-          <button
+          </h2>
+          <Button
             onClick={onNext}
-            className="p-xs rounded-full hover:bg-surface-warm transition-colors"
+            variant="ghost"
+            size="sm"
+            pill
+            className="active:scale-95 !transition-all duration-200"
             aria-label="Next week"
           >
-            <span className="material-symbols-outlined text-muted">chevron_right</span>
-          </button>
+            <span className="material-symbols-outlined text-muted text-2xl">chevron_right</span>
+          </Button>
         </div>
-        <button
+        <Button
           onClick={onToday}
-          className="px-16 py-xs rounded-full border border-border-soft bg-surface text-fg-2 font-label-caps text-label-caps hover:border-accent hover:text-accent transition-colors"
+          variant="outline"
+          size="sm"
+          pill
+          className="bg-surface hover:border-accent hover:text-accent active:scale-95 !transition-all duration-200"
         >
           Today
-        </button>
+        </Button>
       </div>
 
-      {/* Row 2: template actions — collapsed on mobile (CU-2), always open on desktop */}
-      <details className="group glass-card rounded-lg p-0 md:p-0">
-        <summary className="md:hidden flex items-center gap-8 px-16 py-8 cursor-pointer font-label-caps text-label-caps text-muted">
+      <details className="glass-card rounded-card">
+        <summary className="flex min-h-11 cursor-pointer items-center gap-8 rounded-card px-16 text-label-caps text-muted">
           <span className="material-symbols-outlined text-sm">bookmark</span>
-          Templates
+          Week templates
+          <span className="material-symbols-outlined ml-auto text-lg" aria-hidden="true">expand_more</span>
         </summary>
-        <div className="hidden group-open:flex md:flex flex-wrap items-center gap-8 px-16 py-12">
+        <div className="flex flex-wrap items-center gap-8 border-t border-border-soft px-16 py-12">
           <input
             type="text"
             placeholder="Template name…"
@@ -112,16 +122,18 @@ export function CalendarHeader({
               setTemplateName(e.target.value)
               setSaveError('')
             }}
-            className="w-48 px-12 py-8 rounded-lg bg-surface border border-border/50 text-body-md text-sm focus:outline-none focus:ring-2 focus:ring-accent transition-all"
+            className="w-48 px-12 py-8 rounded-card bg-surface border border-border/50 text-body-md text-sm focus:outline-none focus:ring-2 focus:ring-accent transition-all"
             aria-label="Template name"
           />
-          <button
+          <Button
             onClick={handleSaveTemplate}
             disabled={!templateName.trim() || !weekPlan}
-            className="px-16 py-8 rounded-lg bg-accent text-accent-on font-label-caps text-label-caps hover:bg-accent/90 disabled:opacity-40 transition-colors ambient-shadow"
+            variant="primary"
+            size="sm"
+            elevated
           >
             Save as template
-          </button>
+          </Button>
           <label className="sr-only" htmlFor="template-apply">
             Apply template
           </label>
@@ -134,7 +146,7 @@ export function CalendarHeader({
               e.target.value = ''
             }}
             disabled={templates.length === 0 || !weekPlan}
-            className="px-12 py-8 rounded-lg bg-surface border border-border/50 text-body-md text-sm text-fg-2 disabled:opacity-40"
+            className="px-12 py-8 rounded-card bg-surface border border-border/50 text-body-md text-sm text-fg-2 disabled:opacity-50"
           >
             <option value="">Apply template…</option>
             {templates.map((t) => (
@@ -151,7 +163,7 @@ export function CalendarHeader({
                 e.target.value = ''
               }}
               aria-label="Delete template"
-              className="px-12 py-8 rounded-lg bg-surface border border-border/50 text-body-md text-sm text-danger"
+              className="px-12 py-8 rounded-card bg-surface border border-border/50 text-body-md text-sm text-danger"
             >
               <option value="">Delete…</option>
               {templates.map((t) => (

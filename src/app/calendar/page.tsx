@@ -13,6 +13,9 @@ import {
   buildMonthMatrix,
   deriveNextUp,
   deriveTypeLabel,
+  localDateKey,
+  nextWeek,
+  previousWeek,
 } from '@/lib/calendar-utils'
 import { formatDuration } from '@/lib/format'
 import { CalendarHeader } from '@/components/CalendarHeader'
@@ -33,15 +36,20 @@ export default function CalendarPage() {
   )
   const router = useRouter()
 
-  const { weekPlans, getWeekPlan, saveWeekPlan } = useWeekPlans()
+  const { weekPlans, getWeekPlan, saveWeekPlan, error } = useWeekPlans()
   const { templates, saveTemplate, deleteTemplate } = useProgramTemplates()
   const { workouts } = useWorkoutContext()
   const { sequences } = useSequences()
 
   // der: load weekPlan for currentMonday (async getWeekPlan with auto-create)
-  const [weekPlan, setWeekPlan] = useState<WeekPlan | undefined>(undefined)
+  const [loadedPlan, setLoadedPlan] = useState<WeekPlan | undefined>(undefined)
+  const weekPlan = loadedPlan?.startDate === currentMonday ? loadedPlan : undefined
   useEffect(() => {
-    getWeekPlan(currentMonday).then(setWeekPlan)
+    let current = true
+    getWeekPlan(currentMonday).then((plan) => {
+      if (current) setLoadedPlan(plan)
+    })
+    return () => { current = false }
   }, [currentMonday, getWeekPlan])
 
   // -1 if viewing a different week
@@ -51,7 +59,7 @@ export default function CalendarPage() {
     return todayMon === currentMonday ? getDayOfWeek(now) : -1
   }, [currentMonday])
 
-  const todayIso = useMemo(() => new Date().toISOString().slice(0, 10), [])
+  const todayIso = useMemo(() => localDateKey(new Date()), [])
 
   // CU-3: month density from already-loaded weekPlans (no extra fetches/writes)
   const monthMatrix = useMemo(
@@ -73,7 +81,9 @@ export default function CalendarPage() {
 
   // CU-5: one-line next-up summary from pure helper
   const nextUpLabel = useMemo(() => {
-    const nextUp = deriveNextUp(weekPlan, currentMonday, new Date())
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    const nextUp = deriveNextUp(weekPlan, currentMonday, tomorrow)
     if (!nextUp) return null
     const workout = nextUp.assignment.workoutId
       ? workouts.find((w) => w.id === nextUp.assignment.workoutId)
@@ -130,19 +140,12 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen p-margin-mobile md:p-margin-desktop max-w-6xl mx-auto gap-24">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-24">
+      <h1 className="text-4xl font-bold tracking-tight text-fg-2 sm:text-5xl">Calendar</h1>
       <CalendarHeader
         weekStart={currentMonday}
-        onPrev={() => setCurrentMonday((prev) => {
-          const d = new Date(prev + 'T00:00:00')
-          d.setDate(d.getDate() - 7)
-          return d.toISOString().slice(0, 10)
-        })}
-        onNext={() => setCurrentMonday((prev) => {
-          const d = new Date(prev + 'T00:00:00')
-          d.setDate(d.getDate() + 7)
-          return d.toISOString().slice(0, 10)
-        })}
+        onPrev={() => setCurrentMonday(previousWeek)}
+        onNext={() => setCurrentMonday(nextWeek)}
         onToday={() => setCurrentMonday(getMonday(new Date()))}
         templates={templates}
         weekPlan={weekPlan}
@@ -151,11 +154,24 @@ export default function CalendarPage() {
         deleteTemplate={deleteTemplate}
       />
 
-      <div className="flex flex-col md:flex-row gap-24">
-        {/* CU-1 zone 1: main week grid + today's focus */}
-        <main className="flex-1 flex flex-col gap-24">
-          <div className="flex flex-col lg:flex-row gap-16">
-            <div className="flex-1 flex flex-col gap-16">
+      {error && <p className="rounded-card border border-danger/40 bg-surface p-16 text-sm text-danger" role="alert">The calendar couldn’t sync. Try again in a moment.</p>}
+      <div className="grid items-start gap-24 xl:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="flex min-w-0 flex-col gap-24">
+          <TodaysFocus
+            assignment={todayAssignment}
+            workout={todayWorkout}
+            sequence={todaySequence}
+            typeLabel={todayTypeLabel}
+            isCurrentWeek={today >= 0 && Boolean(weekPlan)}
+            nextUpLabel={nextUpLabel}
+            onStartWorkout={() => {
+              if (todayWorkout) router.push(`/workouts/${todayWorkout.id}/play`)
+              else if (todaySequence) router.push(`/sequences/${todaySequence.id}/play`)
+            }}
+          />
+          <section className="flex flex-col gap-8" aria-labelledby="calendar-week-title">
+            <h2 id="calendar-week-title" className="text-lg font-semibold text-fg-2">Week plan</h2>
+            {!weekPlan && !error && <p role="status" className="text-muted">Loading week…</p>}
               {DAY_NAMES.map((name, i) => {
                 if (!weekPlan) return null
                 const d = new Date(currentMonday + 'T00:00:00')
@@ -196,29 +212,13 @@ export default function CalendarPage() {
                   />
                 )
               })}
-            </div>
-
-            <TodaysFocus
-              assignment={todayAssignment}
-              workout={todayWorkout}
-              sequence={todaySequence}
-              typeLabel={todayTypeLabel}
-              isCurrentWeek={today >= 0}
-              nextUpLabel={nextUpLabel}
-              onStartWorkout={() => {
-                if (todayAssignment?.workoutId)
-                  router.push(`/workouts/${todayAssignment.workoutId}/play`)
-                else if (todayAssignment?.sequenceId)
-                  router.push(`/sequences/${todayAssignment.sequenceId}/play`)
-              }}
-            />
-          </div>
-        </main>
+          </section>
+        </div>
 
         {/* CU-1 zone 2: contextual sidebar — desktop shows the month overview
             directly; mobile collapses it into a <details> (CU-2). */}
-        <aside className="w-full md:w-80 flex flex-col gap-16">
-          <div className="hidden md:block">
+        <aside className="flex w-full flex-col gap-16">
+          <div className="hidden xl:block">
             <MonthOverview
               anchorMonday={currentMonday}
               currentMonday={currentMonday}
@@ -228,8 +228,8 @@ export default function CalendarPage() {
               onSelectDay={handleSelectDay}
             />
           </div>
-          <details className="md:hidden glass-card rounded-lg">
-            <summary className="flex items-center gap-8 px-16 py-8 cursor-pointer font-label-caps text-label-caps text-muted">
+          <details className="glass-card rounded-lg xl:hidden">
+            <summary className="flex min-h-11 cursor-pointer items-center gap-8 rounded-lg px-16 text-label-caps text-muted">
               <span className="material-symbols-outlined text-sm">calendar_month</span>
               Month overview
             </summary>
