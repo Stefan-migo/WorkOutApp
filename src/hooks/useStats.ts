@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react'
 import type { Session } from '@/types/workout'
+import { localDateKey } from '@/lib/calendar-utils'
 
 export interface StatsData {
   totalWorkouts: number
@@ -41,18 +42,16 @@ export function computeStats(sessions: Session[], now: Date = new Date()): Stats
   const totalWorkouts = sessions.length
   const totalTimeSeconds = sessions.reduce((sum, s) => sum + s.intervals.reduce((sum, i) => sum + i.actualDuration, 0), 0)
 
-  // Streak: consecutive calendar days (UTC) with ≥1 session, backward from now
+  // Streak: consecutive local calendar days with at least one session.
   const sessionDates = new Set(
-    sessions
-      .sort((a, b) => b.startedAt - a.startedAt)
-      .map((s) => new Date(s.startedAt).toISOString().slice(0, 10)),
+    sessions.map((s) => localDateKey(new Date(s.startedAt))),
   )
 
   let streak = 0
-  const cursor = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()))
-  while (sessionDates.has(cursor.toISOString().slice(0, 10))) {
+  const cursor = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  while (sessionDates.has(localDateKey(cursor))) {
     streak++
-    cursor.setUTCDate(cursor.getUTCDate() - 1)
+    cursor.setDate(cursor.getDate() - 1)
   }
 
   // Sessions this ISO week

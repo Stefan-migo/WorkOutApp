@@ -7,6 +7,7 @@ import { useSessions } from '@/hooks/useSessions'
 import { exportAllData } from '@/lib/export-data'
 import { formatDuration } from '@/lib/format'
 import { computePRs, hasStrength, type PRRecord } from '@/lib/pr-engine'
+import { localDateKey } from '@/lib/calendar-utils'
 import type { Session } from '@/types/workout'
 import VolumeChart from '@/components/VolumeChart'
 import StrainGauge from '@/components/StrainGauge'
@@ -37,7 +38,7 @@ interface HeatmapCell {
 function buildHeatmap(sessions: Session[]): HeatmapCell[][] {
   const countByDate = new Map<string, number>()
   for (const s of sessions) {
-    const key = new Date(s.startedAt).toISOString().slice(0, 10)
+    const key = localDateKey(new Date(s.startedAt))
     countByDate.set(key, (countByDate.get(key) ?? 0) + 1)
   }
 
@@ -53,7 +54,7 @@ function buildHeatmap(sessions: Session[]): HeatmapCell[][] {
     for (let d = 0; d < 7; d++) {
       const day = new Date(monday)
       day.setDate(monday.getDate() - w * 7 + d)
-      const key = day.toISOString().slice(0, 10)
+      const key = localDateKey(day)
       week.push({ date: key, count: countByDate.get(key) ?? 0 })
     }
     weeks.push(week)
@@ -71,6 +72,7 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
     let workSec = 0
     let restSec = 0
     for (const s of sessions) {
+      if (s.type === 'free') continue
       for (const i of s.intervals) {
         if (i.type === 'work') workSec += i.actualDuration
         else restSec += i.actualDuration

@@ -10,6 +10,7 @@ function mapRowToSession(row: Record<string, unknown>): Session {
   return {
     id: row.id as string,
     type: row.type as Session['type'],
+    ...(typeof row.title === 'string' ? { title: row.title } : {}),
     sequenceId: (row.sequence_id as string | null) ?? undefined,
     workoutId: (row.workout_id as string | null) ?? undefined,
     startedAt: new Date(row.started_at as string).getTime(),
@@ -25,6 +26,7 @@ function toInsertPayload(session: Session, userId: string) {
     id: session.id,
     user_id: userId,
     type: session.type,
+    ...(session.type === 'free' ? { title: session.title } : {}),
     workout_id: session.workoutId ?? null,
     sequence_id: session.sequenceId ?? null,
     started_at: new Date(session.startedAt).toISOString(),
@@ -51,6 +53,7 @@ export function useSessions() {
 
     setIsLoading(true)
     setError(null)
+    const fallbackKey = `sessions.${user.id}`
 
     const { data, error: fetchError } = await supabase
       .from('sessions')
@@ -60,11 +63,11 @@ export function useSessions() {
 
     if (fetchError) {
       setError(fetchError.message)
-      setSessions(getFallback<Session>('sessions'))
+      setSessions(getFallback<Session>(fallbackKey))
     } else {
       const mapped = (data ?? []).map(mapRowToSession)
       setSessions(mapped)
-      setFallback('sessions', mapped)
+      setFallback(fallbackKey, mapped)
     }
     setIsLoading(false)
   }, [user, supabase])
@@ -103,18 +106,24 @@ export function useSessions() {
 
   const addSession = useCallback(
     async (session: Session) => {
-      if (!user) return
+      if (!user) {
+        setError('Sign in to save your training session.')
+        return false
+      }
       setError(null)
 
-      const { error: insertError } = await supabase
-        .from('sessions')
-        .insert(toInsertPayload(session, user.id))
+      const table = supabase.from('sessions')
+      const payload = toInsertPayload(session, user.id)
+      const { error: insertError } = await (session.type === 'free'
+        ? table.upsert(payload, { onConflict: 'id', ignoreDuplicates: true })
+        : table.insert(payload))
 
       if (insertError) {
         setError(insertError.message)
-      } else {
-        await fetchSessions()
+        return false
       }
+      await fetchSessions()
+      return true
     },
     [user, supabase, fetchSessions],
   )

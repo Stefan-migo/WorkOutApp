@@ -37,6 +37,8 @@ export function computePRs(sessions: Session[]): PRRecord[] {
   const groups = new Map<string, Group>()
 
   for (const s of sessions) {
+    // Free entries can describe aggregate reps rather than a single set.
+    if (s.type === 'free') continue
     for (const i of s.intervals) {
       if (i.type !== 'work' || !i.completed) continue
       const key = (i.exerciseId ?? i.title ?? '').toLowerCase().trim()
