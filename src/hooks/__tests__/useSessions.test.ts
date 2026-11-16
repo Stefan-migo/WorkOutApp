@@ -188,4 +188,34 @@ describe('useSessions', () => {
 
     await waitFor(() => expect(result.current.error).toBe('Insert failed'))
   })
+
+  it('saves a free session without a template and reloads its name and actual reps', async () => {
+    const intervals: Session['intervals'] = [{
+      intervalId: 'push-ups', title: 'Push-ups', type: 'work',
+      plannedDuration: 0, actualDuration: 0, actualReps: 25, completed: true,
+    }]
+    const insert = mockQueryBuilder({ data: null, error: null })
+    mockFrom
+      .mockReturnValueOnce(mockQueryBuilder({ data: [], error: null }))
+      .mockReturnValueOnce(insert)
+      .mockReturnValueOnce(mockQueryBuilder({
+        data: [{ ...mockRow, id: 'free-1', type: 'free', title: 'At the park', workout_id: null, intervals }],
+        error: null,
+      }))
+    const { result } = renderHook(() => useSessions())
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+    const saved = await result.current.addSession({
+      id: 'free-1', type: 'free', title: 'At the park',
+      startedAt: expectedSession.startedAt, intervals,
+    })
+
+    expect(saved).toBe(true)
+    expect(insert.upsert).toHaveBeenCalledWith(expect.objectContaining({
+      type: 'free', title: 'At the park', workout_id: null, sequence_id: null, intervals,
+    }), { onConflict: 'id', ignoreDuplicates: true })
+    await waitFor(() => expect(result.current.sessions[0]).toMatchObject({
+      type: 'free', title: 'At the park', intervals,
+    }))
+  })
 })

@@ -9,7 +9,7 @@ const mobileItems = [
   { href: '/', label: 'Today', icon: 'today' },
   { href: '/calendar', label: 'Calendar', icon: 'calendar_month' },
   { href: '/workouts', label: 'Workouts', icon: 'fitness_center' },
-  { href: '/history', label: 'History', icon: 'history' },
+  { href: '/history', label: 'Log', icon: 'history' },
 ]
 
 const extraItems = [

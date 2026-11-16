@@ -95,7 +95,8 @@ export interface CompletedInterval {
 
 export interface Session {
   id: string
-  type: 'workout' | 'sequence'
+  type: 'workout' | 'sequence' | 'free'
+  title?: string
   sequenceId?: string
   workoutId?: string
   startedAt: number
