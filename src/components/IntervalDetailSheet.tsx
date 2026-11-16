@@ -24,6 +24,8 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
   const [imageUrl, setImageUrl] = useState(interval.imageUrl ?? '')
   const [pickerOpen, setPickerOpen] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
+  const hasLocalImage = imageUrl.startsWith('local-image:') || imageUrl.startsWith('blob:')
   const [reps, setReps] = useState(interval.reps ?? 0)
   const [weight, setWeight] = useState(interval.weight ?? 0)
   const [editMode, setEditMode] = useState<WorkoutMode>(interval.mode ?? 'timed')
@@ -84,9 +86,26 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
         onClose={handleDialogClose}
       >
         <div className="interval-sheet-content">
-          <div className="interval-sheet-heading">
-            <span className="text-xs text-muted font-medium uppercase tracking-wider">{interval.type}</span>
-            <h2 id={headingId} className="text-xl font-semibold">Edit interval</h2>
+          <div className="interval-sheet-heading flex items-center justify-between gap-3">
+            <div>
+              <span className="text-xs text-muted font-medium uppercase tracking-wider">{interval.type}</span>
+              <h2 id={headingId} className="text-xl font-semibold">Edit interval</h2>
+            </div>
+            <button
+              type="button"
+              ref={(button) => { button?.setAttribute('autofocus', '') }}
+              onPointerDown={(event) => event.preventDefault()}
+              onClick={(event) => {
+                const field = document.activeElement
+                if (field instanceof HTMLElement && field !== event.currentTarget && dialogRef.current?.contains(field)) {
+                  field.blur()
+                }
+                event.currentTarget.focus({ preventScroll: true })
+              }}
+              className="min-h-11 shrink-0 rounded-lg px-2 text-xs text-accent focus-visible:focus-ring"
+            >
+              Hide keyboard
+            </button>
           </div>
 
           {/* Title */}
@@ -229,9 +248,9 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
             <div className="flex gap-2">
               <input
                 type="text"
-                value={imageUrl}
+                value={hasLocalImage ? '' : imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="https://example.com/image.jpg"
+                placeholder={hasLocalImage ? "Local image attached" : "https://example.com/image.jpg"}
                 className="min-w-0 flex-1 bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-base border border-border focus:outline-none focus:ring-1 focus:ring-accent"
               />
               <button
@@ -253,22 +272,30 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
                 const f = e.target.files?.[0]
                 if (f && onImageUpload) {
                   setUploading(true)
+                  setUploadError('')
                   try {
                     const url = await onImageUpload(f)
                     if (url) setImageUrl(url)
-                  } catch { /* silent */ }
+                  } catch (error) {
+                    setUploadError(error instanceof Error ? error.message : 'Could not attach image.')
+                  }
                   finally { setUploading(false) }
                 }
                 e.target.value = ''
               }}
             />
           </label>
+          {hasLocalImage && (
+            <button type="button" className="self-start text-sm text-accent" onClick={() => setImageUrl('')}>
+              Remove local image
+            </button>
+          )}
+          {uploadError && <p role="alert" className="text-sm text-fg-2">{uploadError}</p>}
 
           {/* Actions */}
           <div className="interval-sheet-actions">
             <button
               onClick={handleCancel}
-              autoFocus
               className="flex-1 py-3 bg-surface text-fg-2 rounded-lg font-medium hover:bg-surface-warm transition-colors text-sm"
             >
               Cancel

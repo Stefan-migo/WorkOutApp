@@ -43,6 +43,8 @@ interface PlayScreenProps {
   onComplete?: () => void
   // full-bleed background
   imageUrl?: string
+  nextImageUrl?: string
+  nextImageLabel?: string
   embedded?: boolean
 }
 
@@ -72,11 +74,13 @@ export function PlayScreen({
   weight,
   onComplete,
   imageUrl,
+  nextImageUrl,
+  nextImageLabel,
   embedded = false,
 }: PlayScreenProps) {
   return (
     <div className={`relative flex w-full flex-1 flex-col overflow-hidden ${embedded ? '' : 'min-h-dvh'}`}>
-      {imageUrl && (
+      {imageUrl && !embedded && (
         <>
           {/* Exercise image — CSS background, decorative only */}
           <div
@@ -105,6 +109,15 @@ export function PlayScreen({
 
         {/* Center — timer or reps surface */}
         <div className="flex w-full flex-1 flex-col items-center justify-center gap-5 md:gap-32">
+          {embedded && imageUrl && (
+            <img key={imageUrl} src={imageUrl} alt={exerciseName ?? label} className="h-[min(24dvh,14rem)] max-w-full rounded-lg object-contain" />
+          )}
+          {nextImageUrl && (
+            <figure className="flex flex-col items-center gap-1">
+              <img key={nextImageUrl} src={nextImageUrl} alt={nextImageLabel ?? 'Next exercise'} className="h-[min(20dvh,12rem)] max-w-full rounded-lg object-contain" />
+              <figcaption className="text-center text-data-sm text-timer-muted">Up next: {nextImageLabel}</figcaption>
+            </figure>
+          )}
           {isRepsMode ? (
             <>
               <RepCounter

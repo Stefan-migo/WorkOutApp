@@ -77,6 +77,28 @@ vi.mock('@/hooks/useFavorites', () => ({
 afterEach(() => {
   cleanup()
   vi.clearAllMocks()
+  vi.unstubAllGlobals()
+})
+
+it('hides open-source exercises across visits without clearing favorites', async () => {
+  const ExercisesPage = (await import('../page')).default
+  const storage = new Map<string, string>()
+  vi.stubGlobal('localStorage', {
+    getItem: (key: string) => storage.get(key) ?? null,
+    setItem: (key: string, value: string) => storage.set(key, value),
+  })
+  const first = render(<ExercisesPage />)
+  fireEvent.click(screen.getByRole('switch', { name: 'Show open-source exercises' }))
+  expect(screen.queryByText('Push Up')).not.toBeInTheDocument()
+  expect(screen.getByText('Squat')).toBeInTheDocument()
+  expect(mockClearOrphans).toHaveBeenCalledWith(['ex1', 'ex2'])
+  first.unmount()
+
+  render(<ExercisesPage />)
+  const toggle = screen.getByRole('switch', { name: 'Show open-source exercises' })
+  expect(toggle).not.toBeChecked()
+  fireEvent.click(toggle)
+  expect(screen.getByText('Push Up')).toBeInTheDocument()
 })
 
 describe('ExercisesPage card click navigates', () => {

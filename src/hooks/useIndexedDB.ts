@@ -9,7 +9,7 @@ export interface ImageEntry {
 
 export interface UseIndexedDBReturn {
   getImages(exerciseId: string): Promise<ImageEntry[]>
-  saveImage(exerciseId: string, file: File): Promise<string>
+  saveImage(exerciseId: string, file: File, format?: 'reference'): Promise<string>
   deleteImage(exerciseId: string, blobId: string): Promise<void>
   getUsage(): Promise<number>
 }
@@ -114,26 +114,15 @@ export function useIndexedDB(): UseIndexedDBReturn {
         const store = tx.objectStore(STORE_NAME)
 
         const allRecords = await new Promise<any[]>((resolve, reject) => {
-          const result: any[] = []
-          const req = store.openCursor()
-          req.onsuccess = () => {
-            const cursor = req.result
-            if (cursor) {
-              if (cursor.value.exerciseId === exerciseId) {
-                result.push(cursor.value)
-              }
-              cursor.continue()
-            } else {
-              resolve(result)
-            }
-          }
+          const req = store.index('exerciseId').getAll(exerciseId)
+          req.onsuccess = () => resolve(req.result)
           req.onerror = () => reject(req.error)
         })
 
-        return allRecords.map((record) => {
+        return allRecords.sort((a, b) => a.createdAt - b.createdAt).map((record) => {
           const blob = bufferToBlob(record.blobData, record.blobType)
-          const blobUrl = URL.createObjectURL(blob)
           const blobId = (record.id as string).split('::')[1] ?? record.id
+          const blobUrl = blobMapRef.current.get(blobId) ?? URL.createObjectURL(blob)
           trackBlobUrl(blobId, blobUrl)
           return { blobUrl, blobId }
         })
@@ -145,7 +134,7 @@ export function useIndexedDB(): UseIndexedDBReturn {
   )
 
   const saveImage = useCallback(
-    async (exerciseId: string, file: File): Promise<string> => {
+    async (exerciseId: string, file: File, format?: 'reference'): Promise<string> => {
       const db = await ensureDB()
       if (!db) throw new Error('IndexedDB is not available')
 
@@ -196,6 +185,8 @@ export function useIndexedDB(): UseIndexedDBReturn {
         writeTx.oncomplete = () => resolve()
         writeTx.onerror = () => reject(writeTx.error)
       })
+
+      if (format === 'reference') return `local-image:${id}`
 
       const blob = bufferToBlob(blobData, file.type)
       const blobUrl = URL.createObjectURL(blob)

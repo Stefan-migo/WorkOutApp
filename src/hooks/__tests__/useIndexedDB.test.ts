@@ -34,6 +34,18 @@ describe('useIndexedDB', () => {
     expect(images[0]!.blobUrl).toMatch(/^blob:/)
   })
 
+  it('resolves an interval GIF reference after the uploader unmounts', async () => {
+    const id = nextId()
+    const uploader = renderHook(() => useIndexedDB())
+    const ref = await uploader.result.current.saveImage(id, createMockFile(128, 'exercise.gif', 'image/gif'), 'reference')
+    uploader.unmount()
+
+    const reader = renderHook(() => useIndexedDB())
+    const [image] = await reader.result.current.getImages(id)
+    expect(ref).toBe(`local-image:${id}::${image!.blobId}`)
+    expect(image!.blobUrl).toMatch(/^blob:/)
+  })
+
   it('retrieves images only for the requested exercise', async () => {
     const ex1 = nextId()
     const ex2 = nextId()

@@ -11,6 +11,7 @@ import { useIntervalNotification } from '@/hooks/useIntervalNotification'
 import { PlayHeader } from '@/components/PlayHeader'
 import { RepCompleteDialog } from '@/components/RepCompleteDialog'
 import { PlayScreen } from '@/components/blocks/PlayScreen'
+import { useIntervalImage } from '@/hooks/useIntervalImage'
 import { useExercises } from '@/hooks/useExercises'
 import { flattenWorkout, getEffectiveMode } from '@/lib/interval-engine'
 import { formatDuration, formatTime } from '@/lib/format'
@@ -46,7 +47,6 @@ export default function PlayWorkoutPage() {
   const total = flat.length
 
   const { exercises, getExerciseImages } = useExercises()
-  const [idbImageUrls, setIdbImageUrls] = useState<string[]>([])
   const timer = useTimer(interval?.duration ?? 0, () => {
     beep({ volume: 0.5, duration: 0.5, pitch: 1000 }) // louder transition
     notify(workout?.title ?? 'Workout', currentIdx + 1, total)
@@ -210,16 +210,13 @@ export default function PlayWorkoutPage() {
   const exercise = interval?.exerciseId
     ? exercises.find((e) => e.id === interval.exerciseId)
     : undefined
-  // ponytail: fetch IDB images for the current exercise
-  useEffect(() => {
-    if (exercise?.id) {
-      getExerciseImages(exercise.id).then((entries) => {
-        setIdbImageUrls(entries.map((e) => e.blobUrl))
-      }).catch(() => setIdbImageUrls([]))
-    } else {
-      setIdbImageUrls([])
-    }
-  }, [exercise?.id, getExerciseImages])
+  const nextInterval = flat[currentIdx + 1]
+  const upcomingWork = interval?.type !== 'work'
+    ? flat.slice(currentIdx + 1).find((item) => item.type === 'work')
+    : undefined
+  const upcomingExercise = exercises.find((item) => item.id === upcomingWork?.exerciseId)
+  const imageUrl = useIntervalImage(interval, exercise?.images?.[0], getExerciseImages)
+  const nextImageUrl = useIntervalImage(upcomingWork, upcomingExercise?.images?.[0], getExerciseImages)
 
   if (!workout) {
     return (
@@ -242,7 +239,6 @@ export default function PlayWorkoutPage() {
   // ponytail: show addTime buttons on rest intervals when workout is reps mode
   const isRestInRepsWorkout = !!(interval && workout?.mode === 'reps' && (interval.type === 'rest' || interval.type === 'rest_between_cycles'))
 
-  const nextInterval = flat[currentIdx + 1]
   // Work count up to current interval (1-based, for display naming)
   const workCount = flat.slice(0, currentIdx + 1).filter((i) => i.type === 'work').length
   const nextLabel = nextInterval
@@ -294,7 +290,9 @@ export default function PlayWorkoutPage() {
             reps={interval?.reps ?? 0}
             weight={interval?.weight}
             onComplete={() => setShowRepDialog(true)}
-            imageUrl={exercise?.images?.[0] ?? idbImageUrls[0] ?? interval?.imageUrl}
+            imageUrl={imageUrl}
+            nextImageUrl={nextImageUrl}
+            nextImageLabel={upcomingWork ? getIntervalName(upcomingWork, workCount + 1) : undefined}
           />
           {showRepDialog && interval && (
             <RepCompleteDialog
