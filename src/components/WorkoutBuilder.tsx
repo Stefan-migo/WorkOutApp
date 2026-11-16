@@ -1,7 +1,8 @@
 'use client'
 
 import { PageHeading } from '@/components/ui/PageHeading'
-import { useState, useEffect, useId } from 'react'
+import { useState, useEffect, useId, type PointerEvent } from 'react'
+import { createPortal } from 'react-dom'
 import { SEGMENT_BG, SEGMENT_BORDER, SEGMENT_TEXT, TYPE_ICONS } from '@/lib/segment-styles'
 import type { Interval, CycleTemplate, IntervalType, WorkoutMode } from '@/types/workout'
 
@@ -137,6 +138,8 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
   const [title, setTitle] = useState('')
   const [items, setItems] = useState<BuilderItem[]>([])
   const [dragIndex, setDragIndex] = useState<number | null>(null)
+  const [touchDrag, setTouchDrag] = useState<{ index: number; x: number; y: number; target: number | null } | null>(null)
+  const floatingBlock = touchDrag ? items[touchDrag.index] : undefined
 
   // ponytail: wheel scroll during HTML5 DnD — browser blocks scroll, so we handle it manually
   useEffect(() => {
@@ -178,7 +181,33 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
       return next
     })
   }
-  function handleDragEnd() { setDragIndex(null) }
+  function handleDragEnd() {
+    setDragIndex(null)
+    setTouchDrag(null)
+  }
+
+  function touchTarget(event: PointerEvent<HTMLButtonElement>, from: number) {
+    const hit = document.elementFromPoint(event.clientX, event.clientY)
+    const block = hit?.closest<HTMLElement>('[data-workout-block]')
+    const list = event.currentTarget.closest('[role="list"]')
+    if (block && list?.contains(block)) return Number(block.dataset.workoutBlock)
+    if (!list || hit !== list) return null
+
+    // The space between two cards represents the same drop slot as the marker.
+    const rows = Array.from(list.children)
+    const next = rows.findIndex((row) => row.getBoundingClientRect().top > event.clientY)
+    return next >= 0 ? (from < next ? next - 1 : next) : null
+  }
+
+  function updateTouchDrag(event: PointerEvent<HTMLButtonElement>, index: number) {
+    const { clientX, clientY } = event
+    setTouchDrag({
+      index,
+      x: Math.max(12, Math.min(clientX + 12, window.innerWidth - Math.min(240, window.innerWidth - 24) - 12)),
+      y: clientY > 80 ? clientY - 64 : clientY + 20,
+      target: touchTarget(event, index),
+    })
+  }
 
   function addItem(type: IntervalType, customTitle?: string, customDuration?: number) {
     setItems((prev) => [...prev, createInterval(type, customTitle, customDuration)])
@@ -304,9 +333,16 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
               data-workout-block={i}
               role="listitem"
               className={`glass-card rounded-xl flex items-center group transition-all duration-200 pl-0 hover:shadow-md relative overflow-visible ${
-                dragIndex === i ? 'opacity-40 ring-2 ring-accent' : ''
+                dragIndex === i || touchDrag?.index === i ? 'opacity-40 ring-2 ring-accent' : ''
               } ${!isCycle(item) ? `border-l-4 ${SEGMENT_BORDER[item.type]}` : 'border-l-4 border-l-accent/60'}`}
             >
+              {touchDrag?.target === i && touchDrag.index !== i && (
+                <span
+                  aria-hidden="true"
+                  data-drop-indicator
+                  className={`pointer-events-none absolute inset-x-0 z-10 h-1 rounded-full bg-accent ${touchDrag.index < i ? '-bottom-1.5' : '-top-1.5'}`}
+                />
+              )}
               {/* Drag handle */}
               <button
                 type="button"
@@ -318,18 +354,18 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                   if (event.pointerType === 'mouse' || !event.isPrimary) return
                   event.preventDefault()
                   event.currentTarget.setPointerCapture(event.pointerId)
-                  handleDragStart(i)
+                  updateTouchDrag(event, i)
                 }}
                 onPointerMove={(event) => {
                   if (!event.currentTarget.hasPointerCapture(event.pointerId)) return
                   if (event.clientY < 64) window.scrollBy(0, -12)
                   else if (event.clientY > window.innerHeight - 96) window.scrollBy(0, 12)
+                  updateTouchDrag(event, i)
                 }}
                 onPointerUp={(event) => {
                   if (!event.currentTarget.hasPointerCapture(event.pointerId)) return
-                  const row = document.elementFromPoint(event.clientX, event.clientY)?.closest<HTMLElement>('[data-workout-block]')
-                  const target = row?.dataset.workoutBlock
-                  if (target !== undefined) moveBlock(i, Number(target))
+                  const target = touchTarget(event, i)
+                  if (target !== null) moveBlock(i, target)
                   handleDragEnd()
                 }}
                 onPointerCancel={handleDragEnd}
@@ -695,6 +731,21 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
             </div>
           ))}
         </div>
+      )}
+
+      {touchDrag && floatingBlock && createPortal(
+        <div
+          aria-hidden="true"
+          data-floating-workout-block
+          className="pointer-events-none fixed z-[70] flex h-12 w-[min(240px,calc(100vw_-_24px))] select-none items-center gap-2 rounded-card border border-accent bg-surface px-3 text-sm font-semibold text-fg-2 shadow-fab"
+          style={{ left: touchDrag.x, top: touchDrag.y }}
+        >
+          <span className="material-symbols-outlined shrink-0 text-accent">
+            {isCycle(floatingBlock) ? 'repeat' : TYPE_ICONS[floatingBlock.type]}
+          </span>
+          <span className="min-w-0 truncate">{floatingBlock.title || (isCycle(floatingBlock) ? 'Cycle' : 'Interval')}</span>
+        </div>,
+        document.body,
       )}
 
       {/* Block palette */}
