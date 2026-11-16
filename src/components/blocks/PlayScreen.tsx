@@ -5,19 +5,14 @@ import { RepCounter } from '@/components/RepCounter'
 import type { IntervalType } from '@/types/workout'
 import type { TimerStatus } from '@/hooks/useTimer'
 
-// DD-3 (WB-3): strictly presentational — props in, callbacks out. No hooks,
-// no page logic, no 'use client'. TimerDisplay is never composed (WB-3d).
-// Full-bleed contract: the block owns the viewport (min-h-dvh). When
-// `imageUrl` is provided, two aria-hidden absolute layers render behind the
-// content — the exercise image (CSS background, exercises/page.tsx precedent)
-// and a bg-token scrim that fades the image into the app background. Content
-// is one centered column on all viewports: top context row (exercise name in
-// timed mode only — RepCounter owns it in reps mode — plus the Set counter),
-// centered timer/reps surface, and the total-progress row pinned at the
-// bottom. Timer-era components' internal text (timer-muted) is NOT AA on the
-// app background (3.82:1 < 4.5:1, verified slice A); this block's own labels
-// use text-fg-2/70 (slice A precedent) and ProgressBar's label prop is
-// omitted (out-of-scope internals — escalated).
+const PHASE_NAMES: Record<IntervalType, string> = {
+  prepare: 'Prepare',
+  work: 'Work',
+  rest: 'Rest',
+  rest_between_cycles: 'Recovery',
+  cooldown: 'Cool down',
+}
+
 interface PlayScreenProps {
   // TimerRing
   timeLeft: number
@@ -37,8 +32,10 @@ interface PlayScreenProps {
   // progress row + reps branch
   setIndex: number
   setCount: number
+  positionLabel?: string
   totalProgress: number
   progressPercent: number
+  progressLabel?: string
   isRepsMode: boolean
   exerciseName?: string
   reps?: number
@@ -46,6 +43,7 @@ interface PlayScreenProps {
   onComplete?: () => void
   // full-bleed background
   imageUrl?: string
+  embedded?: boolean
 }
 
 export function PlayScreen({
@@ -64,17 +62,20 @@ export function PlayScreen({
   showAddTime,
   setIndex,
   setCount,
+  positionLabel = 'Set',
   totalProgress,
   progressPercent,
+  progressLabel = 'Total progress',
   isRepsMode,
   exerciseName,
   reps,
   weight,
   onComplete,
   imageUrl,
+  embedded = false,
 }: PlayScreenProps) {
   return (
-    <div className="relative flex min-h-dvh w-full flex-col overflow-hidden">
+    <div className={`relative flex w-full flex-1 flex-col overflow-hidden ${embedded ? '' : 'min-h-dvh'}`}>
       {imageUrl && (
         <>
           {/* Exercise image — CSS background, decorative only */}
@@ -86,38 +87,42 @@ export function PlayScreen({
           {/* Scrim — fades the image into the app background (bg token only) */}
           <div
             aria-hidden="true"
-            className="absolute inset-0 bg-linear-to-b from-bg/40 via-bg/50 to-bg/95"
+            className="absolute inset-0 bg-linear-to-b from-timer-bg/70 via-timer-bg/80 to-timer-bg/95"
           />
         </>
       )}
 
-      <div className="relative z-10 flex min-h-dvh w-full max-w-2xl flex-col items-center mx-auto gap-12 py-24">
+      <div className="relative z-10 mx-auto flex w-full max-w-2xl flex-1 flex-col items-center gap-6 px-margin-mobile py-6 md:gap-32 md:py-32">
         {/* Top context row — Set counter always; name only in timed mode */}
         <div className="w-full flex items-center">
           {!isRepsMode && (
-            <h2 className="font-label-caps text-label-caps text-fg-2/70">{exerciseName ?? label}</h2>
+            <h2 className="min-w-0 break-words font-headline text-body-lg font-semibold text-fg-2">{exerciseName ?? label}</h2>
           )}
-          <span className="ml-auto font-label-caps text-label-caps text-fg-2/70">
-            Set {setIndex + 1} of {setCount}
+          <span className="ml-auto shrink-0 pl-4 font-mono text-data-sm text-timer-muted">
+            {positionLabel} {setIndex + 1} of {setCount}
           </span>
         </div>
 
         {/* Center — timer or reps surface */}
-        <div className="flex w-full flex-1 flex-col items-center justify-center gap-12">
+        <div className="flex w-full flex-1 flex-col items-center justify-center gap-5 md:gap-32">
           {isRepsMode ? (
-            <RepCounter
-              exerciseName={exerciseName ?? label}
-              reps={reps ?? 0}
-              weight={weight}
-              onComplete={onComplete ?? (() => {})}
-            />
+            <>
+              <RepCounter
+                exerciseName={exerciseName ?? label}
+                reps={reps ?? 0}
+                weight={weight}
+                onComplete={onComplete ?? (() => {})}
+              />
+              {nextLabel && <p className="text-center text-data-sm text-timer-muted">{nextLabel}</p>}
+            </>
           ) : (
             <>
               <TimerRing
+                mobileCompact
                 timeLeft={timeLeft}
                 duration={duration}
                 intervalType={intervalType}
-                label={label}
+                label={embedded ? PHASE_NAMES[intervalType] : label}
                 nextLabel={nextLabel}
               />
               <TimerControls
@@ -135,12 +140,9 @@ export function PlayScreen({
         </div>
 
         {/* Bottom progress */}
-        <div className="w-full">
-          <div className="flex justify-between items-center mb-8">
-            <span className="font-data-sm text-data-sm text-fg-2/70">Total Progress</span>
-            <span className="font-data-sm text-data-sm text-fg-2">{progressPercent}%</span>
-          </div>
-          <ProgressBar progress={totalProgress} dark />
+        <div className="relative w-full">
+          <span className="absolute right-0 top-0 font-mono text-data-sm text-timer-on">{progressPercent}%</span>
+          <ProgressBar progress={totalProgress} label={progressLabel} variant="plain" dark />
         </div>
       </div>
     </div>

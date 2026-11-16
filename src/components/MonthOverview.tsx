@@ -28,16 +28,16 @@ export function MonthOverview({
   })
 
   return (
-    <section className="glass-card rounded-lg p-16 flex flex-col gap-12" aria-label={`Month overview ${monthLabel}`}>
-      <h2 className="font-label-caps text-label-caps text-accent tracking-wider">
+    <section className="glass-card rounded-card p-16 flex flex-col gap-12" aria-label={`Month overview ${monthLabel}`}>
+      <h2 className="text-label-caps text-accent tracking-wider">
         {monthLabel}
       </h2>
-      <div className="grid grid-cols-[1.25rem_repeat(7,minmax(0,1fr))] gap-4 items-center">
+      <div className="grid grid-cols-[1.5rem_repeat(7,minmax(0,1fr))] items-center gap-1">
         <span /> {/* week-gutter spacer */}
         {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => (
           <span
             key={i}
-            className="text-center font-label-caps text-label-caps text-muted"
+            className="text-center text-label-caps text-muted"
           >
             {d}
           </span>
@@ -47,14 +47,14 @@ export function MonthOverview({
           const isSelectedWeek = monday === currentMonday
           const weekNum = isoWeekNumber(monday)
           return (
-            <div key={monday} className="col-span-8 grid grid-cols-subgrid gap-4">
+            <div key={monday} className="col-span-8 grid grid-cols-subgrid gap-1">
               <button
                 onClick={() => onSelectWeek(monday)}
                 aria-label={`Select week of ${monday}`}
-                className={`w-5 h-5 rounded text-[10px] font-data-sm font-bold transition-colors cursor-pointer ${
+                className={`h-8 w-6 rounded text-[11px] font-bold transition-colors focus-visible:focus-ring cursor-pointer ${
                   isSelectedWeek
                     ? 'bg-accent text-accent-on'
-                    : 'text-muted/60 hover:text-accent hover:bg-surface-warm'
+                    : 'text-muted hover:text-accent hover:bg-surface-warm'
                 }`}
               >
                 {weekNum}
@@ -66,20 +66,21 @@ export function MonthOverview({
                     key={cell.date}
                     onClick={() => onSelectDay(cell.date)}
                     aria-label={`${cell.date}${cell.hasAssignment ? ' (assigned)' : ''}`}
-                    className={`relative flex flex-col items-center justify-center rounded-lg py-4 transition-colors cursor-pointer ${
+                    aria-current={isToday ? 'date' : undefined}
+                    className={`relative flex min-h-9 flex-col items-center justify-center rounded-control py-1 text-sm transition-colors focus-visible:focus-ring cursor-pointer ${
                       cell.isCurrentMonth
                         ? 'text-fg-2 hover:bg-surface-warm'
-                        : 'text-muted/40 hover:bg-surface-warm/50'
+                        : 'text-muted hover:bg-surface-warm/50'
                     } ${
                       isToday
-                        ? 'ring-1 ring-accent font-data-sm font-bold'
-                        : 'font-data-sm'
+                        ? 'ring-1 ring-accent font-bold'
+                        : ''
                     }`}
                   >
                     <span>{cell.date.slice(8)}</span>
                     <span
                       aria-hidden
-                      className={`w-1.5 h-1.5 rounded-full ${
+                      className={`w-1.5 h-1.5 rounded-pill ${
                         cell.hasAssignment ? 'bg-accent' : 'bg-transparent'
                       }`}
                     />

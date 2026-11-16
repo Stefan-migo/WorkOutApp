@@ -46,7 +46,7 @@ function deriveTypeChips(
 export default function SessionDetailPage() {
   const router = useRouter()
   const params = useParams<{ id: string }>()
-  const { sessions, updateSession } = useSessions()
+  const { sessions, updateSession, isLoading } = useSessions()
   const { workouts } = useWorkoutContext()
   const { sequences } = useSequences()
 
@@ -77,6 +77,7 @@ export default function SessionDetailPage() {
     type === 'work' || type === 'rest' || type === 'rest_between_cycles'
 
   if (!session) {
+    if (isLoading) return <p role="status" className="text-muted">Loading session…</p>
     return (
       <div className="flex flex-col items-center justify-center flex-1 gap-16 p-margin-mobile md:p-margin-desktop text-center">
         <h1 className="font-headline-lg text-headline-lg text-fg-2">
@@ -113,9 +114,9 @@ export default function SessionDetailPage() {
   }
 
   return (
-    <div className="p-margin-mobile md:p-margin-desktop max-w-6xl mx-auto flex flex-col gap-24">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-24">
       {/* Header */}
-      <section className="flex flex-col gap-16 mb-16">
+      <section className="flex flex-col gap-16 border-b border-border-soft pb-16">
         <Link
           href="/history"
           className="font-body-md text-body-md text-muted hover:text-fg-2 transition-colors inline-flex items-center gap-xs w-fit"
@@ -133,10 +134,10 @@ export default function SessionDetailPage() {
               {formatDateFull(session.startedAt)}
             </span>
           </div>
-          <div className="flex items-center justify-between gap-16">
-            <h2 className="font-headline-lg text-headline-lg text-fg-2 tracking-tight font-bold">
+          <div className="flex flex-wrap items-center justify-between gap-16">
+            <h1 className="font-headline text-headline-lg text-fg-2 tracking-tight">
               {name}
-            </h2>
+            </h1>
             <button
               onClick={handleRepeat}
               className="shrink-0 px-24 py-16 bg-accent text-accent-on rounded-lg font-label-caps text-label-caps hover:bg-accent/90 transition-colors ambient-shadow flex items-center gap-8 focus-visible:focus-ring"

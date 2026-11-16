@@ -21,7 +21,7 @@ const EMPTY_FORM: ExerciseFormData = {
 }
 
 export default function ExercisesPage() {
-  const { exercises, saveExercise, saveExerciseImage, getExerciseImages } = useExercises()
+  const { exercises, saveExercise, saveExerciseImage, getExerciseImages, isLoading } = useExercises()
   const { favoriteIds, toggleFavorite, clearOrphans } = useFavorites()
   const router = useRouter()
   const [formOpen, setFormOpen] = useState(false)
@@ -104,6 +104,7 @@ export default function ExercisesPage() {
     <>
       <ExerciseLibrary
         exercises={exercises}
+        isLoading={isLoading}
         favoriteIds={favoriteIds}
         onToggleFavorite={toggleFavorite}
         onCreate={openCreate}

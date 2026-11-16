@@ -1,69 +1,44 @@
+import Link from 'next/link'
+
 interface MiniCalendarProps {
   monday: string
   todayIndex: number
   weekPlanDays: (unknown | null)[]
-  assignedDays: number
-  weekProgress: number
 }
 
-export default function MiniCalendar({
-  monday,
-  todayIndex,
-  weekPlanDays,
-  assignedDays,
-  weekProgress,
-}: MiniCalendarProps) {
+export default function MiniCalendar({ monday, todayIndex, weekPlanDays }: MiniCalendarProps) {
+  const assignedDays = weekPlanDays.filter((day) => day != null).length
+
   return (
-    <div className="md:col-span-4 rounded-xl glass-card p-24 flex flex-col justify-between min-h-[280px]">
-      <div className="flex items-center justify-between mb-16">
-        <h4 className="font-headline text-headline-md text-accent">This Week</h4>
+    <section className="glass-card flex flex-col justify-between gap-16 rounded-dialog p-24">
+      <div className="flex flex-wrap items-center justify-between gap-8">
+        <h2 className="text-lg font-bold text-fg-2">This week</h2>
+        <Link href="/calendar" className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-accent hover:underline">
+          Calendar <span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_forward</span>
+        </Link>
       </div>
-      <div className="grid grid-cols-7 gap-xs mb-auto">
-        {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => (
-          <div key={i} className="text-center font-label text-label-caps text-muted mb-xs">
-            {d}
-          </div>
-        ))}
-        {Array.from({ length: 7 }, (_, i) => {
-          const d = new Date(monday)
-          d.setDate(d.getDate() + i)
-          const dayNum = d.getDate()
-          const isToday = i === todayIndex
-          const hasAssignment = weekPlanDays[i] !== null
+      <ol className="grid grid-cols-7 gap-xs text-center" aria-label="Weekly plan">
+        {Array.from({ length: 7 }, (_, index) => {
+          const date = new Date(monday + 'T00:00:00')
+          date.setDate(date.getDate() + index)
+          const planned = weekPlanDays[index] != null
+          const isToday = index === todayIndex
+
           return (
-            <div key={i} className="flex flex-col items-center gap-1 cursor-pointer">
-              {isToday ? (
-                <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
-                  <span className="font-mono text-data-sm text-accent-on font-bold">{dayNum}</span>
-                </div>
-              ) : (
-                <span className="font-mono text-data-sm text-muted">{dayNum}</span>
-              )}
-              <div className={`w-1.5 h-1.5 rounded-full ${hasAssignment ? 'bg-accent' : 'bg-transparent'}`} />
-            </div>
+            <li key={index} className="flex min-w-0 flex-col items-center gap-1" aria-current={isToday ? 'date' : undefined}>
+              <span className="sr-only">{date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}, {planned ? 'planned' : 'no session'}</span>
+              <span aria-hidden="true" className="text-xs text-muted">{date.toLocaleDateString('en-US', { weekday: 'narrow' })}</span>
+              <span aria-hidden="true" className={`grid aspect-square w-full max-w-9 place-items-center rounded-control text-sm font-semibold ${isToday ? 'bg-accent text-accent-on' : 'bg-surface-warm text-fg-2'}`}>
+                {date.getDate()}
+              </span>
+              <span aria-hidden="true" className={`h-1 w-1 rounded-full ${planned ? 'bg-accent' : 'bg-transparent'}`} />
+            </li>
           )
         })}
-      </div>
-      <div className="mt-16 pt-16 border-t border-border-soft flex justify-between items-center">
-        <div>
-          <p className="font-mono text-data-lg text-accent">{assignedDays} / 5</p>
-          <p className="font-label text-label-caps text-muted">DAYS PLANNED</p>
-        </div>
-        <div className="w-16 h-16 rounded-full border-4 border-border relative flex items-center justify-center">
-          <svg className="absolute inset-0 w-full h-full -rotate-90 text-accent" viewBox="0 0 36 36">
-            <path
-              className="stroke-current"
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-              fill="none"
-              strokeDasharray="100"
-              strokeDashoffset={100 - weekProgress}
-              strokeLinecap="round"
-              strokeWidth="4"
-            />
-          </svg>
-          <span className="font-mono text-data-sm text-accent">{weekProgress}%</span>
-        </div>
-      </div>
-    </div>
+      </ol>
+      <p className="border-t border-border-soft pt-16 text-sm text-muted">
+        <span className="font-semibold text-fg-2">{assignedDays}</span> {assignedDays === 1 ? 'day planned' : 'days planned'}
+      </p>
+    </section>
   )
 }

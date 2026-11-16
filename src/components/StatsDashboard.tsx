@@ -11,6 +11,8 @@ import type { Session } from '@/types/workout'
 import VolumeChart from '@/components/VolumeChart'
 import StrainGauge from '@/components/StrainGauge'
 import ConsistencyHeatmap from '@/components/ConsistencyHeatmap'
+import { Button, EmptyState } from '@/components/ui'
+import { PageHeading } from '@/components/ui/PageHeading'
 
 export { formatDuration, formatHours }
 
@@ -60,7 +62,7 @@ function buildHeatmap(sessions: Session[]): HeatmapCell[][] {
 }
 
 export default function StatsDashboard({ sessions: propSessions }: { sessions?: Session[] } = {}) {
-  const { sessions: lsSessions } = useSessions()
+  const { sessions: lsSessions, isLoading } = useSessions()
   const sessions = propSessions ?? lsSessions
   const stats = useStats(sessions)
 
@@ -87,48 +89,28 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
 
   if (sessions.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center flex-1 gap-24 p-margin-mobile md:p-margin-desktop text-center">
-        <span className="material-symbols-outlined text-[64px] text-muted">
-          monitoring
-        </span>
-        <h1 className="font-headline-lg text-headline-lg text-fg-2">
-          Performance Stats
-        </h1>
-        <p className="font-body-md text-body-md text-muted max-w-sm">
-          Complete your first workout to see stats
-        </p>
-        <Link
-          href="/workouts"
-          className="px-24 py-16 bg-accent text-accent-on rounded-lg font-label-caps text-label-caps hover:bg-accent/90 transition-colors ambient-shadow"
-        >
-          Browse Workouts
-        </Link>
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-24">
+        <PageHeading title="Performance Stats" />
+        {isLoading && propSessions == null ? <p role="status" className="text-muted">Loading statistics…</p> : (
+          <div className="glass-card rounded-xl px-16">
+            <EmptyState
+              title="No training data yet"
+              body="Complete your first workout to see your progress here."
+              action={<Link href="/workouts" className="inline-flex min-h-11 items-center rounded-control bg-accent px-16 font-semibold text-accent-on focus-visible:focus-ring">Browse workouts</Link>}
+            />
+          </div>
+        )}
       </div>
     )
   }
 
   return (
-    <div className="p-margin-mobile md:p-margin-desktop max-w-7xl mx-auto space-y-24">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 mb-24">
-        <div>
-          <h2 className="font-headline-lg text-headline-lg text-fg-2 mb-1">
-            Performance Stats
-          </h2>
-          <p className="font-body-lg text-body-lg text-muted">
-            Last 30 Days Overview
-          </p>
-        </div>
-        <div className="flex gap-8">
-          <button
-            onClick={exportAllData}
-            className="px-4 py-2 border border-border rounded font-label-caps text-label-caps text-fg-2 hover:bg-surface transition-colors focus-visible:focus-ring"
-          >
-            Export JSON
-          </button>
-        </div>
-      </div>
-
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-24">
+      <PageHeading
+        title="Performance Stats"
+        description="Review recent training and your personal records."
+        action={<Button variant="outline" onClick={exportAllData}>Export JSON</Button>}
+      />
       {/* Bento Grid */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-24">
         <VolumeChart recentVolume={recentVolume} maxVolume={maxVolume} formatHours={formatHours} />
@@ -154,8 +136,8 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
               ) : (
                 <ul className="space-y-8">
                   {strengthPRs.map((r) => (
-                    <li key={r.exercise} className="flex items-baseline justify-between gap-8">
-                      <span className="font-body-md text-body-md text-fg-2 truncate">{r.exercise}</span>
+                    <li key={r.exercise} className="flex flex-wrap items-baseline justify-between gap-8">
+                      <span className="font-body-md text-body-md text-fg-2">{r.exercise}</span>
                       <span className="font-data-sm text-data-sm text-accent whitespace-nowrap">
                         {strengthValue(r)}
                       </span>
@@ -175,8 +157,8 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
               ) : (
                 <ul className="space-y-8">
                   {cardioPRs.map((r) => (
-                    <li key={r.exercise} className="flex items-baseline justify-between gap-8">
-                      <span className="font-body-md text-body-md text-fg-2 truncate">{r.exercise}</span>
+                    <li key={r.exercise} className="flex flex-wrap items-baseline justify-between gap-8">
+                      <span className="font-body-md text-body-md text-fg-2">{r.exercise}</span>
                       <span className="font-data-sm text-data-sm text-accent whitespace-nowrap">
                         {formatDuration(r.bestCardioSeconds!)}
                       </span>

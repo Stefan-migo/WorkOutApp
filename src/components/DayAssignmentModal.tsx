@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useRef, useEffect, type FormEvent } from 'react'
+import { useState, useRef, useEffect, useId, type FormEvent } from 'react'
 import type { DayAssignment, Workout, Sequence } from '@/types/workout'
 import { formatDuration } from '@/lib/format'
+import { Button } from '@/components/ui/Button'
 
 export interface DayAssignmentModalProps {
   dayIndex: number
@@ -13,6 +14,8 @@ export interface DayAssignmentModalProps {
   onClear: (dayIndex: number) => void
   onClose: () => void
 }
+
+const DAY_LABELS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 // ponytail: native <dialog> — no modal lib, no portal, no focus-trap dep
 export default function DayAssignmentModal({
@@ -25,8 +28,9 @@ export default function DayAssignmentModal({
   onClose,
 }: DayAssignmentModalProps) {
   const ref = useRef<HTMLDialogElement>(null)
+  const id = useId()
   const [mode, setMode] = useState<'workout' | 'sequence'>(
-    currentAssignment?.workoutId ? 'workout' : 'sequence',
+    currentAssignment?.sequenceId && !currentAssignment.workoutId ? 'sequence' : 'workout',
   )
   const [selectedId, setSelectedId] = useState(
     currentAssignment?.workoutId ?? currentAssignment?.sequenceId ?? '',
@@ -61,15 +65,17 @@ export default function DayAssignmentModal({
     <dialog
       ref={ref}
       onClose={onClose}
-      className="rounded-xl bg-surface border border-border/50 text-fg-2 p-24 w-full max-w-md m-auto backdrop:bg-surface/80 max-h-[85vh] overflow-y-auto"
+      aria-labelledby={`${id}-title`}
+      className="m-auto max-h-[85dvh] w-[calc(100%_-_2rem)] max-w-md overflow-y-auto rounded-dialog border border-border bg-surface p-24 text-fg-2 backdrop:bg-fg/40"
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <h2 className="font-headline-md text-headline-md text-fg-2">
-          Assign Day {dayIndex + 1}
+        <h2 id={`${id}-title`} className="text-headline-md text-fg-2">
+          Assign {DAY_LABELS[dayIndex] ?? 'a session'}
         </h2>
 
         {/* Radio: Workout / Sequence */}
         <fieldset className="flex gap-4">
+          <legend className="sr-only">Session type</legend>
           <label className="flex items-center gap-2 cursor-pointer text-body-md text-sm">
             <input
               type="radio"
@@ -96,11 +102,12 @@ export default function DayAssignmentModal({
 
         {/* Search */}
         <input
-          type="text"
+          type="search"
+          aria-label={`Search ${mode}s`}
           placeholder={`Search ${mode}s\u2026`}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg bg-surface border border-border/50 text-body-md text-sm text-fg-2 focus:outline-none focus:ring-2 focus:ring-accent transition-all"
+          className="w-full px-3 py-2 rounded-card bg-surface border border-border/50 text-body-md text-sm text-fg-2 focus:outline-none focus:ring-2 focus:ring-accent transition-all"
         />
 
         {/* Items list */}
@@ -113,7 +120,7 @@ export default function DayAssignmentModal({
           {filtered.map((item) => (
             <label
               key={item.id}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
+              className={`flex items-center gap-3 px-3 py-2 rounded-card cursor-pointer transition-colors focus-within:focus-ring ${
                 selectedId === item.id
                   ? 'bg-accent/20 border border-accent'
                   : 'hover:bg-surface-warm border border-transparent'
@@ -149,42 +156,47 @@ export default function DayAssignmentModal({
 
         {/* Notes */}
         <div className="flex flex-col gap-1">
-          <label htmlFor="notes" className="font-label-caps text-label-caps text-muted">
+          <label htmlFor={`${id}-notes`} className="text-label-caps text-muted">
             Notes (optional)
           </label>
           <textarea
-            id="notes"
+            id={`${id}-notes`}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
-            className="w-full px-3 py-2 rounded-lg bg-surface border border-border/50 text-body-md text-sm text-fg-2 resize-none focus:outline-none focus:ring-2 focus:ring-accent transition-all"
+            className="w-full px-3 py-2 rounded-card bg-surface border border-border/50 text-body-md text-sm text-fg-2 resize-none focus:outline-none focus:ring-2 focus:ring-accent transition-all"
           />
         </div>
 
         {/* Actions */}
         <div className="flex justify-between gap-3">
-          <button
+          <Button
             type="button"
+            variant="danger"
+            size="md"
+            disabled={!currentAssignment}
             onClick={handleClear}
-            className="px-4 py-2 rounded-lg text-sm bg-danger/15 text-danger font-label-caps text-label-caps hover:bg-danger hover:text-accent-on transition-colors"
           >
             Clear
-          </button>
+          </Button>
           <div className="flex gap-2">
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg text-sm bg-surface text-fg-2 font-label-caps text-label-caps hover:bg-surface-warm transition-colors"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
+              variant="primary"
+              size="sm"
+              elevated
               disabled={!selectedId}
-              className="px-4 py-2 rounded-lg text-sm bg-accent text-accent-on font-label-caps text-label-caps hover:bg-accent/90 disabled:opacity-40 transition-colors ambient-shadow"
             >
               Assign
-            </button>
+            </Button>
           </div>
         </div>
       </form>

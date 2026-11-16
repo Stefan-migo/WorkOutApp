@@ -60,6 +60,7 @@ function FilterSelect({
 
 export interface ExerciseLibraryProps {
   exercises: Exercise[]
+  isLoading?: boolean
   favoriteIds: string[]
   onToggleFavorite: (id: string) => void
   onCreate: () => void
@@ -71,6 +72,7 @@ export interface ExerciseLibraryProps {
 
 export function ExerciseLibrary({
   exercises,
+  isLoading,
   favoriteIds,
   onToggleFavorite,
   onCreate,
@@ -155,22 +157,19 @@ export function ExerciseLibrary({
   }
 
   return (
-    <div className="max-w-[1440px] mx-auto w-full p-margin-mobile md:p-margin-desktop flex flex-col gap-16 md:gap-24 pb-32">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-16 md:gap-24">
       {/* Editorial header — not sticky, gives the page breathing room */}
-      <header className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+      <header className="flex flex-wrap items-end justify-between gap-16 border-b border-border-soft pb-16">
         <div className="flex flex-col gap-2">
-          <p className="font-label text-label-caps text-muted">Library</p>
           <h1 className="font-headline text-headline-lg text-fg">
             Exercises <span className="text-accent">({filtered.length})</span>
           </h1>
         </div>
-        <Button size="md" onClick={onCreate} className="self-start md:self-auto">
-          + New Exercise
-        </Button>
+        {!hasNoExercises && <Button onClick={onCreate}>New exercise</Button>}
       </header>
 
       {/* Sticky toolbar: search + category chips + filters toggle */}
-      <div className="sticky top-0 z-30 -mx-margin-mobile md:-mx-margin-desktop px-margin-mobile md:px-margin-desktop py-8 bg-bg/95 backdrop-blur flex flex-col gap-8 border-b border-border-soft">
+      {!hasNoExercises && <div className="sticky top-0 z-30 flex flex-col gap-8 border-b border-border-soft bg-bg/95 py-8 backdrop-blur">
         <div className="flex items-center gap-8">
           <div className="flex-1 min-w-0">
             <SearchInput
@@ -257,20 +256,26 @@ export function ExerciseLibrary({
             )
           })}
         </div>
-      </div>
+      </div>}
 
       {/* Empty states */}
-      {hasNoExercises && (
+      {hasNoExercises && (isLoading ? <p role="status" className="text-muted">Loading exercises…</p> : (
         <EmptyState
           title="No exercises yet"
           body="Create your first one!"
           action={<Button onClick={onCreate}>Create Exercise</Button>}
         />
-      )}
+      ))}
 
       {hasNoResults && !hasNoExercises && (
         <EmptyState
           title={isFavoritesEmpty ? 'No favorites yet — star exercises to add them' : 'No exercises match your filters.'}
+          action={<Button variant="outline" onClick={() => {
+            clearFilters()
+            setSearch('')
+            setCategoryFilter(null)
+            setFavoritesFilter(false)
+          }}>Show all exercises</Button>}
         />
       )}
 

@@ -5,16 +5,20 @@ import { useWorkoutContext } from '@/context/WorkoutContext'
 import { SEGMENT_BG, SEGMENT_BORDER, SEGMENT_TEXT, TYPE_ICONS } from '@/lib/segment-styles'
 import { formatDuration } from '@/lib/format'
 import { getIntervalName } from '@/lib/interval-display'
+import { getEffectiveMode } from '@/lib/interval-engine'
 import { useExercises } from '@/hooks/useExercises'
+import { Button } from '@/components/ui'
+import { PageHeading } from '@/components/ui/PageHeading'
 
 export default function PreviewWorkoutPage() {
-  const { workouts } = useWorkoutContext()
+  const { workouts, isLoading } = useWorkoutContext()
   const { exercises } = useExercises()
   const router = useRouter()
   const params = useParams<{ id: string }>()
   const workout = workouts.find((w) => w.id === params.id)
 
   if (!workout) {
+    if (isLoading) return <p role="status" className="text-muted">Loading workout…</p>
     return (
       <div className="flex flex-col items-center justify-center flex-1 gap-4 p-32 text-center">
         <h1 className="text-2xl font-bold text-fg-2">Workout not found</h1>
@@ -23,28 +27,23 @@ export default function PreviewWorkoutPage() {
     )
   }
 
+  const hasRepIntervals = workout.intervals.some((interval) =>
+    interval.type === 'work' && getEffectiveMode(workout, interval) === 'reps',
+  )
   const total = workout.intervals.reduce((s, i) => s + i.duration, 0)
 
   return (
-    <div className="max-w-2xl mx-auto w-full p-margin-mobile md:p-margin-desktop flex flex-col gap-6">
-      {/* Header */}
-      <div className="glass-card rounded-xl p-16 flex flex-col md:flex-row justify-between items-start md:items-end gap-12">
-        <div>
-          <h1 className="font-headline text-headline-lg text-fg-2 font-bold">{workout.title}</h1>
-          {workout.description && (
-            <p className="font-body-md text-body-md text-muted mt-4">{workout.description}</p>
-          )}
-        </div>
-        <div className="text-right">
-          <span className="block font-label-caps text-label-caps text-muted uppercase tracking-wider">Duration</span>
-          <span className="font-mono text-display-timer-mobile text-accent tracking-tighter">{formatDuration(total)}</span>
-        </div>
-      </div>
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-24">
+      <PageHeading
+        title={workout.title}
+        description={workout.description}
+        action={<Button onClick={() => router.push(`/workouts/${workout.id}/play`)}>Start workout</Button>}
+      />
 
       {/* Intervals list (read-only) */}
       <div className="flex flex-col gap-8">
         <span className="font-label-caps text-label-caps uppercase text-muted tracking-wider px-4">
-          {workout.intervals.length} interval{workout.intervals.length !== 1 && 's'}
+          {workout.intervals.length} interval{workout.intervals.length !== 1 && 's'} · {hasRepIntervals ? 'Includes repetitions' : formatDuration(total)}
         </span>
         {(() => {
           let workCount = 0
@@ -61,7 +60,7 @@ export default function PreviewWorkoutPage() {
                 <div className={`p-8 mx-8 ${SEGMENT_BG[interval.type]} ${SEGMENT_TEXT[interval.type]} rounded-md flex items-center justify-center`}>
                   <span className="material-symbols-outlined text-[20px]">{TYPE_ICONS[interval.type]}</span>
                 </div>
-                <div className="flex-1 py-md">
+                <div className="min-w-0 flex-1 py-8">
                   <span className="font-body-md font-semibold text-fg-2">
                     {getIntervalName(interval, workCount, exercise)}
                   </span>
@@ -69,8 +68,10 @@ export default function PreviewWorkoutPage() {
                     <p className="text-[11px] text-muted font-body-md mt-2">{interval.description}</p>
                   )}
                 </div>
-                <div className="px-16 font-data-lg text-data-lg text-accent font-bold tracking-tight font-mono">
-                  {formatDuration(interval.duration)}
+                <div className="shrink-0 px-16 font-mono text-data-sm text-accent">
+                  {interval.type === 'work' && getEffectiveMode(workout, interval) === 'reps'
+                    ? `${interval.reps ?? 0} reps`
+                    : formatDuration(interval.duration)}
                 </div>
               </div>
             )

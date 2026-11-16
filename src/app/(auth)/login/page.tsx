@@ -8,7 +8,7 @@ import { AuthCard } from '@/components/blocks/AuthCard'
 // ponytail: useSearchParams needs a Suspense boundary for static prerender (Next 16)
 export default function LoginPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<p role="status" className="p-24 text-center text-muted">Loading sign in…</p>}>
       <LoginForm />
     </Suspense>
   )
@@ -22,32 +22,31 @@ function LoginForm() {
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirect') ?? '/'
 
-  const run = async (fn: () => Promise<{ error: string | null }>) => {
+  const run = async <T extends { error: string | null },>(fn: () => Promise<T>) => {
     setError(null)
     setLoading(true)
-    const { error } = await fn()
-    setLoading(false)
-    if (error) setError(error)
+    try {
+      const result = await fn()
+      if (result.error) setError(result.error)
+      return result
+    } catch {
+      const error = 'Something went wrong. Please try again.'
+      setError(error)
+      return { error, requiresConfirmation: false }
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <AuthCard
       onSignIn={async (email, password) => {
-        const result = await signIn(email, password)
-        await run(() => Promise.resolve(result))
+        const result = await run(() => signIn(email, password))
         if (!result.error) router.push(redirectTo)
         return result
       }}
-      onSignUp={async (email, password) => {
-        const result = await signUp(email, password)
-        await run(() => Promise.resolve(result))
-        return result
-      }}
-      onForgot={async email => {
-        const result = await resetPassword(email)
-        await run(() => Promise.resolve(result))
-        return result
-      }}
+      onSignUp={(email, password) => run(() => signUp(email, password))}
+      onForgot={(email) => run(() => resetPassword(email))}
       loading={loading}
       error={error}
     />

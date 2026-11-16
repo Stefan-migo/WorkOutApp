@@ -81,7 +81,7 @@ describe('StatsDashboard', () => {
     it('shows empty message and link to /workouts when no sessions', () => {
       render(<StatsDashboard sessions={[]} />)
 
-      expect(screen.getByText('Complete your first workout to see stats')).toBeInTheDocument()
+      expect(screen.getByText('Complete your first workout to see your progress here.')).toBeInTheDocument()
       const link = screen.getByRole('link', { name: /browse workouts/i })
       expect(link).toHaveAttribute('href', '/workouts')
     })
@@ -107,7 +107,7 @@ describe('StatsDashboard', () => {
       )
 
       expect(screen.getByText('Performance Stats')).toBeInTheDocument()
-      expect(screen.getByText('Last 30 Days Overview')).toBeInTheDocument()
+      expect(screen.getByText('Review recent training and your personal records.')).toBeInTheDocument()
     })
 
     it('shows Export CSV button', () => {

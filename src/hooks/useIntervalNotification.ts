@@ -18,7 +18,7 @@ export function useIntervalNotification() {
 
       // NE-2: only dispatch when tab is hidden
       if (document.hidden) {
-        const n = new Notification(`WorkOutApp - ${workoutName}`, {
+        const n = new Notification(`Baronda - ${workoutName}`, {
           body: `Interval ${currentInterval} of ${totalIntervals}`,
         })
         // NE-4: click focuses tab

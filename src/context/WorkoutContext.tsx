@@ -6,6 +6,7 @@ import type { Workout } from '@/types/workout'
 
 interface WorkoutContextValue {
   workouts: Workout[]
+  isLoading?: boolean
   getWorkout: (id: string) => Promise<Workout | undefined>
   saveWorkout: (workout: Workout) => Promise<void>
   deleteWorkout: (id: string) => Promise<void>
@@ -14,10 +15,10 @@ interface WorkoutContextValue {
 const WorkoutContext = createContext<WorkoutContextValue | null>(null)
 
 export function WorkoutProvider({ children }: { children: ReactNode }) {
-  const { workouts, getWorkout, saveWorkout, deleteWorkout } = useWorkouts()
+  const { workouts, getWorkout, saveWorkout, deleteWorkout, isLoading } = useWorkouts()
 
   return (
-    <WorkoutContext.Provider value={{ workouts, getWorkout, saveWorkout, deleteWorkout }}>
+    <WorkoutContext.Provider value={{ workouts, getWorkout, saveWorkout, deleteWorkout, isLoading }}>
       {children}
     </WorkoutContext.Provider>
   )

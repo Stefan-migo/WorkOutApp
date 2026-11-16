@@ -1,136 +1,101 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 
-const navItems = [
-  { href: '/', label: 'Dashboard', icon: 'dashboard' },
+const mobileItems = [
+  { href: '/', label: 'Today', icon: 'today' },
+  { href: '/calendar', label: 'Calendar', icon: 'calendar_month' },
   { href: '/workouts', label: 'Workouts', icon: 'fitness_center' },
-  { href: '/sequences', label: 'Sequences', icon: 'reorder' },
-  { href: '/exercises', label: 'Exercises', icon: 'settings_accessibility' },
-  { href: '/calendar', label: 'Calendar', icon: 'calendar_today' },
   { href: '/history', label: 'History', icon: 'history' },
+]
+
+const extraItems = [
+  { href: '/sequences', label: 'Sequences', icon: 'reorder' },
+  { href: '/exercises', label: 'Exercises', icon: 'accessibility_new' },
   { href: '/stats', label: 'Stats', icon: 'monitoring' },
 ]
 
 export default function Nav() {
   const pathname = usePathname()
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [menuPath, setMenuPath] = useState<string | null>(null)
+  const firstLink = useRef<HTMLAnchorElement>(null)
+  const moreButton = useRef<HTMLButtonElement>(null)
   const { user, signOut } = useAuth()
+  const isOpen = menuPath === pathname
+
+  useEffect(() => {
+    if (isOpen) firstLink.current?.focus()
+  }, [isOpen])
+
+  function closeMenu() {
+    setMenuPath(null)
+    moreButton.current?.focus()
+  }
+
+  function handleEscape(event: KeyboardEvent<HTMLElement>) {
+    if (!isOpen || event.key !== 'Escape') return
+    event.preventDefault()
+    closeMenu()
+  }
 
   function isActive(href: string) {
-    if (href === '/') return pathname === '/'
-    return pathname === href || pathname.startsWith(href + '/')
+    return pathname === href || (href !== '/' && pathname.startsWith(href + '/'))
   }
 
   return (
     <>
-      {/* Mobile menu overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-surface/80 z-40 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
+      {isOpen && (
+        <div aria-hidden="true" className="fixed inset-0 z-20 bg-fg/25 md:hidden" onClick={closeMenu} />
       )}
 
-      {/* Sidebar — Desktop (fixed) + Mobile (overlay) */}
-      <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-surface z-50 flex flex-col py-24 px-16 transition-transform duration-300 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:translate-x-0`}
-      >
-        {/* Brand */}
-        <div className="mb-32 px-8">
-          <h1 className="font-headline text-[24px] font-bold text-fg-2 leading-tight tracking-tight">WorkOutApp</h1>
-          <p className="font-mono text-sm text-muted mt-1">Nordic Athletic</p>
-        </div>
-
-        {/* Nav items */}
-        <nav className="flex-1 flex flex-col gap-xs">
-          {navItems.map(({ href, label, icon }) => {
+      <aside className={`app-sidebar fixed z-30 border-border-soft bg-surface md:inset-y-0 md:left-0 md:w-64 md:rounded-none md:border-y-0 md:border-r ${isOpen ? 'flex' : 'hidden md:flex'} flex-col overflow-y-auto p-16`} id="app-menu" onKeyDown={handleEscape}>
+        <Link ref={firstLink} href="/" onClick={() => setMenuPath(null)} className="mb-4 flex min-h-12 items-center gap-3 px-3 text-lg font-bold tracking-tight text-fg-2">
+          <img src="/baronda-48.png" width={36} height={36} alt="" className="rounded-control" />
+          Baronda
+        </Link>
+        <nav aria-label="All sections" className="flex flex-1 flex-col gap-1">
+          {[...mobileItems, ...extraItems].map(({ href, label, icon }) => {
             const active = isActive(href)
             return (
-              <Link
-                key={href}
-                href={href}
-                onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-16 px-8 py-2.5 rounded-lg transition-all duration-200 ${
-                  active
-                    ? 'text-fg-2 font-bold bg-surface-warm'
-                    : 'text-muted hover:bg-surface-warm hover:text-fg-2 transition-colors'
-                }`}
-              >
-                <span
-                  className="material-symbols-outlined text-[20px]"
-                  style={{ fontVariationSettings: active ? "'FILL' 1" : "'FILL' 0" }}
-                >
-                  {icon}
-                </span>
-                <span className="font-label text-label-caps uppercase tracking-wider">{label}</span>
+              <Link key={href} href={href} onClick={() => setMenuPath(null)} aria-current={active ? 'page' : undefined}
+                className={`flex min-h-11 items-center gap-3 rounded-control px-3 text-sm hover:bg-surface-warm ${active ? 'bg-surface-warm font-bold text-accent' : 'font-medium text-muted'}`}>
+                <span className="material-symbols-outlined text-xl" aria-hidden="true">{icon}</span>
+                {label}
               </Link>
             )
           })}
         </nav>
-
-        {/* User + sign out */}
         {user && (
-          <div className="border-t border-border-soft pt-16 mt-16">
-            <div className="flex items-center gap-16 px-8 pb-8">
-              <span className="material-symbols-outlined text-[20px] text-muted">account_circle</span>
-              <span className="font-body text-body-sm text-muted truncate">{user.email}</span>
-            </div>
-            <button
-              onClick={() => signOut()}
-              className="flex w-full items-center gap-16 px-8 py-2.5 rounded-lg text-muted hover:bg-surface-warm hover:text-danger transition-colors"
-            >
-              <span className="material-symbols-outlined text-[20px]">logout</span>
-              <span className="font-label text-label-caps uppercase tracking-wider">Sign out</span>
+          <div className="mt-16 border-t border-border-soft pt-16">
+            <p className="truncate px-3 text-sm text-muted">{user.email}</p>
+            <button onClick={() => signOut()} className="mt-1 flex min-h-11 w-full items-center gap-3 rounded-control px-3 text-sm font-medium text-muted hover:bg-surface-warm hover:text-danger">
+              <span className="material-symbols-outlined text-xl" aria-hidden="true">logout</span>
+              Sign out
             </button>
           </div>
         )}
       </aside>
 
-      {/* Top App Bar — hidden on mobile, visible on desktop */}
-      <header className="hidden md:flex fixed top-0 left-64 right-0 h-20 bg-surface border-b border-border-soft items-center px-margin-desktop z-[60]">
-        <span className="font-headline text-headline-md font-bold text-accent tracking-tight">WorkOutApp</span>
-      </header>
-
-      {/* Bottom Nav — Mobile only */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-md border-t border-border-soft flex justify-around items-center px-2 py-1 z-40 ">
-        {navItems.slice(0, 5).map(({ href, label, icon }) => {
+      <nav aria-label="Primary navigation" className="app-bottom-nav fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-border-soft bg-surface px-2 md:hidden" onKeyDown={handleEscape}>
+        {mobileItems.map(({ href, label, icon }) => {
           const active = isActive(href)
           return (
-            <Link
-              key={href}
-              href={href}
-              className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg min-w-0 transition-colors ${
-                active ? 'text-accent' : 'text-muted'
-              }`}
-            >
-              <span
-                className="material-symbols-outlined text-[22px]"
-                style={{ fontVariationSettings: active ? "'FILL' 1" : "'FILL' 0" }}
-              >
-                {icon}
-              </span>
-              <span className="text-[10px] font-label leading-none truncate max-w-full">{label}</span>
+            <Link key={href} href={href} onClick={() => setMenuPath(null)} aria-current={active ? 'page' : undefined}
+              className={`flex min-h-12 min-w-0 flex-col items-center justify-center gap-1 rounded-control px-0.5 text-[11px] font-semibold ${active ? 'bg-surface-warm text-accent' : 'text-muted'}`}>
+              <span className="material-symbols-outlined text-[21px]" aria-hidden="true">{icon}</span>
+              {label}
             </Link>
           )
         })}
+        <button ref={moreButton} aria-expanded={isOpen} aria-controls="app-menu" onClick={() => isOpen ? closeMenu() : setMenuPath(pathname)}
+          className={`flex min-h-12 flex-col items-center justify-center gap-1 rounded-control text-[11px] font-semibold ${isOpen || extraItems.some(({ href }) => isActive(href)) ? 'bg-surface-warm text-accent' : 'text-muted'}`}>
+          <span className="material-symbols-outlined text-[21px]" aria-hidden="true">{isOpen ? 'close' : 'more_horiz'}</span>
+          More
+        </button>
       </nav>
-
-      {/* Mobile hamburger */}
-      <button
-        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-full bg-surface/80 backdrop-blur-md border border-border-soft shadow-sm"
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        aria-label="Toggle menu"
-      >
-        <span className="material-symbols-outlined text-[24px] text-fg-2">
-          {sidebarOpen ? 'close' : 'menu'}
-        </span>
-      </button>
     </>
   )
 }

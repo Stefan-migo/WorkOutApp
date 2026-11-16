@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { PageHeading } from '@/components/ui/PageHeading'
+import { IconButton } from '@/components/ui'
 import { useSequences } from '@/hooks/useSequences'
 import { useWorkoutContext } from '@/context/WorkoutContext'
 import { flattenWorkout } from '@/lib/interval-engine'
@@ -33,6 +35,9 @@ export default function NewSequencePage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [search, setSearch] = useState('')
   const [dragIndex, setDragIndex] = useState<number | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [saveFailed, setSaveFailed] = useState(false)
+  const draft = useRef<{ id: string; createdAt: number } | null>(null)
 
   // ponytail: filtered list on search input, no debounce needed at this scale
   const filtered = useMemo(
@@ -94,14 +99,18 @@ export default function NewSequencePage() {
     e.dataTransfer.dropEffect = 'move'
   }
 
-  function handleDrop(i: number) {
-    if (dragIndex === null || dragIndex === i) return
+  function moveWorkout(from: number, to: number) {
     setSelectedIds((prev) => {
+      if (from === to || to < 0 || to >= prev.length || !prev[from]) return prev
       const next = [...prev]
-      const [moved] = next.splice(dragIndex, 1)
-      next.splice(i, 0, moved!)
+      next.splice(from, 1)
+      next.splice(to, 0, prev[from])
       return next
     })
+  }
+
+  function handleDrop(i: number) {
+    if (dragIndex !== null) moveWorkout(dragIndex, i)
     setDragIndex(null)
   }
 
@@ -109,21 +118,32 @@ export default function NewSequencePage() {
     setDragIndex(null)
   }
 
-  function handleSave() {
-    if (!title.trim() || selectedIds.length === 0) return
+  async function handleSave() {
+    if (!title.trim() || selectedIds.length === 0 || saving) return
     // ponytail: dedupe in case of edge-toggling, though toggleWorkout prevents it
     const uniqueIds = [...new Set(selectedIds)]
+    draft.current ??= { id: crypto.randomUUID(), createdAt: Date.now() }
     const seq: Sequence = {
-      id: crypto.randomUUID(),
+      ...draft.current,
       title: title.trim(),
       description: description.trim() || undefined,
       workoutIds: uniqueIds,
       repeatCount,
-      createdAt: Date.now(),
       updatedAt: Date.now(),
     }
-    saveSequence(seq)
-    router.push(`/sequences/${seq.id}/play`)
+    setSaving(true)
+    setSaveFailed(false)
+    try {
+      if (await saveSequence(seq)) {
+        router.push(`/sequences/${seq.id}/play`)
+      } else {
+        setSaveFailed(true)
+      }
+    } catch {
+      setSaveFailed(true)
+    } finally {
+      setSaving(false)
+    }
   }
 
   const canSave = title.trim().length > 0 && selectedIds.length > 0
@@ -152,13 +172,14 @@ export default function NewSequencePage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen relative pb-[100px]">
-      <div className="flex-1 p-margin-mobile md:p-margin-desktop flex flex-col xl:flex-row gap-[48px] max-w-[1600px] mx-auto w-full">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-24">
+      <PageHeading title="New sequence" description="Choose the workouts and set their order." />
+      <div className="flex w-full flex-col gap-24 xl:flex-row">
         {/* Left Column: Sequence Metadata & List */}
-        <div className="flex-1 flex flex-col gap-32">
+        <div className="min-w-0 flex-1 flex flex-col gap-24">
           {/* Glass Header Panel */}
-          <div className="glass-card rounded-xl p-32 space-y-24">
-            <div className="flex flex-col md:flex-row justify-between md:items-end gap-md border-b border-border-soft pb-md">
+          <div className="glass-card rounded-xl p-16 sm:p-24 space-y-24">
+            <div className="flex flex-col md:flex-row justify-between md:items-end gap-16 border-b border-border-soft pb-16">
               <div className="flex-1 w-full">
                 <label className="block font-label text-label-caps text-muted mb-xs uppercase tracking-wider" htmlFor="sequence-title">
                   Sequence Title
@@ -172,17 +193,17 @@ export default function NewSequencePage() {
                   onChange={(e) => setTitle(e.target.value)}
                 />
               </div>
-              <div className="shrink-0 text-right">
+              <div className="shrink-0 md:text-right">
                 <div className="font-label text-label-caps text-muted mb-xs uppercase tracking-wider">Total Duration</div>
-                <div className="font-mono text-display-timer-mobile md:text-display-timer tracking-tighter text-accent leading-none">
+                <div className="font-mono text-4xl md:text-5xl tracking-tighter text-accent leading-none">
                   {formatDuration(totalDurationSec * repeatCount)}
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="font-label text-label-caps text-muted mb-xs block uppercase tracking-wider">Description</label>
-              <textarea
+              <label htmlFor="sequence-description" className="font-label text-label-caps text-muted mb-xs block uppercase tracking-wider">Description</label>
+              <textarea id="sequence-description"
                 value={description}
                 placeholder="Optional description"
                 rows={2}
@@ -230,26 +251,18 @@ export default function NewSequencePage() {
                   onDragOver={handleDragOver}
                   onDrop={() => handleDrop(i)}
                   onDragEnd={handleDragEnd}
-                  className={`group glass-card rounded-lg p-24 flex items-center gap-16 transition-all hover:border-accent relative border-l-4 border-l-border ${isDragging ? 'opacity-40 ring-2 ring-accent' : ''}`}
+                  className={`group glass-card flex flex-wrap items-center gap-8 rounded-xl p-16 transition-colors hover:border-accent sm:flex-nowrap ${isDragging ? 'opacity-40 ring-2 ring-accent' : ''}`}
                 >
                   {/* Drag handle */}
-                  <div className="text-muted/40 group-hover:text-accent transition-colors cursor-grab shrink-0">
+                  <div aria-hidden="true" className="hidden shrink-0 cursor-grab text-muted sm:block">
                     <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
                     </svg>
                   </div>
 
-                  {/* Workout icon placeholder */}
-                  <div className="w-12 h-10 rounded bg-surface border border-border-soft flex items-center justify-center shrink-0 overflow-hidden relative">
-                    <div className="w-full h-full opacity-20" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 5px, var(--color-surface) 5px, var(--color-surface) 10px)' }} />
-                    <svg className="w-5 h-5 absolute text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                    </svg>
-                  </div>
-
                   {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-body text-body-lg font-bold text-fg-2 truncate">
+                  <div className="min-w-0 basis-full sm:flex-1">
+                    <h3 className="wrap-break-word font-body text-body-lg font-bold text-fg-2">
                       {w?.title ?? 'Unknown workout'}
                     </h3>
                     <p className="font-data text-data-sm text-muted mt-xs">
@@ -261,15 +274,17 @@ export default function NewSequencePage() {
                   <IntervalBadge workoutId={id} />
 
                   {/* Remove */}
-                  <button
-                    onClick={() => setSelectedIds((prev) => prev.filter((x) => x !== id))}
-                    className="p-8 rounded-lg text-muted hover:text-danger hover:bg-danger/5 transition-colors shrink-0 focus-visible:focus-ring"
-                    title="Remove workout"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
+                  <div className="flex shrink-0 gap-xs">
+                    <IconButton variant="ghost" aria-label={`Move workout ${i + 1} up`} disabled={i === 0} onClick={() => moveWorkout(i, i - 1)}>
+                      <span aria-hidden="true" className="material-symbols-outlined">keyboard_arrow_up</span>
+                    </IconButton>
+                    <IconButton variant="ghost" aria-label={`Move workout ${i + 1} down`} disabled={i === selectedIds.length - 1} onClick={() => moveWorkout(i, i + 1)}>
+                      <span aria-hidden="true" className="material-symbols-outlined">keyboard_arrow_down</span>
+                    </IconButton>
+                    <IconButton variant="ghost" aria-label={`Remove workout ${i + 1}`} onClick={() => setSelectedIds((prev) => prev.filter((x) => x !== id))}>
+                      <span aria-hidden="true" className="material-symbols-outlined">close</span>
+                    </IconButton>
+                  </div>
                 </div>
               )
             })}
@@ -331,7 +346,7 @@ export default function NewSequencePage() {
 
         {/* Right Column: Summary Sidebar (desktop) */}
         <div className="w-full xl:w-80 shrink-0">
-          <div className="glass-card rounded-xl p-24 sticky top-28">
+          <div className="glass-card rounded-xl p-24 sticky top-24">
             <h2 className="font-headline text-headline-md font-bold text-fg-2 mb-24">Sequence Profile</h2>
             <div className="space-y-16">
               {/* Mini Chart */}
@@ -394,23 +409,24 @@ export default function NewSequencePage() {
         </div>
       </div>
 
-      {/* Fixed Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-md border-t border-border-soft p-margin-mobile md:p-margin-desktop flex justify-between items-center z-40">
+      {saveFailed && <p role="alert" className="text-danger">Couldn’t save the sequence. Try again.</p>}
+      <div className="flex flex-wrap justify-between gap-8 border-t border-border-soft py-16">
         <button
           onClick={() => router.push('/sequences')}
-          className="font-label text-label-caps text-muted hover:text-danger transition-colors px-24 py-8 uppercase tracking-wider focus-visible:focus-ring"
+          disabled={saving}
+          className="font-label text-label-caps text-muted hover:text-danger transition-colors rounded-control min-h-11 px-16 focus-visible:focus-ring"
         >
           Discard
         </button>
         <button
           onClick={handleSave}
-          disabled={!canSave}
-          className="bg-accent text-accent-on font-label text-label-caps px-32 py-16 rounded-full hover:bg-accent-hover disabled:bg-surface disabled:text-muted transition-colors shadow-sm ambient-shadow uppercase tracking-wider flex items-center gap-8 focus-visible:focus-ring"
+          disabled={!canSave || saving}
+          className="bg-accent text-accent-on font-label text-label-caps min-h-11 px-16 rounded-control hover:bg-accent-hover disabled:bg-surface disabled:text-muted transition-colors shadow-sm ambient-shadow flex items-center gap-8 focus-visible:focus-ring"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
           </svg>
-          Save Sequence
+          {saving ? 'Saving…' : 'Save sequence'}
         </button>
       </div>
     </div>

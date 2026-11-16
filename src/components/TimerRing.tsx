@@ -32,15 +32,15 @@ export function TimerRing({ timeLeft, duration, intervalType, label, nextLabel, 
   }
 
   const ringColor = SEGMENT_COLORS[intervalType]
-  const progress = duration > 0 ? timeLeft / duration : 0
+  const progress = duration > 0 ? Math.min(1, Math.max(0, timeLeft / duration)) : 0
   const offset = CIRCUMFERENCE * (1 - progress)
 
   return (
     <div className={mobileCompact
-      ? 'relative w-52 h-52 lg:w-96 lg:h-96 flex items-center justify-center'
-      : 'relative w-72 h-72 md:w-96 md:h-96 flex items-center justify-center'
+      ? 'relative flex aspect-square w-52 max-w-full items-center justify-center sm:w-80'
+      : 'relative flex aspect-square w-72 max-w-full items-center justify-center md:w-96'
     }>
-      <svg className="absolute inset-0 w-full h-full drop-shadow-2xl" viewBox="0 0 100 100">
+      <svg aria-hidden="true" className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
         {/* Track — inline style: SVG presentation attrs don't resolve CSS vars */}
         <circle
           cx="50"
@@ -81,18 +81,18 @@ export function TimerRing({ timeLeft, duration, intervalType, label, nextLabel, 
           strokeWidth="4"
         />
       </svg>
-      <div className="z-10 flex flex-col items-center text-center">
-        <span className="font-label-caps text-label-caps tracking-widest uppercase mb-sm" style={{ color: ringColor }}>
+      <div className="z-10 flex w-[72%] flex-col items-center text-center">
+        <span className="max-w-full break-words font-label text-label-caps uppercase text-timer-on" style={mobileCompact ? undefined : { color: ringColor }}>
           {label}
         </span>
         <span className={mobileCompact
-          ? 'font-display-timer-mobile text-display-timer-mobile lg:font-display-timer lg:text-display-timer text-timer-on tabular-nums'
-          : 'font-display-timer-mobile text-display-timer-mobile md:font-display-timer md:text-display-timer text-timer-on tabular-nums'
+          ? 'font-timer text-[clamp(2rem,10vw,3rem)] leading-tight font-bold tracking-tight text-timer-on tabular-nums sm:text-display-timer-mobile'
+          : 'font-timer text-display-timer-mobile md:text-display-timer text-timer-on tabular-nums'
         }>
           {formatTime(timeLeft)}
         </span>
         {nextLabel && (
-          <span className="font-data-sm text-data-sm text-timer-muted mt-xs">{nextLabel}</span>
+          <span className="mt-1 max-w-full break-words text-data-sm text-timer-muted">{nextLabel}</span>
         )}
       </div>
     </div>

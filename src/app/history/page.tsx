@@ -8,6 +8,8 @@ import { useSequences } from '@/hooks/useSequences'
 import { formatDuration } from '@/lib/format'
 import { SEGMENT_DOT } from '@/lib/segment-styles'
 import type { IntervalType } from '@/types/workout'
+import { Button, EmptyState, SearchInput } from '@/components/ui'
+import { PageHeading } from '@/components/ui/PageHeading'
 
 function formatDate(ts: number) {
   const d = new Date(ts)
@@ -93,7 +95,7 @@ function predominantType(
 }
 
 export default function HistoryPage() {
-  const { sessions } = useSessions()
+  const { sessions, isLoading } = useSessions()
   const { workouts } = useWorkoutContext()
   const { sequences } = useSequences()
   const [search, setSearch] = useState('')
@@ -101,7 +103,7 @@ export default function HistoryPage() {
   // ponytail: client-side filter on session name — use arrays to avoid async getters
   const filtered = useMemo(() => {
     if (!search.trim()) return sessions
-    const q = search.toLowerCase()
+    const q = search.trim().toLowerCase()
     return sessions.filter((s) => {
       const name =
         s.type === 'workout'
@@ -111,63 +113,32 @@ export default function HistoryPage() {
     })
   }, [sessions, search, workouts, sequences])
 
-  if (sessions.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center flex-1 gap-24 p-margin-mobile md:p-margin-desktop text-center">
-        <span className="material-symbols-outlined text-[64px] text-muted">
-          fitness_center
-        </span>
-        <h1 className="font-headline-lg text-headline-lg text-fg-2">
-          No sessions yet
-        </h1>
-        <p className="font-body-md text-body-md text-muted max-w-sm">
-          Complete a workout to see it here
-        </p>
-        <Link
-          href="/workouts"
-          className="px-24 py-16 bg-accent text-accent-on rounded-lg font-label-caps text-label-caps hover:bg-accent/90 transition-colors ambient-shadow"
-        >
-          Browse Workouts
-        </Link>
-      </div>
-    )
-  }
-
   return (
-    <div className="p-margin-mobile md:p-margin-desktop max-w-5xl mx-auto flex flex-col gap-24">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-16 mb-24">
-        <div>
-          <h2 className="font-headline-lg text-headline-lg text-fg-2 mb-8">
-            History
-          </h2>
-          <p className="font-body-md text-body-md text-muted">
-            Review your past performance and metrics.
-          </p>
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-24">
+      <PageHeading title="History" description="Review your completed training sessions." />
+      {sessions.length > 0 && (
+        <div className="w-full sm:max-w-sm">
+          <SearchInput label="Search sessions" value={search} onChange={setSearch} />
         </div>
-        <div className="flex flex-wrap gap-8 items-center w-full md:w-auto">
-          <div className="relative flex-1 md:flex-none">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm">
-              search
-            </span>
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full md:w-64 pl-10 pr-16 py-8 rounded-lg bg-surface border border-border-soft font-body-md text-body-md text-fg-2 focus:ring-1 focus:ring-accent focus:border-accent transition-all shadow-sm"
-              placeholder="Search sessions..."
-              type="text"
-            />
-          </div>
-
-        </div>
-      </div>
+      )}
 
       {/* History items */}
       <div className="flex flex-col gap-16">
-        {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-[64px] text-center">
-            <p className="font-body-md text-body-md text-muted">No sessions match your search.</p>
-          </div>
+        {sessions.length === 0 ? (
+          isLoading ? <p role="status" className="text-muted">Loading sessions…</p> : (
+            <div className="glass-card rounded-xl px-16">
+              <EmptyState
+                title="No sessions yet"
+                body="Complete a workout to see it here."
+                action={<Link href="/workouts" className="inline-flex min-h-11 items-center rounded-control bg-accent px-16 font-semibold text-accent-on focus-visible:focus-ring">Browse workouts</Link>}
+              />
+            </div>
+          )
+        ) : filtered.length === 0 ? (
+          <EmptyState
+            title="No sessions match your search"
+            action={<Button variant="outline" onClick={() => setSearch('')}>Clear search</Button>}
+          />
         ) : filtered.map((s) => {
           const name =
             s.type === 'workout'
@@ -186,12 +157,12 @@ export default function HistoryPage() {
             <Link
               key={s.id}
               href={`/history/${s.id}`}
-              className="glass-card rounded-xl p-16 md:p-24 flex flex-col md:flex-row gap-6 hover:shadow-md transition-shadow group cursor-pointer relative overflow-hidden"
+              className="glass-card rounded-xl p-16 md:p-24 flex flex-col md:flex-row gap-16 transition-colors hover:bg-surface-warm focus-visible:focus-ring group relative"
             >
               <div
-                className={`absolute left-0 top-0 bottom-0 w-1 ${accentColor}`}
+                className={`absolute left-0 top-3 bottom-3 w-1 rounded-r-full ${accentColor}`}
               />
-              <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+              <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-16 items-center">
                 {/* Date & Title */}
                 <div className="col-span-1 md:col-span-4 flex gap-16 items-center">
                   <div className="bg-surface w-12 h-12 rounded-lg flex flex-col items-center justify-center border border-border-soft flex-shrink-0">
@@ -222,7 +193,7 @@ export default function HistoryPage() {
                 <div className="col-span-1 md:col-span-4 flex justify-between md:justify-around px-0 md:px-16 border-y md:border-y-0 md:border-x border-border-soft py-16 md:py-0">
                   <div className="text-center">
                     <p className="font-label-caps text-[10px] text-muted mb-1">
-                      DURATION
+                      Duration
                     </p>
                     <p className="font-data-lg text-data-lg text-fg-2">
                       {formatDuration(totalDuration)}
@@ -230,7 +201,7 @@ export default function HistoryPage() {
                   </div>
                   <div className="text-center">
                     <p className="font-label-caps text-[10px] text-muted mb-1">
-                      LOAD
+                      Estimated load
                     </p>
                     <p className="font-data-lg text-data-lg text-fg-2">
                       {deriveLoad(s.intervals)}
@@ -241,9 +212,9 @@ export default function HistoryPage() {
                 <div className="col-span-1 md:col-span-4 flex flex-col justify-center">
                   <div className="flex justify-between items-center mb-1">
                     <span className="font-label-caps text-[10px] text-muted">
-                      ZONE DISTRIBUTION
+                      Interval breakdown
                     </span>
-                    <span className="material-symbols-outlined text-muted text-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="material-symbols-outlined text-muted text-sm group-hover:text-accent transition-colors">
                       arrow_forward
                     </span>
                   </div>
@@ -260,10 +231,10 @@ export default function HistoryPage() {
                         style={{ width: `${zones.work}%` }}
                       />
                     )}
-                    {zones.rest > 0 && (
+                    {zones.rest + zones.rest_between_cycles > 0 && (
                       <div
                         className="h-full bg-segment-rest"
-                        style={{ width: `${zones.rest}%` }}
+                        style={{ width: `${zones.rest + zones.rest_between_cycles}%` }}
                       />
                     )}
                     {zones.cooldown > 0 && (
