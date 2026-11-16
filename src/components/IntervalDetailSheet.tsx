@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useRef, useId, useMemo } from 'react'
+import { useIntervalDialog } from '@/hooks/useIntervalDialog'
 import type { Interval, Exercise, WorkoutMode } from '@/types/workout'
 import { ExercisePicker } from './ExercisePicker'
 
@@ -13,7 +14,8 @@ interface IntervalDetailSheetProps {
 }
 
 export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onImageUpload }: IntervalDetailSheetProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null)
+  const dialogRef = useIntervalDialog()
+  const headingId = useId()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [title, setTitle] = useState(interval.title)
   const [duration, setDuration] = useState(interval.duration)
@@ -28,10 +30,6 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
 
   // ponytail: per-interval mode; rest/prepare/cooldown always stay timed
   const showRepsInput = editMode === 'reps' && interval.type === 'work'
-
-  useEffect(() => {
-    dialogRef.current?.showModal()
-  }, [])
 
   function handleSave() {
     const payload: Interval = {
@@ -77,42 +75,18 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
     if (title === 'Work') setTitle(exercise.name)
   }
 
-  // ponytail: CSS in <style> tag — no extra file, no CSS-in-JS lib
   return (
     <>
-      <style>{`
-        @keyframes interval-sheet-slide-up {
-          from { transform: translateY(100%); }
-          to { transform: translateY(0); }
-        }
-        .interval-sheet {
-          animation: interval-sheet-slide-up 0.3s ease-out;
-          position: fixed;
-          bottom: 0;
-          left: 50%;
-          transform: translateX(-50%);
-          margin: 0;
-          width: 100%;
-          max-width: 32rem;
-          border: none;
-          padding: 0;
-          border-radius: 12px 12px 0 0;
-          background: var(--color-surface);
-          max-height: 85vh;
-          overflow-y: auto;
-        }
-        .interval-sheet::backdrop {
-          background: color-mix(in srgb, var(--color-surface) 80%, transparent);
-        }
-      `}</style>
       <dialog
         ref={dialogRef}
         className="interval-sheet"
+        aria-labelledby={headingId}
         onClose={handleDialogClose}
       >
-        <div className="p-6 flex flex-col gap-5">
-          <div className="flex items-center justify-between">
+        <div className="interval-sheet-content">
+          <div className="interval-sheet-heading">
             <span className="text-xs text-muted font-medium uppercase tracking-wider">{interval.type}</span>
+            <h2 id={headingId} className="text-xl font-semibold">Edit interval</h2>
           </div>
 
           {/* Title */}
@@ -122,7 +96,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-border focus:outline-none focus:ring-1 focus:ring-accent"
+              className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-base border border-border focus:outline-none focus:ring-1 focus:ring-accent"
             />
           </label>
 
@@ -166,7 +140,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
                   onChange={(e) => setReps(Math.max(1, Math.min(999, Number(e.target.value))))}
                   min={1}
                   max={999}
-                  className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-28 border border-border focus:outline-none focus:ring-1 focus:ring-accent"
+                  className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-base w-28 border border-border focus:outline-none focus:ring-1 focus:ring-accent"
                 />
               </label>
               <label className="flex flex-col gap-1.5">
@@ -178,7 +152,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
                   min={0}
                   max={9999}
                   placeholder="0"
-                  className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-28 border border-border focus:outline-none focus:ring-1 focus:ring-accent"
+                  className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-base w-28 border border-border focus:outline-none focus:ring-1 focus:ring-accent"
                 />
               </label>
             </>
@@ -191,7 +165,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
                 onChange={(e) => setDuration(Math.max(1, Math.min(3600, Number(e.target.value))))}
                 min={1}
                 max={3600}
-                className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm w-28 border border-border focus:outline-none focus:ring-1 focus:ring-accent"
+                className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-base w-28 border border-border focus:outline-none focus:ring-1 focus:ring-accent"
               />
             </label>
           )}
@@ -203,7 +177,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
               <button
                 type="button"
                 onClick={() => setPickerOpen(true)}
-                className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-border hover:bg-surface-warm transition-colors text-left w-full flex items-center gap-3 focus-visible:focus-ring"
+                className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-base border border-border hover:bg-surface-warm transition-colors text-left w-full flex items-center gap-3 focus-visible:focus-ring"
               >
                 {selectedExercise ? (
                   <>
@@ -245,7 +219,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-border resize-none focus:outline-none focus:ring-1 focus:ring-accent"
+              className="bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-base border border-border resize-none focus:outline-none focus:ring-1 focus:ring-accent"
             />
           </label>
 
@@ -258,7 +232,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
                 placeholder="https://example.com/image.jpg"
-                className="flex-1 bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-sm border border-border focus:outline-none focus:ring-1 focus:ring-accent"
+                className="min-w-0 flex-1 bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-base border border-border focus:outline-none focus:ring-1 focus:ring-accent"
               />
               <button
                 type="button"
@@ -291,15 +265,17 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
           </label>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-2">
+          <div className="interval-sheet-actions">
             <button
               onClick={handleCancel}
+              autoFocus
               className="flex-1 py-3 bg-surface text-fg-2 rounded-lg font-medium hover:bg-surface-warm transition-colors text-sm"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
+              disabled={uploading}
               className="flex-1 py-3 bg-accent text-accent-on rounded-lg font-medium hover:opacity-90 transition-colors text-sm"
             >
               Save
