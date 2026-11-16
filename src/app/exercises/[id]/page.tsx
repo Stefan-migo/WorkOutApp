@@ -172,7 +172,7 @@ export default function ExerciseDetailPage() {
   }
 
   return (
-    <div className="max-w-[1440px] mx-auto w-full p-margin-mobile md:p-margin-desktop flex flex-col gap-24 pb-32">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-24">
       {/* Back link */}
       <Link
         href="/exercises"
@@ -180,6 +180,18 @@ export default function ExerciseDetailPage() {
       >
         ← Back to exercises
       </Link>
+
+      <div className="flex items-center justify-between gap-16 border-b border-border-soft pb-16">
+        <h1 className="font-headline text-headline-lg text-fg-2">{ex.name}</h1>
+        <button
+          onClick={() => toggleFavorite(ex.id)}
+          className="size-11 flex shrink-0 items-center justify-center rounded-full bg-surface text-lg hover:bg-surface-warm transition-colors focus-visible:focus-ring"
+          aria-pressed={isFavorite(ex.id)}
+          aria-label={isFavorite(ex.id) ? 'Remove from favorites' : 'Add to favorites'}
+        >
+          {isFavorite(ex.id) ? '★' : '☆'}
+        </button>
+      </div>
 
       {/* Image gallery — ponytail: CSS scroll snap, no JS carousel lib */}
       {(() => {
@@ -221,7 +233,7 @@ export default function ExerciseDetailPage() {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="px-3 py-1.5 rounded-lg font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm transition-colors disabled:opacity-50 focus-visible:focus-ring"
+                className="min-h-11 px-3 rounded-control font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm transition-colors disabled:opacity-50 focus-visible:focus-ring"
               >
                 {uploading ? 'Uploading...' : '+ Upload Image'}
               </button>
@@ -229,7 +241,7 @@ export default function ExerciseDetailPage() {
           </div>
         ) : (
           <div>
-            <div className="aspect-[4/3] bg-surface rounded-xl flex items-center justify-center max-w-[600px]">
+            <div className="aspect-[4/3] bg-surface rounded-xl flex items-center justify-center max-w-[600px] border border-border-soft">
               <svg className="w-16 h-16 text-muted/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
               </svg>
@@ -248,7 +260,7 @@ export default function ExerciseDetailPage() {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="px-3 py-1.5 rounded-lg font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm transition-colors disabled:opacity-50 focus-visible:focus-ring"
+                className="min-h-11 px-3 rounded-control font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm transition-colors disabled:opacity-50 focus-visible:focus-ring"
               >
                 {uploading ? 'Uploading...' : '+ Upload Image'}
               </button>
@@ -256,18 +268,6 @@ export default function ExerciseDetailPage() {
           </div>
         )
       })()}
-
-      {/* Name + star toggle */}
-      <div className="flex items-center gap-3">
-        <h1 className="font-headline text-headline-lg font-bold text-accent">{ex.name}</h1>
-        <button
-          onClick={() => toggleFavorite(ex.id)}
-          className="w-10 h-10 flex items-center justify-center rounded-full bg-surface text-lg hover:bg-surface-warm transition-colors focus-visible:focus-ring"
-          aria-label={isFavorite(ex.id) ? 'Remove from favorites' : 'Add to favorites'}
-        >
-          {isFavorite(ex.id) ? '★' : '☆'}
-        </button>
-      </div>
 
       {/* Metadata chips */}
       <div className="flex flex-wrap gap-2">
