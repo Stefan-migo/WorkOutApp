@@ -35,7 +35,7 @@ describe('useIntervalNotification', () => {
     act(() => { result.current.notify('Test Workout', 3, 10) })
 
     expect(notificationCtor).toHaveBeenCalledWith(
-      'WorkOutApp - Test Workout',
+      'Baronda - Test Workout',
       expect.objectContaining({ body: 'Interval 3 of 10' }),
     )
   })

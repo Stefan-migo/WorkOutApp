@@ -16,6 +16,7 @@ vi.mock('next/font/google', () => ({
 }))
 
 vi.mock('@/components/Nav', () => ({ default: () => <nav>Nav</nav> }))
+vi.mock('next/navigation', () => ({ usePathname: () => '/' }))
 vi.mock('@/components/ErrorBoundary', () => ({
   default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))

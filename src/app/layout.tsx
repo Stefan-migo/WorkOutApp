@@ -2,7 +2,8 @@ import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { AuthProvider } from '@/context/AuthContext'
 import { WorkoutProvider } from '@/context/WorkoutContext'
-import Nav from '@/components/Nav'
+import AppShell from '@/components/AppShell'
+import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import './globals.css'
 
@@ -16,14 +17,16 @@ const inter = Inter({
 // support is added, or download the variable TTF to public/fonts/.
 
 export const metadata: Metadata = {
-  title: 'WorkOutApp',
-  description: 'Interval timer and workout planner',
+  title: 'Baronda',
+  description: 'Plan calisthenics workouts, track sets, and train through timed circuits.',
+  appleWebApp: { capable: true, title: 'Baronda', statusBarStyle: 'default' },
+  icons: { apple: '/baronda-apple.png' },
 }
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#55423d',
+  themeColor: '#f8f4ed',
 }
 
 export default function RootLayout({
@@ -40,15 +43,11 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full bg-bg text-fg-2" suppressHydrationWarning>
+        <ServiceWorkerRegistration />
         <ErrorBoundary>
         <AuthProvider>
         <WorkoutProvider>
-          <Nav />
-          <main className="flex-1 md:ml-64 flex flex-col min-h-screen pt-14 md:pt-20 pb-[64px] md:pb-0">
-            <div className="flex-1 flex flex-col px-margin-mobile md:px-margin-desktop py-24">
-              {children}
-            </div>
-          </main>
+          <AppShell>{children}</AppShell>
         </WorkoutProvider>
         </AuthProvider>
         </ErrorBoundary>

@@ -54,6 +54,7 @@ export function AuthCard({ onSignIn, onSignUp, onForgot, loading = false, error 
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
+    if (loading) return
     const errors: FieldErrors = {}
     if (!EMAIL_RE.test(email)) errors.email = 'Enter a valid email address'
     if (view !== 'forgot') {
@@ -71,8 +72,8 @@ export function AuthCard({ onSignIn, onSignUp, onForgot, loading = false, error 
       // stay on the card and point the user at their inbox.
       if (result?.requiresConfirmation) goTo('checkEmail')
     } else if (view === 'forgot') {
-      await onForgot(email)
-      goTo('checkEmail')
+      const result = await onForgot(email)
+      if (!result?.error) goTo('checkEmail')
     }
   }
 
@@ -85,12 +86,11 @@ export function AuthCard({ onSignIn, onSignUp, onForgot, loading = false, error 
         : 'We will email you a reset link'
 
   return (
-    <div className="flex min-h-dvh items-center justify-center px-margin-mobile md:px-margin-desktop">
-      <Card variant="raised" className="w-full max-w-sm p-24">
+    <div className="flex min-h-dvh items-center justify-center px-margin-mobile py-24 md:px-margin-desktop">
+      <Card variant="raised" className="w-full max-w-md p-24 sm:p-32">
         {/* Brand */}
         <div className="mb-32 text-center">
-          <h1 className="font-headline text-headline-md font-bold text-fg-2 tracking-tight">WorkOutApp</h1>
-          <p className="mt-1 font-mono text-data-sm text-muted">Every rep counts</p>
+          <img src="/baronda-logo.png" width={132} height={160} alt="Baronda" className="mx-auto rounded-control" />
         </div>
 
         {error && (
@@ -99,9 +99,10 @@ export function AuthCard({ onSignIn, onSignUp, onForgot, loading = false, error 
           </div>
         )}
 
-        <form onSubmit={handleSubmit} noValidate className="space-y-24">
+        <form onSubmit={handleSubmit} noValidate aria-busy={loading} className="space-y-24">
           {view === 'checkEmail' ? (
             <div className="space-y-16 text-center">
+              <h1 className="font-headline text-headline-lg text-fg-2">Check your inbox</h1>
               <p className="font-body text-body-md text-fg-2">
                 Check your email for a link to continue. No email?{' '}
                 <button
@@ -119,7 +120,7 @@ export function AuthCard({ onSignIn, onSignUp, onForgot, loading = false, error 
           ) : (
             <>
               <div className="text-center">
-                <h2 className="font-headline text-headline-md font-bold text-fg-2">{heading}</h2>
+                <h1 className="font-headline text-headline-lg text-fg-2">{heading}</h1>
                 <p className="mt-8 font-body text-body-md text-muted">{subheading}</p>
               </div>
 
