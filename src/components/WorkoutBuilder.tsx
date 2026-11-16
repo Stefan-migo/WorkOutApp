@@ -164,15 +164,19 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
     else if (cy > window.innerHeight - threshold) window.scrollBy(0, Math.min(cy - (window.innerHeight - threshold), 12))
   }
   function handleDrop(i: number) {
-    if (dragIndex === null || dragIndex === i) return
+    if (dragIndex !== null) moveBlock(dragIndex, i)
+    setDragIndex(null)
+  }
+
+  function moveBlock(from: number, to: number) {
+    if (from === to || to < 0 || to >= items.length) return
     setItems((prev) => {
       const next = [...prev]
-      const [moved] = next.splice(dragIndex, 1)
+      const [moved] = next.splice(from, 1)
       if (!moved) return prev
-      next.splice(i, 0, moved)
+      next.splice(to, 0, moved)
       return next
     })
-    setDragIndex(null)
   }
   function handleDragEnd() { setDragIndex(null) }
 
@@ -297,40 +301,68 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
               onDragOver={handleDragOver}
               onDrop={() => handleDrop(i)}
               onDragEnd={handleDragEnd}
+              data-workout-block={i}
               role="listitem"
               className={`glass-card rounded-xl flex items-center group transition-all duration-200 pl-0 hover:shadow-md relative overflow-visible ${
                 dragIndex === i ? 'opacity-40 ring-2 ring-accent' : ''
               } ${!isCycle(item) ? `border-l-4 ${SEGMENT_BORDER[item.type]}` : 'border-l-4 border-l-accent/60'}`}
             >
               {/* Drag handle */}
-              <div
-                className="px-5 py-10 text-muted cursor-grab flex items-center justify-center active:cursor-grabbing self-stretch"
+              <button
+                type="button"
+                className="flex min-h-11 w-9 shrink-0 touch-none select-none items-center justify-center self-stretch text-muted cursor-grab active:cursor-grabbing sm:w-12"
                 aria-label="Drag to reorder"
-                role="button"
+                aria-keyshortcuts="ArrowUp ArrowDown"
+                onContextMenu={(event) => event.preventDefault()}
+                onPointerDown={(event) => {
+                  if (event.pointerType === 'mouse' || !event.isPrimary) return
+                  event.preventDefault()
+                  event.currentTarget.setPointerCapture(event.pointerId)
+                  handleDragStart(i)
+                }}
+                onPointerMove={(event) => {
+                  if (!event.currentTarget.hasPointerCapture(event.pointerId)) return
+                  if (event.clientY < 64) window.scrollBy(0, -12)
+                  else if (event.clientY > window.innerHeight - 96) window.scrollBy(0, 12)
+                }}
+                onPointerUp={(event) => {
+                  if (!event.currentTarget.hasPointerCapture(event.pointerId)) return
+                  const row = document.elementFromPoint(event.clientX, event.clientY)?.closest<HTMLElement>('[data-workout-block]')
+                  const target = row?.dataset.workoutBlock
+                  if (target !== undefined) moveBlock(i, Number(target))
+                  handleDragEnd()
+                }}
+                onPointerCancel={handleDragEnd}
+                onLostPointerCapture={handleDragEnd}
+                onKeyDown={(event) => {
+                  if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return
+                  event.preventDefault()
+                  moveBlock(i, i + (event.key === 'ArrowUp' ? -1 : 1))
+                }}
               >
-                <span className="material-symbols-outlined text-[20px]">drag_indicator</span>
-              </div>
+                <span aria-hidden="true" className="material-symbols-outlined text-[20px]">drag_indicator</span>
+              </button>
 
               {isCycle(item) ? (
                 /* ── Cycle Template card ── */
-                <div className="flex-1 py-12 px-4 flex flex-col gap-8 relative">
+                <div className="relative flex min-w-0 flex-1 flex-col gap-8 py-12 pl-1 pr-3 sm:px-4">
                   {/* Top row: title + actions */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-8">
-                      <span className="material-symbols-outlined text-accent text-[22px]">repeat</span>
+                  <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 sm:flex-nowrap">
+                    <div className="flex min-w-0 flex-[1_1_12rem] items-center gap-2">
+                      <span aria-hidden="true" className="material-symbols-outlined shrink-0 text-accent text-[22px]">repeat</span>
                       <input
                         type="text"
                         value={item.title}
                         onChange={(e) => updateCycleField(i, 'title', e.target.value)}
-                        className="bg-transparent border-0 border-b border-border-soft p-0 font-body-md font-semibold text-fg-2 w-32 focus:border-accent focus:ring-0 outline-none"
+                        className="min-h-11 min-w-0 w-full bg-transparent border-0 border-b border-border-soft p-0 text-base font-semibold text-fg-2 focus:border-accent focus:ring-0 outline-none"
                         aria-label="Cycle name"
                       />
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="ml-auto flex shrink-0 items-center">
                       {/* Duplicate */}
                       <button
                         onClick={() => duplicateCycle(i)}
-                        className="text-muted hover:text-accent transition-colors p-4 rounded-lg hover:bg-surface"
+                        className="grid size-11 place-items-center rounded-lg text-muted hover:bg-surface hover:text-accent"
                         aria-label="Duplicate cycle"
                       >
                         <span className="material-symbols-outlined text-[18px]">content_copy</span>
@@ -338,7 +370,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                       {/* Delete */}
                       <button
                         onClick={() => removeItem(i)}
-                        className="text-muted hover:text-danger transition-colors p-4 rounded-lg hover:bg-surface"
+                        className="grid size-11 place-items-center rounded-lg text-muted hover:bg-surface hover:text-danger"
                         aria-label="Remove cycle"
                       >
                         <span className="material-symbols-outlined text-[18px]">delete</span>
@@ -527,7 +559,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                   </div>
 
                   {/* Title + Duration / Reps (inline editing) */}
-                  <div className="flex-1 py-8 flex flex-col justify-center gap-2">
+                  <div className="flex min-w-0 flex-1 flex-col justify-center gap-2 py-8">
                     <input
                       type="text"
                       value={item.title}
@@ -561,7 +593,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                       </div>
                     )}
                     {item.mode === 'reps' ? (
-                      <div className="flex gap-4">
+                      <div className="flex flex-wrap gap-x-4 gap-y-2">
                         <div className="flex items-center gap-2">
                           <span className="font-data-sm text-data-sm text-muted/70 font-semibold">Reps</span>
                           <input
@@ -585,7 +617,7 @@ export default function WorkoutBuilder({ onSave, onCancel }: WorkoutBuilderProps
                           />
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="font-data-sm text-data-sm text-muted/70 font-semibold">Weight (kg)</span>
+                          <span className="whitespace-nowrap font-data-sm text-data-sm text-muted/70 font-semibold">Weight (kg)</span>
                           <input
                             type="text"
                             inputMode="numeric"
