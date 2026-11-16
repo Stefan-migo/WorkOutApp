@@ -55,6 +55,23 @@ describe('WorkoutEditor', () => {
     expect(screen.getByText('Rest')).toBeInTheDocument()
   })
 
+  it('applies an edit to the same Work position across cycles', async () => {
+    const WorkoutEditor = (await import('../WorkoutEditor')).default
+    const intervals: Interval[] = ['first', 'second', 'third'].flatMap((cycleId) => [
+      { id: `${cycleId}-1`, type: 'work', title: 'Work 1', duration: 30, cycleId },
+      { id: `${cycleId}-rest`, type: 'rest', title: 'Rest', duration: 15, cycleId },
+      { id: `${cycleId}-2`, type: 'work', title: 'Work 2', duration: 30, cycleId },
+    ])
+    render(<WorkoutEditor initialIntervals={intervals} onSave={vi.fn()} />)
+    fireEvent.click(screen.getByTestId('interval-row-2').parentElement!)
+    fireEvent.click(screen.getByText('mock-save'))
+    fireEvent.click(screen.getByRole('button', { name: 'Same Work position across cycles' }))
+    expect(screen.getAllByText('Sheet Saved')).toHaveLength(3)
+    expect(screen.getAllByText('Work 1')).toHaveLength(3)
+    expect(screen.getByTestId('interval-row-5')).toHaveTextContent('Sheet Saved')
+    expect(screen.getByTestId('interval-row-8')).toHaveTextContent('Sheet Saved')
+  })
+
   it('shows no-intervals message when empty', async () => {
     const WorkoutEditor = (await import('../WorkoutEditor')).default
     render(<WorkoutEditor initialIntervals={[]} onSave={vi.fn()} />)

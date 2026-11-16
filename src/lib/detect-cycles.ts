@@ -143,3 +143,29 @@ export function isInCycle(
 ): DetectedCycle | undefined {
   return cycles.find((c) => index >= c.startIdx && index <= c.endIdx)
 }
+
+/** Match the ordinal of a Work block within its cycle, excluding standalone work. */
+export function getMatchingWorkIndexes(intervals: Interval[], index: number): number[] {
+  const selected = intervals[index]
+  if (selected?.type !== 'work') return []
+
+  const groups = new Map<string, number[]>()
+  let legacyCycle = 0
+  intervals.forEach((interval, i) => {
+    if (interval.type !== 'work') return
+    if (!interval.cycleId && interval.cycleIndex === 0) legacyCycle++
+    const key = interval.cycleId
+      ? `id:${interval.cycleId}`
+      : interval.cycleIndex != null && legacyCycle > 0 ? `legacy:${legacyCycle}` : undefined
+    if (!key) return
+    const group = groups.get(key) ?? []
+    group.push(i)
+    groups.set(key, group)
+  })
+
+  const cycles = [...groups.values()]
+  const current = cycles.find((group) => group.includes(index))
+  if (!current) return []
+  const position = current.indexOf(index)
+  return cycles.flatMap((group) => group !== current && group[position] != null ? [group[position]!] : [])
+}

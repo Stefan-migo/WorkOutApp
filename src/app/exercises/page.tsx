@@ -10,6 +10,8 @@ import { ExerciseFormDialog } from '@/components/ExerciseFormDialog'
 import { AddToWorkoutModal } from '@/components/AddToWorkoutModal'
 import type { ExerciseFormData } from '@/components/ExerciseFormDialog'
 
+const OPEN_SOURCE_PREFERENCE = 'show-open-source-exercises'
+
 const EMPTY_FORM: ExerciseFormData = {
   name: '',
   category: 'strength',
@@ -24,6 +26,17 @@ export default function ExercisesPage() {
   const { exercises, saveExercise, saveExerciseImage, getExerciseImages, isLoading } = useExercises()
   const { favoriteIds, toggleFavorite, clearOrphans } = useFavorites()
   const router = useRouter()
+  const [showOpenSource, setShowOpenSource] = useState(true)
+  useEffect(() => {
+    try {
+      setShowOpenSource(window.localStorage.getItem(OPEN_SOURCE_PREFERENCE) !== 'false')
+    } catch {
+      // The toggle still works for this visit when browser storage is unavailable.
+    }
+  }, [])
+  const visibleExercises = useMemo(() =>
+    showOpenSource ? exercises : exercises.filter((exercise) => exercise.source !== 'free-exercise-db'),
+  [exercises, showOpenSource])
   const [formOpen, setFormOpen] = useState(false)
   const [form, setForm] = useState(EMPTY_FORM)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -102,8 +115,26 @@ export default function ExercisesPage() {
 
   return (
     <>
+      <label className="mb-3 flex w-fit cursor-pointer items-center gap-2 text-sm text-fg-2">
+        <input
+          type="checkbox"
+          role="switch"
+          checked={showOpenSource}
+          className="accent-accent"
+          onChange={(event) => {
+            const checked = event.target.checked
+            setShowOpenSource(checked)
+            try {
+              window.localStorage.setItem(OPEN_SOURCE_PREFERENCE, String(checked))
+            } catch {
+              // Keep the in-memory selection.
+            }
+          }}
+        />
+        Show open-source exercises
+      </label>
       <ExerciseLibrary
-        exercises={exercises}
+        exercises={visibleExercises}
         isLoading={isLoading}
         favoriteIds={favoriteIds}
         onToggleFavorite={toggleFavorite}

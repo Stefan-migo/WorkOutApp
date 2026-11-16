@@ -385,7 +385,7 @@ describe('PlayWorkoutPage', () => {
   })
 
   describe('active phase PlayScreen surface', () => {
-    it('renders the full-bleed exercise image background on a work interval (PlayScreen, not ExercisePanel)', async () => {
+    it('shows upcoming exercise media during Prepare and current media during Work', async () => {
       mockWorkouts = [mockWorkout]
       mockExercisesData = [{
         id: 'ex1',
@@ -399,21 +399,18 @@ describe('PlayWorkoutPage', () => {
       mockTimer.timeLeft = 60
 
       const Page = (await import('../page')).default
-      const { container } = render(<Page />)
+      render(<Page />)
 
       fireEvent.click(screen.getByText('Start'))
+      expect(await screen.findByText('Up next: Sprints')).toBeInTheDocument()
+      expect(screen.getByRole('img', { name: 'Sprints' })).toHaveAttribute('src', 'https://example.com/sprints.jpg')
 
-      // Prepare interval (no image) — no background layer yet
-      await waitFor(() => expect(screen.getByLabelText('Skip interval')).toBeInTheDocument())
-      expect(container.querySelector('[style*="background-image"][aria-hidden="true"]')).not.toBeInTheDocument()
-
-      // Skip to Sprints (work, has exercise image) — PlayScreen full-bleed layer appears
       mockTimer.timeLeft = 10
       fireEvent.click(screen.getByLabelText('Skip interval'))
 
       await waitFor(() => {
-        const imageLayer = container.querySelector('[style*="background-image"][aria-hidden="true"]')
-        expect(imageLayer).toBeInTheDocument()
+        expect(screen.queryByText('Up next: Sprints')).not.toBeInTheDocument()
+        expect(screen.getByRole('img', { name: 'Sprints' })).toHaveAttribute('src', 'https://example.com/sprints.jpg')
       })
     })
   })

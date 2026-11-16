@@ -9,7 +9,7 @@ import { useExercises } from '@/hooks/useExercises'
 import { SEGMENT_BG, SEGMENT_TEXT, SEGMENT_DOT, TYPE_ICONS } from '@/lib/segment-styles'
 import { workoutReducer } from '@/lib/workout-reducer'
 import { createInterval } from '@/components/WorkoutBuilder'
-import { detectCycles, isInCycle } from '@/lib/detect-cycles'
+import { detectCycles, isInCycle, getMatchingWorkIndexes } from '@/lib/detect-cycles'
 import type { Exercise, Interval, IntervalType, Workout } from '@/types/workout'
 
 // ponytail: counter ID, upgrade to crypto.randomUUID if collisions become an issue
@@ -42,11 +42,13 @@ function BulkApplyDialog({
   changedFields,
   onApplyAll,
   onApplyOne,
+  onApplyMatching,
 }: {
   type: IntervalType
   changedFields: string[]
   onApplyAll: () => void
   onApplyOne: () => void
+  onApplyMatching?: () => void
 }) {
   const label = type.replace(/_/g, ' ')
   return (
@@ -72,13 +74,21 @@ function BulkApplyDialog({
             </div>
             <div>
               <h3 className="font-headline-md text-headline-md text-fg-2 font-bold mb-4">
-                Apply to all {label}?
+                Where should these changes apply?
               </h3>
               <p className="font-body-md text-body-md text-muted">
-                You changed <strong className="text-fg-2">{changedFields.join(', ')}</strong>. Do you want to apply this change to all <strong className="text-fg-2">{label}</strong> intervals?
+                You changed <strong className="text-fg-2">{changedFields.join(', ')}</strong>. Choose which <strong className="text-fg-2">{label}</strong> intervals to update.
               </p>
             </div>
           </div>
+          {onApplyMatching && (
+            <button
+              onClick={onApplyMatching}
+              className="mb-8 w-full rounded-xl border border-border bg-surface px-3 py-3 font-medium text-fg-2 focus-visible:focus-ring"
+            >
+              Same Work position across cycles
+            </button>
+          )}
           <div className="flex gap-8">
             <button
               onClick={onApplyOne}
@@ -217,6 +227,7 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
     changes: Partial<Interval>
     changedFields: string[]
     index: number
+    matchingIndexes: number[]
   } | null>(null)
 
   function handleSheetSave(updated: Interval) {
@@ -230,8 +241,9 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
       const changes: Partial<Interval> = {}
       const changedFields: string[] = []
       // ponytail: reps always checked so reps-mode changes bulk-apply; safe since undefined !== undefined is false
-      for (const key of ['title', 'duration', 'description', 'imageUrl', 'reps'] as const) {
-        if (updated[key] !== originalInterval[key]) {
+      for (const key of ['title', 'duration', 'description', 'imageUrl', 'exerciseId', 'mode', 'reps', 'weight'] as const) {
+        const defaultValue = key === 'mode' ? existingWorkout?.mode ?? 'timed' : undefined
+        if ((updated[key] ?? defaultValue) !== (originalInterval[key] ?? defaultValue)) {
           ;(changes as Record<string, unknown>)[key] = updated[key]
           changedFields.push(key)
         }
@@ -240,7 +252,7 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
         // Check if there are other intervals of the same type
         const sameType = intervals.filter((_, i) => i !== editingIndex && intervals[i]?.type === updated.type)
         if (sameType.length > 0) {
-          setBulkPrompt({ type: updated.type, changes, changedFields, index: editingIndex })
+          setBulkPrompt({ type: updated.type, changes, changedFields, index: editingIndex, matchingIndexes: getMatchingWorkIndexes(intervals, editingIndex) })
           return
         }
       }
@@ -248,11 +260,11 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
     setOriginalInterval(null)
   }
 
-  function handleBulkApplyAll() {
+  function handleBulkApply(matchingOnly = false) {
     if (!bulkPrompt) return
     markDirty()
     for (let i = 0; i < intervals.length; i++) {
-      if (i !== bulkPrompt.index && intervals[i]?.type === bulkPrompt.type) {
+      if (matchingOnly ? bulkPrompt.matchingIndexes.includes(i) : i !== bulkPrompt.index && intervals[i]?.type === bulkPrompt.type) {
         dispatch({ type: 'CHANGE_INTERVAL', index: i, interval: { ...intervals[i]!, ...bulkPrompt.changes } })
       }
     }
@@ -392,7 +404,7 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
           onSave={handleSheetSave}
           onClose={() => { setEditingIndex(null); setOriginalInterval(null) }}
           exercises={exercises}
-          onImageUpload={(file) => saveExerciseImage(intervals[editingIndex]!.id, file)}
+          onImageUpload={(file) => saveExerciseImage(intervals[editingIndex]!.id, file, 'reference')}
         />
       )}
 
@@ -401,7 +413,8 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
         <BulkApplyDialog
           type={bulkPrompt.type}
           changedFields={bulkPrompt.changedFields}
-          onApplyAll={handleBulkApplyAll}
+          onApplyAll={() => handleBulkApply()}
+          onApplyMatching={bulkPrompt.matchingIndexes.length ? () => handleBulkApply(true) : undefined}
           onApplyOne={handleBulkApplyOne}
         />
       )}
