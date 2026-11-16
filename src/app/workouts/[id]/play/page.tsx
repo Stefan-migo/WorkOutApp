@@ -13,7 +13,7 @@ import { RepCompleteDialog } from '@/components/RepCompleteDialog'
 import { PlayScreen } from '@/components/blocks/PlayScreen'
 import { useExercises } from '@/hooks/useExercises'
 import { flattenWorkout, getEffectiveMode } from '@/lib/interval-engine'
-import { formatTime } from '@/lib/format'
+import { formatDuration, formatTime } from '@/lib/format'
 import { getIntervalName } from '@/lib/interval-display'
 import type { CompletedInterval } from '@/types/workout'
 import type { Interval } from '@/types/workout'
@@ -22,7 +22,7 @@ import type { Workout } from '@/types/workout'
 type Phase = 'idle' | 'active' | 'complete'
 
 export default function PlayWorkoutPage() {
-  const { workouts } = useWorkoutContext()
+  const { workouts, isLoading } = useWorkoutContext()
   const { addSession } = useSessions()
   const router = useRouter()
   const params = useParams<{ id: string }>()
@@ -202,21 +202,9 @@ export default function PlayWorkoutPage() {
       completedAt: Date.now(),
       intervals: completedIntervals,
     }
-    addSession(session)
-    router.push(`/history/${session.id}`)
+    void Promise.resolve(addSession(session)).then(() => router.push(`/history/${session.id}`))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase])
-
-  if (!workout) {
-    return (
-      <div className="timer-dark-bg text-timer-on min-h-screen flex flex-col items-center justify-center gap-4 px-margin-mobile">
-        <h1 className="font-headline-lg text-headline-lg">Workout not found</h1>
-        <Link href="/workouts" className="text-timer-muted hover:text-timer-on transition-colors">
-          &larr; Back to workouts
-        </Link>
-      </div>
-    )
-  }
 
   // ponytail: exercises already loaded — use find, not async getExercise
   const exercise = interval?.exerciseId
@@ -233,6 +221,23 @@ export default function PlayWorkoutPage() {
     }
   }, [exercise?.id, getExerciseImages])
 
+  if (!workout) {
+    return (
+      <main className="timer-dark-bg flex min-h-dvh flex-col items-center justify-center gap-4 px-margin-mobile text-center text-timer-on">
+        {isLoading ? (
+          <p role="status" className="text-timer-muted">Loading workout…</p>
+        ) : (
+          <>
+            <h1 className="font-headline text-headline-lg">Workout not found</h1>
+            <Link href="/workouts" className="text-timer-muted hover:text-timer-on transition-colors">
+              &larr; Back to workouts
+            </Link>
+          </>
+        )}
+      </main>
+    )
+  }
+
   const isRepsWork = !!(interval && getEffectiveMode(workout as Workout, interval) === 'reps' && interval.type === 'work')
   // ponytail: show addTime buttons on rest intervals when workout is reps mode
   const isRestInRepsWorkout = !!(interval && workout?.mode === 'reps' && (interval.type === 'rest' || interval.type === 'rest_between_cycles'))
@@ -240,27 +245,37 @@ export default function PlayWorkoutPage() {
   const nextInterval = flat[currentIdx + 1]
   // Work count up to current interval (1-based, for display naming)
   const workCount = flat.slice(0, currentIdx + 1).filter((i) => i.type === 'work').length
+  const nextLabel = nextInterval
+    ? `Next: ${getIntervalName(nextInterval, workCount + 1)} (${
+        nextInterval.type === 'work' && getEffectiveMode(workout, nextInterval) === 'reps'
+          ? `${nextInterval.reps ?? 0} reps`
+          : formatTime(nextInterval.duration)
+      })`
+    : undefined
   // ponytail: reps mode progress is discrete — completed / total
   const progressVal = isRepsWork
-    ? (completedIntervals.length / total)
+    ? currentIdx / total
     : total > 0
-      ? (currentIdx + (1 - timer.timeLeft / (interval?.duration || 1))) / total
+      ? (currentIdx + timer.progress) / total
       : 0
 
   // ponytail: no drag, no reorder — flat list, upgrade with drag-and-drop in Phase 1
   const invalidFirst = workout.intervals[0]?.type !== 'prepare'
   const invalidLast = workout.intervals[workout.intervals.length - 1]?.type !== 'cooldown'
+  const plannedDuration = formatDuration(flat.reduce((sum, step) => sum + step.duration, 0))
 
   return (
-    <>
+    <main className="timer-dark-bg flex min-h-dvh flex-col text-timer-on">
+      <PlayHeader title={phase === 'idle' ? 'Workout' : workout.title} onClose={() => router.push('/workouts')} />
       {phase === 'active' ? (
-        <div className="relative min-h-dvh">
+        <>
           <PlayScreen
+            embedded
             timeLeft={timer.timeLeft}
             duration={interval?.duration ?? 0}
             intervalType={interval?.type ?? 'prepare'}
             label={interval ? getIntervalName(interval, workCount, exercise) : ''}
-            nextLabel={nextInterval ? `Next: ${nextInterval.type === 'work' ? getIntervalName(nextInterval, workCount + 1) : nextInterval.title} (${formatTime(nextInterval.duration)})` : undefined}
+            nextLabel={nextLabel}
             status={timer.status}
             onPause={timer.pause}
             onResume={timer.resume}
@@ -271,6 +286,7 @@ export default function PlayWorkoutPage() {
             showAddTime={isRestInRepsWorkout}
             setIndex={currentIdx}
             setCount={total}
+            positionLabel="Step"
             totalProgress={progressVal}
             progressPercent={Math.round(progressVal * 100)}
             isRepsMode={isRepsWork}
@@ -280,9 +296,6 @@ export default function PlayWorkoutPage() {
             onComplete={() => setShowRepDialog(true)}
             imageUrl={exercise?.images?.[0] ?? idbImageUrls[0] ?? interval?.imageUrl}
           />
-          <div className="absolute inset-x-0 top-0 z-50">
-            <PlayHeader title={workout.title} onClose={() => router.push('/workouts')} />
-          </div>
           {showRepDialog && interval && (
             <RepCompleteDialog
               plannedReps={interval.reps ?? 0}
@@ -291,51 +304,41 @@ export default function PlayWorkoutPage() {
               onSkip={handleRepSkip}
             />
           )}
-        </div>
+        </>
       ) : (
-        <div className="timer-dark-bg text-timer-on min-h-screen flex flex-col">
-          <PlayHeader title={workout.title} onClose={() => router.push('/workouts')} />
-
-          <main className="flex-grow flex flex-col items-center justify-center px-margin-mobile py-24 w-full max-w-4xl mx-auto">
-            {phase === 'idle' && (
-              <>
-                <h1 className="font-headline-lg text-headline-lg text-timer-on mb-8 mt-24">{workout.title}</h1>
-                <p className="font-body-md text-body-md text-timer-muted mb-24">
-                  {total} interval{total !== 1 && 's'} &middot;{' '}
-                  {Math.floor(flat.reduce((s, i) => s + i.duration, 0) / 60)} min
-                </p>
-                {(invalidFirst || invalidLast) && (
-                  <div className="w-full max-w-md p-3 rounded-lg bg-timer-on/5 border border-warn/50 mb-24">
-                    <p className="text-sm text-center text-yellow-400">
-                      {invalidFirst && 'First interval should be "Prepare". '}
-                      {invalidLast && 'Last interval should be "Cooldown".'}
-                    </p>
-                  </div>
-                )}
-                <button
-                  onClick={handleStart}
-                  className="px-12 py-4 bg-timer-on text-accent rounded-full text-xl font-bold hover:bg-timer-on/80 transition-colors"
-                >
-                  Start
-                </button>
-              </>
-            )}
-
-            {phase === 'complete' && (
-              <div className="flex flex-col items-center gap-4 mt-12 text-center">
-                <h1 className="font-headline-lg text-headline-lg text-timer-on">Workout Complete!</h1>
-                <p className="font-body-md text-body-md text-timer-muted">
-                  {total} interval{total !== 1 && 's'} completed
-                </p>
-                <p className="font-body-md text-body-md text-timer-muted">
-                  Total time:{' '}
-                  {Math.floor(flat.reduce((s, i) => s + i.duration, 0) / 60)} min
-                </p>
-              </div>
-            )}
-          </main>
+        <div className="mx-auto flex w-full max-w-lg flex-1 flex-col items-center justify-center gap-4 px-margin-mobile py-10 text-center">
+          {phase === 'idle' ? (
+            <>
+              <h1 className="font-headline text-headline-lg">{workout.title}</h1>
+              <p className="text-body-md text-timer-muted">
+                {total} interval{total !== 1 && 's'} &middot; {workout.mode === 'reps' ? 'Reps and rest' : `${plannedDuration} planned`}
+              </p>
+              {(invalidFirst || invalidLast) && (
+                <div className="w-full rounded-card border border-warn/50 bg-timer-on/5 p-3">
+                  <p className="text-sm text-timer-on">
+                    {invalidFirst && 'First interval should be "Prepare". '}
+                    {invalidLast && 'Last interval should be "Cooldown".'}
+                  </p>
+                </div>
+              )}
+              <button
+                onClick={handleStart}
+                className="mt-3 min-h-14 w-full rounded-full bg-accent px-32 text-body-lg font-semibold text-accent-on transition-colors hover:bg-accent-hover focus-visible:focus-ring sm:w-auto"
+              >
+                Start
+              </button>
+            </>
+          ) : (
+            <>
+              <h1 className="font-headline text-headline-lg">Workout Complete!</h1>
+              <p className="text-body-md text-timer-muted">
+                {completedIntervals.filter((step) => step.completed).length} of {total} steps completed
+              </p>
+              <p role="status" className="text-body-md text-timer-muted">Opening session summary…</p>
+            </>
+          )}
         </div>
       )}
-    </>
+    </main>
   )
 }

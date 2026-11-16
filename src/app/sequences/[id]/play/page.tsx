@@ -10,8 +10,7 @@ import { useTimer } from '@/hooks/useTimer'
 import { useBeep } from '@/hooks/useBeep'
 import { useIntervalNotification } from '@/hooks/useIntervalNotification'
 import { ProgressBar } from '@/components/ProgressBar'
-import { TimerControls } from '@/components/TimerControls'
-import { TimerRing } from '@/components/TimerRing'
+import { PlayScreen } from '@/components/blocks/PlayScreen'
 import { PlayHeader } from '@/components/PlayHeader'
 import { ExercisePanel } from '@/components/ExercisePanel'
 import { useExercises } from '@/hooks/useExercises'
@@ -27,7 +26,7 @@ type Phase = 'idle' | 'active' | 'workout-summary' | 'complete'
 export default function PlaySequencePage() {
   const router = useRouter()
   const params = useParams<{ id: string }>()
-  const { workouts } = useWorkoutContext()
+  const { workouts, isLoading: isWorkoutLoading } = useWorkoutContext()
   const { getSequence } = useSequences()
   const { addSession } = useSessions()
   const { beep } = useBeep()
@@ -35,8 +34,15 @@ export default function PlaySequencePage() {
   const { exercises, getExerciseImages } = useExercises()
 
   const [sequence, setSequence] = useState<Sequence | undefined>(undefined)
+  const [loadedSequenceId, setLoadedSequenceId] = useState<string>()
   useEffect(() => {
-    getSequence(params.id).then(setSequence)
+    let isCurrent = true
+    void getSequence(params.id).then((result) => {
+      if (!isCurrent) return
+      setSequence(result)
+      setLoadedSequenceId(params.id)
+    })
+    return () => { isCurrent = false }
   }, [params.id, getSequence])
   const totalRounds = sequence ? getTotalRounds(sequence) : 0
 
@@ -176,8 +182,7 @@ export default function PlaySequencePage() {
       completedAt: Date.now(),
       intervals: completedIntervals,
     }
-    addSession(session)
-    router.push(`/history/${session.id}`)
+    void Promise.resolve(addSession(session)).then(() => router.push(`/history/${session.id}`))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase])
 
@@ -250,6 +255,14 @@ export default function PlaySequencePage() {
 
   // --- Render ---
 
+  if ((!sequence && loadedSequenceId !== params.id) || (!workout && isWorkoutLoading)) {
+    return (
+      <main className="timer-dark-bg grid min-h-dvh place-items-center px-margin-mobile text-timer-muted">
+        <p role="status">Loading sequence…</p>
+      </main>
+    )
+  }
+
   if (!sequence) {
     return (
       <div className="timer-dark-bg text-timer-on min-h-screen flex flex-col items-center justify-center gap-4 px-margin-mobile">
@@ -278,55 +291,84 @@ export default function PlaySequencePage() {
     )
   }
 
-  const totalDuration = flat.reduce((s, i) => s + i.duration, 0)
-  const progressVal =
-    totalDuration > 0 && currentInterval
-      ? (flat.slice(0, intervalIdx).reduce((s, i) => s + i.duration, 0) +
-          (currentInterval.duration - timer.timeLeft)) / totalDuration
-      : 0
+  const progressVal = flat.length > 0 ? (intervalIdx + timer.progress) / flat.length : 0
 
   return (
-    <div className="timer-dark-bg text-timer-on min-h-screen flex flex-col">
-      <PlayHeader title={sequence.title} onClose={() => router.push('/sequences')} />
+    <main className="timer-dark-bg flex min-h-dvh flex-col text-timer-on">
+      <PlayHeader title={phase === 'idle' ? 'Sequence' : sequence.title} onClose={() => router.push('/sequences')} />
 
-      <main className="flex-grow flex flex-col items-center px-margin-mobile py-24 w-full max-w-4xl mx-auto">
+      <div className={`mx-auto flex w-full flex-1 flex-col items-center ${phase === 'active' ? 'max-w-6xl py-4' : 'max-w-lg justify-center px-margin-mobile py-10 text-center'}`}>
         {/* Progress bar — visible during active and summary phases */}
         {phase !== 'idle' && (
-          <div className="w-full max-w-2xl mb-24">
-            <div className="flex justify-between items-center mb-8">
-              <span className="font-data-sm text-data-sm text-timer-muted">{sequence.title} Progress</span>
-              <span className="font-data-sm text-data-sm text-timer-on">{progress.percent}%</span>
-            </div>
-            <ProgressBar progress={progress.percent / 100} dark />
+          <div className="relative mb-4 w-full max-w-2xl px-margin-mobile">
+            <span className="absolute right-margin-mobile top-0 font-mono text-data-sm text-timer-on">{progress.percent}%</span>
+            <ProgressBar progress={progress.percent / 100} label="Sequence progress" variant="plain" dark />
             <div className="flex justify-between w-full font-label-caps text-label-caps text-timer-muted mt-sm">
-              <span>{progress.current + 1}/{progress.total}</span>
-              {workout && <span>Workout: {workout.title}</span>}
+              <span className="shrink-0">Round {progress.current + 1} of {progress.total}</span>
+              {workout && <span className="min-w-0 truncate text-right">{workout.title}</span>}
             </div>
           </div>
         )}
 
         {phase === 'idle' && (
           <>
-            <h1 className="font-headline-lg text-headline-lg text-timer-on mb-8 mt-24">{sequence.title}</h1>
-            <p className="font-body-md text-body-md text-timer-muted mb-24">
+            <h1 className="font-headline text-headline-lg">{sequence.title}</h1>
+            <p className="mb-6 mt-4 text-body-md text-timer-muted">
               {totalRounds} round{totalRounds !== 1 && 's'} &middot;{' '}
               {sequence.workoutIds.length} workout{sequence.workoutIds.length !== 1 && 's'}
               {sequence.repeatCount > 1 && ` × ${sequence.repeatCount}`}
             </p>
             <button
               onClick={handleStart}
-              className="px-12 py-4 rounded-full text-xl font-bold transition-colors bg-accent text-accent-on hover:opacity-90"
+              className="min-h-14 w-full rounded-full bg-accent px-32 text-body-lg font-semibold text-accent-on transition-colors hover:bg-accent-hover focus-visible:focus-ring sm:w-auto"
             >
               Start Sequence
             </button>
           </>
         )}
 
-        {phase === 'active' && (
-          <div className="flex flex-col lg:flex-row gap-24 w-full max-w-6xl mx-auto items-start">
-            {/* Left column — Exercise info */}
-            <div className="w-full lg:w-1/2 flex justify-center lg:sticky lg:top-24">
-              {currentInterval?.exerciseId && (
+        {phase === 'active' && currentInterval && (
+          <div className="mx-auto flex w-full flex-1 flex-col items-start gap-6 lg:flex-row lg:justify-center">
+            <div className="flex w-full flex-1 flex-col self-stretch lg:max-w-2xl">
+              <PlayScreen
+                embedded
+                timeLeft={timer.timeLeft}
+                duration={timerDuration}
+                intervalType={currentInterval.type}
+                label={getIntervalName(currentInterval, seqWorkCount, exercise)}
+                nextLabel={nextInterval ? `Next: ${nextInterval.type === 'work' ? getIntervalName(nextInterval, seqWorkCount + 1) : nextInterval.title} (${formatTime(nextInterval.duration)})` : undefined}
+                status={timer.status}
+                onPause={timer.pause}
+                onResume={timer.resume}
+                onSkip={handleSkipInterval}
+                onRestart={handleRestart}
+                onPrevious={intervalIdx > 0 ? () => setIntervalIdx((prev) => prev - 1) : undefined}
+                setIndex={intervalIdx}
+                setCount={flat.length}
+                positionLabel="Step"
+                totalProgress={progressVal}
+                progressPercent={Math.round(progressVal * 100)}
+                progressLabel="Workout progress"
+                exerciseName={exercise?.name}
+                isRepsMode={false}
+              />
+              <div className="flex flex-wrap items-center justify-center gap-3 px-margin-mobile py-4">
+                <button
+                  onClick={handleSkipWorkout}
+                  className="min-h-11 rounded-control border border-timer-border px-4 text-sm font-medium text-timer-on transition-colors hover:bg-timer-on/10 focus-visible:focus-ring"
+                >
+                  Skip to next workout
+                </button>
+                <button
+                  onClick={handleFinishEarly}
+                  className="min-h-11 rounded-control border border-danger/50 px-4 text-sm font-medium text-timer-on transition-colors hover:bg-danger/10 focus-visible:focus-ring"
+                >
+                  Finish Early
+                </button>
+              </div>
+            </div>
+            {currentInterval.exerciseId && (
+              <div className="flex w-full justify-center px-margin-mobile lg:sticky lg:top-20 lg:w-2/5 lg:py-6">
                 <ExercisePanel
                   name={exercise?.name ?? ''}
                   exerciseId={currentInterval.exerciseId}
@@ -342,65 +384,8 @@ export default function PlaySequencePage() {
                   category={exercise?.category}
                   chips={exercise?.muscleGroups}
                 />
-              )}
-            </div>
-
-            {/* Right column — Timer + Controls + Progress */}
-            <div className="w-full lg:w-1/2 flex flex-col items-center gap-12">
-              {/* Timer Ring */}
-              {currentInterval && (
-                <TimerRing
-                  timeLeft={timer.timeLeft}
-                  duration={currentInterval.duration}
-                  intervalType={currentInterval.type}
-                  label={getIntervalName(currentInterval, seqWorkCount, exercise)}
-                  nextLabel={nextInterval ? `Next: ${nextInterval.type === 'work' ? getIntervalName(nextInterval, seqWorkCount + 1) : nextInterval.title} (${formatTime(nextInterval.duration)})` : undefined}
-                />
-              )}
-
-              {/* Controls */}
-              <TimerControls
-                status={timer.status}
-                onPause={timer.pause}
-                onResume={timer.resume}
-                onSkip={handleSkipInterval}
-                onRestart={handleRestart}
-                onPrevious={() => {
-                  if (intervalIdx > 0) {
-                    setIntervalIdx((prev) => prev - 1)
-                  }
-                }}
-              />
-
-              {/* Workout-level Progress */}
-              <div className="w-full max-w-2xl">
-                <div className="flex justify-between items-center mb-8">
-                  <span className="font-data-sm text-data-sm text-timer-muted">{workout?.title ?? 'Workout'} Progress</span>
-                  <span className="font-data-sm text-data-sm text-timer-on">{Math.round(progressVal * 100)}%</span>
-                </div>
-                <ProgressBar progress={progressVal} dark />
-                <div className="flex justify-between w-full font-label-caps text-label-caps text-timer-muted mt-8">
-                  <span>{intervalIdx + 1} of {flat.length}</span>
-                  <span>{currentInterval ? getIntervalName(currentInterval, seqWorkCount, exercise) : ''}</span>
-                </div>
               </div>
-
-              {/* ponytail: flat skip + finish buttons, no sub-menus */}
-              <div className="flex items-center justify-center gap-4">
-                <button
-                  onClick={handleSkipWorkout}
-                  className="px-4 py-2 rounded-lg text-sm font-medium border border-timer-border text-timer-muted hover:text-timer-on transition-colors"
-                >
-                  Skip to next workout
-                </button>
-                <button
-                  onClick={handleFinishEarly}
-                  className="px-4 py-2 rounded-lg text-sm font-medium border border-danger/50 text-danger hover:text-timer-on transition-colors"
-                >
-                  Finish Early
-                </button>
-              </div>
-            </div>
+            )}
           </div>
         )}
 
@@ -431,10 +416,10 @@ export default function PlaySequencePage() {
               {completedIntervals.length} interval{completedIntervals.length !== 1 && 's'} across{' '}
               {totalRounds} round{totalRounds !== 1 && 's'}
             </p>
-            <p className="font-body-md text-body-md text-timer-muted">Saving session...</p>
+            <p role="status" className="text-body-md text-timer-muted">Opening session summary…</p>
           </div>
         )}
-      </main>
-    </div>
+      </div>
+    </main>
   )
 }

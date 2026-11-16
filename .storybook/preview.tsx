@@ -1,7 +1,19 @@
 import type { Preview } from '@storybook/nextjs-vite'
 import '../src/app/globals.css'
 
+const trainingStories = new Set([
+  'Blocks/PlayScreen',
+  'Blocks/PlayScreenSplit',
+  'Blocks/RepCounter',
+  'Blocks/WorkoutComplete',
+  'Components/TimerControls',
+  'Components/TimerRing',
+])
+
 const preview: Preview = {
+  decorators: [(Story, context) => trainingStories.has(context.title)
+    ? <div className="training-theme bg-bg text-fg-2"><Story /></div>
+    : <Story />],
   parameters: {
     controls: {
       matchers: {
@@ -9,8 +21,6 @@ const preview: Preview = {
         date: /Date$/i,
       },
     },
-    // ponytail: app dark mode is OS-driven (prefers-color-scheme), no manual toggle
-    // DD-6: single Happy Hues theme — bg from token, no stale Material/raw hexes
     backgrounds: {
       default: 'app',
       values: [{ name: 'app', value: 'var(--color-bg)' }],
