@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { uploadExerciseMedia } from '@/lib/exercise-media'
 import { useExercises } from '@/hooks/useExercises'
 import { useFavorites } from '@/hooks/useFavorites'
 import { useRouter } from 'next/navigation'
@@ -23,7 +24,7 @@ const EMPTY_FORM: ExerciseFormData = {
 }
 
 export default function ExercisesPage() {
-  const { exercises, saveExercise, saveExerciseImage, getExerciseImages, isLoading } = useExercises()
+  const { exercises, saveExercise, getExerciseImages, isLoading } = useExercises()
   const { favoriteIds, toggleFavorite, clearOrphans } = useFavorites()
   const router = useRouter()
   const [showOpenSource, setShowOpenSource] = useState(true)
@@ -153,7 +154,7 @@ export default function ExercisesPage() {
         onSave={handleSave}
         allMuscleGroups={allMuscleGroups}
         allEquipment={allEquipment}
-        onImageUpload={editingId ? (file) => saveExerciseImage(editingId, file) : undefined}
+        onImageUpload={uploadExerciseMedia}
       />
 
       {assigningExercise && (

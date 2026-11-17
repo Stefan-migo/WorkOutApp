@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { uploadExerciseMedia } from '@/lib/exercise-media'
 import { useExercises } from '@/hooks/useExercises'
 import { useFavorites } from '@/hooks/useFavorites'
 import { useWorkoutContext } from '@/context/WorkoutContext'
@@ -18,12 +19,13 @@ export default function ExerciseDetailPage() {
   const router = useRouter()
   const {
     exercises, isLoading, error, saveExercise, deleteExercise,
-    getExerciseImages, saveExerciseImage,
+    getExerciseImages,
   } = useExercises()
   const { isFavorite, toggleFavorite } = useFavorites()
   const { workouts } = useWorkoutContext()
   const [idbImages, setIdbImages] = useState<ImageEntry[]>([])
   const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // ponytail: exercises already loaded into state array — use find, not async getExercise
@@ -56,12 +58,13 @@ export default function ExerciseDetailPage() {
   async function handleUpload(file: File) {
     if (!exercise) return
     setUploading(true)
+    setUploadError('')
     try {
-      await saveExerciseImage(exercise.id, file)
-      const updated = await getExerciseImages(exercise.id)
-      setIdbImages(updated)
-    } catch {
-      // ponytail: silent fail — user sees no change, try again
+      const imageUrl = await uploadExerciseMedia(file)
+      const saved = await saveExercise({ ...exercise, images: [...(exercise.images ?? []), imageUrl] })
+      if (!saved) setUploadError('Could not save the image to the exercise.')
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : 'Image upload failed.')
     } finally {
       setUploading(false)
     }
@@ -227,7 +230,8 @@ export default function ExerciseDetailPage() {
                 ref={fileInputRef}
                 onChange={(e) => {
                   const f = e.target.files?.[0]
-                  if (f) handleUpload(f)
+                  e.target.value = ''
+                  if (f) void handleUpload(f)
                 }}
               />
               <button
@@ -254,7 +258,8 @@ export default function ExerciseDetailPage() {
                 ref={fileInputRef}
                 onChange={(e) => {
                   const f = e.target.files?.[0]
-                  if (f) handleUpload(f)
+                  e.target.value = ''
+                  if (f) void handleUpload(f)
                 }}
               />
               <button
@@ -268,6 +273,8 @@ export default function ExerciseDetailPage() {
           </div>
         )
       })()}
+
+      {uploadError && <p role="alert" className="text-danger">{uploadError}</p>}
 
       {/* Metadata chips */}
       <div className="flex flex-wrap gap-2">
@@ -400,7 +407,7 @@ export default function ExerciseDetailPage() {
             onSave={handleSave}
             allMuscleGroups={allMuscleGroups}
             allEquipment={allEquipment}
-            onImageUpload={(file) => saveExerciseImage(exercise.id, file)}
+            onImageUpload={uploadExerciseMedia}
           />
       )}
 

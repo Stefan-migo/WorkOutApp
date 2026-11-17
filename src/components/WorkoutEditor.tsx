@@ -5,6 +5,7 @@ import { useMemo, useState, useEffect, useRef, useReducer, useId } from 'react'
 import { IntervalRow } from '@/components/IntervalRow'
 import { TimelineStrip } from '@/components/TimelineStrip'
 import { IntervalDetailSheet } from '@/components/IntervalDetailSheet'
+import { getLocalIntervalImageReference, uploadExerciseMedia } from '@/lib/exercise-media'
 import { useExercises } from '@/hooks/useExercises'
 import { SEGMENT_BG, SEGMENT_TEXT, SEGMENT_DOT, TYPE_ICONS } from '@/lib/segment-styles'
 import { workoutReducer } from '@/lib/workout-reducer'
@@ -120,7 +121,7 @@ interface WorkoutEditorProps {
 }
 
 export default function WorkoutEditor({ existingWorkout, initialIntervals, onSave, onCancel }: WorkoutEditorProps) {
-  const { exercises, saveExerciseImage } = useExercises()
+  const { exercises, getExerciseImages } = useExercises()
   const [title, setTitle] = useState(existingWorkout?.title ?? '')
   const [intervals, dispatch] = useReducer(
     workoutReducer,
@@ -404,7 +405,18 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
           onSave={handleSheetSave}
           onClose={() => { setEditingIndex(null); setOriginalInterval(null) }}
           exercises={exercises}
-          onImageUpload={(file) => saveExerciseImage(intervals[editingIndex]!.id, file, 'reference')}
+          onImageUpload={uploadExerciseMedia}
+          onSyncLocalImage={async () => {
+            const interval = intervals[editingIndex]!
+            const reference = getLocalIntervalImageReference(interval)
+            const images = await getExerciseImages(reference?.owner ?? interval.id)
+            const image = reference?.blobId
+              ? images.find((item) => item.blobId === reference.blobId)
+              : images.at(-1)
+            if (!image) throw new Error('This image is unavailable in this browser. Attach the original file again.')
+            const blob = await (await fetch(image.blobUrl)).blob()
+            return uploadExerciseMedia(new File([blob], 'exercise-image', { type: blob.type }))
+          }}
         />
       )}
 
