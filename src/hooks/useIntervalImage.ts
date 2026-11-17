@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { getLocalIntervalImageReference } from '@/lib/exercise-media'
 import type { Interval } from '@/types/workout'
 import type { ImageEntry } from './useIndexedDB'
 
@@ -8,10 +9,8 @@ export function useIntervalImage(
   getImages: (owner: string) => Promise<ImageEntry[]>,
 ) {
   const url = interval?.imageUrl
-  const reference = url?.startsWith('local-image:') ? url.slice('local-image:'.length).split('::') : undefined
-  const legacy = url?.startsWith('blob:')
-  const owner = reference?.[0] ?? (legacy ? interval?.id : undefined)
-  const blobId = reference?.[1]
+  const reference = getLocalIntervalImageReference(interval)
+  const { owner, blobId } = reference ?? {}
   const exerciseId = exerciseImage ? undefined : interval?.exerciseId
   const key = JSON.stringify([owner, blobId, exerciseId])
   const [loaded, setLoaded] = useState<{ key: string; local?: string; exercise?: string }>()
@@ -32,5 +31,5 @@ export function useIntervalImage(
   }, [owner, blobId, exerciseId, key, getImages])
 
   const resolved = loaded?.key === key ? loaded : undefined
-  return (owner || reference ? resolved?.local : url) || exerciseImage || resolved?.exercise
+  return (reference ? resolved?.local : url) || exerciseImage || resolved?.exercise
 }

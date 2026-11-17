@@ -56,6 +56,7 @@ export function ExerciseFormDialog({
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (uploading) return
     if (!form.name.trim()) {
       setValidationError('Name is required')
       return
@@ -327,9 +328,9 @@ export function ExerciseFormDialog({
                   setUploading(true)
                   setUploadError('')
                   try {
-                    const blobUrl = await onImageUpload(f)
-                    if (blobUrl) {
-                      update({ images: [...form.images, blobUrl] })
+                    const imageUrl = await onImageUpload(f)
+                    if (imageUrl) {
+                      update({ images: [...form.images, imageUrl] })
                     }
                   } catch (err) {
                     setUploadError(err instanceof Error ? err.message : 'Upload failed')

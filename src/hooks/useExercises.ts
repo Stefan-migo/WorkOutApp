@@ -104,7 +104,7 @@ export function useExercises() {
 
   const saveExercise = useCallback(
     async (exercise: Exercise) => {
-      if (!user) return
+      if (!user) return false
       setError(null)
 
       const { error: upsertError } = await supabase
@@ -113,9 +113,10 @@ export function useExercises() {
 
       if (upsertError) {
         setError(upsertError.message)
-      } else {
-        await fetchExercises()
+        return false
       }
+      await fetchExercises()
+      return true
     },
     [user, supabase, fetchExercises],
   )

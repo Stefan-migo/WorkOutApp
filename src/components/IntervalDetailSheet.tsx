@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useId, useMemo } from 'react'
+import { isCloudExerciseMedia } from '@/lib/exercise-media'
 import { useIntervalDialog } from '@/hooks/useIntervalDialog'
 import type { Interval, Exercise, WorkoutMode } from '@/types/workout'
 import { ExercisePicker } from './ExercisePicker'
@@ -11,9 +12,10 @@ interface IntervalDetailSheetProps {
   onClose: () => void
   exercises?: Exercise[]
   onImageUpload?: (file: File) => Promise<string>
+  onSyncLocalImage?: () => Promise<string>
 }
 
-export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onImageUpload }: IntervalDetailSheetProps) {
+export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onImageUpload, onSyncLocalImage }: IntervalDetailSheetProps) {
   const dialogRef = useIntervalDialog()
   const headingId = useId()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -26,6 +28,19 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
   const hasLocalImage = imageUrl.startsWith('local-image:') || imageUrl.startsWith('blob:')
+  const hasCloudImage = isCloudExerciseMedia(imageUrl)
+
+  async function attachImage(upload: () => Promise<string>) {
+    setUploading(true)
+    setUploadError('')
+    try {
+      setImageUrl(await upload())
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : 'Could not attach image.')
+    } finally {
+      setUploading(false)
+    }
+  }
   const [reps, setReps] = useState(interval.reps ?? 0)
   const [weight, setWeight] = useState(interval.weight ?? 0)
   const [editMode, setEditMode] = useState<WorkoutMode>(interval.mode ?? 'timed')
@@ -248,9 +263,9 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
             <div className="flex gap-2">
               <input
                 type="text"
-                value={hasLocalImage ? '' : imageUrl}
+                value={hasLocalImage || hasCloudImage ? '' : imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
-                placeholder={hasLocalImage ? "Local image attached" : "https://example.com/image.jpg"}
+                placeholder={hasCloudImage ? "Cloud image attached" : hasLocalImage ? "Local image attached" : "https://example.com/image.jpg"}
                 className="min-w-0 flex-1 bg-surface text-fg-2 rounded-lg px-3 py-2.5 text-base border border-border focus:outline-none focus:ring-1 focus:ring-accent"
               />
               <button
@@ -268,27 +283,22 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
               accept="image/*"
               className="hidden"
               ref={fileInputRef}
-              onChange={async (e) => {
-                const f = e.target.files?.[0]
-                if (f && onImageUpload) {
-                  setUploading(true)
-                  setUploadError('')
-                  try {
-                    const url = await onImageUpload(f)
-                    if (url) setImageUrl(url)
-                  } catch (error) {
-                    setUploadError(error instanceof Error ? error.message : 'Could not attach image.')
-                  }
-                  finally { setUploading(false) }
-                }
+              onChange={(e) => {
+                const file = e.target.files?.[0]
                 e.target.value = ''
+                if (file && onImageUpload) void attachImage(() => onImageUpload(file))
               }}
             />
           </label>
-          {hasLocalImage && (
-            <button type="button" className="self-start text-sm text-accent" onClick={() => setImageUrl('')}>
-              Remove local image
-            </button>
+          {(hasLocalImage || hasCloudImage) && (
+            <div className="flex flex-wrap gap-3 text-sm text-accent">
+              <button type="button" disabled={uploading} onClick={() => setImageUrl('')}>Remove image</button>
+              {hasLocalImage && onSyncLocalImage && (
+                <button type="button" disabled={uploading} onClick={() => void attachImage(onSyncLocalImage)}>
+                  Upload local image to cloud
+                </button>
+              )}
+            </div>
           )}
           {uploadError && <p role="alert" className="text-sm text-fg-2">{uploadError}</p>}
 
