@@ -14,8 +14,6 @@ interface DayRowProps {
   onClick: () => void
 }
 
-// Single card style (CU-1); today is distinguished by an accent ring, never a
-// full accent fill, and stays legible for assigned and rest days (CU-4).
 export function DayRow({
   dayName,
   dayNum,
@@ -27,18 +25,18 @@ export function DayRow({
   isEmpty,
   onClick,
 }: DayRowProps) {
-  // CU-4: subtle accent ring for today — same card base for every day
-  const todayRing = isToday
-    ? 'ring-1 ring-accent border-accent'
-    : 'border-border-soft'
+  const dayTone = isToday
+    ? 'bg-surface-warm text-accent'
+    : 'text-fg-2'
 
   if (isEmpty) {
     return (
       <button
         onClick={onClick}
-        className={`flex items-center gap-16 p-16 bg-surface/50 border border-dashed ${todayRing} rounded-card hover:border-accent hover:shadow-card-hover hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 focus-visible:focus-ring cursor-pointer group`}
+        aria-current={isToday ? 'date' : undefined}
+        className={`flex min-h-14 w-full items-center gap-3 px-3 py-2 ${dayTone} first:rounded-t-card last:rounded-b-card hover:bg-surface-warm focus-visible:focus-ring group`}
       >
-        <div className="flex flex-col items-center justify-center w-12 h-12 bg-surface/50 rounded-card shrink-0">
+        <div className="flex flex-col items-center justify-center w-10 rounded-card shrink-0">
           <span className="text-label-caps text-muted">{dayName}</span>
           <span className="text-data-lg font-bold text-muted">
             {dayNum}
@@ -65,9 +63,10 @@ export function DayRow({
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-16 p-16 bg-surface border ${todayRing} rounded-card hover:border-accent hover:shadow-card-hover hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 focus-visible:focus-ring cursor-pointer group`}
+      aria-current={isToday ? 'date' : undefined}
+      className={`flex min-h-14 w-full items-center gap-3 px-3 py-2 ${dayTone} first:rounded-t-card last:rounded-b-card hover:bg-surface-warm focus-visible:focus-ring group`}
     >
-      <div className="flex flex-col items-center justify-center w-12 h-12 bg-surface rounded-card shrink-0">
+      <div className="flex flex-col items-center justify-center w-10 rounded-card shrink-0">
         <span className="text-label-caps text-muted">{dayName}</span>
         <span className="text-data-lg font-bold text-fg-2">{dayNum}</span>
       </div>

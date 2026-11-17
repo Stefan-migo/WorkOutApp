@@ -1,50 +1,18 @@
-interface StrainGaugeProps {
-  avgRpe: number
-}
-
-export default function StrainGauge({ avgRpe }: StrainGaugeProps) {
-  const gaugeR = 80
-  const gaugeCirc = 2 * Math.PI * gaugeR
-  const gaugeOffset = gaugeCirc - (avgRpe / 10) * gaugeCirc
-
+export default function StrainGauge({ workShare }: { workShare: number | null }) {
   return (
-    <div className="md:col-span-4 glass-card rounded-xl p-16 flex flex-col h-96 ambient-shadow justify-between">
-      <div className="pb-3">
-        <h3 className="font-headline-md text-headline-md text-fg-2">
-          Average Strain
-        </h3>
-        <p className="font-body-md text-body-md text-muted">
-          RPE Focus
-        </p>
-      </div>
-      {/* ponytail: work/rest ratio as RPE proxy — no actual RPE tracking */}
-      <div className="flex-1 flex items-center justify-center">
-        <div className="relative w-48 h-48">
-          <svg className="w-full h-full -rotate-90" viewBox="0 0 184 184">
-            <circle
-              cx="92" cy="92" r={gaugeR}
-              fill="none" stroke="currentColor" strokeWidth="16"
-              className="text-border-soft"
-            />
-            <circle
-              cx="92" cy="92" r={gaugeR}
-              fill="none" stroke="currentColor" strokeWidth="16"
-              strokeLinecap="round"
-              strokeDasharray={gaugeCirc}
-              strokeDashoffset={gaugeOffset}
-              className="text-accent transition-all duration-700 ease-out"
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="font-display-timer-mobile text-display-timer-mobile text-accent leading-none">
-              {avgRpe}
-            </span>
-            <span className="font-label-caps text-label-caps text-muted mt-1">
-              Avg RPE
-            </span>
+    <section className="glass-card min-w-0 rounded-card p-4 md:col-span-4">
+      <h3 className="text-lg font-semibold text-fg-2">Work time share</h3>
+      {workShare === null ? (
+        <p className="mt-2 text-sm text-muted">No timed workout intervals yet.</p>
+      ) : (
+        <>
+          <p className="mt-2 text-3xl font-bold tabular-nums text-accent">{workShare}%</p>
+          <div aria-hidden="true" className="mt-2 h-2 overflow-hidden rounded-full bg-surface-warm">
+            <div className="h-full rounded-full bg-accent" style={{ width: `${workShare}%` }} />
           </div>
-        </div>
-      </div>
-    </div>
+          <p className="mt-2 text-sm text-muted">Share of logged timed intervals spent in Work.</p>
+        </>
+      )}
+    </section>
   )
 }

@@ -1,50 +1,32 @@
-interface WeeklyVolume {
-  weekLabel: string
-  totalSeconds: number
-}
+import { formatDuration } from '@/lib/format'
 
 interface VolumeChartProps {
-  recentVolume: WeeklyVolume[]
+  recentVolume: { weekLabel: string; totalSeconds: number }[]
   maxVolume: number
-  formatHours: (sec: number) => string
 }
 
-export default function VolumeChart({ recentVolume, maxVolume, formatHours }: VolumeChartProps) {
+function weekStart(label: string) {
+  const [year, week] = label.split('-W').map(Number)
+  const january4 = new Date(year!, 0, 4, 12)
+  january4.setDate(4 - ((january4.getDay() + 6) % 7) + (week! - 1) * 7)
+  return january4.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
+}
+
+export default function VolumeChart({ recentVolume, maxVolume }: VolumeChartProps) {
   return (
-    <div className="md:col-span-8 glass-card rounded-xl p-16 flex flex-col h-96 ambient-shadow">
-      <h3 className="font-headline-md text-headline-md text-fg-2 mb-16">
-        Volume per Week
-      </h3>
-      {/* ponytail: CSS div bars, no chart library */}
-      <div className="flex-1 w-full bg-surface rounded-lg border border-border-soft flex items-end p-8 gap-2 relative overflow-hidden">
-        {recentVolume.map((w) => {
-          const pct = (w.totalSeconds / maxVolume) * 100
-          const isTop = w.totalSeconds === maxVolume
-          return (
-            <div
-              key={w.weekLabel}
-              className="flex-1 h-full flex flex-col justify-end group relative"
-            >
-              <div
-                className={`w-full rounded-t transition-all duration-300 ${
-                  isTop ? 'bg-accent' : 'bg-accent/30'
-                }`}
-                style={{ height: `${Math.max(pct, 1)}%` }}
-              >
-                {/* ponytail: CSS-only tooltip, no library */}
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-accent text-accent-on font-data-sm text-data-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                  {formatHours(w.totalSeconds)}
-                </div>
-              </div>
+    <section className="glass-card min-w-0 rounded-card p-4 md:col-span-8">
+      <h3 className="mb-3 text-lg font-semibold text-fg-2">Volume per Week</h3>
+      <ul className="grid grid-cols-4 gap-2">
+        {recentVolume.map(({ weekLabel, totalSeconds }) => (
+          <li key={weekLabel} className="flex min-w-0 flex-col items-center gap-1.5">
+            <span className="text-xs font-semibold tabular-nums text-fg-2">{formatDuration(totalSeconds)}</span>
+            <div aria-hidden="true" className="flex h-24 w-full items-end rounded-control bg-surface-warm p-1 sm:h-32">
+              <div className="w-full rounded-sm bg-accent" style={{ height: totalSeconds ? `max(3px, ${totalSeconds / maxVolume * 100}%)` : 0 }} />
             </div>
-          )
-        })}
-      </div>
-      <div className="flex justify-between mt-2 font-data-sm text-data-sm text-muted px-8">
-        {recentVolume.map((w, i) => (
-          <span key={w.weekLabel}>Wk {i + 1}</span>
+            <span className="text-center text-xs text-muted">{weekStart(weekLabel)}</span>
+          </li>
         ))}
-      </div>
-    </div>
+      </ul>
+    </section>
   )
 }

@@ -67,8 +67,7 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
   const sessions = propSessions ?? lsSessions
   const stats = useStats(sessions)
 
-  // ponytail: RPE from work/rest ratio — no actual RPE tracking
-  const avgRpe = useMemo(() => {
+  const workShare = useMemo(() => {
     let workSec = 0
     let restSec = 0
     for (const s of sessions) {
@@ -78,8 +77,8 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
         else restSec += i.actualDuration
       }
     }
-    const ratio = workSec + restSec > 0 ? workSec / (workSec + restSec) : 0
-    return Math.round(ratio * 10 * 10) / 10
+    const total = workSec + restSec
+    return total > 0 ? Math.round(workSec / total * 100) : null
   }, [sessions])
 
   const heatmap = useMemo(() => buildHeatmap(sessions), [sessions])
@@ -91,7 +90,7 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
 
   if (sessions.length === 0) {
     return (
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-24">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-16 sm:gap-24">
         <PageHeading title="Performance Stats" />
         {isLoading && propSessions == null ? <p role="status" className="text-muted">Loading statistics…</p> : (
           <div className="glass-card rounded-xl px-16">
@@ -107,20 +106,28 @@ export default function StatsDashboard({ sessions: propSessions }: { sessions?: 
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-24">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-16 sm:gap-24">
       <PageHeading
         title="Performance Stats"
-        description="Review recent training and your personal records."
         action={<Button variant="outline" onClick={exportAllData}>Export JSON</Button>}
       />
-      {/* Bento Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-24">
-        <VolumeChart recentVolume={recentVolume} maxVolume={maxVolume} formatHours={formatHours} />
-        <StrainGauge avgRpe={avgRpe} />
+      <dl className="grid grid-cols-2 divide-x divide-border-soft rounded-card bg-surface-warm">
+        <div className="p-3">
+          <dt className="text-xs font-medium text-muted">Sessions this week</dt>
+          <dd className="mt-1 text-xl font-semibold tabular-nums text-fg-2">{stats.sessionsThisWeek}</dd>
+        </div>
+        <div className="p-3">
+          <dt className="text-xs font-medium text-muted">Training time this week</dt>
+          <dd className="mt-1 text-xl font-semibold tabular-nums text-fg-2">{formatDuration(recentVolume.at(-1)?.totalSeconds ?? 0)}</dd>
+        </div>
+      </dl>
+      <div className="grid grid-cols-1 items-start gap-3 md:grid-cols-12">
+        <VolumeChart recentVolume={recentVolume} maxVolume={maxVolume} />
+        <StrainGauge workShare={workShare} />
         <ConsistencyHeatmap heatmap={heatmap} />
 
         {/* Personal Records — 5 cols */}
-        <div className="md:col-span-5 glass-card rounded-xl p-16 ambient-shadow flex flex-col">
+        <div className="glass-card flex min-w-0 flex-col rounded-card p-4 md:col-span-5">
           <div className="flex items-center mb-16 border-b border-border-soft pb-8">
             <h3 className="font-headline-md text-headline-md text-fg-2">
               Personal Records

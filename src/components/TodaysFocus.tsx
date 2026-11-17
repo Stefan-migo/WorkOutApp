@@ -33,18 +33,18 @@ export function TodaysFocus({
     : 0
 
   return (
-    <section className="w-full bg-surface rounded-card p-16 flex flex-col gap-12 border border-border-soft self-start">
+    <section className="flex w-full flex-col gap-2 self-start rounded-card bg-surface-warm/70 px-4 py-3">
       <div className="flex flex-wrap items-start justify-between gap-8">
         <div className="min-w-0">
           <span className="text-label-caps text-accent font-bold">
             Today&apos;s Focus
           </span>
           {assignment && title ? (
-            <h3 className="mt-xs break-words text-headline-md font-bold text-fg-2">
+            <h3 className="mt-xs break-words text-lg font-bold text-fg-2">
               {title}
             </h3>
           ) : (
-            <h3 className="mt-xs text-headline-md font-bold text-fg-2">
+            <h3 className="mt-xs text-lg font-bold text-fg-2">
               No session scheduled
             </h3>
           )}
@@ -71,7 +71,7 @@ export function TodaysFocus({
       ) : null}
 
       {/* CU-5: one-line next-up — always present, empty/rest state included */}
-      <p className="flex items-center gap-8 text-data-sm text-muted border-t border-border-soft pt-8">
+      <p className="flex items-center gap-8 text-data-sm text-muted">
         <span className="material-symbols-outlined text-sm text-accent">
           event_upcoming
         </span>
