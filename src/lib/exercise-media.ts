@@ -3,7 +3,7 @@ import type { Interval } from '@/types/workout'
 export const EXERCISE_MEDIA_PATH = '/api/exercise-media'
 export const PRIVATE_MEDIA_CACHE_CONTROL = 'private, no-store'
 export const MAX_EXERCISE_CLIP_BYTES = 1024 * 1024
-export const EXERCISE_CLIP_SECONDS = 8
+export const EXERCISE_CLIP_SECONDS = 10
 export const EXERCISE_VIDEO_TYPES = new Set(['video/mp4', 'video/webm'])
 
 export function exerciseMediaUrl(id: string, video = false) {

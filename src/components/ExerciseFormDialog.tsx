@@ -5,6 +5,7 @@ import type { ExerciseCategory, ExerciseVisibility } from '@/types/workout'
 import { isExerciseVideo, uploadExerciseMedia } from '@/lib/exercise-media'
 import { useExerciseDemoDraft } from '@/hooks/useExerciseDemoDraft'
 import { ExerciseCamera } from './ExerciseCamera'
+import { ExerciseTrimEditor } from './ExerciseTrimEditor'
 import { ExerciseMedia } from './ExerciseMedia'
 import { TagChips } from './TagChips'
 import { Dialog } from './ui/Dialog'
@@ -160,11 +161,14 @@ export function ExerciseFormDialog({
           ) : (
             <>
               {demonstration.file && demonstration.preview && (
-                <video
-                  src={demonstration.preview}
-                  aria-label="Recorded demonstration"
-                  className="max-h-56 w-full rounded-control bg-surface-warm object-contain"
-                  autoPlay muted loop playsInline
+                <ExerciseTrimEditor
+                  key={demonstration.preview}
+                  preview={demonstration.preview}
+                  duration={demonstration.duration}
+                  range={demonstration.range}
+                  onChange={demonstration.changeRange}
+                  videoRef={demonstration.videoRef}
+                  disabled={saving}
                 />
               )}
               <div className="flex flex-wrap gap-2">
