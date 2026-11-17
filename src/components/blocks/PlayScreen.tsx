@@ -105,8 +105,8 @@ export function PlayScreen({
         {/* Center — timer or reps surface */}
         <div className="flex w-full flex-1 flex-col items-center justify-center gap-5 md:gap-32">
           {nextImageUrl && (
-            <figure className="flex w-full max-w-72 items-center gap-3 rounded-2xl border border-timer-border/60 bg-timer-on/5 p-2 pr-3">
-              <img src={nextImageUrl} alt="" className="h-[min(12dvh,4.5rem)] w-12 shrink-0 rounded-lg bg-timer-bg object-contain" />
+            <figure className="flex w-full max-w-80 items-center gap-4">
+              <img src={nextImageUrl} alt="" className="h-[min(25dvh,12rem)] w-[min(40%,8rem)] shrink-0 rounded-lg object-contain" />
               <figcaption className="min-w-0">
                 <p className="text-xs font-medium text-timer-muted">Up next</p>
                 <p className="break-words text-sm font-semibold leading-snug text-timer-on">{nextImageLabel}</p>
