@@ -21,6 +21,12 @@ export function getLocalIntervalImageReference(interval?: Interval) {
   if (url?.startsWith('blob:')) return { owner: interval?.id, blobId: undefined }
 }
 
+export function withExerciseMediaAccess(url: string, exerciseId: string) {
+  return isCloudExerciseMedia(url)
+    ? `${url}&exerciseId=${encodeURIComponent(exerciseId)}`
+    : url
+}
+
 export async function uploadExerciseMedia(file: File): Promise<string> {
   const ticket = await fetch(EXERCISE_MEDIA_PATH, {
     method: 'POST',

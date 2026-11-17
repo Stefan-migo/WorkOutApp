@@ -2,6 +2,8 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { uploadExerciseMedia } from '@/lib/exercise-media'
+import { canManageExercise, isSharedExercise } from '@/lib/exercise-ownership'
+import { useHiddenCatalogExercises } from '@/hooks/useHiddenCatalogExercises'
 import { useExercises } from '@/hooks/useExercises'
 import { useFavorites } from '@/hooks/useFavorites'
 import { useRouter } from 'next/navigation'
@@ -24,9 +26,12 @@ const EMPTY_FORM: ExerciseFormData = {
 }
 
 export default function ExercisesPage() {
-  const { exercises, saveExercise, getExerciseImages, isLoading } = useExercises()
+  const { exercises, saveExercise, deleteExercises, getExerciseImages, isLoading, error } = useExercises()
   const { favoriteIds, toggleFavorite, clearOrphans } = useFavorites()
   const router = useRouter()
+  const { hiddenIds, hide, restoreAll } = useHiddenCatalogExercises()
+  const [catalogError, setCatalogError] = useState('')
+  const [view, setView] = useState<'all' | 'mine' | 'community'>('all')
   const [showOpenSource, setShowOpenSource] = useState(true)
   useEffect(() => {
     try {
@@ -36,15 +41,21 @@ export default function ExercisesPage() {
     }
   }, [])
   const visibleExercises = useMemo(() =>
-    showOpenSource ? exercises : exercises.filter((exercise) => exercise.source !== 'free-exercise-db'),
-  [exercises, showOpenSource])
+    exercises.filter((exercise) => {
+      if (view === 'mine') return canManageExercise(exercise)
+      if (view === 'community') return exercise.visibility === 'community'
+      return !isSharedExercise(exercise) || (showOpenSource && !hiddenIds.includes(exercise.id))
+    }),
+  [exercises, showOpenSource, hiddenIds, view])
   const [formOpen, setFormOpen] = useState(false)
   const [form, setForm] = useState(EMPTY_FORM)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [assigningExercise, setAssigningExercise] = useState<Exercise | null>(null)
 
   // ponytail: clearOrphans on every exercise list refresh to keep favorites clean
-  useEffect(() => { clearOrphans(exercises.map((e) => e.id)) }, [exercises, clearOrphans])
+  useEffect(() => {
+    if (!isLoading && !error) clearOrphans(exercises.map((exercise) => exercise.id))
+  }, [exercises, clearOrphans, isLoading, error])
 
   // Derive unique filter options (shared with the form dialog's autocomplete)
   const allMuscleGroups = useMemo(() => {
@@ -86,7 +97,7 @@ export default function ExercisesPage() {
     setFormOpen(true)
   }
 
-  function handleSave(e: React.FormEvent) {
+  async function handleSave(e: React.FormEvent) {
     e.preventDefault()
     if (!form.name.trim()) return
     const now = Date.now()
@@ -95,6 +106,8 @@ export default function ExercisesPage() {
     const exercise: Exercise = {
       id: editingId!,
       name: form.name.trim(),
+      visibility: form.visibility,
+      authorName: form.authorName,
       category: form.category,
       description: form.description?.trim() || undefined,
       primaryMuscles: form.primaryMuscles.length > 0 ? form.primaryMuscles : undefined,
@@ -108,33 +121,55 @@ export default function ExercisesPage() {
       createdAt: exercises.find((e) => e.id === editingId)?.createdAt ?? now,
       updatedAt: now,
     }
-    saveExercise(exercise)
-    setFormOpen(false)
+    if (await saveExercise(exercise)) setFormOpen(false)
   }
 
   // ponytail: delete dialog removed from compact cards — add back via context menu or detail page
 
   return (
     <>
-      <label className="mb-3 flex w-fit cursor-pointer items-center gap-2 text-sm text-fg-2">
-        <input
-          type="checkbox"
-          role="switch"
-          checked={showOpenSource}
-          className="accent-accent"
-          onChange={(event) => {
-            const checked = event.target.checked
-            setShowOpenSource(checked)
-            try {
-              window.localStorage.setItem(OPEN_SOURCE_PREFERENCE, String(checked))
-            } catch {
-              // Keep the in-memory selection.
-            }
-          }}
-        />
-        Show open-source exercises
-      </label>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <label className="flex min-h-10 w-fit cursor-pointer items-center gap-2 text-sm text-fg-2">
+          <input
+            type="checkbox"
+            role="switch"
+            checked={showOpenSource}
+            className="accent-accent"
+            onChange={(event) => {
+              const checked = event.target.checked
+              setShowOpenSource(checked)
+              try {
+                window.localStorage.setItem(OPEN_SOURCE_PREFERENCE, String(checked))
+              } catch {
+                // Keep the in-memory selection.
+              }
+            }}
+          />
+          Show open-source exercises
+        </label>
+        {hiddenIds.length > 0 && (
+          <button type="button" className="min-h-10 text-sm font-semibold text-accent" onClick={() => setCatalogError(restoreAll() ? '' : 'Could not restore hidden exercises in this browser.')}>
+            Restore hidden ({hiddenIds.length})
+          </button>
+        )}
+        {catalogError && <p role="alert" className="w-full text-sm text-danger">{catalogError}</p>}
+      </div>
+      <div role="group" aria-label="Exercise library view" className="mb-3 grid grid-cols-3 gap-1 rounded-control bg-surface-warm p-1">
+        {([{ key: 'all', text: 'All exercises' }, { key: 'mine', text: 'My exercises' }, { key: 'community', text: 'Community' }] as const).map(({ key, text }) => (
+          <button
+            key={key}
+            type="button"
+            aria-pressed={view === key}
+            onClick={() => setView(key)}
+            className={`grid min-h-11 min-w-0 place-items-center rounded-control px-1.5 py-2 text-center text-sm font-semibold leading-tight focus-visible:focus-ring ${view === key ? 'bg-accent text-accent-on' : 'text-fg-2'}`}
+          >
+            {text}
+          </button>
+        ))}
+      </div>
       <ExerciseLibrary
+        key={view}
+        emptyLabel={view === 'community' ? 'No community exercises yet' : undefined}
         exercises={visibleExercises}
         isLoading={isLoading}
         favoriteIds={favoriteIds}
@@ -143,6 +178,8 @@ export default function ExercisesPage() {
         onOpenExercise={(id) => router.push(`/exercises/${id}`)}
         onAssignToWorkout={setAssigningExercise}
         externalImages={idbImageMap}
+        onDeleteExercises={deleteExercises}
+        onHideExercises={hide}
       />
 
       <ExerciseFormDialog
@@ -150,8 +187,9 @@ export default function ExercisesPage() {
         onOpenChange={setFormOpen}
         form={form}
         onFormChange={setForm}
-        editingId={editingId}
+        editingId={null}
         onSave={handleSave}
+        saveError={formOpen ? error : null}
         allMuscleGroups={allMuscleGroups}
         allEquipment={allEquipment}
         onImageUpload={uploadExerciseMedia}

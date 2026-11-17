@@ -9,6 +9,7 @@ const mockClearOrphans = vi.fn()
 const mockSaveExercise = vi.fn()
 const mockSaveExerciseImage = vi.fn()
 const mockDeleteExercise = vi.fn()
+const mockDeleteExercises = vi.fn()
 const mockGetExercise = vi.fn()
 const mockGetExerciseImages = vi.fn().mockResolvedValue([])
 let mockFavoriteIds: string[] = []
@@ -52,6 +53,7 @@ vi.mock('@/hooks/useExercises', () => ({
     saveExercise: mockSaveExercise,
     saveExerciseImage: mockSaveExerciseImage,
     deleteExercise: mockDeleteExercise,
+    deleteExercises: mockDeleteExercises,
     getExercise: mockGetExercise,
     getExerciseImages: mockGetExerciseImages,
   }),
@@ -78,6 +80,43 @@ afterEach(() => {
   cleanup()
   vi.clearAllMocks()
   vi.unstubAllGlobals()
+})
+
+it('deletes only personal exercises from a mixed selection after confirmation', async () => {
+  if (!HTMLDialogElement.prototype.showModal) {
+    HTMLDialogElement.prototype.showModal = function () { this.open = true }
+  }
+  mockDeleteExercises.mockResolvedValue({ deletedIds: ['ex2'], error: null })
+  const ExercisesPage = (await import('../page')).default
+  render(<ExercisesPage />)
+
+  fireEvent.click(screen.getByRole('button', { name: 'Select exercises' }))
+  fireEvent.click(screen.getByRole('checkbox', { name: 'Select Push Up' }))
+  expect(screen.getByRole('button', { name: 'Hide selected (1)' })).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('checkbox', { name: 'Select Squat' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Delete selected' }))
+  expect(mockDeleteExercises).not.toHaveBeenCalled()
+  fireEvent.click(screen.getByRole('button', { name: 'Delete exercises' }))
+  expect(await screen.findByText('Deleted 1 exercise.')).toBeInTheDocument()
+  expect(mockDeleteExercises).toHaveBeenCalledWith(['ex2'])
+})
+
+it('can hide and restore individually selected catalog exercises', async () => {
+  const storage = new Map<string, string>()
+  vi.stubGlobal('localStorage', {
+    getItem: (key: string) => storage.get(key) ?? null,
+    setItem: (key: string, value: string) => storage.set(key, value),
+  })
+  const ExercisesPage = (await import('../page')).default
+  render(<ExercisesPage />)
+
+  fireEvent.click(screen.getByRole('button', { name: 'Select exercises' }))
+  fireEvent.click(screen.getByRole('checkbox', { name: 'Select Push Up' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Hide selected (1)' }))
+  expect(screen.queryByText('Push Up')).not.toBeInTheDocument()
+  expect(mockDeleteExercises).not.toHaveBeenCalled()
+  fireEvent.click(screen.getByRole('button', { name: 'Restore hidden (1)' }))
+  expect(screen.getByText('Push Up')).toBeInTheDocument()
 })
 
 it('hides open-source exercises across visits without clearing favorites', async () => {
@@ -264,14 +303,13 @@ describe('ExercisesPage card display', () => {
     expect(screen.getByText(/quadriceps, glutes/)).toBeInTheDocument()
   })
 
-  it('shows image thumbnail when exercise has images', async () => {
+  it('shows the full-frame exercise demonstration when an image is available', async () => {
     const ExercisesPage = (await import('../page')).default
     render(<ExercisesPage />)
 
-    // ponytail: images rendered as CSS background-image on a div, not <img> elements
-    const cards = document.querySelectorAll('[style*="background-image"]')
-    expect(cards.length).toBeGreaterThanOrEqual(1)
-    expect(cards[0]!.getAttribute('style')).toContain('https://example.com/pushup.jpg')
+    const image = screen.getByRole('img', { name: 'Demonstration of Push Up' })
+    expect(image).toHaveAttribute('src', 'https://example.com/pushup.jpg')
+    expect(image).toHaveClass('object-contain')
   })
 
   it('shows SVG placeholder when exercise has no images', async () => {

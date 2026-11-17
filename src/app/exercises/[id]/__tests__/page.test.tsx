@@ -181,6 +181,16 @@ describe('ExerciseDetailPage', () => {
     expect(screen.getByText('free-exercise-db')).toBeInTheDocument()
   })
 
+  it('keeps catalog exercises assignable without edit or delete actions', async () => {
+    mockExercises = [createMockExercise()]
+    const Page = (await import('../page')).default
+    render(<Page />)
+
+    expect(screen.queryByRole('button', { name: /^Edit$/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^Delete$/ })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Assign to Workout' })).toBeInTheDocument()
+  })
+
   it('shows source badge as User created', async () => {
     mockExercises = [createMockExercise({ source: 'user' })]
     const Page = (await import('../page')).default
@@ -190,7 +200,7 @@ describe('ExerciseDetailPage', () => {
   })
 
   it('renders Edit, Delete, and Assign to Workout buttons', async () => {
-    mockExercises = [createMockExercise()]
+    mockExercises = [createMockExercise({ source: 'user' })]
     const Page = (await import('../page')).default
     render(<Page />)
 
@@ -211,7 +221,7 @@ describe('ExerciseDetailPage', () => {
 
   it('opens ExerciseFormDialog pre-populated on Edit', async () => {
     const { ExerciseFormDialog } = await import('@/components/ExerciseFormDialog')
-    mockExercises = [createMockExercise()]
+    mockExercises = [createMockExercise({ source: 'user' })]
 
     const Page = (await import('../page')).default
     render(<Page />)
@@ -223,7 +233,7 @@ describe('ExerciseDetailPage', () => {
 
   it('opens ExerciseDeleteDialog on Delete', async () => {
     const { ExerciseDeleteDialog } = await import('@/components/ExerciseDeleteDialog')
-    mockExercises = [createMockExercise()]
+    mockExercises = [createMockExercise({ source: 'user' })]
 
     const Page = (await import('../page')).default
     render(<Page />)
@@ -234,7 +244,7 @@ describe('ExerciseDetailPage', () => {
 
   it('renders ExerciseDeleteDialog with correct exerciseName', async () => {
     const { ExerciseDeleteDialog } = await import('@/components/ExerciseDeleteDialog')
-    mockExercises = [createMockExercise()]
+    mockExercises = [createMockExercise({ source: 'user' })]
 
     const Page = (await import('../page')).default
     render(<Page />)

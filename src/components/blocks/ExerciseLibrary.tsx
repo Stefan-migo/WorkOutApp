@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from 'react'
 import type { Exercise, ExerciseCategory } from '@/types/workout'
+import { canManageExercise, isSharedExercise } from '@/lib/exercise-ownership'
+import { Dialog } from '@/components/ui/Dialog'
 import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Button } from '@/components/ui/Button'
@@ -68,6 +70,9 @@ export interface ExerciseLibraryProps {
   onAssignToWorkout: (exercise: Exercise) => void
   /** IDB fallback images (page wires these; stories omit them) */
   externalImages?: Record<string, string>
+  emptyLabel?: string
+  onHideExercises?: (ids: string[]) => boolean
+  onDeleteExercises?: (ids: string[]) => Promise<{ deletedIds: string[]; error: string | null }>
 }
 
 export function ExerciseLibrary({
@@ -79,6 +84,9 @@ export function ExerciseLibrary({
   onOpenExercise,
   onAssignToWorkout,
   externalImages = {},
+  onDeleteExercises,
+  onHideExercises,
+  emptyLabel,
 }: ExerciseLibraryProps) {
   const [search, setSearch] = useState('')
   const [muscleFilter, setMuscleFilter] = useState<string | null>(null)
@@ -88,6 +96,11 @@ export function ExerciseLibrary({
   const [difficultyFilter, setDifficultyFilter] = useState<string | null>(null)
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null)
   const [favoritesFilter, setFavoritesFilter] = useState(false)
+  const [selected, setSelected] = useState<Set<string> | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [deleteStatus, setDeleteStatus] = useState('')
   const [filtersOpen, setFiltersOpen] = useState(false)
 
   const allMuscleGroups = useMemo(() => {
@@ -120,7 +133,7 @@ export function ExerciseLibrary({
     (mechanicFilter ? 1 : 0) +
     (difficultyFilter ? 1 : 0)
 
-  const filtered = useMemo(() => {
+  const matching = useMemo(() => {
     return exercises.filter((ex) => {
       if (search.trim()) {
         const q = search.toLowerCase()
@@ -144,6 +157,60 @@ export function ExerciseLibrary({
     })
   }, [exercises, search, muscleFilter, equipmentFilter, forceFilter, mechanicFilter, difficultyFilter, categoryFilter, favoritesFilter, favoriteIds])
 
+  const filtered = selected ? matching.filter(canSelect) : matching
+  const chosen = exercises.filter((exercise) => selected?.has(exercise.id))
+  const personalIds = chosen.filter(canManageExercise).map((exercise) => exercise.id)
+  const catalogIds = chosen.filter(isSharedExercise).map((exercise) => exercise.id)
+
+  function canSelect(exercise: Exercise) {
+    return isSharedExercise(exercise) ? Boolean(onHideExercises) : canManageExercise(exercise) && Boolean(onDeleteExercises)
+  }
+
+  function removeFromSelection(ids: string[]) {
+    const removed = new Set(ids)
+    const remaining = chosen.filter((exercise) => !removed.has(exercise.id)).map((exercise) => exercise.id)
+    setSelected(remaining.length ? new Set(remaining) : null)
+  }
+
+  function hideSelection() {
+    setDeleteError(null)
+    if (!onHideExercises?.(catalogIds)) {
+      setDeleteError('Could not hide the selected exercises in this browser.')
+      return
+    }
+    setDeleteStatus(`Hidden ${catalogIds.length} catalog exercise${catalogIds.length === 1 ? '' : 's'}.`)
+    removeFromSelection(catalogIds)
+  }
+
+  function toggleSelection(id: string) {
+    setSelected((current) => {
+      if (!current) return null
+      const next = new Set(current)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  async function handleDeleteSelection() {
+    if (!onDeleteExercises || !personalIds.length || deleting) return
+    setDeleting(true)
+    setDeleteError(null)
+    try {
+      const result = await onDeleteExercises(personalIds)
+      const removed = new Set(result.deletedIds)
+      if (removed.size) setDeleteStatus(`Deleted ${removed.size} exercise${removed.size === 1 ? '' : 's'}.`)
+      removeFromSelection(result.deletedIds)
+      setDeleteError(result.error)
+      setConfirmDelete(false)
+    } catch {
+      setDeleteError('Could not delete the selected exercises.')
+      setConfirmDelete(false)
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   const hasNoExercises = exercises.length === 0
   const hasNoResults = !hasNoExercises && filtered.length === 0
   const isFavoritesEmpty = favoritesFilter && favoriteIds.length === 0
@@ -165,7 +232,16 @@ export function ExerciseLibrary({
             Exercises <span className="text-accent">({filtered.length})</span>
           </h1>
         </div>
-        {!hasNoExercises && <Button onClick={onCreate}>New exercise</Button>}
+        {!hasNoExercises && (
+          <div className="flex flex-wrap gap-2">
+            {exercises.some(canSelect) && (
+              <Button variant="outline" onClick={() => { setDeleteError(null); setDeleteStatus(''); setSelected(selected ? null : new Set()) }}>
+                {selected ? 'Done selecting' : 'Select exercises'}
+              </Button>
+            )}
+            <Button onClick={onCreate}>New exercise</Button>
+          </div>
+        )}
       </header>
 
       {/* Sticky toolbar: search + category chips + filters toggle */}
@@ -258,11 +334,30 @@ export function ExerciseLibrary({
         </div>
       </div>}
 
+      {selected && (
+        <div className="flex flex-wrap items-center gap-3 rounded-card bg-surface-warm p-3">
+          <span className="mr-auto text-sm font-semibold" aria-live="polite">{chosen.length} selected</span>
+          <Button size="sm" variant="ghost" disabled={!filtered.length} onClick={() => setSelected(new Set([...selected, ...filtered.map((exercise) => exercise.id)]))}>Select visible</Button>
+          {catalogIds.length > 0 && <Button size="sm" variant="outline" onClick={hideSelection}>Hide selected ({catalogIds.length})</Button>}
+          {personalIds.length > 0 && <Button size="sm" variant="outline" disabled={deleting} onClick={() => setConfirmDelete(true)}>Delete selected</Button>}
+        </div>
+      )}
+      {deleteStatus && <p role="status" className="text-sm text-muted">{deleteStatus}</p>}
+      {deleteError && <p role="alert" className="text-sm text-danger">{deleteError}</p>}
+      {confirmDelete && (
+        <Dialog open onOpenChange={(open) => { if (!open && !deleting) setConfirmDelete(false) }} title={`Delete ${personalIds.length} selected exercise${personalIds.length === 1 ? '' : 's'}?`}>
+          <p className="my-4 text-sm text-muted">These exercises will be removed from your library. Existing workout intervals will stay in place.</p>
+          <div className="flex flex-wrap justify-end gap-2">
+            <Button variant="outline" disabled={deleting} onClick={() => setConfirmDelete(false)}>Cancel</Button>
+            <Button disabled={deleting} onClick={handleDeleteSelection}>{deleting ? 'Deleting…' : 'Delete exercises'}</Button>
+          </div>
+        </Dialog>
+      )}
+
       {/* Empty states */}
       {hasNoExercises && (isLoading ? <p role="status" className="text-muted">Loading exercises…</p> : (
         <EmptyState
-          title="No exercises yet"
-          body="Create your first one!"
+          title={emptyLabel ?? "No exercises yet"}
           action={<Button onClick={onCreate}>Create Exercise</Button>}
         />
       ))}
@@ -279,9 +374,8 @@ export function ExerciseLibrary({
         />
       )}
 
-      {/* Results — readable list rows instead of dense image grid */}
       {!hasNoExercises && !hasNoResults && (
-        <ul className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 list-none p-0 m-0">
+        <ul className="m-0 grid list-none grid-cols-1 items-start gap-3 p-0 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.map((ex) => {
             const muscles = ex.primaryMuscles ?? ex.muscleGroups ?? []
             const image = ex.images?.[0] ?? externalImages[ex.id]
@@ -292,63 +386,73 @@ export function ExerciseLibrary({
             ].filter(Boolean).join(' · ')
             return (
               <li key={ex.id}>
-                <Card interactive onClick={() => onOpenExercise(ex.id)} className="flex flex-col md:flex-row md:items-center gap-8 md:gap-16 overflow-hidden group">
-                  {/* Mobile: hero image (16:9) on top — the GIF/image leads the card.
-                      Desktop: compact 80px thumbnail back in the row layout. */}
-                  <div
-                    className="w-full aspect-[16/9] md:w-20 md:h-20 md:aspect-auto bg-surface shrink-0 overflow-hidden bg-cover bg-center"
-                    style={image ? { backgroundImage: `url(${image})` } : undefined}
-                    role="img"
-                    aria-label={image ? undefined : `${ex.name} has no image`}
-                  >
+                <Card
+                  interactive={!selected}
+                  onClick={selected ? undefined : () => onOpenExercise(ex.id)}
+                  className="group overflow-hidden"
+                >
+                  {image && (
+                    <div className="aspect-[16/10] w-full border-b border-border-soft bg-surface-warm">
+                      <img
+                        src={image}
+                        alt={`Demonstration of ${ex.name}`}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-full w-full object-contain"
+                      />
+                    </div>
+                  )}
+                  <div className="flex items-center gap-3 px-3 py-3">
                     {!image && (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <svg className="w-10 h-10 md:w-6 md:h-6 text-muted/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                      <div role="img" aria-label={`${ex.name} has no image`} className="grid size-10 shrink-0 place-items-center rounded-control bg-surface-warm text-muted">
+                        <svg aria-hidden="true" className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 5h16v14H4zM4 16l4-4 4 4 3-3 5 5" />
                         </svg>
                       </div>
                     )}
-                  </div>
-
-                  {/* Name + one meta line — scannable at a glance */}
-                  <div className="flex-1 min-w-0 flex flex-col gap-2 px-16 md:px-0 pb-4 md:pb-0">
-                    <div className="flex items-center gap-8 flex-wrap">
-                      <h3 className="font-body text-body-md font-bold text-fg line-clamp-1">{ex.name}</h3>
-                      {ex.difficulty && (
-                        <span className="inline-flex items-center gap-1.5 font-label text-label-caps text-muted">
-                          <span className={`w-2 h-2 rounded-full ${DIFFICULTY_DOT[ex.difficulty] ?? 'bg-muted'}`} aria-hidden="true" />
-                          {ex.difficulty}
-                        </span>
-                      )}
+                    <div className="flex min-w-0 flex-1 flex-col gap-1">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                        <h3 className="wrap-anywhere font-body text-body-md font-bold text-fg line-clamp-2">{ex.name}</h3>
+                        {ex.difficulty && (
+                          <span className="inline-flex items-center gap-1.5 font-label text-label-caps text-muted">
+                            <span className={`w-2 h-2 rounded-full ${DIFFICULTY_DOT[ex.difficulty] ?? 'bg-muted'}`} aria-hidden="true" />
+                            {ex.difficulty}
+                          </span>
+                        )}
+                      </div>
+                      <p className="font-body text-data-sm text-muted line-clamp-1">
+                        {meta || CATEGORY_LABELS[ex.category]}
+                        {muscles.length > 2 && ` +${muscles.length - 2}`}
+                      </p>
+                      {ex.visibility === 'community' && ex.authorName && <p className="truncate text-xs text-muted">By {ex.authorName}</p>}
                     </div>
-                    <p className="font-body text-data-sm text-muted line-clamp-1">
-                      {meta || CATEGORY_LABELS[ex.category]}
-                      {muscles.length > 2 && ` +${muscles.length - 2}`}
-                    </p>
-                  </div>
 
-                  {/* Actions — always visible, no hover-only affordances.
-                      Mobile: quick-action bar pinned to the bottom edge of the card. */}
-                  <div className="flex items-center gap-2 shrink-0 px-16 md:px-0 pb-8 md:pb-0 pt-2 md:pt-0 border-t border-border-soft md:border-t-0">
-                    <IconButton
-                      variant="ghost"
-                      size="sm"
-                      aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-                      onClick={(e) => { e.stopPropagation(); onToggleFavorite(ex.id) }}
-                      className={isFavorite ? 'text-accent' : ''}
-                    >
-                      {isFavorite ? '★' : '☆'}
-                    </IconButton>
-                    <IconButton
-                      variant="ghost"
-                      aria-label="Assign to workout"
-                      onClick={(e) => { e.stopPropagation(); onAssignToWorkout(ex) }}
-                      className="opacity-60 md:opacity-100 group-hover:opacity-100 hover:bg-accent hover:text-accent-on transition"
-                    >
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                      </svg>
-                    </IconButton>
+                    {selected ? (
+                      <label className="flex min-h-11 cursor-pointer items-center gap-2 px-4 text-sm text-fg-2">
+                        <input type="checkbox" className="size-4 accent-accent" checked={selected.has(ex.id)} onChange={() => toggleSelection(ex.id)} aria-label={`Select ${ex.name}`} />
+                        Select
+                      </label>
+                    ) : <div className="ml-auto flex shrink-0 items-center gap-1">
+                      <IconButton
+                        variant="ghost"
+                        size="sm"
+                        aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                        onClick={(e) => { e.stopPropagation(); onToggleFavorite(ex.id) }}
+                        className={isFavorite ? 'text-accent' : ''}
+                      >
+                        {isFavorite ? '★' : '☆'}
+                      </IconButton>
+                      <IconButton
+                        variant="ghost"
+                        aria-label="Assign to workout"
+                        onClick={(e) => { e.stopPropagation(); onAssignToWorkout(ex) }}
+                        className="opacity-60 md:opacity-100 group-hover:opacity-100 hover:bg-accent hover:text-accent-on transition"
+                      >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                      </IconButton>
+                    </div>}
                   </div>
                 </Card>
               </li>

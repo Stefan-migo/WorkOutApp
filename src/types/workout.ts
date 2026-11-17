@@ -31,6 +31,8 @@ export interface Workout {
 
 export type ExerciseCategory = 'strength' | 'cardio' | 'stretching' | 'mobility' | 'plyometrics' | 'strongman' | 'powerlifting' | 'other'
 
+export type ExerciseVisibility = 'private' | 'community'
+
 export interface Exercise {
   id: string
   name: string
@@ -45,7 +47,11 @@ export interface Exercise {
   mechanic?: 'compound' | 'isolation'
   difficulty?: 'beginner' | 'intermediate' | 'advanced'
   images?: string[]
-  source?: 'user' | 'free-exercise-db'
+  source?: 'user' | 'free-exercise-db' | 'system'
+  visibility?: ExerciseVisibility
+  authorName?: string
+  isOwned?: boolean
+  isShared?: boolean
   category: ExerciseCategory
   createdAt: number
   updatedAt: number
