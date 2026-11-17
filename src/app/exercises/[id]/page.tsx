@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { canManageExercise, isSharedExercise } from '@/lib/exercise-ownership'
 import { catalogMedia } from '@/lib/catalog-media'
+import { ExerciseMedia } from '@/components/ExerciseMedia'
 import { uploadExerciseMedia } from '@/lib/exercise-media'
 import { useHiddenCatalogExercises } from '@/hooks/useHiddenCatalogExercises'
 import { useExercises } from '@/hooks/useExercises'
@@ -149,7 +150,7 @@ export default function ExerciseDetailPage() {
     setEditingId(ex.id)
   }
 
-  async function handleSave(e: React.FormEvent) {
+  async function handleSave(e: React.FormEvent, images = form?.images ?? []) {
     e.preventDefault()
     if (!form || !form.name.trim()) return
     const now = Date.now()
@@ -162,7 +163,7 @@ export default function ExerciseDetailPage() {
       secondaryMuscles: form.secondaryMuscles.length > 0 ? form.secondaryMuscles : undefined,
       equipment: form.equipment.length > 0 ? form.equipment : undefined,
       instructions: form.instructions.length > 0 ? form.instructions : undefined,
-      images: form.images.length > 0 ? form.images : undefined,
+      images: images.length > 0 ? images : undefined,
       force: form.force,
       mechanic: form.mechanic,
       difficulty: form.difficulty,
@@ -258,7 +259,7 @@ export default function ExerciseDetailPage() {
 
       <div className="flex snap-x gap-3 overflow-x-auto">
         {allImages.length ? allImages.map((url, idx) => (
-          <img
+          <ExerciseMedia
             key={`${url}-${idx}`}
             src={url}
             alt={`${ex.name} image ${idx + 1}`}

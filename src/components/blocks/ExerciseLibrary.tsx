@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import type { Exercise, ExerciseCategory } from '@/types/workout'
+import { ExerciseMedia } from '@/components/ExerciseMedia'
 import { canManageExercise, isSharedExercise } from '@/lib/exercise-ownership'
 import { Dialog } from '@/components/ui/Dialog'
 import { Card } from '@/components/ui/Card'
@@ -393,11 +394,10 @@ export function ExerciseLibrary({
                 >
                   {image && (
                     <div className="aspect-[16/10] w-full border-b border-border-soft bg-surface-warm">
-                      <img
+                      <ExerciseMedia
                         src={image}
                         alt={`Demonstration of ${ex.name}`}
                         loading="lazy"
-                        decoding="async"
                         className="h-full w-full object-contain"
                       />
                     </div>

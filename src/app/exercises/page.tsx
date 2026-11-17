@@ -97,12 +97,12 @@ export default function ExercisesPage() {
     setFormOpen(true)
   }
 
-  async function handleSave(e: React.FormEvent) {
+  async function handleSave(e: React.FormEvent, images = form.images) {
     e.preventDefault()
     if (!form.name.trim()) return
     const now = Date.now()
     // ponytail: filter out ephemeral blob: URLs — only persist real URLs
-    const persistentImages = form.images.filter((url) => !url.startsWith('blob:'))
+    const persistentImages = images.filter((url) => !url.startsWith('blob:'))
     const exercise: Exercise = {
       id: editingId!,
       name: form.name.trim(),

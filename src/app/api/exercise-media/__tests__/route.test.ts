@@ -79,6 +79,26 @@ describe('exercise media route', () => {
     expect((await GET(request())).status).toBe(404)
   })
 
+  it('accepts a compressed demonstration and applies a separate 1 MB cap', async () => {
+    expect((await POST(metadata('video/webm', 1024 * 1024 + 1))).status).toBe(413)
+    const response = await POST(metadata('video/mp4', 780_000))
+    expect(response.status).toBe(200)
+    const { imageUrl, uploadUrl } = await response.json()
+    expect(imageUrl).toMatch(/&kind=video$/)
+    expect(new URL(uploadUrl).searchParams.get('X-Amz-SignedHeaders')).toContain('content-length;content-type')
+  })
+
+  it('checks the exact published video reference before signing as its owner', async () => {
+    const exerciseId = '22940d39-12bb-4257-a895-317a67e20380'
+    const published = { data: { user_id: 'author-id', images: [`/api/exercise-media?id=${id}&kind=video`] }, error: null }
+    maybeSingle.mockResolvedValueOnce(published).mockResolvedValueOnce(published)
+    const base = `${path}?id=${id}&exerciseId=${exerciseId}`
+    expect((await GET(new Request(base))).status).toBe(404)
+    const response = await GET(new Request(`${base}&kind=video`))
+    expect(response.status).toBe(307)
+    expect(new URL(response.headers.get('location')!).pathname).toBe(`/private-assets/author-id/${id}`)
+  })
+
   it('reports missing R2 configuration without issuing upload credentials', async () => {
     vi.stubEnv('R2_SECRET_ACCESS_KEY', '')
     expect((await POST(metadata('image/gif', 128))).status).toBe(503)

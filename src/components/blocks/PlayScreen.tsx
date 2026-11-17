@@ -1,3 +1,4 @@
+import { ExerciseMedia } from '@/components/ExerciseMedia'
 import { TimerRing } from '@/components/TimerRing'
 import { TimerControls } from '@/components/TimerControls'
 import { ProgressBar } from '@/components/ProgressBar'
@@ -86,7 +87,7 @@ export function PlayScreen({
     <div className={`relative flex w-full flex-1 flex-col overflow-hidden ${embedded ? '' : 'min-h-dvh'}`}>
       {backgroundImage && (
         <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-          <img src={backgroundImage} alt="" className="size-full object-cover object-center" data-testid="exercise-background" />
+          <ExerciseMedia src={backgroundImage} alt="" className="size-full object-cover object-center" data-testid="exercise-background" />
           <div className="absolute inset-0 bg-linear-to-b from-timer-bg/90 via-timer-bg/55 to-timer-bg/95" />
         </div>
       )}
@@ -106,7 +107,7 @@ export function PlayScreen({
         <div className="flex w-full flex-1 flex-col items-center justify-center gap-5 md:gap-32">
           {nextImageUrl && (
             <figure className="flex w-full max-w-80 items-center gap-4">
-              <img src={nextImageUrl} alt="" className="h-[min(25dvh,12rem)] w-[min(40%,8rem)] shrink-0 rounded-lg object-contain" />
+              <ExerciseMedia src={nextImageUrl} alt="" className="h-[min(25dvh,12rem)] w-[min(40%,8rem)] shrink-0 rounded-lg object-contain" />
               <figcaption className="min-w-0">
                 <p className="text-xs font-medium text-timer-muted">Up next</p>
                 <p className="break-words text-sm font-semibold leading-snug text-timer-on">{nextImageLabel}</p>

@@ -2,6 +2,18 @@ import type { Interval } from '@/types/workout'
 
 export const EXERCISE_MEDIA_PATH = '/api/exercise-media'
 export const PRIVATE_MEDIA_CACHE_CONTROL = 'private, no-store'
+export const MAX_EXERCISE_CLIP_BYTES = 1024 * 1024
+export const EXERCISE_CLIP_SECONDS = 8
+export const EXERCISE_VIDEO_TYPES = new Set(['video/mp4', 'video/webm'])
+
+export function exerciseMediaUrl(id: string, video = false) {
+  return `${EXERCISE_MEDIA_PATH}?id=${id}${video ? '&kind=video' : ''}`
+}
+
+export function isExerciseVideo(url: string) {
+  return isCloudExerciseMedia(url) && new URLSearchParams(url.split('?')[1]).get('kind') === 'video'
+}
+
 export const MAX_EXERCISE_IMAGE_BYTES = 10 * 1024 * 1024
 
 export const EXERCISE_IMAGE_TYPES = new Set([
@@ -28,10 +40,11 @@ export function withExerciseMediaAccess(url: string, exerciseId: string) {
 }
 
 export async function uploadExerciseMedia(file: File): Promise<string> {
+  const type = file.type.split(';')[0] ?? file.type
   const ticket = await fetch(EXERCISE_MEDIA_PATH, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ type: file.type, size: file.size }),
+    body: JSON.stringify({ type, size: file.size }),
   })
   const result = await ticket.json().catch(() => null)
   if (!ticket.ok || !result?.uploadUrl || !result?.imageUrl) {
@@ -40,7 +53,7 @@ export async function uploadExerciseMedia(file: File): Promise<string> {
 
   const upload = await fetch(result.uploadUrl, {
     method: 'PUT',
-    headers: { 'Content-Type': file.type, 'Cache-Control': PRIVATE_MEDIA_CACHE_CONTROL },
+    headers: { 'Content-Type': type, 'Cache-Control': PRIVATE_MEDIA_CACHE_CONTROL },
     body: file,
   })
   if (!upload.ok) throw new Error('Could not upload the image to storage.')
