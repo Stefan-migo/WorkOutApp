@@ -2,12 +2,14 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Button } from './ui/Button'
-import { EXERCISE_CLIP_SECONDS, EXERCISE_VIDEO_TYPES, MAX_EXERCISE_CLIP_BYTES } from '@/lib/exercise-media'
+import { EXERCISE_CLIP_SECONDS } from '@/lib/exercise-media'
 
-type Phase = 'idle' | 'opening' | 'ready' | 'recording' | 'finishing'
+import { createExerciseRecorder, recordingFile } from '@/lib/exercise-recording'
+
+type Phase = 'idle' | 'opening' | 'ready' | 'countdown' | 'recording' | 'finishing'
 
 export function ExerciseCamera({ onCapture, onCancel }: {
-  onCapture: (file: File) => void
+  onCapture: (file: File, duration: number) => void
   onCancel: () => void
 }) {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -15,6 +17,11 @@ export function ExerciseCamera({ onCapture, onCancel }: {
   const recorderRef = useRef<MediaRecorder | null>(null)
   const requestRef = useRef(0)
   const timerRef = useRef<number | undefined>(undefined)
+  const startedAt = useRef(0)
+  const [facing, setFacing] = useState<'user' | 'environment'>('environment')
+  const [delay, setDelay] = useState(5)
+  const [limit, setLimit] = useState(EXERCISE_CLIP_SECONDS)
+  const [remaining, setRemaining] = useState(0)
   const [phase, setPhase] = useState<Phase>('idle')
   const [error, setError] = useState('')
   const [previewReady, setPreviewReady] = useState(false)
@@ -31,19 +38,20 @@ export function ExerciseCamera({ onCapture, onCancel }: {
     streamRef.current?.getTracks().forEach((track) => track.stop())
   }, [])
 
-  async function openCamera() {
+  async function openCamera(nextFacing = facing) {
     setError('')
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
       setError('Camera recording is unavailable here. Try a browser with camera support.')
       return
     }
+    streamRef.current?.getTracks().forEach((track) => track.stop())
     const request = ++requestRef.current
     setPreviewReady(false)
     setPhase('opening')
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: false,
-        video: { facingMode: { ideal: 'environment' }, width: { ideal: 640, max: 640 }, height: { ideal: 480, max: 640 }, frameRate: { ideal: 24, max: 30 } },
+        video: { facingMode: { ideal: nextFacing }, width: { ideal: 640, max: 640 }, height: { ideal: 480, max: 640 }, frameRate: { ideal: 24, max: 30 } },
       })
       if (request !== requestRef.current) {
         stream.getTracks().forEach((track) => track.stop())
@@ -73,13 +81,7 @@ export function ExerciseCamera({ onCapture, onCancel }: {
     if (!streamRef.current) return
     setError('')
     try {
-      const mimeType = ['video/mp4;codecs=avc1.42001E', 'video/mp4', 'video/webm;codecs=vp8', 'video/webm']
-        .find((type) => MediaRecorder.isTypeSupported(type))
-      if (!mimeType) {
-        setError('This browser cannot record MP4 or WebM.')
-        return
-      }
-      const recorder = new MediaRecorder(streamRef.current, { mimeType, videoBitsPerSecond: 650_000 })
+      const recorder = createExerciseRecorder(streamRef.current)
       recorderRef.current = recorder
       const chunks: Blob[] = []
       recorder.ondataavailable = ({ data }) => { if (data.size) chunks.push(data) }
@@ -91,26 +93,67 @@ export function ExerciseCamera({ onCapture, onCancel }: {
       }
       recorder.onstop = () => {
         window.clearTimeout(timerRef.current)
-        const type = (chunks[0]?.type || recorder.mimeType).split(';')[0] ?? ''
-        const file = new File(chunks, type === 'video/mp4' ? 'demonstration.mp4' : 'demonstration.webm', { type })
-        if (!EXERCISE_VIDEO_TYPES.has(type) || file.size === 0 || file.size > MAX_EXERCISE_CLIP_BYTES) {
-          setError(file.size > MAX_EXERCISE_CLIP_BYTES ? 'This take exceeded 1 MB. Try a shorter recording.' : 'No playable clip was captured. Try again.')
+        try {
+          const duration = Math.min(limit, Math.max(0.1, (performance.now() - startedAt.current) / 1000))
+          onCapture(recordingFile(recorder, chunks), duration)
+        } catch (error) {
+          setError(error instanceof Error ? error.message : 'Could not prepare this take.')
           setPhase('ready')
-          return
         }
-        onCapture(file)
       }
+      startedAt.current = performance.now()
       recorder.start()
       setPhase('recording')
-      timerRef.current = window.setTimeout(finish, EXERCISE_CLIP_SECONDS * 1000)
+      timerRef.current = window.setTimeout(finish, limit * 1000)
     } catch {
+      setPhase('ready')
       setError('Could not start recording. Try again.')
     }
   }
 
+  function startCountdown() {
+    setPhase('countdown')
+    const end = performance.now() + delay * 1000
+    function tick() {
+      const seconds = Math.ceil((end - performance.now()) / 1000)
+      if (seconds <= 0) {
+        record()
+        return
+      }
+      setRemaining(seconds)
+      timerRef.current = window.setTimeout(tick, 1000)
+    }
+    tick()
+  }
+
+  const canConfigure = phase === 'idle' || phase === 'ready'
+
   return (
     <div className="flex flex-col gap-2 rounded-control border border-border-soft p-3">
       <p className="text-sm text-muted">Frame your whole body. Up to {EXERCISE_CLIP_SECONDS} seconds, without audio.</p>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <label className="flex flex-col gap-1 text-sm">Camera
+          <select className="min-h-11 rounded-control border border-border-soft bg-surface px-2" value={facing} disabled={!canConfigure} onChange={(event) => {
+            const next = event.target.value as typeof facing
+            setFacing(next)
+            if (phase === 'ready') void openCamera(next)
+          }}>
+            <option value="environment">Rear camera</option>
+            <option value="user">Front camera</option>
+          </select>
+        </label>
+        <label className="flex flex-col gap-1 text-sm">Countdown
+          <select className="min-h-11 rounded-control border border-border-soft bg-surface px-2" value={delay} disabled={!canConfigure} onChange={(event) => setDelay(Number(event.target.value))}>
+            {[3, 5, 10].map((seconds) => <option key={seconds} value={seconds}>{seconds} seconds</option>)}
+          </select>
+        </label>
+        <label className="flex flex-col gap-1 text-sm">Recording length
+          <select className="min-h-11 rounded-control border border-border-soft bg-surface px-2" value={limit} disabled={!canConfigure} onChange={(event) => setLimit(Number(event.target.value))}>
+            {Array.from({ length: EXERCISE_CLIP_SECONDS }, (_, index) => index + 1).map((seconds) => <option key={seconds} value={seconds}>{seconds} s</option>)}
+          </select>
+        </label>
+      </div>
+      <div className="relative">
       <video
         ref={videoRef}
         autoPlay
@@ -120,10 +163,20 @@ export function ExerciseCamera({ onCapture, onCancel }: {
         onPlaying={() => setPreviewReady(true)}
         className={`max-h-56 w-full rounded-control bg-surface-warm object-contain ${phase === 'idle' || phase === 'opening' ? 'hidden' : ''}`}
       />
+        {phase === 'countdown' && (
+          <div role="status" aria-label={`Recording starts in ${remaining} seconds`} className="pointer-events-none absolute inset-0 grid place-items-center rounded-control bg-black/30">
+            <span className="text-6xl font-bold tabular-nums text-white">{remaining}</span>
+          </div>
+        )}
+      </div>
       {error && <p role="alert" className="text-sm text-danger">{error}</p>}
       <div className="flex flex-wrap gap-2">
-        {(phase === 'idle' || phase === 'opening') && <Button type="button" size="sm" disabled={phase === 'opening'} onClick={openCamera}>{phase === 'opening' ? 'Opening camera…' : 'Enable camera'}</Button>}
-        {phase === 'ready' && <Button type="button" size="sm" disabled={!previewReady} onClick={record}>Start recording</Button>}
+        {(phase === 'idle' || phase === 'opening') && <Button type="button" size="sm" disabled={phase === 'opening'} onClick={() => void openCamera()}>{phase === 'opening' ? 'Opening camera…' : 'Enable camera'}</Button>}
+        {phase === 'ready' && <Button type="button" size="sm" disabled={!previewReady} onClick={startCountdown}>Start countdown</Button>}
+        {phase === 'countdown' && <Button type="button" variant="outline" size="sm" onClick={() => {
+          window.clearTimeout(timerRef.current)
+          setPhase('ready')
+        }}>Cancel countdown</Button>}
         {phase === 'recording' && <Button type="button" size="sm" onClick={finish}>Stop recording</Button>}
         {phase === 'finishing' && <span role="status" className="self-center text-sm">Preparing preview…</span>}
         <Button type="button" variant="ghost" size="sm" onClick={onCancel}>Close camera</Button>
