@@ -1,13 +1,15 @@
 'use client'
 
+import { formatDuration } from '@/lib/format'
 import { PageHeading } from '@/components/ui/PageHeading'
-import { useMemo, useState, useEffect, useRef, useReducer, useId } from 'react'
+import { Fragment, useMemo, useState, useEffect, useRef, useReducer, useId } from 'react'
+import { IntervalApplyDialog, EDIT_FIELDS, type EditField } from '@/components/IntervalApplyDialog'
 import { IntervalRow } from '@/components/IntervalRow'
 import { TimelineStrip } from '@/components/TimelineStrip'
 import { IntervalDetailSheet } from '@/components/IntervalDetailSheet'
 import { getLocalIntervalImageReference, uploadExerciseMedia } from '@/lib/exercise-media'
 import { useExercises } from '@/hooks/useExercises'
-import { SEGMENT_BG, SEGMENT_TEXT, SEGMENT_DOT, TYPE_ICONS } from '@/lib/segment-styles'
+import { SEGMENT_BG, SEGMENT_TEXT, TYPE_ICONS, TYPE_LABELS } from '@/lib/segment-styles'
 import { workoutReducer } from '@/lib/workout-reducer'
 import { createInterval } from '@/components/WorkoutBuilder'
 import { detectCycles, isInCycle, getMatchingWorkIndexes } from '@/lib/detect-cycles'
@@ -24,104 +26,19 @@ const DEFAULT_INTERVALS: Interval[] = [
   { id: crypto.randomUUID(), type: 'cooldown', title: 'Cooldown', duration: 10 },
 ]
 
-// ponytail: exhaustive map so Tailwind v4 resolves all class strings
 const ADD_BLOCK_TYPES: IntervalType[] = ['prepare', 'work', 'rest', 'rest_between_cycles', 'cooldown']
 
-const SEGMENT_CLASSES: Record<IntervalType, { bg: string; text: string; border: string; bg10: string }> = {
-  prepare: { bg: SEGMENT_DOT.prepare, text: SEGMENT_TEXT.prepare, border: 'border-t-segment-prepare', bg10: SEGMENT_BG.prepare },
-  work: { bg: SEGMENT_DOT.work, text: SEGMENT_TEXT.work, border: 'border-t-segment-work', bg10: SEGMENT_BG.work },
-  rest: { bg: SEGMENT_DOT.rest, text: SEGMENT_TEXT.rest, border: 'border-t-segment-rest', bg10: SEGMENT_BG.rest },
-  rest_between_cycles: { bg: SEGMENT_DOT.rest_between_cycles, text: SEGMENT_TEXT.rest_between_cycles, border: 'border-t-segment-rest', bg10: SEGMENT_BG.rest_between_cycles },
-  cooldown: { bg: SEGMENT_DOT.cooldown, text: SEGMENT_TEXT.cooldown, border: 'border-t-segment-cooldown', bg10: SEGMENT_BG.cooldown },
-}
-
-// ---------------------------------------------------------------------------
-// BulkApplyDialog
-// ---------------------------------------------------------------------------
-function BulkApplyDialog({
-  type,
-  changedFields,
-  onApplyAll,
-  onApplyOne,
-  onApplyMatching,
-}: {
-  type: IntervalType
-  changedFields: string[]
-  onApplyAll: () => void
-  onApplyOne: () => void
-  onApplyMatching?: () => void
-}) {
-  const label = type.replace(/_/g, ' ')
-  return (
-    <>
-      <style>{`
-        @keyframes bulk-slide-up {
-          from { transform: translateY(100%); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
-        }
-        .bulk-sheet {
-          animation: bulk-slide-up 0.25s ease-out;
-        }
-      `}</style>
-      <div className="fixed inset-0 bg-surface/80 backdrop-blur-sm z-40" onClick={onApplyOne} />
-      <div className="fixed inset-0 z-50 flex items-end justify-center pb-24">
-        <div
-          className="bulk-sheet bg-surface rounded-2xl shadow-xl border border-border-soft p-24 w-full max-w-md mx-8"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex items-start gap-12 mb-16">
-            <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-2">
-              <span className="material-symbols-outlined text-accent text-[22px]">sync_alt</span>
-            </div>
-            <div>
-              <h3 className="font-headline-md text-headline-md text-fg-2 font-bold mb-4">
-                Where should these changes apply?
-              </h3>
-              <p className="font-body-md text-body-md text-muted">
-                You changed <strong className="text-fg-2">{changedFields.join(', ')}</strong>. Choose which <strong className="text-fg-2">{label}</strong> intervals to update.
-              </p>
-            </div>
-          </div>
-          {onApplyMatching && (
-            <button
-              onClick={onApplyMatching}
-              className="mb-8 w-full rounded-xl border border-border bg-surface px-3 py-3 font-medium text-fg-2 focus-visible:focus-ring"
-            >
-              Same Work position across cycles
-            </button>
-          )}
-          <div className="flex gap-8">
-            <button
-              onClick={onApplyOne}
-              className="flex-1 py-10 bg-surface border border-border text-fg-2 rounded-xl font-medium hover:bg-surface transition-colors"
-            >
-              Just this one
-            </button>
-            <button
-              onClick={onApplyAll}
-              className="flex-1 py-10 bg-accent hover:bg-accent-hover text-accent-on rounded-xl font-medium transition-colors"
-            >
-              Apply to all
-            </button>
-          </div>
-        </div>
-      </div>
-    </>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// WorkoutEditor
-// ---------------------------------------------------------------------------
 interface WorkoutEditorProps {
   existingWorkout?: Workout
   initialIntervals?: Interval[]
-  onSave: (workout: Workout) => void
+  onSave: (workout: Workout) => void | Promise<void>
   onCancel?: () => void
 }
 
 export default function WorkoutEditor({ existingWorkout, initialIntervals, onSave, onCancel }: WorkoutEditorProps) {
   const { exercises, getExerciseImages } = useExercises()
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
   const [title, setTitle] = useState(existingWorkout?.title ?? '')
   const [intervals, dispatch] = useReducer(
     workoutReducer,
@@ -146,19 +63,20 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
   const cycles = useMemo(() => detectCycles(intervals), [intervals])
 
   const totalDurationSec = intervals.reduce((s, i) => s + i.duration, 0)
-  const totalMin = Math.floor(totalDurationSec / 60)
-  const totalSec = totalDurationSec % 60
+  const exerciseById = useMemo(() => new Map(exercises.map((exercise) => [exercise.id, exercise])), [exercises])
+  const groups = intervals.reduce<{ cycle: ReturnType<typeof isInCycle>; indexes: number[] }[]>((result, _, index) => {
+    const cycle = isInCycle(index, cycles)
+    const previous = result.at(-1)
+    if (previous && previous.cycle === cycle) previous.indexes.push(index)
+    else result.push({ cycle, indexes: [index] })
+    return result
+  }, [])
 
   function markDirty() { dirtyRef.current = true }
 
-  function handleAdd(type: IntervalType) {
+  function handleAdd(type: IntervalType, index?: number) {
     markDirty()
-    dispatch({ type: 'ADD_INTERVAL', interval: createInterval(type) })
-  }
-
-  function handleChange(index: number, interval: Interval) {
-    markDirty()
-    dispatch({ type: 'CHANGE_INTERVAL', index, interval })
+    dispatch({ type: 'ADD_INTERVAL', interval: createInterval(type), index })
   }
 
   function handleRemove(index: number) {
@@ -178,10 +96,10 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
     dispatch({ type: 'REORDER', fromIndex: index, toIndex: index + 1 })
   }
 
-  // ponytail: DragState — simple flat index only
+  // ponytail: DragState â€” simple flat index only
   const [dragIndex, setDragIndex] = useState<number | null>(null)
 
-  // ponytail: wheel scroll during HTML5 DnD — browser blocks scroll, so we handle it manually
+  // ponytail: wheel scroll during HTML5 DnD â€” browser blocks scroll, so we handle it manually
   useEffect(() => {
     if (dragIndex === null) return
     function onWheel(e: WheelEvent) {
@@ -210,13 +128,6 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
   }
   function handleDragEnd() { setDragIndex(null) }
 
-  function handleTimelineClick(idx: number) {
-    if (idx >= 0 && idx < intervals.length) {
-      setOriginalInterval(intervals[idx]!)
-      setEditingIndex(idx)
-    }
-  }
-
   function handleRowClick(idx: number) {
     setOriginalInterval(intervals[idx]!)
     setEditingIndex(idx)
@@ -226,7 +137,7 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
   const [bulkPrompt, setBulkPrompt] = useState<{
     type: IntervalType
     changes: Partial<Interval>
-    changedFields: string[]
+    changedFields: EditField[]
     index: number
     matchingIndexes: number[]
   } | null>(null)
@@ -240,9 +151,9 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
     // Detect changes for bulk apply
     if (originalInterval) {
       const changes: Partial<Interval> = {}
-      const changedFields: string[] = []
+      const changedFields: EditField[] = []
       // ponytail: reps always checked so reps-mode changes bulk-apply; safe since undefined !== undefined is false
-      for (const key of ['title', 'duration', 'description', 'imageUrl', 'exerciseId', 'mode', 'reps', 'weight'] as const) {
+      for (const key of EDIT_FIELDS) {
         const defaultValue = key === 'mode' ? existingWorkout?.mode ?? 'timed' : undefined
         if ((updated[key] ?? defaultValue) !== (originalInterval[key] ?? defaultValue)) {
           ;(changes as Record<string, unknown>)[key] = updated[key]
@@ -251,8 +162,7 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
       }
       if (changedFields.length > 0) {
         // Check if there are other intervals of the same type
-        const sameType = intervals.filter((_, i) => i !== editingIndex && intervals[i]?.type === updated.type)
-        if (sameType.length > 0) {
+        if (intervals.some((interval, index) => index !== editingIndex && interval.type === updated.type)) {
           setBulkPrompt({ type: updated.type, changes, changedFields, index: editingIndex, matchingIndexes: getMatchingWorkIndexes(intervals, editingIndex) })
           return
         }
@@ -278,126 +188,128 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
     setOriginalInterval(null)
   }
 
-  function handleSave() {
-    if (!title.trim() || intervals.length === 0) return
+  async function handleSave() {
+    if (saving || !title.trim() || intervals.length === 0) return
     const workout: Workout = existingWorkout
       ? { ...existingWorkout, title: title.trim(), intervals, updatedAt: Date.now() }
       : { id: generateId(), title: title.trim(), intervals, createdAt: Date.now(), updatedAt: Date.now() }
-    onSave(workout)
+    setSaving(true)
+    setSaveError('')
+    try {
+      await onSave(workout)
+      dirtyRef.current = false
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : 'Could not save the workout. Try again.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const titleId = useId()
   const canSave = title.trim().length > 0 && intervals.length > 0
 
+  function renderRow(index: number) {
+    const interval = intervals[index]!
+    return (
+      <IntervalRow
+        key={interval.id}
+        interval={interval}
+        exercise={exerciseById.get(interval.exerciseId ?? '')}
+        index={index}
+        onEdit={() => handleRowClick(index)}
+        onRemove={handleRemove}
+        onMoveUp={handleMoveUp}
+        onMoveDown={handleMoveDown}
+        isFirst={index === 0}
+        isLast={index === intervals.length - 1}
+        dragIndex={dragIndex}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+        onDragEnd={handleDragEnd}
+      />
+    )
+  }
+
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-24">
-      <PageHeading title="Edit workout" />
-      <div className="glass-card rounded-xl p-16 flex flex-col gap-12">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-24">
-          <div className="w-full md:w-2/3">
-            <label htmlFor={titleId} className="block font-label text-label-caps text-muted mb-xs uppercase tracking-wider">Workout Title</label>
-            <input
-              id={titleId}
-              type="text"
-              value={title}
-              placeholder="Name your workout..."
-              className="w-full bg-transparent border-0 border-b-2 border-border pb-xs font-headline text-headline-lg text-fg-2 focus:border-accent focus:ring-0 transition-colors px-0 outline-none placeholder:text-muted/50 focus-visible:focus-ring"
-              onChange={(e) => { markDirty(); setTitle(e.target.value) }}
-            />
-          </div>
-          <div className="w-full md:w-auto md:text-right">
-            <span className="block font-label text-label-caps text-muted mb-xs uppercase tracking-wider">Est. Duration</span>
-            <div className="font-mono text-4xl text-accent tracking-tighter">
-              {totalMin}:{String(totalSec).padStart(2, '0')}
-            </div>
-          </div>
+      <PageHeading title={existingWorkout ? 'Edit workout' : 'New workout'} />
+      <section aria-label="Workout overview" className="grid gap-16 rounded-2xl border border-border-soft bg-surface p-16">
+        <label htmlFor={titleId} className="grid gap-xs text-sm font-semibold text-fg-2">
+          Workout name
+          <input
+            id={titleId}
+            type="text"
+            value={title}
+            placeholder="Name your workout..."
+            className="w-full min-w-0 rounded-lg border border-border bg-surface-warm px-16 py-8 text-base text-fg-2 focus-visible:focus-ring"
+            onChange={(event) => { markDirty(); setTitle(event.target.value) }}
+          />
+        </label>
+        <div className="flex flex-wrap items-baseline gap-x-16 gap-y-xs text-sm text-muted">
+          <span><strong className="font-mono text-base text-fg-2">{formatDuration(totalDurationSec)}</strong> estimated</span>
+          <span>{intervals.length} {intervals.length === 1 ? 'block' : 'blocks'}</span>
+          {cycles.length > 0 && <span>{cycles.length} {cycles.length === 1 ? 'cycle' : 'cycles'}</span>}
         </div>
-      </div>
+        {intervals.length > 0 && <TimelineStrip intervals={intervals} onIntervalClick={handleRowClick} />}
+      </section>
 
-      {intervals.length > 0 && (
-        <TimelineStrip intervals={intervals} onIntervalClick={handleTimelineClick} />
-      )}
-
-      {intervals.length === 0 ? (
-        <div className="glass-card rounded-xl p-24 flex flex-col items-center justify-center gap-16 text-center py-[64px] border-dashed border-2 border-border-soft">
-          <span className="material-symbols-outlined text-[40px] text-muted/40">playlist_add</span>
+      <section aria-labelledby={`${titleId}-blocks`} className="grid gap-16">
+        <div className="flex flex-wrap items-start justify-between gap-8">
           <div>
-            <p className="font-headline-md text-headline-md text-fg-2 font-bold">No intervals yet</p>
-            <p className="font-body-md text-body-md text-muted mt-xs">Add blocks below to build your workout</p>
+            <h2 id={`${titleId}-blocks`} className="text-xl font-semibold text-fg-2">Workout blocks</h2>
+            {intervals.length > 0 && <p className="text-sm text-muted">Select a block to edit it. Use its menu to reorder or remove it.</p>}
           </div>
+          <a href={`#${titleId}-add`} className="inline-flex min-h-[44px] items-center gap-xs rounded-lg border border-border-soft bg-surface px-16 text-sm font-semibold text-accent hover:bg-surface-warm focus-visible:focus-ring">
+            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
+            Add block
+          </a>
         </div>
-      ) : (
-        <div className="flex flex-col gap-16">
-          {intervals.map((interval, i) => {
-            const cycle = isInCycle(i, cycles)
-            const isFirstInCycle = cycle && i === cycle.startIdx
-            return (
-              <div key={interval.id} className="relative">
-                {/* Cycle bracket indicator */}
-                {cycle && (
-                  <div
-                    className={`absolute left-0 top-0 w-1 rounded-full bg-accent/40 ${isFirstInCycle ? 'h-full' : 'h-full'}`}
-                    style={{ minHeight: isFirstInCycle ? '100%' : undefined }}
-                  />
-                )}
+        {intervals.length === 0 && <p className="rounded-xl border border-dashed border-border-soft p-16 text-sm text-muted">No intervals yet. Choose a block type below to get started.</p>}
+        {groups.map(({ cycle, indexes }, groupIndex) => (
+          <Fragment key={intervals[indexes[0]!]!.id}>
+            {cycle && groups[groupIndex - 1]?.cycle && (
+              <button
+                type="button"
+                onClick={() => handleAdd('rest_between_cycles', cycle.startIdx)}
+                className="flex min-h-[44px] items-center justify-center gap-8 rounded-lg border border-dashed border-border-soft px-8 text-sm font-semibold text-accent hover:bg-surface-warm focus-visible:focus-ring"
+              >
+                <span aria-hidden="true" className="material-symbols-outlined text-[18px]">add</span>
+                Add rest between cycles
+              </button>
+            )}
+            {cycle ? (
+              <section aria-label={cycle.label} className="grid gap-8 rounded-2xl border border-border-soft bg-surface-warm p-8 sm:p-16">
+                <header className="flex flex-wrap items-baseline justify-between gap-8 px-8 py-xs">
+                  <h3 className="font-semibold text-fg-2">{cycle.label}</h3>
+                  <span className="text-xs text-muted">{indexes.length} {indexes.length === 1 ? 'block' : 'blocks'}</span>
+                </header>
+                {indexes.map(renderRow)}
+              </section>
+            ) : (
+              <div className="grid gap-8">{indexes.map(renderRow)}</div>
+            )}
+          </Fragment>
+        ))}
+      </section>
 
-                {/* Cycle label at start */}
-                {isFirstInCycle && (
-                  <div className="flex items-center gap-2 mb-2 ml-4">
-                    <span className="text-body-xs text-accent font-medium uppercase tracking-wider">
-                      {cycle!.label}
-                    </span>
-                    <div className="h-px flex-1 bg-accent/20" />
-                  </div>
-                )}
-
-                <div
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => handleRowClick(i)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleRowClick(i) } }}
-                  className={cycle ? 'ml-4' : ''}
-                >
-                  <IntervalRow
-                    interval={interval}
-                    index={i}
-                    onChange={handleChange}
-                    onRemove={handleRemove}
-                    onMoveUp={handleMoveUp}
-                    onMoveDown={handleMoveDown}
-                    isFirst={i === 0}
-                    isLast={i === intervals.length - 1}
-                    dragIndex={dragIndex}
-                    onDragStart={handleDragStart}
-                    onDragOver={handleDragOver}
-                    onDrop={handleDrop}
-                    onDragEnd={handleDragEnd}
-                  />
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
-
-      {/* Add Block grid — 5 types, no Cycle */}
-      <div className="pt-24 border-t border-border-soft mt-32">
-        <h3 className="font-label text-label-caps uppercase text-muted mb-16 text-center tracking-widest">Add Block</h3>
-        <div className="grid grid-cols-3 md:grid-cols-5 gap-12">
+      <section id={`${titleId}-add`} tabIndex={-1} className="grid scroll-mt-16 gap-8 rounded-2xl border border-border-soft bg-surface p-16">
+        <h2 className="text-lg font-semibold text-fg-2">Add a block</h2>
+        <p className="text-sm text-muted">New blocks are added at the end of the workout.</p>
+        <div className="flex flex-wrap gap-8">
           {ADD_BLOCK_TYPES.map((type) => (
             <button
               key={type}
+              type="button"
               onClick={() => handleAdd(type)}
-              className={`glass-card p-12 rounded-xl flex flex-col items-center justify-center gap-6 hover:-translate-y-1 hover:shadow-md transition-all duration-200 focus-visible:focus-ring ${SEGMENT_CLASSES[type].border} group`}
+              className="inline-flex min-h-[44px] items-center gap-8 rounded-lg border border-border-soft px-8 py-xs text-sm font-medium text-fg-2 hover:bg-surface-warm focus-visible:focus-ring"
             >
-              <div className={`w-10 h-10 rounded-full ${SEGMENT_CLASSES[type].bg10} ${SEGMENT_CLASSES[type].text} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                <span className="material-symbols-outlined">{TYPE_ICONS[type]}</span>
-              </div>
-              <span className="font-label text-label-caps uppercase text-fg-2 font-semibold text-[10px] leading-tight text-center">{type.replace(/_/g, ' ')}</span>
+              <span aria-hidden="true" className={`material-symbols-outlined rounded-md p-xs text-[20px] ${SEGMENT_BG[type]} ${SEGMENT_TEXT[type]}`}>{TYPE_ICONS[type]}</span>
+              {TYPE_LABELS[type]}
             </button>
           ))}
         </div>
-      </div>
+      </section>
 
       {editingIndex !== null && intervals[editingIndex] && (
         <IntervalDetailSheet
@@ -422,31 +334,37 @@ export default function WorkoutEditor({ existingWorkout, initialIntervals, onSav
 
       {/* Bulk apply dialog */}
       {bulkPrompt && (
-        <BulkApplyDialog
+        <IntervalApplyDialog
           type={bulkPrompt.type}
           changedFields={bulkPrompt.changedFields}
+          allCount={intervals.filter((interval) => interval.type === bulkPrompt.type).length}
+          matchingCount={bulkPrompt.matchingIndexes.length + 1}
           onApplyAll={() => handleBulkApply()}
           onApplyMatching={bulkPrompt.matchingIndexes.length ? () => handleBulkApply(true) : undefined}
           onApplyOne={handleBulkApplyOne}
         />
       )}
 
-      <div className="flex gap-3">
-        {onCancel && (
+      <div className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-20 grid gap-8 rounded-xl border border-border-soft bg-surface p-8 shadow-fab md:bottom-8">
+        {saveError && <p role="alert" className="px-8 text-sm text-danger">{saveError}</p>}
+        <div className="flex justify-end gap-8">
+          {onCancel && (
+            <button
+              disabled={saving}
+              onClick={() => { if (!dirtyRef.current || window.confirm('Discard your unsaved workout changes?')) onCancel() }}
+              className="min-h-[44px] rounded-lg px-16 text-sm font-medium text-fg-2 hover:bg-surface-warm focus-visible:focus-ring"
+            >
+              Discard
+            </button>
+          )}
           <button
-            onClick={onCancel}
-            className="flex-1 py-3 bg-surface border border-border text-fg-2 rounded-lg font-medium transition-colors hover:bg-surface font-label text-label-caps uppercase tracking-wider focus-visible:focus-ring"
+            onClick={handleSave}
+            disabled={!canSave || saving}
+            className="min-h-[44px] rounded-lg bg-accent px-16 text-sm font-semibold text-accent-on hover:bg-accent-hover focus-visible:focus-ring disabled:opacity-50"
           >
-            Discard
+            {saving ? 'Saving…' : existingWorkout ? 'Save changes' : 'Save workout'}
           </button>
-        )}
-        <button
-          onClick={handleSave}
-          disabled={!canSave}
-          className="flex-1 py-3 bg-accent hover:bg-accent-hover disabled:bg-surface disabled:text-muted text-accent-on rounded-lg font-medium transition-colors font-label text-label-caps uppercase tracking-wider focus-visible:focus-ring"
-        >
-          {existingWorkout ? 'Update Workout' : 'Save Workout'}
-        </button>
+        </div>
       </div>
     </div>
   )

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 // ── Hoisted mock setup ─────────────────────────────────────────────
 
@@ -20,19 +20,19 @@ function setLocalStorage(key: string, value: unknown) {
   localStorage.setItem(key, JSON.stringify(value))
 }
 
-function clearLocalStorage() {
-  localStorage.clear()
-}
-
-// ── Tests ──────────────────────────────────────────────────────────
-
 describe('migrateLocalData', () => {
   beforeEach(() => {
-    clearLocalStorage()
+    const values = new Map<string, string>()
+    vi.stubGlobal('localStorage', {
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => { values.set(key, value) },
+    })
     vi.clearAllMocks()
     // Set up mock to return success by default
     mockUpsert.mockResolvedValue({ error: null })
   })
+
+  afterEach(() => vi.unstubAllGlobals())
 
   it('skips migration if already migrated', async () => {
     localStorage.setItem('workoutapp.migrated_user-1', 'true')

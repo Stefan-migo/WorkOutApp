@@ -1,156 +1,86 @@
 'use client'
 
 import { ExerciseMedia } from '@/components/ExerciseMedia'
-import Link from 'next/link'
-import { SEGMENT_BORDER, SEGMENT_BG, SEGMENT_TEXT, TYPE_ICONS } from '@/lib/segment-styles'
-import type { Interval } from '@/types/workout'
-import { useExercises } from '@/hooks/useExercises'
+import { withExerciseMediaAccess } from '@/lib/exercise-media'
+import { formatTime } from '@/lib/format'
+import { SEGMENT_BG, SEGMENT_BORDER, SEGMENT_TEXT, TYPE_ICONS, TYPE_LABELS } from '@/lib/segment-styles'
+import type { Exercise, Interval } from '@/types/workout'
 
 interface IntervalRowProps {
   interval: Interval
+  exercise?: Exercise
   index: number
-  onChange: (index: number, interval: Interval) => void
+  onEdit: () => void
   onRemove: (index: number) => void
-  onMoveUp?: (index: number) => void
-  onMoveDown?: (index: number) => void
-  isFirst?: boolean
-  isLast?: boolean
-  dragIndex?: number | null
-  onDragStart?: (i: number) => void
-  onDragOver?: (e: React.DragEvent, i: number) => void
-  onDrop?: (i: number) => void
-  onDragEnd?: () => void
+  onMoveUp: (index: number) => void
+  onMoveDown: (index: number) => void
+  isFirst: boolean
+  isLast: boolean
+  dragIndex: number | null
+  onDragStart: (index: number) => void
+  onDragOver: (event: React.DragEvent, index: number) => void
+  onDrop: (index: number) => void
+  onDragEnd: () => void
 }
 
-export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onMoveDown, isFirst, isLast, dragIndex, onDragStart, onDragOver, onDrop, onDragEnd }: IntervalRowProps) {
-  const { exercises } = useExercises()
-  const minutes = Math.floor(interval.duration / 60)
-  const seconds = interval.duration % 60
-  const durationStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-  // ponytail: inline exercise lookup from loaded list, memoize if list grows
-  const exercise =
-    interval.type === 'work' && interval.exerciseId
-      ? exercises.find((e) => e.id === interval.exerciseId)
-      : undefined
-
-  // ponytail: HTML5 DnD, zero deps. The cursor-grab handle initiates the drag.
-  const isDragging = dragIndex === index
+export function IntervalRow({ interval, exercise, index, onEdit, onRemove, onMoveUp, onMoveDown, isFirst, isLast, dragIndex, onDragStart, onDragOver, onDrop, onDragEnd }: IntervalRowProps) {
+  const type = TYPE_LABELS[interval.type]
+  const title = interval.title.trim() || type
+  const media = exercise?.images?.[0]
+  const target = interval.mode !== 'timed' && interval.type === 'work' && interval.reps != null
+    ? interval.weight ? `${interval.reps} reps · ${interval.weight} kg` : `${interval.reps} reps`
+    : formatTime(interval.duration)
+  const actionClass = 'min-h-[44px] rounded-lg px-8 text-left text-sm text-fg-2 hover:bg-surface-warm focus-visible:focus-ring disabled:opacity-40'
 
   return (
     <div
-      draggable
-      onDragStart={() => onDragStart?.(index)}
-      onDragOver={(e) => onDragOver?.(e, index)}
-      onDrop={() => onDrop?.(index)}
-      onDragEnd={() => onDragEnd?.()}
-      className={`glass-card rounded-lg flex items-center group transition-all duration-200 border-l-4 ${SEGMENT_BORDER[interval.type] ?? 'border-l-segment-work'} pl-0 hover:shadow-md relative overflow-hidden ${isDragging ? 'opacity-40 ring-2 ring-accent' : ''}`}
+      onDragOver={(event) => onDragOver(event, index)}
+      onDrop={(event) => { event.preventDefault(); onDrop(index) }}
+      className={`rounded-xl border border-l-4 border-border-soft bg-surface ${SEGMENT_BORDER[interval.type]} ${dragIndex === index ? 'opacity-40' : ''}`}
     >
-      {/* Drag handle */}
-      <div className="px-8 py-16 text-muted cursor-grab flex items-center justify-center active:cursor-grabbing" role="button" aria-label="Drag to reorder">
-        <span className="material-symbols-outlined text-[20px]">drag_indicator</span>
-      </div>
-
-      {/* Type Icon */}
-      <div className={`p-8 ${SEGMENT_BG[interval.type] ?? 'bg-segment-work/10'} ${SEGMENT_TEXT[interval.type] ?? 'text-segment-work'} rounded-md mr-16 flex items-center justify-center`}>
-        <span className="material-symbols-outlined text-[20px]">{TYPE_ICONS[interval.type] ?? 'fitness_center'}</span>
-      </div>
-
-      {/* Title + Description */}
-      <div className="flex-1 py-md">
-        <input
-          type="text"
-          value={interval.title}
-          onChange={(e) => onChange(index, { ...interval, title: e.target.value })}
-          className="bg-transparent border-none p-0 font-body-md font-semibold text-fg-2 w-full focus:ring-0 focus:outline-none placeholder:text-muted/50"
-          aria-label={`Interval ${index + 1} title`}
-        />
-        {exercise && (
-          <div className="flex items-center gap-8 mt-xs">
-            {exercise.images?.[0] ? (
-              <ExerciseMedia
-                src={exercise.images[0]}
-                alt={exercise.name}
-                className="w-8 h-8 rounded object-cover shrink-0"
-              />
-            ) : (
-              <div className="w-8 h-8 rounded bg-surface flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-[14px] text-muted">fitness_center</span>
-              </div>
+      <div className="flex items-center">
+        <span
+          draggable
+          onDragStart={(event) => {
+            event.dataTransfer.setData('text/plain', String(index))
+            event.dataTransfer.effectAllowed = 'move'
+            onDragStart(index)
+          }}
+          onDragEnd={onDragEnd}
+          aria-hidden="true"
+          className="material-symbols-outlined hidden cursor-grab select-none px-8 text-[20px] text-muted active:cursor-grabbing md:block"
+        >
+          drag_indicator
+        </span>
+        <button
+          type="button"
+          onClick={onEdit}
+          aria-label={`Edit interval ${index + 1}: ${title}`}
+          className="flex min-h-[64px] min-w-0 flex-1 items-center gap-8 rounded-lg px-8 py-8 text-left hover:bg-surface-warm focus-visible:focus-ring sm:px-16"
+        >
+          <span className={`grid size-[36px] shrink-0 place-items-center overflow-hidden rounded-lg ${SEGMENT_BG[interval.type]} ${SEGMENT_TEXT[interval.type]}`}>
+            {exercise && media ? <ExerciseMedia src={withExerciseMediaAccess(media, exercise.id)} alt="" loading="lazy" className="size-full object-contain" /> : (
+              <span aria-hidden="true" className="material-symbols-outlined text-[20px]">{TYPE_ICONS[interval.type]}</span>
             )}
-            <Link
-              href={`/exercises/${interval.exerciseId}`}
-              className="text-[11px] font-body-md text-accent hover:underline"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {exercise.name}
-            </Link>
-            {exercise.primaryMuscles && exercise.primaryMuscles.length > 0 && (
-              <div className="flex gap-4">
-                {exercise.primaryMuscles.slice(0, 2).map((muscle) => (
-                  <span
-                    key={muscle}
-                    className="text-[9px] px-4 py-1 rounded-full bg-accent/10 text-accent font-medium whitespace-nowrap"
-                  >
-                    {muscle}
-                  </span>
-                ))}
-              </div>
-            )}
+          </span>
+          <span className="min-w-0 flex-1">
+            {title.toLowerCase() !== type.toLowerCase() && <span className="block text-xs text-muted">{type}</span>}
+            <span className="block break-words font-semibold leading-snug text-fg-2">{title}</span>
+            {exercise && exercise.name !== title && <span className="block break-words text-xs text-muted">{exercise.name}</span>}
+          </span>
+          <span className="max-w-[32%] shrink-0 text-right font-mono text-xs font-semibold tabular-nums text-fg-2 sm:text-sm">{target}</span>
+          <span aria-hidden="true" className="material-symbols-outlined shrink-0 text-[18px] text-accent">edit</span>
+        </button>
+        <details className="relative mr-8">
+          <summary aria-label={`Actions for interval ${index + 1}: ${title}`} className="grid size-[44px] cursor-pointer list-none place-items-center rounded-lg text-muted hover:bg-surface-warm focus-visible:focus-ring [&::-webkit-details-marker]:hidden">
+            <span aria-hidden="true" className="material-symbols-outlined text-[20px]">more_vert</span>
+          </summary>
+          <div className="absolute right-0 top-full z-10 grid w-[10rem] rounded-xl border border-border-soft bg-surface p-xs shadow-fab">
+            <button type="button" className={actionClass} disabled={isFirst} onClick={(event) => { event.currentTarget.closest('details')!.open = false; onMoveUp(index) }}>Move up</button>
+            <button type="button" className={actionClass} disabled={isLast} onClick={(event) => { event.currentTarget.closest('details')!.open = false; onMoveDown(index) }}>Move down</button>
+            <button type="button" className={`${actionClass} text-danger`} onClick={() => onRemove(index)}>Remove block</button>
           </div>
-        )}
-      </div>
-
-      {/* Duration + Reps + Actions */}
-      <div className="px-16 flex items-center gap-8 border-l border-border-soft py-16">
-        {interval.reps != null ? (
-          <div className="font-data-lg text-data-lg text-accent font-bold tracking-tight whitespace-nowrap">
-            {interval.weight != null ? `${interval.reps} reps @ ${interval.weight}kg` : `${interval.reps} reps`}
-          </div>
-        ) : (
-          <input
-            type="text"
-            value={durationStr}
-            onChange={(e) => {
-              // ponytail: parse MM:SS input, default to current duration on parse failure
-              const parts = e.target.value.split(':')
-              if (parts.length === 2) {
-                const m = parseInt(parts[0]!, 10) || 0
-                const s = parseInt(parts[1]!, 10) || 0
-                onChange(index, { ...interval, duration: m * 60 + s })
-              }
-            }}
-            className="bg-transparent border-none p-0 font-data-lg text-data-lg text-accent focus:ring-0 focus:outline-none w-20 text-center font-bold tracking-tight"
-            aria-label={`Interval ${index + 1} duration`}
-          />
-        )}
-        <div className="hidden group-hover:flex gap-xs items-center pl-8">
-          {/* Move Up */}
-          <button
-            onClick={() => onMoveUp?.(index)}
-            disabled={isFirst}
-            className="text-muted hover:text-accent transition-colors disabled:opacity-20 disabled:pointer-events-none"
-            aria-label={`Move interval ${index + 1} up`}
-          >
-            <span className="material-symbols-outlined text-[18px]">keyboard_arrow_up</span>
-          </button>
-          {/* Move Down */}
-          <button
-            onClick={() => onMoveDown?.(index)}
-            disabled={isLast}
-            className="text-muted hover:text-accent transition-colors disabled:opacity-20 disabled:pointer-events-none"
-            aria-label={`Move interval ${index + 1} down`}
-          >
-            <span className="material-symbols-outlined text-[18px]">keyboard_arrow_down</span>
-          </button>
-          {/* Remove */}
-          <button
-            onClick={() => onRemove(index)}
-            className="text-muted hover:text-danger transition-colors"
-            aria-label={`Remove interval ${index + 1}`}
-          >
-            <span className="material-symbols-outlined text-[18px]">delete</span>
-          </button>
-        </div>
+        </details>
       </div>
     </div>
   )

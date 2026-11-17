@@ -58,6 +58,23 @@ describe('workoutReducer', () => {
   })
 
   describe('REORDER', () => {
+    it('moves a work block to the target round and keeps the source round separate', () => {
+      const roundOne = { cycleId: 'r1', cycleTitle: 'Round 1' }
+      const roundTwo = { cycleId: 'r2', cycleTitle: 'Round 2' }
+      const state = [{ ...a, ...roundOne }, { ...b, ...roundOne }, { ...c, ...roundTwo }]
+      const result = workoutReducer(state, { type: 'REORDER', fromIndex: 1, toIndex: 2 })
+      expect(result.map((block) => [block.id, block.cycleId])).toEqual([['a', 'r1'], ['c', 'r2'], ['b', 'r2']])
+      expect(result[2]!.cycleTitle).toBe('Round 2')
+    })
+
+    it('moves a recovery from the end to the gap before a cycle in one step', () => {
+      const recovery = { ...rest, type: 'rest_between_cycles' as const }
+      const state = [{ ...a, cycleId: 'r1' }, { ...b, cycleId: 'r2' }, { ...c, cycleId: 'r2' }, recovery]
+      const result = workoutReducer(state, { type: 'REORDER', fromIndex: 3, toIndex: 2 })
+      expect(result.map((block) => block.id)).toEqual(['a', 'r', 'b', 'c'])
+      expect(result[1]!.cycleId).toBeUndefined()
+    })
+
     it('reorders forward (fromIndex < toIndex)', () => {
       const r = workoutReducer([a, b, c], { type: 'REORDER', fromIndex: 0, toIndex: 2 })
       expect(r).toHaveLength(3)

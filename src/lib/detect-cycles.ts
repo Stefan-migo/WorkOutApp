@@ -18,12 +18,10 @@ export interface DetectedCycle {
  *    intervals with same (title, duration).
  */
 export function detectCycles(intervals: Interval[]): DetectedCycle[] {
-  const byCycleId = groupByCycleId(intervals)
-  if (byCycleId.length > 0) return byCycleId
+  if (intervals.some((interval) => interval.cycleId)) return groupByCycleId(intervals)
 
   const byCycleIndex = groupByCycleIndexReset(intervals)
   if (byCycleIndex.length > 0) return byCycleIndex
-
   return groupByHeuristic(intervals)
 }
 
@@ -31,31 +29,36 @@ export function detectCycles(intervals: Interval[]): DetectedCycle[] {
 // Strategy 1: cycleId — most reliable, preserves custom titles
 // ---------------------------------------------------------------------------
 function groupByCycleId(intervals: Interval[]): DetectedCycle[] {
-  const blocks = new Map<string, { startIdx: number; endIdx: number; intervals: Interval[]; title?: string }>()
-  for (let i = 0; i < intervals.length; i++) {
-    const cid = intervals[i]?.cycleId
-    if (!cid) continue
-    if (!blocks.has(cid)) {
-      blocks.set(cid, { startIdx: i, endIdx: i, intervals: [], title: intervals[i]?.cycleTitle })
+  const cycles: DetectedCycle[] = []
+  for (let start = 0; start < intervals.length;) {
+    const first = intervals[start]!
+    if (!first.cycleId || first.type === 'rest_between_cycles') {
+      start++
+      continue
     }
-    const block = blocks.get(cid)!
-    block.endIdx = i
-    block.intervals.push(intervals[i]!)
-    // Capture title from any interval in the block (they all share it)
-    if (!block.title && intervals[i]?.cycleTitle) block.title = intervals[i]!.cycleTitle
+
+    let end = start
+    while (end + 1 < intervals.length) {
+      const next = intervals[end + 1]!
+      if (next.type === 'rest_between_cycles') break
+      if (next.cycleId === first.cycleId) {
+        end++
+      } else if (next.type === 'rest' && !next.cycleId && intervals[end + 2]?.cycleId === first.cycleId
+        && intervals[end + 2]?.type !== 'rest_between_cycles') {
+        end += 2
+      } else {
+        break
+      }
+    }
+
+    const members = intervals.slice(start, end + 1)
+    const title = members.find((member) => member.cycleTitle && member.cycleTitle !== 'Cycle')?.cycleTitle
+    if (members.some((member) => member.type === 'work')) {
+      cycles.push({ startIdx: start, endIdx: end, label: title ?? `Cycle ${cycles.length + 1}`, intervals: members })
+    }
+    start = end + 1
   }
-  if (blocks.size === 0) return []
-
-  const entries = Array.from(blocks.entries())
-  const withCustomTitles = entries.filter(([, b]) => b.intervals.filter((i) => i.type === 'work').length >= 2)
-
-  // Assign sequential labels — use custom title if set and not the default "Cycle"
-  let cycleNum = 0
-  return withCustomTitles.map(([, b]) => {
-    cycleNum++
-    const title = b.title && b.title !== 'Cycle' ? b.title : `Cycle ${cycleNum}`
-    return { startIdx: b.startIdx, endIdx: b.endIdx, label: title, intervals: b.intervals }
-  })
+  return cycles
 }
 
 // ---------------------------------------------------------------------------

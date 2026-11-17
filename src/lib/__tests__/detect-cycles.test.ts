@@ -79,6 +79,15 @@ describe('detectCycles', () => {
     expect(result[1]!.intervals).toHaveLength(3)
   })
 
+  it('keeps a between-cycle recovery outside both groups, even with a stale cycle id', () => {
+    const intervals: Interval[] = [
+      work('a', 'Work', 30, { cycleId: 'round-a', cycleTitle: 'Round 1' }),
+      { ...rest('recovery', 15), type: 'rest_between_cycles', cycleId: 'round-a' },
+      work('b', 'Work', 30, { cycleId: 'round-b', cycleTitle: 'Round 2' }),
+    ]
+    expect(detectCycles(intervals).map(({ startIdx, endIdx }) => [startIdx, endIdx])).toEqual([[0, 0], [2, 2]])
+  })
+
   // --- by cycleIndex (fallback for workouts without cycleId) ---
   it('detects cycleIndex reset to 0 as boundary, sequential labels', () => {
     const intervals = [
@@ -143,8 +152,7 @@ describe('detectCycles', () => {
       work('c', 'Work', 30, { cycleId: 'c2', cycleIndex: 0 }),
     ]
     const result = detectCycles(intervals)
-    expect(result).toHaveLength(1)
-    expect(result[0]!.intervals).toHaveLength(2)
+    expect(result.map(({ intervals }) => intervals.length)).toEqual([2, 1])
     expect(result[0]!.label).toBe('Cycle 1')
   })
 })

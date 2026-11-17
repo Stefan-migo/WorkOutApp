@@ -1,225 +1,66 @@
-import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, cleanup } from '@testing-library/react'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { IntervalRow } from '../IntervalRow'
 import type { Interval } from '@/types/workout'
 
-vi.mock('next/link', () => {
-  const Link = ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: unknown }) => (
-    <a href={href} {...props}>{children}</a>
-  )
-  return { default: Link }
-})
-
-vi.mock('@/hooks/useExercises', () => ({
-  useExercises: () => ({
-    exercises: [
-      {
-        id: 'ex-1',
-        name: 'Sprint',
-        category: 'cardio',
-        primaryMuscles: ['Quadriceps', 'Hamstrings', 'Glutes'],
-        images: ['https://example.com/sprint.jpg'],
-        createdAt: 0,
-        updatedAt: 0,
-      },
-    ],
-    saveExercise: vi.fn(),
-    deleteExercise: vi.fn(),
-  }),
-}))
-
 afterEach(cleanup)
 
-function interval(overrides: Partial<Interval> & { id: string }): Interval {
-  return {
-    type: 'work',
-    title: 'Test Interval',
-    duration: 60,
-    ...overrides,
-  }
+function renderRow(interval: Partial<Interval> = {}) {
+  const onEdit = vi.fn()
+  const onRemove = vi.fn()
+  const onMoveDown = vi.fn()
+  render(
+    <IntervalRow
+      interval={{ id: 'work-1', type: 'work', title: 'Sprint drills', duration: 125, ...interval }}
+      index={0}
+      onEdit={onEdit}
+      onRemove={onRemove}
+      onMoveUp={vi.fn()}
+      onMoveDown={onMoveDown}
+      isFirst
+      isLast={false}
+      dragIndex={null}
+      onDragStart={vi.fn()}
+      onDragOver={vi.fn()}
+      onDrop={vi.fn()}
+      onDragEnd={vi.fn()}
+    />,
+  )
+  return { onEdit, onRemove, onMoveDown }
 }
 
-const noop = () => {}
-
 describe('IntervalRow', () => {
-  it('renders the interval title in the input', () => {
-    render(
-      <IntervalRow
-        interval={interval({ id: 'i1', title: 'Sprint Drills' })}
-        index={0}
-        onChange={noop}
-        onRemove={noop}
-      />,
-    )
-    const titleInput = screen.getByDisplayValue('Sprint Drills')
-    expect(titleInput).toBeInTheDocument()
+  it('opens the editor through a single button and displays the timed target', () => {
+    const { onEdit } = renderRow()
+    const edit = screen.getByRole('button', { name: 'Edit interval 1: Sprint drills' })
+    expect(edit).toHaveTextContent('02:05')
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
+    fireEvent.click(edit)
+    expect(onEdit).toHaveBeenCalledOnce()
   })
 
-  it('renders duration as MM:SS in the duration input', () => {
-    render(
-      <IntervalRow
-        interval={interval({ id: 'i2', duration: 125 })}
-        index={0}
-        onChange={noop}
-        onRemove={noop}
-      />,
-    )
-    const durationInput = screen.getByDisplayValue('02:05')
-    expect(durationInput).toBeInTheDocument()
+  it('shows reps and weight for rep-based blocks', () => {
+    renderRow({ mode: 'reps', reps: 12, weight: 20 })
+    expect(screen.getByText('12 reps · 20 kg')).toBeInTheDocument()
   })
 
-  it('shows exercise preview for work type with exerciseId', () => {
-    render(
-      <IntervalRow
-        interval={interval({ id: 'i3', type: 'work', exerciseId: 'ex-1' })}
-        index={0}
-        onChange={noop}
-        onRemove={noop}
-      />,
-    )
-    // Exercise name shown as link
-    const link = screen.getByRole('link', { name: 'Sprint' })
-    expect(link).toBeInTheDocument()
-    expect(link).toHaveAttribute('href', '/exercises/ex-1')
-    // Thumbnail image
-    const img = screen.getByAltText('Sprint')
-    expect(img).toBeInTheDocument()
-    expect(img).toHaveAttribute('src', 'https://example.com/sprint.jpg')
-    // Primary muscles chips (max 2 of 3)
-    expect(screen.getByText('Quadriceps')).toBeInTheDocument()
-    expect(screen.getByText('Hamstrings')).toBeInTheDocument()
-    expect(screen.queryByText('Glutes')).not.toBeInTheDocument()
+  it('shows time for explicitly timed blocks with old rep values', () => {
+    renderRow({ mode: 'timed', reps: 12 })
+    expect(screen.getByText('02:05')).toBeInTheDocument()
+    expect(screen.queryByText('12 reps')).not.toBeInTheDocument()
   })
 
-  it('shows reps badge when interval has reps', () => {
-    render(
-      <IntervalRow
-        interval={interval({ id: 'ir-reps', reps: 12 })}
-        index={0}
-        onChange={noop}
-        onRemove={noop}
-      />,
-    )
-    expect(screen.getByText('12 reps')).toBeInTheDocument()
-  })
-
-  it('shows reps and weight when interval has both', () => {
-    render(
-      <IntervalRow
-        interval={interval({ id: 'ir-weight', reps: 12, weight: 20 })}
-        index={0}
-        onChange={noop}
-        onRemove={noop}
-      />,
-    )
-    expect(screen.getByText('12 reps @ 20kg')).toBeInTheDocument()
-  })
-
-  it('hides reps badge and shows duration when interval has no reps', () => {
-    render(
-      <IntervalRow
-        interval={interval({ id: 'ir-noreps' })}
-        index={0}
-        onChange={noop}
-        onRemove={noop}
-      />,
-    )
-    expect(screen.getByDisplayValue('01:00')).toBeInTheDocument()
-    expect(screen.queryByText(/reps/)).not.toBeInTheDocument()
-  })
-
-  it('does not show exercise preview for rest interval', () => {
-    render(
-      <IntervalRow
-        interval={interval({ id: 'i9', type: 'rest', title: 'Rest' })}
-        index={0}
-        onChange={noop}
-        onRemove={noop}
-      />,
-    )
-    expect(screen.queryByRole('link')).not.toBeInTheDocument()
-    expect(screen.queryByAltText(/Sprint|Rest/)).not.toBeInTheDocument()
-  })
-
-  it('does not show exercise preview for work interval without exerciseId', () => {
-    render(
-      <IntervalRow
-        interval={interval({ id: 'i10', type: 'work', title: 'Free Work' })}
-        index={0}
-        onChange={noop}
-        onRemove={noop}
-      />,
-    )
-    expect(screen.queryByRole('link')).not.toBeInTheDocument()
-  })
-
-  it('renders move up and move down buttons visible on hover', () => {
-    render(
-      <IntervalRow
-        interval={interval({ id: 'i4' })}
-        index={1}
-        onChange={noop}
-        onRemove={noop}
-        onMoveUp={noop}
-        onMoveDown={noop}
-        isFirst={false}
-        isLast={false}
-      />,
-    )
-    expect(screen.getByRole('button', { name: /move interval 2 up/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /move interval 2 down/i })).toBeInTheDocument()
-  })
-
-  it('renders remove button', () => {
-    render(
-      <IntervalRow
-        interval={interval({ id: 'i5' })}
-        index={0}
-        onChange={noop}
-        onRemove={noop}
-      />,
-    )
-    expect(screen.getByRole('button', { name: /remove interval 1/i })).toBeInTheDocument()
-  })
-
-  it('does NOT render checkbox (selection mode removed)', () => {
-    render(
-      <IntervalRow
-        interval={interval({ id: 'i6' })}
-        index={0}
-        onChange={noop}
-        onRemove={noop}
-      />,
-    )
-    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
-  })
-
-  it('renders drag handle for DnD reorder', () => {
-    render(
-      <IntervalRow
-        interval={interval({ id: 'i7' })}
-        index={0}
-        onChange={noop}
-        onRemove={noop}
-      />,
-    )
-    expect(screen.getByLabelText('Drag to reorder')).toBeInTheDocument()
-  })
-
-  it('accepts onDragStart prop without parentIndex parameter', () => {
-    const onDragStart = vi.fn()
-    render(
-      <IntervalRow
-        interval={interval({ id: 'i8' })}
-        index={2}
-        onChange={noop}
-        onRemove={noop}
-        onDragStart={(i) => onDragStart(i)}
-      />,
-    )
-    // Trigger drag via draggable attribute
-    const row = screen.getByLabelText('Drag to reorder').closest('[draggable]') as HTMLElement
-    expect(row).toBeInTheDocument()
+  it('keeps reorder and removal separate from editing', () => {
+    const { onEdit, onRemove, onMoveDown } = renderRow()
+    const menu = screen.getByLabelText('Actions for interval 1: Sprint drills')
+    fireEvent.click(menu)
+    expect(screen.getByRole('button', { name: 'Move up' })).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Move down' }))
+    expect(onMoveDown).toHaveBeenCalledWith(0)
+    fireEvent.click(menu)
+    fireEvent.click(screen.getByRole('button', { name: 'Remove block' }))
+    expect(onRemove).toHaveBeenCalledWith(0)
+    expect(onEdit).not.toHaveBeenCalled()
   })
 })

@@ -285,11 +285,8 @@ describe('ExercisesPage card display', () => {
     const ExercisesPage = (await import('../page')).default
     render(<ExercisesPage />)
 
-    // Difficulty text also appears in the form select options
-    const beginnerBadges = screen.getAllByText('Beginner')
-    expect(beginnerBadges.length).toBeGreaterThanOrEqual(1)
-    const intermediateBadges = screen.getAllByText('Intermediate')
-    expect(intermediateBadges.length).toBeGreaterThanOrEqual(1)
+    expect(screen.getByText(/^beginner$/i)).toBeInTheDocument()
+    expect(screen.getByText(/^intermediate$/i)).toBeInTheDocument()
   })
 
   it('shows primary muscles meta line with +N overflow', async () => {
