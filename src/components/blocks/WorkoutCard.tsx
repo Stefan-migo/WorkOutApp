@@ -24,7 +24,7 @@ function TimelinePreview({ intervals }: { intervals: { type: IntervalType; durat
   const total = totalSeconds(intervals)
   if (total === 0) return null
   return (
-    <div className="h-2 w-full bg-surface rounded-full overflow-hidden flex">
+    <div aria-hidden="true" className="flex h-1.5 w-full overflow-hidden rounded-full bg-surface-warm">
       {intervals.map((i, idx) => (
         <div
           key={idx}
@@ -57,20 +57,21 @@ export function WorkoutCard({ workout, onOpen, onPlay, onEdit, onPreview, onDele
         tabIndex={0}
         onClick={onOpen}
         onKeyDown={(e) => {
-          if (e.key === 'Enter') onOpen()
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            onOpen()
+          }
         }}
-        className="p-16 flex flex-col gap-4"
+        className="flex h-full min-h-28 flex-col gap-3 py-4 pl-4 pr-17"
       >
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="font-headline-md text-headline-md font-bold text-fg-2 mb-1">{workout.title}</h3>
-            <p className="font-data-sm text-data-sm text-muted flex items-center gap-2">
-              <span className="material-symbols-outlined text-[16px]">timer</span>
-              {formatDuration(total)}
-              <span className="w-1 h-1 rounded-full bg-border-soft/50" />
-              {count} interval{count !== 1 && 's'}
-            </p>
-          </div>
+        <div className="min-w-0">
+          <h3 className="mb-1 break-words text-xl font-bold leading-tight tracking-tight text-fg-2">{workout.title}</h3>
+          <p className="font-data-sm text-data-sm text-muted flex items-center gap-2">
+            <span className="material-symbols-outlined text-[16px]">timer</span>
+            {formatDuration(total)}
+            <span className="w-1 h-1 rounded-full bg-border-soft/50" />
+            {count} interval{count !== 1 && 's'}
+          </p>
         </div>
         <TimelinePreview intervals={workout.intervals} />
       </Card>
@@ -81,7 +82,7 @@ export function WorkoutCard({ workout, onOpen, onPlay, onEdit, onPreview, onDele
         size="sm"
         aria-label={`Play ${workout.title}`}
         onClick={onPlay}
-        className="absolute bottom-4 right-4 shadow-fab"
+        className="absolute bottom-3 right-3"
       >
         <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
           play_arrow
@@ -89,7 +90,7 @@ export function WorkoutCard({ workout, onOpen, onPlay, onEdit, onPreview, onDele
       </IconButton>
 
       {/* ⋮ overflow menu — sibling of the Card (DD-1, DD-7) */}
-      <div className="absolute top-4 right-4 z-40">
+      <div className={`absolute right-3 top-2 ${menuOpen ? "z-20" : ""}`}>
         <IconButton
           variant="ghost"
           aria-label="Workout options"

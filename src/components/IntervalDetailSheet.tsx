@@ -4,6 +4,7 @@ import { useState, useRef, useId, useMemo } from 'react'
 import { isCloudExerciseMedia } from '@/lib/exercise-media'
 import { useIntervalDialog } from '@/hooks/useIntervalDialog'
 import styles from './IntervalDialog.module.css'
+import { snapshotExerciseDescription } from '@/lib/exercise-ownership'
 import type { Interval, Exercise, WorkoutMode } from '@/types/workout'
 import { ExercisePicker } from './ExercisePicker'
 
@@ -89,6 +90,9 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
 
   function handlePickerSelect(exercise: Exercise) {
     setExerciseId(exercise.id)
+    if (!description && exercise.visibility === 'community') {
+      setDescription(snapshotExerciseDescription(exercise) ?? '')
+    }
     // Auto-name the interval to the exercise name if title is still the default "Work"
     if (title === 'Work') setTitle(exercise.name)
   }

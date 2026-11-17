@@ -90,14 +90,14 @@ describe('StatsDashboard', () => {
       render(<StatsDashboard sessions={[]} />)
 
       expect(screen.queryByText('Volume per Week')).not.toBeInTheDocument()
-      expect(screen.queryByText('Average Strain')).not.toBeInTheDocument()
+      expect(screen.queryByText('Work time share')).not.toBeInTheDocument()
       expect(screen.queryByText('Consistency')).not.toBeInTheDocument()
       expect(screen.queryByText('Personal Records')).not.toBeInTheDocument()
     })
   })
 
   describe('header', () => {
-    it('shows Performance Stats heading and subtitle', () => {
+    it('shows the stats heading and current-week summary', () => {
       render(
         <StatsDashboard
           sessions={[
@@ -107,7 +107,7 @@ describe('StatsDashboard', () => {
       )
 
       expect(screen.getByText('Performance Stats')).toBeInTheDocument()
-      expect(screen.getByText('Review recent training and your personal records.')).toBeInTheDocument()
+      expect(screen.getByText('Sessions this week')).toBeInTheDocument()
     })
 
     it('shows Export CSV button', () => {
@@ -134,10 +134,10 @@ describe('StatsDashboard', () => {
       )
 
       expect(screen.getByText('Volume per Week')).toBeInTheDocument()
-      expect(screen.getByText('Wk 1')).toBeInTheDocument()
+      expect(screen.getAllByText('10:00').length).toBeGreaterThan(0)
     })
 
-    it('renders Average Strain with RPE gauge', () => {
+    it('shows measured work share without labeling it as RPE', () => {
       render(
         <StatsDashboard
           sessions={[
@@ -146,9 +146,8 @@ describe('StatsDashboard', () => {
         />,
       )
 
-      expect(screen.getByText('Average Strain')).toBeInTheDocument()
-      expect(screen.getByText('RPE Focus')).toBeInTheDocument()
-      expect(screen.getByText('Avg RPE')).toBeInTheDocument()
+      expect(screen.getByText('Work time share')).toBeInTheDocument()
+      expect(screen.getByText('100%')).toBeInTheDocument()
     })
 
     it('renders Consistency heatmap with day labels', () => {

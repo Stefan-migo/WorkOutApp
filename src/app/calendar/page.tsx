@@ -140,7 +140,7 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-24">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-16 sm:gap-24">
       <h1 className="text-4xl font-bold tracking-tight text-fg-2 sm:text-5xl">Calendar</h1>
       <CalendarHeader
         weekStart={currentMonday}
@@ -155,8 +155,8 @@ export default function CalendarPage() {
       />
 
       {error && <p className="rounded-card border border-danger/40 bg-surface p-16 text-sm text-danger" role="alert">The calendar couldn’t sync. Try again in a moment.</p>}
-      <div className="grid items-start gap-24 xl:grid-cols-[minmax(0,1fr)_20rem]">
-        <div className="flex min-w-0 flex-col gap-24">
+      <div className="grid items-start gap-16 xl:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="flex min-w-0 flex-col gap-16">
           <TodaysFocus
             assignment={todayAssignment}
             workout={todayWorkout}
@@ -172,6 +172,7 @@ export default function CalendarPage() {
           <section className="flex flex-col gap-8" aria-labelledby="calendar-week-title">
             <h2 id="calendar-week-title" className="text-lg font-semibold text-fg-2">Week plan</h2>
             {!weekPlan && !error && <p role="status" className="text-muted">Loading week…</p>}
+            <div className="divide-y divide-border-soft rounded-card border border-border-soft bg-surface">
               {DAY_NAMES.map((name, i) => {
                 if (!weekPlan) return null
                 const d = new Date(currentMonday + 'T00:00:00')
@@ -212,6 +213,7 @@ export default function CalendarPage() {
                   />
                 )
               })}
+            </div>
           </section>
         </div>
 

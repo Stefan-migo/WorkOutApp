@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import type { ExerciseCategory } from '@/types/workout'
+import type { ExerciseCategory, ExerciseVisibility } from '@/types/workout'
 import { TagChips } from './TagChips'
 import { Dialog } from './ui/Dialog'
 import { Button } from './ui/Button'
@@ -18,6 +18,8 @@ export interface ExerciseFormData {
   mechanic?: 'compound' | 'isolation'
   instructions: string[]
   images: string[]
+  visibility?: ExerciseVisibility
+  authorName?: string
 }
 
 interface ExerciseFormDialogProps {
@@ -26,7 +28,8 @@ interface ExerciseFormDialogProps {
   form: ExerciseFormData
   onFormChange: (f: ExerciseFormData) => void
   editingId: string | null
-  onSave: (e: React.FormEvent) => void
+  onSave: (e: React.FormEvent) => void | Promise<void>
+  saveError?: string | null
   allMuscleGroups: string[]
   allEquipment: string[]
   onImageUpload?: (file: File) => Promise<string>
@@ -43,6 +46,7 @@ export function ExerciseFormDialog({
   form, onFormChange,
   editingId,
   onSave,
+  saveError,
   allMuscleGroups,
   allEquipment,
   onImageUpload,
@@ -51,18 +55,30 @@ export function ExerciseFormDialog({
   // ponytail: simple local state for each image URL input, not a full array manager
   const [imageUrlInput, setImageUrlInput] = useState('')
   const [uploading, setUploading] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [uploadError, setUploadError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (uploading) return
+    if (uploading || saving) return
     if (!form.name.trim()) {
       setValidationError('Name is required')
       return
     }
+    if (form.visibility === 'community' && !form.authorName?.trim()) {
+      setValidationError('Enter the author name to display in the community.')
+      return
+    }
     setValidationError('')
-    onSave(e)
+    setSaving(true)
+    try {
+      await onSave(e)
+    } catch {
+      setValidationError('Could not save the exercise. Try again.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   function update(changes: Partial<ExerciseFormData>) {
@@ -84,7 +100,7 @@ export function ExerciseFormDialog({
   return (
     <Dialog
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={(next) => { if (!saving) onOpenChange(next) }}
       contained
       title={editingId ? 'Edit Exercise' : 'New Exercise'}
     >
@@ -104,6 +120,31 @@ export function ExerciseFormDialog({
             <span className="text-danger text-sm font-label text-label-caps">{validationError}</span>
           )}
         </label>
+
+        <fieldset className="flex flex-col gap-2 rounded-control border border-border-soft p-3">
+          <legend className="px-1 text-sm font-semibold text-fg-2">Visibility</legend>
+          <label className="flex min-h-9 items-center gap-2 text-sm">
+            <input type="radio" name="exercise-visibility" className="accent-accent" checked={form.visibility !== 'community'} onChange={() => update({ visibility: 'private' })} />
+            Private
+          </label>
+          <label className="flex min-h-9 items-center gap-2 text-sm">
+            <input type="radio" name="exercise-visibility" className="accent-accent" checked={form.visibility === 'community'} onChange={() => update({ visibility: 'community' })} />
+            Share with the community
+          </label>
+          {form.visibility === 'community' && (
+            <label className="flex flex-col gap-1 text-sm">
+              Display name
+              <input
+                required
+                maxLength={60}
+                value={form.authorName ?? ''}
+                onChange={(event) => update({ authorName: event.target.value })}
+                className="min-h-11 rounded-control border border-border-soft bg-surface px-3"
+              />
+              <span className="text-xs text-muted">Signed-in members can view this exercise, including its images.</span>
+            </label>
+          )}
+        </fieldset>
 
         {/* Category */}
         <label className="flex flex-col gap-1">
@@ -372,6 +413,8 @@ export function ExerciseFormDialog({
           )}
         </div>
 
+        {saveError && <p role="alert" className="text-sm text-danger">{saveError}</p>}
+
         {/* Preview Card */}
         {(form.name || form.primaryMuscles.length > 0 || form.images.length > 0) && (
           <div className="border border-border-soft rounded-xl overflow-hidden bg-surface">
@@ -416,12 +459,13 @@ export function ExerciseFormDialog({
             variant="ghost"
             size="sm"
             type="button"
+            disabled={saving}
             onClick={() => onOpenChange(false)}
           >
             Cancel
           </Button>
-          <Button variant="primary" size="sm" type="submit">
-            {editingId ? 'Save' : 'Create'}
+          <Button variant="primary" size="sm" type="submit" disabled={saving || uploading}>
+            {saving ? 'Saving…' : editingId ? 'Save' : 'Create'}
           </Button>
         </div>
       </form>

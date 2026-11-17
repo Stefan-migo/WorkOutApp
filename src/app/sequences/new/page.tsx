@@ -172,14 +172,14 @@ export default function NewSequencePage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-24">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-16 sm:gap-24">
       <PageHeading title="New sequence" description="Choose the workouts and set their order." />
-      <div className="flex w-full flex-col gap-24 xl:flex-row">
+      <div className="flex w-full flex-col gap-16 xl:flex-row">
         {/* Left Column: Sequence Metadata & List */}
         <div className="min-w-0 flex-1 flex flex-col gap-24">
           {/* Glass Header Panel */}
-          <div className="glass-card rounded-xl p-16 sm:p-24 space-y-24">
-            <div className="flex flex-col md:flex-row justify-between md:items-end gap-16 border-b border-border-soft pb-16">
+          <div className="glass-card rounded-card p-4 sm:p-6 space-y-4">
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 border-b border-border-soft pb-3">
               <div className="flex-1 w-full">
                 <label className="block font-label text-label-caps text-muted mb-xs uppercase tracking-wider" htmlFor="sequence-title">
                   Sequence Title
@@ -193,9 +193,9 @@ export default function NewSequencePage() {
                   onChange={(e) => setTitle(e.target.value)}
                 />
               </div>
-              <div className="shrink-0 md:text-right">
+              <div className="shrink-0 text-right">
                 <div className="font-label text-label-caps text-muted mb-xs uppercase tracking-wider">Total Duration</div>
-                <div className="font-mono text-4xl md:text-5xl tracking-tighter text-accent leading-none">
+                <div className="font-mono text-2xl md:text-4xl tracking-tighter text-accent leading-none">
                   {formatDuration(totalDurationSec * repeatCount)}
                 </div>
               </div>
@@ -213,7 +213,7 @@ export default function NewSequencePage() {
             </div>
 
             {/* Meta chips */}
-            <div className="flex gap-24 flex-wrap items-center">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-8 rounded-full bg-surface px-16 py-8 font-data text-data-sm text-muted">
                 <span className="w-2 h-2 rounded-full bg-accent" />
                 {selectedIds.length} Workout{selectedIds.length !== 1 && 's'}
@@ -251,7 +251,7 @@ export default function NewSequencePage() {
                   onDragOver={handleDragOver}
                   onDrop={() => handleDrop(i)}
                   onDragEnd={handleDragEnd}
-                  className={`group glass-card flex flex-wrap items-center gap-8 rounded-xl p-16 transition-colors hover:border-accent sm:flex-nowrap ${isDragging ? 'opacity-40 ring-2 ring-accent' : ''}`}
+                  className={`group glass-card flex flex-wrap items-center gap-2 rounded-card p-3 transition-colors hover:border-accent sm:flex-nowrap ${isDragging ? 'opacity-40 ring-2 ring-accent' : ''}`}
                 >
                   {/* Drag handle */}
                   <div aria-hidden="true" className="hidden shrink-0 cursor-grab text-muted sm:block">

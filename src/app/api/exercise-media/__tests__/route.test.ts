@@ -1,9 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { GET, POST } from '../route'
 
-const { getUser } = vi.hoisted(() => ({ getUser: vi.fn() }))
+const { getUser, maybeSingle } = vi.hoisted(() => ({ getUser: vi.fn(), maybeSingle: vi.fn() }))
 vi.mock('@/lib/supabase/server', () => ({
-  createClient: async () => ({ auth: { getUser } }),
+  createClient: async () => {
+    const query = { select: () => query, eq: () => query, maybeSingle }
+    return { auth: { getUser }, from: () => query }
+  },
 }))
 
 const path = 'https://app.example.com/api/exercise-media'
@@ -60,6 +63,20 @@ describe('exercise media route', () => {
     const signed = new URL(response.headers.get('location')!)
     expect(signed.pathname).toBe(`/private-assets/different-user/${id}`)
     expect(signed.searchParams.get('X-Amz-Expires')).toBe('60')
+  })
+
+  it('signs a community attachment under the owner only while it is listed on the published exercise', async () => {
+    const exerciseId = '22940d39-12bb-4257-a895-317a67e20380'
+    const request = () => new Request(`${path}?id=${id}&exerciseId=${exerciseId}`)
+    maybeSingle.mockResolvedValueOnce({ data: { user_id: 'author-id', images: [`/api/exercise-media?id=${id}`] }, error: null })
+    const response = await GET(request())
+    expect(response.status).toBe(307)
+    expect(new URL(response.headers.get('location')!).pathname).toBe(`/private-assets/author-id/${id}`)
+
+    maybeSingle.mockResolvedValueOnce({ data: { user_id: 'author-id', images: [] }, error: null })
+    expect((await GET(request())).status).toBe(404)
+    maybeSingle.mockResolvedValueOnce({ data: null, error: null })
+    expect((await GET(request())).status).toBe(404)
   })
 
   it('reports missing R2 configuration without issuing upload credentials', async () => {

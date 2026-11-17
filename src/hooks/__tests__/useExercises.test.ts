@@ -38,6 +38,7 @@ function mockQueryBuilder(resolvesTo: { data: unknown; error: unknown }) {
   const builder = {
     select: vi.fn(),
     eq: vi.fn(),
+    in: vi.fn(),
     or: vi.fn(),
     order: vi.fn(),
     single: vi.fn(),
@@ -53,6 +54,7 @@ function mockQueryBuilder(resolvesTo: { data: unknown; error: unknown }) {
   }
   builder.select.mockReturnValue(builder)
   builder.eq.mockReturnValue(builder)
+  builder.in.mockReturnValue(builder)
   builder.or.mockReturnValue(builder)
   builder.order.mockReturnValue(builder)
   builder.single.mockReturnValue(builder)
@@ -116,6 +118,9 @@ const expectedExercises: Exercise[] = [
     mechanic: 'compound',
     difficulty: 'beginner',
     images: [],
+    isShared: true,
+    isOwned: false,
+    visibility: 'private',
     source: 'free-exercise-db',
     createdAt: new Date('2026-07-25T10:00:00.000Z').getTime(),
     updatedAt: new Date('2026-07-25T10:00:00.000Z').getTime(),
@@ -133,6 +138,9 @@ const expectedExercises: Exercise[] = [
     mechanic: undefined,
     difficulty: 'beginner',
     images: [],
+    isShared: false,
+    isOwned: true,
+    visibility: 'private',
     source: 'user',
     createdAt: new Date('2026-07-25T11:00:00.000Z').getTime(),
     updatedAt: new Date('2026-07-25T11:00:00.000Z').getTime(),
@@ -166,7 +174,7 @@ describe('useExercises', () => {
     expect(result.current.error).toBeNull()
     expect(mockFrom).toHaveBeenCalledWith('exercises')
     expect(qb.select).toHaveBeenCalledWith('*')
-    expect(qb.or).toHaveBeenCalledWith('user_id.eq.user-1,user_id.is.null')
+    expect(qb.or).toHaveBeenCalledWith('user_id.eq.user-1,user_id.is.null,visibility.eq.community')
     expect(qb.order).toHaveBeenCalledWith('name')
   })
 
@@ -272,6 +280,8 @@ describe('useExercises', () => {
       difficulty: 'beginner',
       images: [],
       source: 'user',
+      visibility: 'private',
+      author_name: null,
       updated_at: expect.any(String),
     })
     // After upsert, list is refreshed
@@ -295,14 +305,10 @@ describe('useExercises', () => {
     await waitFor(() => expect(result.current.error).toBe('Upsert failed'))
   })
 
-  it('deleteExercise deletes and refreshes', async () => {
+  it('deleteExercise removes the confirmed exercise from the list', async () => {
     const loadQb = mockQueryBuilder({ data: [mockPublicRow, mockUserRow], error: null })
-    const deleteQb = mockQueryBuilder({ data: null, error: null })
-    const refreshQb = mockQueryBuilder({ data: [mockPublicRow], error: null })
-    mockFrom
-      .mockReturnValueOnce(loadQb)   // initial fetch
-      .mockReturnValueOnce(deleteQb)  // delete call
-      .mockReturnValueOnce(refreshQb) // refresh after delete
+    const deleteQb = mockQueryBuilder({ data: [{ id: 'ex-user-1' }], error: null })
+    mockFrom.mockReturnValueOnce(loadQb).mockReturnValueOnce(deleteQb)
 
     const { result } = renderHook(() => useExercises())
 
@@ -311,8 +317,23 @@ describe('useExercises', () => {
     await result.current.deleteExercise('ex-user-1')
 
     expect(deleteQb.delete).toHaveBeenCalledWith()
-    expect(deleteQb.eq).toHaveBeenCalledWith('id', 'ex-user-1')
+    expect(deleteQb.eq).toHaveBeenCalledWith('user_id', mockUser.id)
+    expect(deleteQb.in).toHaveBeenCalledWith('id', ['ex-user-1'])
+    expect(deleteQb.select).toHaveBeenCalledWith('id')
     await waitFor(() => expect(result.current.exercises).toHaveLength(1))
+  })
+
+  it('keeps shared rows when Supabase confirms only part of a bulk deletion', async () => {
+    const load = mockQueryBuilder({ data: [mockPublicRow, mockUserRow], error: null })
+    const remove = mockQueryBuilder({ data: [{ id: 'ex-user-1' }], error: null })
+    mockFrom.mockReturnValueOnce(load).mockReturnValueOnce(remove)
+    const { result } = renderHook(() => useExercises())
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+    const outcome = await result.current.deleteExercises(['ex-user-1', 'ex-pub-1'])
+    expect(outcome.deletedIds).toEqual(['ex-user-1'])
+    expect(outcome.error).toMatch(/could not be deleted/)
+    await waitFor(() => expect(result.current.exercises.map((exercise) => exercise.id)).toEqual(['ex-pub-1']))
   })
 
   it('deleteExercise sets error on failure', async () => {

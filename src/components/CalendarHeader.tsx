@@ -68,10 +68,10 @@ export function CalendarHeader({
   }
 
   return (
-    <header className="flex flex-col gap-16">
+    <header className="flex flex-col gap-2">
       {/* Row 1: week navigation + Today */}
-      <div className="flex items-center justify-between gap-16 flex-wrap">
-        <div className="flex items-center gap-16">
+      <div className="flex items-center justify-between gap-1 rounded-card bg-surface-warm px-2 py-1 sm:px-3">
+        <div className="grid min-w-0 flex-1 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1 sm:max-w-sm">
           <Button
             onClick={onPrev}
             variant="ghost"
@@ -82,7 +82,7 @@ export function CalendarHeader({
           >
             <span className="material-symbols-outlined text-muted text-2xl">chevron_left</span>
           </Button>
-          <h2 className="text-lg font-bold text-fg-2 sm:text-headline-md">
+          <h2 className="text-center text-sm font-semibold leading-tight text-fg-2 sm:text-lg">
             {formatWeekRange(weekStart)}
           </h2>
           <Button
@@ -101,7 +101,7 @@ export function CalendarHeader({
           variant="outline"
           size="sm"
           pill
-          className="bg-surface hover:border-accent hover:text-accent active:scale-95 !transition-all duration-200"
+          className="shrink-0 bg-surface hover:border-accent hover:text-accent active:scale-95 !transition-all duration-200"
         >
           Today
         </Button>

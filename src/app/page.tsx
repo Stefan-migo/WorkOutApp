@@ -65,13 +65,13 @@ export default function DashboardPage() {
   const training = resolve(days[todayIndex])
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-24">
-      <header>
-        <p className="mb-xs text-sm font-semibold text-muted">{dateLabel}</p>
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-16 sm:gap-24">
+      <header className="flex items-end justify-between gap-3 border-b border-border-soft pb-3">
         <h1 className="text-4xl font-bold tracking-tight text-fg-2 sm:text-5xl">Today</h1>
+        <p className="pb-1 text-right text-sm font-medium text-muted">{dateLabel}</p>
       </header>
 
-      <div className="grid gap-16 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <HeroCard
           training={training}
           hasWorkouts={workouts.length > 0}

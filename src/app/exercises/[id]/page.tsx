@@ -3,7 +3,10 @@
 import { useMemo, useRef, useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { canManageExercise, isSharedExercise } from '@/lib/exercise-ownership'
+import { catalogMedia } from '@/lib/catalog-media'
 import { uploadExerciseMedia } from '@/lib/exercise-media'
+import { useHiddenCatalogExercises } from '@/hooks/useHiddenCatalogExercises'
 import { useExercises } from '@/hooks/useExercises'
 import { useFavorites } from '@/hooks/useFavorites'
 import { useWorkoutContext } from '@/context/WorkoutContext'
@@ -17,6 +20,8 @@ import type { ImageEntry } from '@/hooks/useIndexedDB'
 export default function ExerciseDetailPage() {
   const params = useParams<{ id: string }>()
   const router = useRouter()
+  const { hiddenIds, hide, restore } = useHiddenCatalogExercises()
+  const [catalogError, setCatalogError] = useState('')
   const {
     exercises, isLoading, error, saveExercise, deleteExercise,
     getExerciseImages,
@@ -73,6 +78,8 @@ export default function ExerciseDetailPage() {
   const [form, setForm] = useState<ExerciseFormData | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const deleteDialogRef = useRef<HTMLDialogElement>(null)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
   const [showAssignModal, setShowAssignModal] = useState(false)
 
@@ -84,7 +91,7 @@ export default function ExerciseDetailPage() {
     )
   }
 
-  if (error) {
+  if (error && !exercise) {
     return (
       <div className="max-w-[1440px] mx-auto w-full p-margin-mobile md:p-margin-desktop flex flex-col items-center justify-center gap-4 py-[64px] text-center">
         <p className="font-headline text-headline-md font-semibold text-danger">{error}</p>
@@ -117,6 +124,10 @@ export default function ExerciseDetailPage() {
 
   // ponytail: local alias for type narrowing after guard
   const ex: Exercise = exercise
+  const canManage = canManageExercise(ex)
+  const credit = ex.source === 'system' && isSharedExercise(ex) ? catalogMedia(ex.name) : undefined
+  const hiddenFromLibrary = hiddenIds.includes(ex.id)
+  const allImages = [...(ex.images ?? []), ...idbImages.map((image) => image.blobUrl)]
 
   function openEdit() {
     const ed: ExerciseFormData = {
@@ -131,12 +142,14 @@ export default function ExerciseDetailPage() {
       mechanic: ex.mechanic,
       instructions: ex.instructions ?? [],
       images: ex.images ?? [],
+      visibility: ex.visibility,
+      authorName: ex.authorName,
     }
     setForm(ed)
     setEditingId(ex.id)
   }
 
-  function handleSave(e: React.FormEvent) {
+  async function handleSave(e: React.FormEvent) {
     e.preventDefault()
     if (!form || !form.name.trim()) return
     const now = Date.now()
@@ -154,19 +167,29 @@ export default function ExerciseDetailPage() {
       mechanic: form.mechanic,
       difficulty: form.difficulty,
       source: ex.source,
+      visibility: form.visibility,
+      authorName: form.authorName,
       createdAt: ex.createdAt,
       updatedAt: now,
     }
-    saveExercise(updated)
-    setForm(null)
+    if (await saveExercise(updated)) setForm(null)
   }
 
-  function handleDelete() {
-    if (deleteTarget) {
-      deleteExercise(deleteTarget)
-      setDeleteTarget(null)
+  async function handleDelete() {
+    if (!deleteTarget || deleting) return
+    setDeleting(true)
+    try {
+      const result = await deleteExercise(deleteTarget)
+      if (!result.deletedIds.includes(deleteTarget)) {
+        setDeleteError(result.error ?? 'Could not delete this exercise.')
+        return
+      }
       deleteDialogRef.current?.close()
       router.push('/exercises')
+    } catch {
+      setDeleteError('Could not delete this exercise.')
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -175,7 +198,7 @@ export default function ExerciseDetailPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-24">
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-16 sm:gap-24">
       {/* Back link */}
       <Link
         href="/exercises"
@@ -196,84 +219,79 @@ export default function ExerciseDetailPage() {
         </button>
       </div>
 
-      {/* Image gallery — ponytail: CSS scroll snap, no JS carousel lib */}
-      {(() => {
-        const allImages = [
-          ...(ex.images ?? []),
-          ...idbImages.map((e) => e.blobUrl),
-        ]
-        return allImages.length > 0 ? (
-          <div>
-            <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-thin pb-4">
-              {allImages.map((url, idx) => (
-                <div
-                  key={`${url}-${idx}`}
-                  className="snap-start shrink-0 w-full max-w-[600px] aspect-[4/3] bg-surface rounded-xl overflow-hidden"
-                >
-                  <img
-                    src={url}
-                    alt={`${ex.name} image ${idx + 1}`}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none'
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-            <div className="mt-2">
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                ref={fileInputRef}
-                onChange={(e) => {
-                  const f = e.target.files?.[0]
-                  e.target.value = ''
-                  if (f) void handleUpload(f)
-                }}
-              />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-                className="min-h-11 px-3 rounded-control font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm transition-colors disabled:opacity-50 focus-visible:focus-ring"
-              >
-                {uploading ? 'Uploading...' : '+ Upload Image'}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div>
-            <div className="aspect-[4/3] bg-surface rounded-xl flex items-center justify-center max-w-[600px] border border-border-soft">
-              <svg className="w-16 h-16 text-muted/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-              </svg>
-            </div>
-            <div className="mt-2">
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                ref={fileInputRef}
-                onChange={(e) => {
-                  const f = e.target.files?.[0]
-                  e.target.value = ''
-                  if (f) void handleUpload(f)
-                }}
-              />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-                className="min-h-11 px-3 rounded-control font-label text-label-caps bg-surface text-fg-2 hover:bg-surface-warm transition-colors disabled:opacity-50 focus-visible:focus-ring"
-              >
-                {uploading ? 'Uploading...' : '+ Upload Image'}
-              </button>
-            </div>
-          </div>
-        )
-      })()}
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          onClick={() => setShowAssignModal(true)}
+          className="min-h-11 rounded-control bg-accent px-3 text-sm font-semibold text-accent-on hover:bg-accent-hover focus-visible:focus-ring"
+        >
+          Assign to Workout
+        </button>
+        {canManage ? (
+          <>
+            <button onClick={openEdit} className="min-h-11 rounded-control border border-border-soft px-3 text-sm font-semibold focus-visible:focus-ring">Edit</button>
+            <button
+              onClick={() => {
+                setDeleteError(null)
+                setDeleteTarget(ex.id)
+                deleteDialogRef.current?.showModal()
+              }}
+              className="min-h-11 rounded-control px-3 text-sm font-semibold text-danger hover:bg-danger/5 focus-visible:focus-ring"
+            >
+              Delete
+            </button>
+          </>
+        ) : isSharedExercise(ex) && (
+          <button
+            onClick={() => {
+              const saved = hiddenFromLibrary ? restore(ex.id) : hide([ex.id])
+              setCatalogError(saved ? '' : 'Could not update your library in this browser.')
+            }}
+            className="min-h-11 rounded-control border border-border-soft px-3 text-sm font-semibold focus-visible:focus-ring"
+          >
+            {hiddenFromLibrary ? 'Restore to library' : 'Hide from library'}
+          </button>
+        )}
+      </div>
+      {ex.visibility === 'community' && ex.authorName && <p className="text-sm text-muted">Shared by {ex.authorName}</p>}
+      {catalogError && <p role="alert" className="text-sm text-danger">{catalogError}</p>}
+      {error && !deleteTarget && !form && <p role="alert" className="text-sm text-danger">{error}</p>}
 
+      <div className="flex snap-x gap-3 overflow-x-auto">
+        {allImages.length ? allImages.map((url, idx) => (
+          <img
+            key={`${url}-${idx}`}
+            src={url}
+            alt={`${ex.name} image ${idx + 1}`}
+            className="aspect-[4/3] w-full max-h-80 max-w-[600px] shrink-0 snap-start rounded-card bg-surface object-contain"
+            loading="lazy"
+          />
+        )) : (
+          <div className="flex min-h-14 w-full items-center gap-2 rounded-card bg-surface-warm px-3 text-sm text-muted">
+            <svg aria-hidden="true" className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 5h16v14H4zM4 16l4-4 4 4 3-3 5 5" />
+            </svg>
+            No exercise image
+          </div>
+        )}
+      </div>
+      {credit && allImages.some((url) => credit.images.includes(url)) && (
+        <p className="text-xs text-muted">
+          Exercise data by <a href={credit.source} className="underline">{credit.author}</a>
+          {' · '}{credit.license}
+        </p>
+      )}
+      {canManage && (
+        <div>
+          <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={(event) => {
+            const file = event.target.files?.[0]
+            event.target.value = ''
+            if (file) void handleUpload(file)
+          }} />
+          <button onClick={() => fileInputRef.current?.click()} disabled={uploading} className="min-h-11 rounded-control border border-border-soft px-3 text-sm font-semibold focus-visible:focus-ring">
+            {uploading ? 'Uploading…' : 'Upload image'}
+          </button>
+        </div>
+      )}
       {uploadError && <p role="alert" className="text-danger">{uploadError}</p>}
 
       {/* Metadata chips */}
@@ -297,7 +315,7 @@ export default function ExerciseDetailPage() {
           </span>
         )}
         <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-label-caps text-label-caps">
-          {ex.source === 'free-exercise-db' ? 'free-exercise-db' : 'User created'}
+          {ex.visibility === 'community' ? 'Community' : canManage ? 'User created' : ex.source === 'free-exercise-db' ? 'free-exercise-db' : 'Shared catalog'}
         </span>
       </div>
 
@@ -369,31 +387,6 @@ export default function ExerciseDetailPage() {
         </section>
       )}
 
-      {/* Action buttons */}
-      <div className="flex flex-wrap gap-4 pt-8 border-t border-border-soft">
-        <button
-          onClick={openEdit}
-          className="px-6 py-3 bg-accent text-accent-on font-label text-label-caps rounded-lg hover:bg-accent-hover transition-colors focus-visible:focus-ring"
-        >
-          Edit
-        </button>
-        <button
-          onClick={() => {
-            setDeleteTarget(ex.id)
-            deleteDialogRef.current?.showModal()
-          }}
-          className="px-6 py-3 bg-danger text-accent-on font-label text-label-caps rounded-lg hover:bg-danger/15 hover:text-danger transition-colors focus-visible:focus-ring"
-        >
-          Delete
-        </button>
-        <button
-          onClick={() => setShowAssignModal(true)}
-          className="px-6 py-3 border border-border text-accent font-label text-label-caps rounded-lg hover:bg-surface-warm transition-colors focus-visible:focus-ring"
-        >
-          Assign to Workout
-        </button>
-      </div>
-
       {/* Dialogs */}
       {form && (
           <ExerciseFormDialog
@@ -405,6 +398,7 @@ export default function ExerciseDetailPage() {
             onFormChange={setForm}
             editingId={editingId}
             onSave={handleSave}
+            saveError={error}
             allMuscleGroups={allMuscleGroups}
             allEquipment={allEquipment}
             onImageUpload={uploadExerciseMedia}
@@ -420,6 +414,8 @@ export default function ExerciseDetailPage() {
         onDelete={handleDelete}
         dialogRef={deleteDialogRef}
         exerciseName={ex.name}
+        deleting={deleting}
+        error={deleteError}
       />
 
       {showAssignModal && (

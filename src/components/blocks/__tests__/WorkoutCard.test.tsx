@@ -56,7 +56,7 @@ describe('WorkoutCard (WB-1)', () => {
     renderCard()
 
     const card = screen.getByText('Morning HIIT').closest('[role="button"]')!
-    const strip = card.querySelector('.h-2')!
+    const strip = card.querySelector('div[aria-hidden="true"]')!
     // 4 intervals -> 4 segments; first is 180/360 = 50%
     expect(strip.children).toHaveLength(4)
     expect((strip.children[0] as HTMLElement).style.width).toBe('50%')
@@ -66,7 +66,7 @@ describe('WorkoutCard (WB-1)', () => {
     renderCard({ workout: { ...TIMED, intervals: [] } })
 
     const card = screen.getByText(/0 intervals/).closest('[role="button"]')!
-    expect(card.querySelector('.h-2')).toBeNull()
+    expect(card.querySelector('div[aria-hidden="true"]')).toBeNull()
   })
 
   it('opens the workout on card click (WB-1e)', () => {

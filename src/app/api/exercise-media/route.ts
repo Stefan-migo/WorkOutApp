@@ -45,15 +45,30 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
-  const user = await getUser()
-  if (!user) return fail('Sign in to view this image.', 401)
+  const supabase = await createClient()
+  const { data: auth, error } = await supabase.auth.getUser()
+  const user = auth.user
+  if (error || !user) return fail('Sign in to view this image.', 401)
 
-  const id = new URL(request.url).searchParams.get('id')
+  const params = new URL(request.url).searchParams
+  const id = params.get('id')
   if (!id || !IMAGE_ID.test(id)) return fail('Image not found.', 404)
 
   const bucket = getR2Bucket()
   if (!bucket) return fail('Cloud image storage is unavailable.', 503)
 
-  const url = await bucket.sign(`${user.id}/${id}`, 'GET')
+  let ownerId = user.id
+  const exerciseId = params.get('exerciseId')
+  if (exerciseId) {
+    if (!IMAGE_ID.test(exerciseId)) return fail('Image not found.', 404)
+    const { data: exercise, error: lookupError } = await supabase.from('exercises')
+      .select('user_id, images').eq('id', exerciseId).eq('visibility', 'community').maybeSingle()
+    if (lookupError || !exercise?.user_id || !exercise.images?.includes(`${EXERCISE_MEDIA_PATH}?id=${id}`)) {
+      return fail('Image not found.', 404)
+    }
+    ownerId = exercise.user_id
+  }
+
+  const url = await bucket.sign(`${ownerId}/${id}`, 'GET')
   return new Response(null, { status: 307, headers: { ...NO_STORE, Location: url } })
 }

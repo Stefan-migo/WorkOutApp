@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { useWorkoutContext } from '@/context/WorkoutContext'
 import { getIntervalName } from '@/lib/interval-display'
+import { snapshotExerciseDescription } from '@/lib/exercise-ownership'
 import type { Exercise, Workout } from '@/types/workout'
 import { detectCycles, isInCycle } from '@/lib/detect-cycles'
 import { Dialog } from './ui/Dialog'
@@ -40,7 +41,12 @@ export function AddToWorkoutModal({ exercise, onClose }: Props) {
       ...selectedWorkout,
       intervals: selectedWorkout.intervals.map((i) =>
         i.id === intervalId
-          ? { ...i, exerciseId: exercise.id, title: exercise.name }
+          ? {
+              ...i,
+              exerciseId: exercise.id,
+              title: exercise.name,
+              description: i.description || snapshotExerciseDescription(exercise),
+            }
           : i,
       ),
       updatedAt: Date.now(),

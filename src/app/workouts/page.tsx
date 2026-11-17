@@ -33,10 +33,9 @@ export default function WorkoutListPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-24">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-16 sm:gap-24">
       <PageHeading
         title="Workouts"
-        description="Build a routine or start one you’ve already saved."
         action={workouts.length > 0 && (
           <Button aria-label="Create workout" onClick={createWorkout}>
             <span aria-hidden="true" className="material-symbols-outlined text-[18px]">add</span>
@@ -58,16 +57,17 @@ export default function WorkoutListPage() {
         )
       ) : (
         <>
-          <div className="flex flex-col gap-16 lg:flex-row lg:items-end">
+          <div className="flex flex-col gap-3 rounded-card bg-surface-warm/60 p-3 lg:flex-row lg:items-end">
             <div className="w-full lg:max-w-sm">
               <SearchInput label="Search workouts" value={search} onChange={setSearch} />
             </div>
-            <div role="group" aria-label="Workout mode" className="flex flex-wrap gap-8">
+            <div role="group" aria-label="Workout mode" className="flex flex-wrap gap-1">
               {modes.map(({ value, label }) => (
                 <Button
                   key={value}
+                  size="sm"
                   pill
-                  variant={mode === value ? 'primary' : 'outline'}
+                  variant={mode === value ? 'primary' : 'ghost'}
                   aria-pressed={mode === value}
                   onClick={() => setMode(value)}
                 >
@@ -83,7 +83,7 @@ export default function WorkoutListPage() {
               action={<Button variant="outline" onClick={() => { setSearch(''); setMode('all') }}>Reset filters</Button>}
             />
           ) : (
-            <div className="grid grid-cols-1 gap-16 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {filtered.map((workout) => (
                 <WorkoutCard
                   key={workout.id}
