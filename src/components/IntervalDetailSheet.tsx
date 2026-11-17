@@ -3,6 +3,7 @@
 import { useState, useRef, useId, useMemo } from 'react'
 import { isCloudExerciseMedia } from '@/lib/exercise-media'
 import { useIntervalDialog } from '@/hooks/useIntervalDialog'
+import styles from './IntervalDialog.module.css'
 import type { Interval, Exercise, WorkoutMode } from '@/types/workout'
 import { ExercisePicker } from './ExercisePicker'
 
@@ -96,12 +97,12 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
     <>
       <dialog
         ref={dialogRef}
-        className="interval-sheet"
+        className={styles.sheet}
         aria-labelledby={headingId}
         onClose={handleDialogClose}
       >
-        <div className="interval-sheet-content">
-          <div className="interval-sheet-heading flex items-center justify-between gap-3">
+        <div className={styles.content}>
+          <div className={`${styles.heading} flex items-center justify-between gap-3`}>
             <div>
               <span className="text-xs text-muted font-medium uppercase tracking-wider">{interval.type}</span>
               <h2 id={headingId} className="text-xl font-semibold">Edit interval</h2>
@@ -303,7 +304,7 @@ export function IntervalDetailSheet({ interval, onSave, onClose, exercises, onIm
           {uploadError && <p role="alert" className="text-sm text-fg-2">{uploadError}</p>}
 
           {/* Actions */}
-          <div className="interval-sheet-actions">
+          <div className={styles.actions}>
             <button
               onClick={handleCancel}
               className="flex-1 py-3 bg-surface text-fg-2 rounded-lg font-medium hover:bg-surface-warm transition-colors text-sm"
