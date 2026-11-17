@@ -2,6 +2,7 @@
 
 import { useState, useId } from 'react'
 import { useIntervalDialog } from '@/hooks/useIntervalDialog'
+import styles from './IntervalDialog.module.css'
 import { formatTime } from '@/lib/format'
 import { parseDurationInput } from '@/lib/session-intervals'
 import type { CompletedInterval } from '@/types/workout'
@@ -57,14 +58,14 @@ export function IntervalEditModal({ interval, title, typeLabel, onSave, onClose 
     <>
       <dialog
         ref={dialogRef}
-        className="interval-sheet"
+        className={styles.sheet}
         aria-labelledby={headingId}
         onClose={onClose}
         onClick={handleBackdropClick}
       >
-        <div className="interval-sheet-content">
+        <div className={styles.content}>
           {/* Header — read-only title + type */}
-          <div className="interval-sheet-heading">
+          <div className={styles.heading}>
             <span className="text-xs text-muted font-medium uppercase tracking-wider">
               {typeLabel}
             </span>
@@ -141,7 +142,7 @@ export function IntervalEditModal({ interval, title, typeLabel, onSave, onClose 
           </label>
 
           {/* Actions */}
-          <div className="interval-sheet-actions">
+          <div className={styles.actions}>
             <button
               onClick={handleCancel}
               autoFocus
