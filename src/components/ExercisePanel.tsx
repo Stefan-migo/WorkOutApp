@@ -1,5 +1,6 @@
 'use client'
 
+import { ExerciseMedia } from '@/components/ExerciseMedia'
 import { useState } from 'react'
 
 interface ExercisePanelProps {
@@ -64,7 +65,7 @@ export function ExercisePanel({
       {/* Image Gallery */}
       <div className="w-full h-64 bg-accent rounded-lg mb-16 overflow-hidden relative border border-timer-border/25 flex items-center justify-center">
         {displayImage ? (
-          <img src={displayImage} alt={name} className="w-full h-full object-contain" />
+          <ExerciseMedia src={displayImage} alt={name} className="w-full h-full object-contain" />
         ) : (
           <svg className="w-12 h-12 text-muted/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 6.75a.75.75 0 0 0-.75.75v9a.75.75 0 0 0 1.5 0v-9a.75.75 0 0 0-.75-.75Zm-9 0a.75.75 0 0 0-.75.75v9a.75.75 0 0 0 1.5 0v-9a.75.75 0 0 0-.75-.75Zm10.5 0a2.25 2.25 0 0 1 2.25 2.25v4.5a2.25 2.25 0 0 1-2.25 2.25h-9A2.25 2.25 0 0 1 6 13.5v-4.5A2.25 2.25 0 0 1 8.25 6.75h9Z" />
@@ -83,7 +84,7 @@ export function ExercisePanel({
                 idx === selectedImage ? 'border-timer-on' : 'border-timer-border hover:border-timer-border'
               }`}
             >
-              <img src={img} alt="" className="w-full h-full object-cover" />
+              <ExerciseMedia src={img} alt="" className="w-full h-full object-cover" />
             </button>
           ))}
         </div>

@@ -2,6 +2,10 @@
 
 import { useState, useRef } from 'react'
 import type { ExerciseCategory, ExerciseVisibility } from '@/types/workout'
+import { isExerciseVideo, uploadExerciseMedia } from '@/lib/exercise-media'
+import { useExerciseDemoDraft } from '@/hooks/useExerciseDemoDraft'
+import { ExerciseCamera } from './ExerciseCamera'
+import { ExerciseMedia } from './ExerciseMedia'
 import { TagChips } from './TagChips'
 import { Dialog } from './ui/Dialog'
 import { Button } from './ui/Button'
@@ -28,7 +32,7 @@ interface ExerciseFormDialogProps {
   form: ExerciseFormData
   onFormChange: (f: ExerciseFormData) => void
   editingId: string | null
-  onSave: (e: React.FormEvent) => void | Promise<void>
+  onSave: (e: React.FormEvent, images?: string[]) => void | Promise<void>
   saveError?: string | null
   allMuscleGroups: string[]
   allEquipment: string[]
@@ -51,6 +55,7 @@ export function ExerciseFormDialog({
   allEquipment,
   onImageUpload,
 }: ExerciseFormDialogProps) {
+  const demonstration = useExerciseDemoDraft(open)
   const [validationError, setValidationError] = useState('')
   // ponytail: simple local state for each image URL input, not a full array manager
   const [imageUrlInput, setImageUrlInput] = useState('')
@@ -61,7 +66,7 @@ export function ExerciseFormDialog({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (uploading || saving) return
+    if (uploading || saving || demonstration.cameraOpen) return
     if (!form.name.trim()) {
       setValidationError('Name is required')
       return
@@ -72,10 +77,13 @@ export function ExerciseFormDialog({
     }
     setValidationError('')
     setSaving(true)
+    setUploadError('')
     try {
-      await onSave(e)
-    } catch {
-      setValidationError('Could not save the exercise. Try again.')
+      const clipUrl = demonstration.file ? await demonstration.getMedia(uploadExerciseMedia) : undefined
+      if (clipUrl) await onSave(e, [clipUrl, ...form.images])
+      else await onSave(e)
+    } catch (error) {
+      setValidationError(error instanceof Error ? error.message : 'Could not save the exercise. Try again.')
     } finally {
       setSaving(false)
     }
@@ -141,10 +149,33 @@ export function ExerciseFormDialog({
                 onChange={(event) => update({ authorName: event.target.value })}
                 className="min-h-11 rounded-control border border-border-soft bg-surface px-3"
               />
-              <span className="text-xs text-muted">Signed-in members can view this exercise, including its images.</span>
+              <span className="text-xs text-muted">Signed-in members can view this exercise, including its demonstration.</span>
             </label>
           )}
         </fieldset>
+
+        <section aria-label="Exercise demonstration" className="flex flex-col gap-2">
+          {open && demonstration.cameraOpen ? (
+            <ExerciseCamera onCapture={demonstration.capture} onCancel={() => demonstration.setCameraOpen(false)} />
+          ) : (
+            <>
+              {demonstration.file && demonstration.preview && (
+                <video
+                  src={demonstration.preview}
+                  aria-label="Recorded demonstration"
+                  className="max-h-56 w-full rounded-control bg-surface-warm object-contain"
+                  autoPlay muted loop playsInline
+                />
+              )}
+              <div className="flex flex-wrap gap-2">
+                <Button type="button" variant="outline" size="sm" disabled={saving || uploading} onClick={() => demonstration.setCameraOpen(true)}>
+                  {demonstration.file ? 'Record again' : 'Record demonstration'}
+                </Button>
+                {demonstration.file && <Button type="button" variant="ghost" size="sm" disabled={saving} onClick={demonstration.discard}>Discard recording</Button>}
+              </div>
+            </>
+          )}
+        </section>
 
         {/* Category */}
         <label className="flex flex-col gap-1">
@@ -403,7 +434,7 @@ export function ExerciseFormDialog({
                     type="button"
                     onClick={() => removeImage(url)}
                     className="text-accent/60 hover:text-accent transition-colors shrink-0 focus-visible:focus-ring rounded"
-                    aria-label={`Remove image`}
+                    aria-label={isExerciseVideo(url) ? 'Remove demonstration' : 'Remove image'}
                   >
                     ✕
                   </button>
@@ -421,14 +452,12 @@ export function ExerciseFormDialog({
             {form.images[0] && (
               <div className="aspect-[4/3] bg-surface relative overflow-hidden">
                 {/* ponytail: native img with loading lazy, no next/image complexity for dialog */}
-                <img
+                <ExerciseMedia
                   src={form.images[0]}
                   alt={form.name || 'Exercise preview'}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                   loading="lazy"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none'
-                  }}
+                  onError={(event) => { event.currentTarget.style.display = 'none' }}
                 />
               </div>
             )}
@@ -464,7 +493,7 @@ export function ExerciseFormDialog({
           >
             Cancel
           </Button>
-          <Button variant="primary" size="sm" type="submit" disabled={saving || uploading}>
+          <Button variant="primary" size="sm" type="submit" disabled={saving || uploading || demonstration.cameraOpen}>
             {saving ? 'Saving…' : editingId ? 'Save' : 'Create'}
           </Button>
         </div>

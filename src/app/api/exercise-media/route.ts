@@ -1,4 +1,4 @@
-import { EXERCISE_IMAGE_TYPES, EXERCISE_MEDIA_PATH, MAX_EXERCISE_IMAGE_BYTES, PRIVATE_MEDIA_CACHE_CONTROL } from '@/lib/exercise-media'
+import { EXERCISE_IMAGE_TYPES, EXERCISE_VIDEO_TYPES, MAX_EXERCISE_CLIP_BYTES, MAX_EXERCISE_IMAGE_BYTES, PRIVATE_MEDIA_CACHE_CONTROL, exerciseMediaUrl } from '@/lib/exercise-media'
 import { getR2Bucket } from '@/lib/r2'
 import { createClient } from '@/lib/supabase/server'
 
@@ -25,11 +25,13 @@ export async function POST(request: Request) {
   const payload = await request.json().catch(() => null)
   const type = payload?.type
   const size = payload?.size
-  if (typeof type !== 'string' || !EXERCISE_IMAGE_TYPES.has(type)) {
-    return fail('Choose a GIF, JPEG, PNG, WebP or AVIF image.', 415)
+  const video = typeof type === 'string' && EXERCISE_VIDEO_TYPES.has(type)
+  if (typeof type !== 'string' || (!video && !EXERCISE_IMAGE_TYPES.has(type))) {
+    return fail('Choose a supported image or an MP4 or WebM demonstration.', 415)
   }
-  if (!Number.isSafeInteger(size) || size <= 0 || size > MAX_EXERCISE_IMAGE_BYTES) {
-    return fail('Choose an image up to 10 MB.', 413)
+  const limit = video ? MAX_EXERCISE_CLIP_BYTES : MAX_EXERCISE_IMAGE_BYTES
+  if (!Number.isSafeInteger(size) || size <= 0 || size > limit) {
+    return fail(video ? 'Record a demonstration up to 1 MB.' : 'Choose an image up to 10 MB.', 413)
   }
 
   const bucket = getR2Bucket()
@@ -41,7 +43,7 @@ export async function POST(request: Request) {
     'Content-Type': type,
     'Content-Length': String(size),
   })
-  return Response.json({ uploadUrl, imageUrl: `${EXERCISE_MEDIA_PATH}?id=${id}` }, { headers: NO_STORE })
+  return Response.json({ uploadUrl, imageUrl: exerciseMediaUrl(id, video) }, { headers: NO_STORE })
 }
 
 export async function GET(request: Request) {
@@ -63,7 +65,7 @@ export async function GET(request: Request) {
     if (!IMAGE_ID.test(exerciseId)) return fail('Image not found.', 404)
     const { data: exercise, error: lookupError } = await supabase.from('exercises')
       .select('user_id, images').eq('id', exerciseId).eq('visibility', 'community').maybeSingle()
-    if (lookupError || !exercise?.user_id || !exercise.images?.includes(`${EXERCISE_MEDIA_PATH}?id=${id}`)) {
+    if (lookupError || !exercise?.user_id || !exercise.images?.includes(exerciseMediaUrl(id, params.get('kind') === 'video'))) {
       return fail('Image not found.', 404)
     }
     ownerId = exercise.user_id

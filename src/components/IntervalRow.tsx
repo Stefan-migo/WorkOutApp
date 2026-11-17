@@ -1,5 +1,6 @@
 'use client'
 
+import { ExerciseMedia } from '@/components/ExerciseMedia'
 import Link from 'next/link'
 import { SEGMENT_BORDER, SEGMENT_BG, SEGMENT_TEXT, TYPE_ICONS } from '@/lib/segment-styles'
 import type { Interval } from '@/types/workout'
@@ -66,7 +67,7 @@ export function IntervalRow({ interval, index, onChange, onRemove, onMoveUp, onM
         {exercise && (
           <div className="flex items-center gap-8 mt-xs">
             {exercise.images?.[0] ? (
-              <img
+              <ExerciseMedia
                 src={exercise.images[0]}
                 alt={exercise.name}
                 className="w-8 h-8 rounded object-cover shrink-0"
