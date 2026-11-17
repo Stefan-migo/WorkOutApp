@@ -45,6 +45,7 @@ interface PlayScreenProps {
   imageUrl?: string
   nextImageUrl?: string
   nextImageLabel?: string
+  nextImageDetail?: string
   embedded?: boolean
 }
 
@@ -76,24 +77,18 @@ export function PlayScreen({
   imageUrl,
   nextImageUrl,
   nextImageLabel,
+  nextImageDetail,
   embedded = false,
 }: PlayScreenProps) {
+  const backgroundImage = !embedded || intervalType === 'work' ? imageUrl : undefined
+
   return (
     <div className={`relative flex w-full flex-1 flex-col overflow-hidden ${embedded ? '' : 'min-h-dvh'}`}>
-      {imageUrl && !embedded && (
-        <>
-          {/* Exercise image — CSS background, decorative only */}
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${imageUrl})` }}
-          />
-          {/* Scrim — fades the image into the app background (bg token only) */}
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 bg-linear-to-b from-timer-bg/70 via-timer-bg/80 to-timer-bg/95"
-          />
-        </>
+      {backgroundImage && (
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+          <img src={backgroundImage} alt="" className="size-full object-cover object-center" data-testid="exercise-background" />
+          <div className="absolute inset-0 bg-linear-to-b from-timer-bg/90 via-timer-bg/55 to-timer-bg/95" />
+        </div>
       )}
 
       <div className="relative z-10 mx-auto flex w-full max-w-2xl flex-1 flex-col items-center gap-6 px-margin-mobile py-6 md:gap-32 md:py-32">
@@ -109,13 +104,14 @@ export function PlayScreen({
 
         {/* Center — timer or reps surface */}
         <div className="flex w-full flex-1 flex-col items-center justify-center gap-5 md:gap-32">
-          {embedded && imageUrl && (
-            <img key={imageUrl} src={imageUrl} alt={exerciseName ?? label} className="h-[min(24dvh,14rem)] max-w-full rounded-lg object-contain" />
-          )}
           {nextImageUrl && (
-            <figure className="flex flex-col items-center gap-1">
-              <img key={nextImageUrl} src={nextImageUrl} alt={nextImageLabel ?? 'Next exercise'} className="h-[min(20dvh,12rem)] max-w-full rounded-lg object-contain" />
-              <figcaption className="text-center text-data-sm text-timer-muted">Up next: {nextImageLabel}</figcaption>
+            <figure className="flex w-full max-w-72 items-center gap-3 rounded-2xl border border-timer-border/60 bg-timer-on/5 p-2 pr-3">
+              <img src={nextImageUrl} alt="" className="h-[min(12dvh,4.5rem)] w-12 shrink-0 rounded-lg bg-timer-bg object-contain" />
+              <figcaption className="min-w-0">
+                <p className="text-xs font-medium text-timer-muted">Up next</p>
+                <p className="break-words text-sm font-semibold leading-snug text-timer-on">{nextImageLabel}</p>
+                {nextImageDetail && <p className="mt-0.5 font-mono text-xs text-timer-muted">{nextImageDetail}</p>}
+              </figcaption>
             </figure>
           )}
           {isRepsMode ? (

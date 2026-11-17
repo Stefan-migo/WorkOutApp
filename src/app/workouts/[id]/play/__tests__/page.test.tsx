@@ -402,15 +402,20 @@ describe('PlayWorkoutPage', () => {
       render(<Page />)
 
       fireEvent.click(screen.getByText('Start'))
-      expect(await screen.findByText('Up next: Sprints')).toBeInTheDocument()
-      expect(screen.getByRole('img', { name: 'Sprints' })).toHaveAttribute('src', 'https://example.com/sprints.jpg')
+      const preview = (await screen.findByText('Up next')).closest('figure')!
+      expect(preview).toHaveTextContent('Sprints')
+      expect(preview).toHaveTextContent('00:30')
+      expect(preview.querySelector('img')).toHaveAttribute('src', 'https://example.com/sprints.jpg')
+      expect(screen.queryByText(/Next: Sprints/)).not.toBeInTheDocument()
+      expect(screen.queryByTestId('exercise-background')).not.toBeInTheDocument()
 
       mockTimer.timeLeft = 10
       fireEvent.click(screen.getByLabelText('Skip interval'))
 
       await waitFor(() => {
-        expect(screen.queryByText('Up next: Sprints')).not.toBeInTheDocument()
-        expect(screen.getByRole('img', { name: 'Sprints' })).toHaveAttribute('src', 'https://example.com/sprints.jpg')
+        expect(screen.queryByText('Up next')).not.toBeInTheDocument()
+        expect(screen.getByTestId('exercise-background')).toHaveAttribute('src', 'https://example.com/sprints.jpg')
+        expect(screen.getByText(/Next: Stretch/)).toBeInTheDocument()
       })
     })
   })

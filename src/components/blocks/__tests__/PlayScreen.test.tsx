@@ -143,17 +143,18 @@ describe('PlayScreen (WB-3)', () => {
   })
 
   it('renders the exercise image as full-bleed background when imageUrl is provided', () => {
-    const { container } = renderScreen({ imageUrl: 'https://example.com/bench.jpg' })
+    renderScreen({ imageUrl: 'https://example.com/bench.jpg' })
 
-    const imageLayer = container.querySelector('[style*="background-image"]')
-    expect(imageLayer).toBeInTheDocument()
-    expect(imageLayer).toHaveAttribute('aria-hidden', 'true')
+    const image = screen.getByTestId('exercise-background')
+    expect(image).toHaveAttribute('src', 'https://example.com/bench.jpg')
+    expect(image).toHaveClass('object-cover')
+    expect(image.parentElement).toHaveAttribute('aria-hidden', 'true')
   })
 
   it('renders no image layer when imageUrl is absent', () => {
-    const { container } = renderScreen()
+    renderScreen()
 
-    expect(container.querySelector('[style*="background-image"][aria-hidden="true"]')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('exercise-background')).not.toBeInTheDocument()
   })
 
   it('shows exerciseName in the top context row in timed mode', () => {

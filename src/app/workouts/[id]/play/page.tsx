@@ -241,12 +241,13 @@ export default function PlayWorkoutPage() {
 
   // Work count up to current interval (1-based, for display naming)
   const workCount = flat.slice(0, currentIdx + 1).filter((i) => i.type === 'work').length
-  const nextLabel = nextInterval
-    ? `Next: ${getIntervalName(nextInterval, workCount + 1)} (${
-        nextInterval.type === 'work' && getEffectiveMode(workout, nextInterval) === 'reps'
-          ? `${nextInterval.reps ?? 0} reps`
-          : formatTime(nextInterval.duration)
-      })`
+  const intervalMeasure = (step: Interval) =>
+    step.type === 'work' && getEffectiveMode(workout, step) === 'reps'
+      ? `${step.reps ?? 0} reps`
+      : formatTime(step.duration)
+
+  const nextLabel = nextInterval && !(nextImageUrl && nextInterval === upcomingWork)
+    ? `Next: ${getIntervalName(nextInterval, workCount + 1)} (${intervalMeasure(nextInterval)})`
     : undefined
   // ponytail: reps mode progress is discrete — completed / total
   const progressVal = isRepsWork
@@ -292,7 +293,8 @@ export default function PlayWorkoutPage() {
             onComplete={() => setShowRepDialog(true)}
             imageUrl={imageUrl}
             nextImageUrl={nextImageUrl}
-            nextImageLabel={upcomingWork ? getIntervalName(upcomingWork, workCount + 1) : undefined}
+            nextImageLabel={upcomingWork ? getIntervalName(upcomingWork, workCount + 1, upcomingExercise) : undefined}
+            nextImageDetail={upcomingWork ? intervalMeasure(upcomingWork) : undefined}
           />
           {showRepDialog && interval && (
             <RepCompleteDialog
