@@ -96,6 +96,7 @@ export function TagChips({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
+            aria-label={label}
             placeholder={placeholder}
             className="w-full bg-transparent text-fg-2 font-body text-body-md placeholder:text-muted outline-none py-0.5"
           />

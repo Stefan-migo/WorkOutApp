@@ -8,7 +8,7 @@ interface WorkoutContextValue {
   workouts: Workout[]
   isLoading?: boolean
   getWorkout: (id: string) => Promise<Workout | undefined>
-  saveWorkout: (workout: Workout) => Promise<void>
+  saveWorkout: (workout: Workout) => Promise<boolean>
   deleteWorkout: (id: string) => Promise<void>
 }
 

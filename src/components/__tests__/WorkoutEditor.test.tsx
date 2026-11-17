@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach, beforeAll } from 'vitest'
-import { render, screen, cleanup, fireEvent } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent, within } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import type { Interval, Workout } from '@/types/workout'
 
@@ -21,10 +21,10 @@ vi.mock('@/components/TimelineStrip', () => ({
 
 // ponytail: simplified mock — renders the interval title
 vi.mock('@/components/IntervalRow', () => ({
-  IntervalRow: ({ interval, index, onChange }: any) => (
+  IntervalRow: ({ interval, index, onEdit }: any) => (
     <div
       data-testid={`interval-row-${index}`}
-      onClick={() => onChange?.(index, { ...interval, title: 'Changed' })}
+      onClick={onEdit}
     >
       {interval.title}
     </div>
@@ -52,7 +52,7 @@ describe('WorkoutEditor', () => {
     ]
     render(<WorkoutEditor initialIntervals={intervals} onSave={vi.fn()} />)
     expect(screen.getByText('Push Up')).toBeInTheDocument()
-    expect(screen.getByText('Rest')).toBeInTheDocument()
+    expect(screen.getByTestId('interval-row-1')).toHaveTextContent('Rest')
   })
 
   it('applies an edit to the same Work position across cycles', async () => {
@@ -63,7 +63,7 @@ describe('WorkoutEditor', () => {
       { id: `${cycleId}-2`, type: 'work', title: 'Work 2', duration: 30, cycleId },
     ])
     render(<WorkoutEditor initialIntervals={intervals} onSave={vi.fn()} />)
-    fireEvent.click(screen.getByTestId('interval-row-2').parentElement!)
+    fireEvent.click(screen.getByTestId('interval-row-2'))
     fireEvent.click(screen.getByText('mock-save'))
     fireEvent.click(screen.getByRole('button', { name: 'Same Work position across cycles' }))
     expect(screen.getAllByText('Sheet Saved')).toHaveLength(3)
@@ -72,10 +72,30 @@ describe('WorkoutEditor', () => {
     expect(screen.getByTestId('interval-row-8')).toHaveTextContent('Sheet Saved')
   })
 
+  it('inserts a recovery between adjacent rounds and saves it outside both', async () => {
+    const WorkoutEditor = (await import('../WorkoutEditor')).default
+    const onSave = vi.fn()
+    const intervals: Interval[] = ['Round 1', 'Round 2'].flatMap((cycleTitle) => [1, 2].map((position) => ({
+      id: `${cycleTitle}-${position}`, title: `Work ${position}`, type: 'work', duration: 30,
+      cycleId: cycleTitle, cycleTitle,
+    })))
+    render(<WorkoutEditor initialIntervals={intervals} onSave={onSave} />)
+    fireEvent.change(screen.getByLabelText('Workout name'), { target: { value: 'Two rounds' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Add rest between cycles' }))
+    const recovery = screen.getByTestId('interval-row-2')
+    expect(recovery).toHaveTextContent('Rest Between Cycles')
+    expect(within(screen.getByRole('region', { name: 'Round 1' })).queryByTestId('interval-row-2')).toBeNull()
+    expect(within(screen.getByRole('region', { name: 'Round 2' })).queryByTestId('interval-row-2')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Save workout' }))
+    expect(onSave.mock.calls[0]![0].intervals.map(({ type }: Interval) => type))
+      .toEqual(['work', 'work', 'rest_between_cycles', 'work', 'work'])
+    expect(onSave.mock.calls[0]![0].intervals[2].cycleId).toBeUndefined()
+  })
+
   it('shows no-intervals message when empty', async () => {
     const WorkoutEditor = (await import('../WorkoutEditor')).default
     render(<WorkoutEditor initialIntervals={[]} onSave={vi.fn()} />)
-    expect(screen.getByText('No intervals yet')).toBeInTheDocument()
+    expect(screen.getByText(/No intervals yet/)).toBeInTheDocument()
   })
 
   it('uses existingWorkout intervals over initialIntervals', async () => {
@@ -118,11 +138,11 @@ describe('WorkoutEditor', () => {
   it('renders Add Block with 5 interval types (no Cycle)', async () => {
     const WorkoutEditor = (await import('../WorkoutEditor')).default
     render(<WorkoutEditor initialIntervals={[]} onSave={vi.fn()} />)
-    expect(screen.getByText('Add Block')).toBeInTheDocument()
+    expect(screen.getByText('Add a block')).toBeInTheDocument()
     // Check each type appears in the grid (use exact match to avoid substring conflicts)
-    expect(screen.getByText('prepare', { exact: true })).toBeInTheDocument()
-    expect(screen.getByText('work', { exact: true })).toBeInTheDocument()
-    expect(screen.getByText('cooldown', { exact: true })).toBeInTheDocument()
+    expect(screen.getByText('Prepare', { exact: true })).toBeInTheDocument()
+    expect(screen.getByText('Work', { exact: true })).toBeInTheDocument()
+    expect(screen.getByText('Cooldown', { exact: true })).toBeInTheDocument()
     expect(screen.queryByText(/^cycle$/i)).not.toBeInTheDocument()
   })
 
@@ -149,7 +169,7 @@ describe('WorkoutEditor', () => {
       { id: 'i1', type: 'work', title: 'Sprint', duration: 60 },
     ]
     render(<WorkoutEditor existingWorkout={{ id: 'w1', title: 'Test', intervals, createdAt: 1, updatedAt: 1 }} onSave={onSave} />)
-    fireEvent.click(screen.getByText('Update Workout'))
+    fireEvent.click(screen.getByText('Save changes'))
     expect(onSave).toHaveBeenCalledTimes(1)
     const saved = onSave.mock.calls[0]![0] as Workout
     expect(saved.title).toBe('Test')
@@ -167,7 +187,7 @@ describe('WorkoutEditor', () => {
     // No global mode toggle in the editor anymore
     expect(screen.queryByRole('button', { name: /^timed$/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /^reps$/i })).not.toBeInTheDocument()
-    fireEvent.click(screen.getByText('Update Workout'))
+    fireEvent.click(screen.getByText('Save changes'))
     const saved = onSave.mock.calls[0]![0] as Workout
     // Spread of ...existingWorkout keeps the legacy mode
     expect(saved.mode).toBe('reps')
@@ -178,7 +198,7 @@ describe('WorkoutEditor', () => {
     const onSave = vi.fn()
     render(<WorkoutEditor initialIntervals={[{ id: 'i1', type: 'work', title: 'Test', duration: 30 }]} onSave={onSave} />)
     fireEvent.change(screen.getByPlaceholderText('Name your workout...'), { target: { value: 'New Workout' } })
-    fireEvent.click(screen.getByText('Save Workout'))
+    fireEvent.click(screen.getByText('Save workout'))
     const saved = onSave.mock.calls[0]![0] as Workout
     expect(saved).not.toHaveProperty('mode')
   })
@@ -186,7 +206,7 @@ describe('WorkoutEditor', () => {
   it('save is disabled when title is empty', async () => {
     const WorkoutEditor = (await import('../WorkoutEditor')).default
     render(<WorkoutEditor initialIntervals={[{ id: 'i1', type: 'work', title: 'Test', duration: 30 }]} onSave={vi.fn()} />)
-    const saveBtn = screen.getByText('Save Workout')
+    const saveBtn = screen.getByText('Save workout')
     expect(saveBtn).toBeDisabled()
   })
 
@@ -199,7 +219,7 @@ describe('WorkoutEditor', () => {
     }
     const onSave = vi.fn()
     render(<WorkoutEditor existingWorkout={existing} onSave={onSave} />)
-    const saveBtn = screen.getByText('Update Workout')
+    const saveBtn = screen.getByText('Save changes')
     expect(saveBtn).toBeDisabled()
   })
 

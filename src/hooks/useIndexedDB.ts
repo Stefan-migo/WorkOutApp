@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef } from 'react'
+import { EXERCISE_IMAGE_STORE as STORE_NAME, openExerciseImageDB } from '@/lib/exercise-image-db'
 
 export interface ImageEntry {
   blobUrl: string
@@ -14,9 +15,6 @@ export interface UseIndexedDBReturn {
   getUsage(): Promise<number>
 }
 
-const DB_NAME = 'workoutapp-images'
-const DB_VERSION = 1
-const STORE_NAME = 'images'
 const MAX_BYTES_PER_EXERCISE = 10 * 1024 * 1024 // 10MB
 
 // ponytail: fallback UUID when crypto.randomUUID is unavailable
@@ -35,21 +33,6 @@ async function fileToArrayBuffer(file: File): Promise<ArrayBuffer> {
 
 function bufferToBlob(buffer: ArrayBuffer, type: string): Blob {
   return new Blob([buffer], { type })
-}
-
-function openDB(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION)
-    req.onupgradeneeded = () => {
-      const db = req.result
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' })
-        store.createIndex('exerciseId', 'exerciseId', { unique: false })
-      }
-    }
-    req.onsuccess = () => resolve(req.result)
-    req.onerror = () => reject(req.error)
-  })
 }
 
 // ponytail: 10MB per exercise — make configurable via settings if users hit it
@@ -79,7 +62,7 @@ export function useIndexedDB(): UseIndexedDBReturn {
   async function ensureDB(): Promise<IDBDatabase | null> {
     if (dbRef.current) return dbRef.current
     try {
-      dbRef.current = await openDB()
+      dbRef.current = await openExerciseImageDB()
       return dbRef.current
     } catch {
       return null

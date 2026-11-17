@@ -1,4 +1,6 @@
 import 'fake-indexeddb/auto'
+import { IDBFactory } from 'fake-indexeddb'
+import { EXERCISE_IMAGE_STORE, openExerciseImageDB } from '@/lib/exercise-image-db'
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { useIndexedDB } from '../useIndexedDB'
@@ -20,6 +22,30 @@ describe('useIndexedDB', () => {
     testId++
     return `ex-${Date.now()}-${testId}`
   }
+
+  it('repairs a version-one image database created without the image store', async () => {
+    const factory = new IDBFactory()
+    vi.stubGlobal('indexedDB', factory)
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const request = factory.open('workoutapp-images', 1)
+        request.onerror = () => reject(request.error)
+        request.onsuccess = () => {
+          request.result.close()
+          resolve()
+        }
+      })
+      const database = await openExerciseImageDB()
+      try {
+        const store = database.transaction(EXERCISE_IMAGE_STORE).objectStore(EXERCISE_IMAGE_STORE)
+        expect(store.indexNames.contains('exerciseId')).toBe(true)
+      } finally {
+        database.close()
+      }
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
 
   it('saves an image and retrieves it as a blob URL', async () => {
     const exId = nextId()

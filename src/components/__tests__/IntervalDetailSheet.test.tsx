@@ -71,7 +71,7 @@ describe('IntervalDetailSheet', () => {
         onClose={vi.fn()}
       />,
     )
-    expect(screen.getByText('rest')).toBeInTheDocument()
+    expect(screen.getByText('Rest')).toBeInTheDocument()
   })
 
   it('renders exercise picker trigger for work type with exercises', () => {
@@ -247,7 +247,7 @@ describe('IntervalDetailSheet', () => {
     fireEvent.click(screen.getByRole('button', { name: /reps/i }))
     const repsInput = screen.getByLabelText('Reps')
     fireEvent.change(repsInput, { target: { value: '10' } })
-    fireEvent.click(screen.getByText('Save'))
+    fireEvent.click(screen.getByText('Apply to workout'))
     expect(onSave).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'i-save-reps', mode: 'reps', reps: 10 }),
     )
@@ -262,7 +262,7 @@ describe('IntervalDetailSheet', () => {
         onClose={vi.fn()}
       />,
     )
-    fireEvent.click(screen.getByText('Save'))
+    fireEvent.click(screen.getByText('Apply to workout'))
     expect(onSave).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'i-save-timed', mode: 'timed' }),
     )
@@ -277,7 +277,7 @@ describe('IntervalDetailSheet', () => {
         onClose={vi.fn()}
       />,
     )
-    fireEvent.click(screen.getByText('Save'))
+    fireEvent.click(screen.getByText('Apply to workout'))
     const saved = onSave.mock.calls[0]![0] as Interval
     expect(saved).not.toHaveProperty('mode')
   })
@@ -305,7 +305,7 @@ describe('IntervalDetailSheet', () => {
         onClose={vi.fn()}
       />,
     )
-    fireEvent.click(screen.getByText('Save'))
+    fireEvent.click(screen.getByText('Apply to workout'))
     expect(onSave).toHaveBeenCalledTimes(1)
     expect(onSave).toHaveBeenCalledWith(
       expect.objectContaining({

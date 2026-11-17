@@ -64,3 +64,11 @@ export const TYPE_ICONS: Record<IntervalType, string> = {
   rest_between_cycles: 'hourglass_bottom',
   cooldown: 'ac_unit',
 }
+
+export const TYPE_LABELS: Record<IntervalType, string> = {
+  prepare: 'Prepare',
+  work: 'Work',
+  rest: 'Rest',
+  rest_between_cycles: 'Rest between cycles',
+  cooldown: 'Cooldown',
+}

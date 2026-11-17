@@ -23,7 +23,10 @@ export default function EditWorkoutPage() {
   return (
     <WorkoutEditor
       existingWorkout={existing}
-      onSave={(workout) => { saveWorkout(workout); router.push('/workouts') }}
+      onSave={async (workout) => {
+        if (!await saveWorkout(workout)) throw new Error('Could not save the workout. Try again.')
+        router.push('/workouts')
+      }}
       onCancel={() => router.back()}
     />
   )

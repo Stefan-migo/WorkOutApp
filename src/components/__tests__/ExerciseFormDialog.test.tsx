@@ -129,22 +129,22 @@ describe('ExerciseFormDialog', () => {
         allEquipment={[]}
       />,
     )
-    const submitBtn = screen.getByText('Create')
+    const submitBtn = screen.getByText('Create exercise')
     fireEvent.click(submitBtn)
     expect(onSave).toHaveBeenCalled()
   })
 
   it('renders force selector with push/pull/static options', () => {
     renderDialog()
-    expect(screen.getByLabelText('push')).toBeInTheDocument()
-    expect(screen.getByLabelText('pull')).toBeInTheDocument()
-    expect(screen.getByLabelText('static')).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'push', hidden: true })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'pull', hidden: true })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'static', hidden: true })).toBeInTheDocument()
   })
 
   it('renders mechanic selector with compound/isolation options', () => {
     renderDialog()
-    expect(screen.getByLabelText('compound')).toBeInTheDocument()
-    expect(screen.getByLabelText('isolation')).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'compound', hidden: true })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'isolation', hidden: true })).toBeInTheDocument()
   })
 
   it('renders category and difficulty selects', () => {
@@ -241,18 +241,24 @@ describe('ExerciseFormDialog', () => {
     expect(imageInput).toBeInTheDocument()
   })
 
-  it('renders preview card with exercise name and primary muscles', () => {
+  it('shows attached images next to their remove action', () => {
     renderDialog({ form: FILLED_FORM })
-    // Preview card should show the name and primary muscles in uppercase
-    expect(screen.getByText('Bench Press')).toBeInTheDocument()
-    expect(screen.getByText(/CHEST/)).toBeInTheDocument()
-    expect(screen.getByText(/SHOULDERS/)).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: 'Exercise image 1' })).toHaveAttribute('src', FILLED_FORM.images[0])
+    expect(screen.getByRole('button', { name: 'Remove image 1' })).toBeInTheDocument()
+  })
+
+  it('focuses the display name when submitting a community exercise without one', () => {
+    const { props } = renderDialog({ form: { ...FILLED_FORM, visibility: 'community' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Create exercise' }))
+    expect(screen.getByRole('textbox', { name: 'Display name' })).toHaveFocus()
+    expect(screen.getByText('Enter the author name to display in the community.')).toBeInTheDocument()
+    expect(props.onSave).not.toHaveBeenCalled()
   })
 
   it('renders Cancel and Save/Create buttons', () => {
     renderDialog()
     expect(screen.getByText('Cancel')).toBeInTheDocument()
-    expect(screen.getByText('Create')).toBeInTheDocument()
+    expect(screen.getByText('Create exercise')).toBeInTheDocument()
   })
 
   it('calls onOpenChange(false) when Cancel is clicked', () => {

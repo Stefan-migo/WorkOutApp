@@ -25,6 +25,7 @@ export interface DialogProps extends ComponentPropsWithoutRef<'dialog'> {
   title: string
   /** Long-form content (DD-C): cap fixed variant at 85vh and scroll. */
   contained?: boolean
+  showCloseButton?: boolean
 }
 
 // Token-only class maps (D11): every class exists in the @theme (DD-2).
@@ -39,6 +40,7 @@ export function Dialog({
   variant = 'fixed',
   title,
   contained = false,
+  showCloseButton = false,
   className = '',
   children,
   ...rest
@@ -93,12 +95,22 @@ export function Dialog({
       onClick={handleBackdrop}
       {...rest}
     >
-      <h2
-        id={titleId}
-        className="font-headline text-headline-md font-semibold text-fg-2"
-      >
-        {title}
-      </h2>
+      {showCloseButton ? (
+        <header className="flex items-center justify-between gap-8">
+          <h2 id={titleId} className="font-headline text-headline-md font-semibold text-fg-2">{title}</h2>
+          <button
+            type="button"
+            ref={(button) => { button?.setAttribute('autofocus', '') }}
+            aria-label="Close dialog"
+            onClick={() => onOpenChange(false)}
+            className="grid size-[44px] shrink-0 place-items-center rounded-lg text-muted hover:bg-surface-warm focus-visible:focus-ring"
+          >
+            <span aria-hidden="true" className="material-symbols-outlined">close</span>
+          </button>
+        </header>
+      ) : (
+        <h2 id={titleId} className="font-headline text-headline-md font-semibold text-fg-2">{title}</h2>
+      )}
       {children}
     </dialog>
   )
