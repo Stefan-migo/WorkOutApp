@@ -32,6 +32,35 @@ function mockCtx() {
 }
 
 describe('useBeep', () => {
+  it('skips background alerts and resumes suspended audio on return', () => {
+    const { ctx } = mockCtx()
+    Object.assign(ctx, { state: 'suspended', resume: vi.fn().mockResolvedValue(undefined) })
+    window.AudioContext = function () { return ctx } as unknown as typeof AudioContext
+    const visibility = vi.spyOn(document, 'visibilityState', 'get')
+    visibility.mockReturnValue('visible')
+    const { result } = renderHook(() => useBeep())
+    act(() => { result.current.unlock() })
+    vi.mocked(ctx.resume).mockClear()
+    visibility.mockReturnValue('hidden')
+    act(() => { result.current.beep() })
+    expect(ctx.createOscillator).not.toHaveBeenCalled()
+    visibility.mockReturnValue('visible')
+    act(() => { document.dispatchEvent(new Event('visibilitychange')) })
+    expect(ctx.resume).toHaveBeenCalledOnce()
+    act(() => { result.current.beep() })
+    expect(ctx.createOscillator).toHaveBeenCalledOnce()
+  })
+
+  it('unlocks suspended audio from a user action even when sounds are disabled', () => {
+    const { ctx } = mockCtx()
+    Object.assign(ctx, { state: 'suspended', resume: vi.fn().mockResolvedValue(undefined) })
+    window.AudioContext = function () { return ctx } as unknown as typeof AudioContext
+    const { result } = renderHook(() => useBeep(false))
+    act(() => { result.current.unlock(); result.current.beep() })
+    expect(ctx.resume).toHaveBeenCalledOnce()
+    expect(ctx.createOscillator).not.toHaveBeenCalled()
+  })
+
   describe('AudioContext creation', () => {
     it('creates AudioContext with oscillator and gain wiring', () => {
       const { ctx, osc, gain } = mockCtx()

@@ -7,6 +7,7 @@ import { useWorkoutContext } from '@/context/WorkoutContext'
 import { useSessions } from '@/hooks/useSessions'
 import { useTimer } from '@/hooks/useTimer'
 import { useBeep } from '@/hooks/useBeep'
+import { usePlaybackSettings } from '@/hooks/usePlaybackSettings'
 import { useIntervalNotification } from '@/hooks/useIntervalNotification'
 import { PlayHeader } from '@/components/PlayHeader'
 import { RepCompleteDialog } from '@/components/RepCompleteDialog'
@@ -41,7 +42,8 @@ export default function PlayWorkoutPage() {
   const startedAtRef = useRef(Date.now())
   const sessionSavedRef = useRef(false)
 
-  const { beep } = useBeep()
+  const { settings } = usePlaybackSettings()
+  const { beep, unlock } = useBeep(settings.sound)
   const { notify } = useIntervalNotification()
   const interval: Interval | undefined = flat[currentIdx]
   const total = flat.length
@@ -77,18 +79,9 @@ export default function PlayWorkoutPage() {
     }
   }, handleTick)
 
-  // ponytail: beep on tick — check by last-beep time only (≥800ms), ignore which second
-  const lastBeepTimeRef = useRef(0)
-  const prevRemainingRef = useRef(0)
   function handleTick(remaining: number) {
     if (remaining > 5 || remaining <= 0) return
-    const prev = prevRemainingRef.current
-    prevRemainingRef.current = remaining
-    if (prev === remaining) return // same value as before, skip
-    const now = Date.now()
-    if (now - lastBeepTimeRef.current < 800) return
-    lastBeepTimeRef.current = now
-    beep({ volume: 0.12, duration: 0.15, pitch: 1100 })
+    beep({ volume: 0.3, duration: 0.15, pitch: 900 + (5 - remaining) * 100 })
   }
 
   // Auto-start timer when phase activates or interval advances
@@ -119,6 +112,7 @@ export default function PlayWorkoutPage() {
   }
 
   function handleStart() {
+    unlock()
     startedAtRef.current = Date.now()
     setPhase('active')
   }
@@ -263,7 +257,7 @@ export default function PlayWorkoutPage() {
 
   return (
     <main className="timer-dark-bg flex min-h-dvh flex-col text-timer-on">
-      <PlayHeader title={phase === 'idle' ? 'Workout' : workout.title} onClose={() => router.push('/workouts')} />
+      <PlayHeader onEnableSound={unlock} active={phase === 'active'} title={phase === 'idle' ? 'Workout' : workout.title} onClose={() => router.push('/workouts')} />
       {phase === 'active' ? (
         <>
           <PlayScreen
@@ -275,7 +269,7 @@ export default function PlayWorkoutPage() {
             nextLabel={nextLabel}
             status={timer.status}
             onPause={timer.pause}
-            onResume={timer.resume}
+            onResume={() => { unlock(); timer.resume() }}
             onSkip={handleSkip}
             onRestart={handleRestart}
             onPrevious={handlePrevious}

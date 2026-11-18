@@ -6,6 +6,32 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
+it('uses the latest completion callback after a render during playback', () => {
+  vi.useFakeTimers()
+  const first = vi.fn()
+  const latest = vi.fn()
+  const { result, rerender } = renderHook(
+    ({ complete }) => useTimer(5, complete),
+    { initialProps: { complete: first } },
+  )
+  act(() => { result.current.start() })
+  rerender({ complete: latest })
+  act(() => { vi.advanceTimersByTime(5000) })
+  expect(latest).toHaveBeenCalledOnce()
+  expect(first).not.toHaveBeenCalled()
+})
+
+it('synchronizes elapsed time when the page becomes visible', () => {
+  vi.useFakeTimers()
+  const { result } = renderHook(() => useTimer(30))
+  act(() => { result.current.start() })
+  act(() => {
+    vi.setSystemTime(Date.now() + 12000)
+    document.dispatchEvent(new Event('visibilitychange'))
+  })
+  expect(result.current.timeLeft).toBe(18)
+})
+
 describe('useTimer — addTime', () => {
   describe('adds positive delta', () => {
     it('adds 10 seconds to timeLeft capped at duration', () => {

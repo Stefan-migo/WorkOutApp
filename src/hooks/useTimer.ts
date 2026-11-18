@@ -4,13 +4,18 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 
 export type TimerStatus = 'idle' | 'running' | 'paused' | 'complete'
 
-// ponytail: setInterval + Date.now delta correction, upgrade to Web Workers if background-tab drift matters
 export function useTimer(duration: number, onComplete?: () => void, onTick?: (remaining: number) => void) {
   const [status, setStatus] = useState<TimerStatus>('idle')
   const [timeLeft, setTimeLeft] = useState(duration)
   const startTimeRef = useRef<number>(0)
   const elapsedRef = useRef<number>(0) // accumulated seconds before current pause
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const lastRemainingRef = useRef(duration)
+  const callbacksRef = useRef({ onComplete, onTick })
+
+  useEffect(() => {
+    callbacksRef.current = { onComplete, onTick }
+  }, [onComplete, onTick])
 
   const progress = duration > 0 ? Math.min(1, Math.max(0, 1 - timeLeft / duration)) : 0
 
@@ -25,25 +30,40 @@ export function useTimer(duration: number, onComplete?: () => void, onTick?: (re
   useEffect(() => clearTimer, [clearTimer])
 
   const tick = useCallback(() => {
+    if (intervalRef.current === null) return
     const elapsed = elapsedRef.current + (Date.now() - startTimeRef.current) / 1000
-    const remaining = Math.max(0, Math.min(duration, Math.round(duration - elapsed)))
+    const remaining = Math.max(0, Math.min(duration, Math.ceil(duration - elapsed)))
     setTimeLeft(remaining)
-    onTick?.(remaining)
+    if (remaining !== lastRemainingRef.current) {
+      lastRemainingRef.current = remaining
+      callbacksRef.current.onTick?.(remaining)
+    }
 
     if (remaining <= 0) {
       clearTimer()
       setStatus('complete')
-      onComplete?.()
+      callbacksRef.current.onComplete?.()
     }
-  }, [duration, onComplete, onTick, clearTimer])
+  }, [duration, clearTimer])
+
+  useEffect(() => {
+    if (status !== 'running') return
+    const syncOnReturn = () => {
+      if (document.visibilityState === 'visible') tick()
+    }
+    document.addEventListener('visibilitychange', syncOnReturn)
+    return () => document.removeEventListener('visibilitychange', syncOnReturn)
+  }, [status, tick])
 
   const start = useCallback(() => {
     clearTimer()
     setTimeLeft(duration)
     elapsedRef.current = 0
     startTimeRef.current = Date.now()
+    lastRemainingRef.current = duration
     setStatus('running')
     intervalRef.current = setInterval(tick, 1000)
+    if (duration > 0) callbacksRef.current.onTick?.(duration)
   }, [duration, clearTimer, tick])
 
   const pause = useCallback(() => {

@@ -8,6 +8,7 @@ import { useSequences } from '@/hooks/useSequences'
 import { useSessions } from '@/hooks/useSessions'
 import { useTimer } from '@/hooks/useTimer'
 import { useBeep } from '@/hooks/useBeep'
+import { usePlaybackSettings } from '@/hooks/usePlaybackSettings'
 import { useIntervalNotification } from '@/hooks/useIntervalNotification'
 import { ProgressBar } from '@/components/ProgressBar'
 import { PlayScreen } from '@/components/blocks/PlayScreen'
@@ -29,7 +30,8 @@ export default function PlaySequencePage() {
   const { workouts, isLoading: isWorkoutLoading } = useWorkoutContext()
   const { getSequence } = useSequences()
   const { addSession } = useSessions()
-  const { beep } = useBeep()
+  const { settings } = usePlaybackSettings()
+  const { beep, unlock } = useBeep(settings.sound)
   const { notify } = useIntervalNotification()
   const { exercises, getExerciseImages } = useExercises()
 
@@ -118,18 +120,9 @@ export default function PlaySequencePage() {
     }
   }, handleTick)
 
-  // ponytail: beep on tick — check by last-beep time only (≥800ms), ignore which second
-  const lastBeepTimeRefSeq = useRef(0)
-  const prevRemainingRefSeq = useRef(0)
   function handleTick(remaining: number) {
     if (remaining > 5 || remaining <= 0) return
-    const prev = prevRemainingRefSeq.current
-    prevRemainingRefSeq.current = remaining
-    if (prev === remaining) return
-    const now = Date.now()
-    if (now - lastBeepTimeRefSeq.current < 800) return
-    lastBeepTimeRefSeq.current = now
-    beep({ volume: 0.12, duration: 0.15, pitch: 1100 })
+    beep({ volume: 0.3, duration: 0.15, pitch: 900 + (5 - remaining) * 100 })
   }
 
   // Auto-start timer when phase activates or interval/round advances
@@ -156,6 +149,12 @@ export default function PlaySequencePage() {
     }, 1000)
     return () => clearInterval(id)
   }, [phase])
+
+  useEffect(() => {
+    if (phase === 'workout-summary' && countdown > 0) {
+      beep({ volume: 0.3, duration: 0.15, pitch: 900 + (5 - countdown) * 100 })
+    }
+  }, [phase, countdown, beep])
 
   // When countdown hits 0, advance to next round or complete
   useEffect(() => {
@@ -187,6 +186,7 @@ export default function PlaySequencePage() {
   }, [phase])
 
   function handleStart() {
+    unlock()
     startedAtRef.current = Date.now()
     setPhase('active')
   }
@@ -295,7 +295,7 @@ export default function PlaySequencePage() {
 
   return (
     <main className="timer-dark-bg flex min-h-dvh flex-col text-timer-on">
-      <PlayHeader title={phase === 'idle' ? 'Sequence' : sequence.title} onClose={() => router.push('/sequences')} />
+      <PlayHeader onEnableSound={unlock} active={phase === 'active' || phase === 'workout-summary'} title={phase === 'idle' ? 'Sequence' : sequence.title} onClose={() => router.push('/sequences')} />
 
       <div className={`mx-auto flex w-full flex-1 flex-col items-center ${phase === 'active' ? 'max-w-6xl py-4' : 'max-w-lg justify-center px-margin-mobile py-10 text-center'}`}>
         {/* Progress bar — visible during active and summary phases */}
@@ -339,7 +339,7 @@ export default function PlaySequencePage() {
                 nextLabel={nextInterval ? `Next: ${nextInterval.type === 'work' ? getIntervalName(nextInterval, seqWorkCount + 1) : nextInterval.title} (${formatTime(nextInterval.duration)})` : undefined}
                 status={timer.status}
                 onPause={timer.pause}
-                onResume={timer.resume}
+                onResume={() => { unlock(); timer.resume() }}
                 onSkip={handleSkipInterval}
                 onRestart={handleRestart}
                 onPrevious={intervalIdx > 0 ? () => setIntervalIdx((prev) => prev - 1) : undefined}
