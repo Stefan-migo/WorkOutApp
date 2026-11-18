@@ -2,11 +2,11 @@ import { EXERCISE_VIDEO_TYPES, MAX_EXERCISE_CLIP_BYTES } from './exercise-media'
 
 export interface ClipRange { start: number; end: number }
 
-export function createExerciseRecorder(stream: MediaStream) {
+export function createExerciseRecorder(stream: MediaStream, videoBitsPerSecond = 650_000) {
   const mimeType = ['video/mp4;codecs=avc1.42001E', 'video/mp4', 'video/webm;codecs=vp8', 'video/webm']
     .find((type) => MediaRecorder.isTypeSupported(type))
   if (!mimeType) throw new Error('This browser cannot record MP4 or WebM.')
-  return new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 650_000 })
+  return new MediaRecorder(stream, { mimeType, videoBitsPerSecond })
 }
 
 export function recordingFile(recorder: MediaRecorder, chunks: Blob[]) {
