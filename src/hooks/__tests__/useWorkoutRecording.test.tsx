@@ -1,8 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { act, cleanup, renderHook } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { useWorkoutRecording } from '../useWorkoutRecording'
+import { WorkoutRecordingProvider } from '@/context/WorkoutRecordingContext'
+import { PlayHeader } from '@/components/PlayHeader'
 
+let pathname = '/workouts/test/play'
+vi.mock('next/navigation', () => ({ usePathname: () => pathname }))
 
 class FakeRecorder {
   static isTypeSupported = vi.fn((type: string) => type === 'video/webm')
@@ -28,6 +32,7 @@ let createObjectURL: ReturnType<typeof vi.fn>
 let revokeObjectURL: ReturnType<typeof vi.fn>
 
 beforeEach(() => {
+  pathname = '/workouts/test/play'
   track = Object.assign(new EventTarget(), { stop: vi.fn() })
   stream = { getTracks: () => [track], getVideoTracks: () => [track] } as unknown as MediaStream
   getUserMedia = vi.fn().mockResolvedValue(stream)
@@ -131,4 +136,18 @@ describe('workout recording', () => {
     expect(track.stop).toHaveBeenCalledOnce()
   })
 
+  it('keeps a downloadable clip when playback navigates to the session summary', async () => {
+    function Playback() {
+      return <WorkoutRecordingProvider><PlayHeader title="Workout" onClose={() => {}} active /></WorkoutRecordingProvider>
+    }
+    const { rerender } = render(<Playback />)
+    fireEvent.click(screen.getByRole('button', { name: 'Record workout' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Open camera' }))
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Start recording' })).toBeInTheDocument())
+    fireEvent.click(screen.getByRole('button', { name: 'Start recording' }))
+    pathname = '/history/session'
+    rerender(<Playback />)
+    await waitFor(() => expect(screen.getByRole('link', { name: 'Download video' })).toHaveAttribute('href', 'blob:workout'))
+    expect(track.stop).toHaveBeenCalledOnce()
+  })
 })

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { AuthProvider } from '@/context/AuthContext'
 import { WorkoutProvider } from '@/context/WorkoutContext'
+import { WorkoutRecordingProvider } from '@/context/WorkoutRecordingContext'
 import AppShell from '@/components/AppShell'
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration'
 import ErrorBoundary from '@/components/ErrorBoundary'
@@ -48,7 +49,9 @@ export default function RootLayout({
         <ErrorBoundary>
         <AuthProvider>
         <WorkoutProvider>
-          <AppShell>{children}</AppShell>
+          <WorkoutRecordingProvider>
+            <AppShell>{children}</AppShell>
+          </WorkoutRecordingProvider>
         </WorkoutProvider>
         </AuthProvider>
         </ErrorBoundary>
