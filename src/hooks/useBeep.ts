@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 
 interface BeepOptions {
   volume?: number
@@ -9,7 +9,7 @@ interface BeepOptions {
 }
 
 // ponytail: Web Audio API native, zero dependencies, zero audio files
-export function useBeep() {
+export function useBeep(enabled = true) {
   // Reuse one AudioContext across beeps to avoid creating N contexts per countdown
   const ctxRef = useRef<AudioContext | null>(null)
 
@@ -20,7 +20,34 @@ export function useBeep() {
     return ctxRef.current
   }, [])
 
+  useEffect(() => () => {
+    const ctx = ctxRef.current
+    ctxRef.current = null
+    void ctx?.close?.().catch(() => undefined)
+  }, [])
+
+  const unlock = useCallback(() => {
+    try {
+      const ctx = getCtx()
+      if (ctx.state !== 'running') void ctx.resume().catch(() => undefined)
+    } catch {
+      // The browser may not provide Web Audio.
+    }
+  }, [getCtx])
+
+  useEffect(() => {
+    const resumeOnReturn = () => {
+      const ctx = ctxRef.current
+      if (enabled && document.visibilityState === 'visible' && ctx?.state === 'suspended') {
+        void ctx.resume().catch(() => undefined)
+      }
+    }
+    document.addEventListener('visibilitychange', resumeOnReturn)
+    return () => document.removeEventListener('visibilitychange', resumeOnReturn)
+  }, [enabled])
+
   const beep = useCallback((opts?: BeepOptions) => {
+    if (!enabled || document.visibilityState !== 'visible') return
     const vol = opts?.volume ?? 0.3
     const dur = opts?.duration ?? 0.3
     const pitch = opts?.pitch ?? 800
@@ -39,7 +66,7 @@ export function useBeep() {
     } catch {
       // Audio not available — silently skip
     }
-  }, [getCtx])
+  }, [enabled, getCtx])
 
-  return { beep }
+  return { beep, unlock }
 }

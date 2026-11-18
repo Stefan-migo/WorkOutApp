@@ -22,7 +22,7 @@ vi.mock('@/hooks/useSessions', () => ({
 }))
 
 vi.mock('@/hooks/useBeep', () => ({
-  useBeep: () => ({ beep: vi.fn() }),
+  useBeep: () => ({ beep: vi.fn(), unlock: vi.fn() }),
 }))
 
 vi.mock('@/hooks/useIntervalNotification', () => ({
