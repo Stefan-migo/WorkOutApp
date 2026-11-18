@@ -1,6 +1,7 @@
 'use client'
 
 import { PlaybackSettings } from './PlaybackSettings'
+import { useOpenWorkoutRecording } from '@/context/WorkoutRecordingContext'
 
 interface PlayHeaderProps {
   title: string
@@ -10,6 +11,7 @@ interface PlayHeaderProps {
 }
 
 export function PlayHeader({ title, onClose, active = false, onEnableSound }: PlayHeaderProps) {
+  const openRecording = useOpenWorkoutRecording()
   return (
     <>
     <header className="sticky top-0 z-30 flex min-h-[64px] w-full items-center gap-3 border-b border-timer-border bg-timer-bg px-margin-mobile md:px-margin-desktop">
@@ -22,6 +24,11 @@ export function PlayHeader({ title, onClose, active = false, onEnableSound }: Pl
         <span aria-hidden="true" className="material-symbols-outlined">close</span>
       </button>
       <p className="min-w-0 truncate font-headline text-body-lg font-semibold text-timer-on">{title}</p>
+      {openRecording && (
+        <button type="button" onClick={openRecording} aria-label="Record workout" className="ml-auto grid size-11 shrink-0 place-items-center rounded-full border border-timer-border text-timer-on hover:bg-timer-on/10 focus-visible:focus-ring">
+          <span aria-hidden="true" className="material-symbols-outlined">videocam</span>
+        </button>
+      )}
       <PlaybackSettings active={active} onEnableSound={onEnableSound} />
     </header>
     {!active && (
